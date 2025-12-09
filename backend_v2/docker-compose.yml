@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: idea2_postgres
+    environment:
+      POSTGRES_USER: startup_discovery
+      POSTGRES_PASSWORD: startup_discovery_dev
+      POSTGRES_DB: startup_discovery
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U startup_discovery -d startup_discovery"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: idea2_backend
+    environment:
+      - DATABASE_URL=postgresql://startup_discovery:startup_discovery_dev@postgres:5432/startup_discovery
+      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./migrations:/app/migrations:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    container_name: idea2_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --loglevel verbose --logfile /data/redis.log
+    restart: unless-stopped
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

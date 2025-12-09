@@ -1,0 +1,7 @@
+# SSL certificates directory
+# Place your SSL certificates here:
+# - fullchain.pem (Let's Encrypt full chain)
+# - privkey.pem (private key)
+# 
+# Or use certbot to generate them automatically
+
