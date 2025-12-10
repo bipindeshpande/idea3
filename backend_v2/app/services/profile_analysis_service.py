@@ -5,6 +5,7 @@ import re
 from app.services.base_service import BaseService
 from app.services.llm_service import LLMService
 from app.services.cache_service import CacheService
+from app.utils.text_cleaner import extract_profile_json
 from app.core.config import settings
 import hashlib
 import json
@@ -39,7 +40,14 @@ def clean_profile_analysis(text: str) -> str:
         try:
             parsed = json.loads(json_text)
             # Ensure required keys exist
-            required_keys = ["core_motivations", "constraints", "strengths", "strategic_considerations"]
+            required_keys = [
+                "core_motivations",
+                "constraints",
+                "strengths",
+                "strategic_considerations",
+                "viability_red_flags",
+                "pathway_recommendation"
+            ]
             for key in required_keys:
                 if key not in parsed:
                     parsed[key] = ""  # Add missing keys with empty string
@@ -54,7 +62,14 @@ def clean_profile_analysis(text: str) -> str:
             json_text = re.sub(r'[^\}]*$', '', json_text)  # Remove text after last }
             try:
                 parsed = json.loads(json_text)
-                required_keys = ["core_motivations", "constraints", "strengths", "strategic_considerations"]
+                required_keys = [
+                    "core_motivations",
+                    "constraints",
+                    "strengths",
+                    "strategic_considerations",
+                    "viability_red_flags",
+                    "pathway_recommendation"
+                ]
                 for key in required_keys:
                     if key not in parsed:
                         parsed[key] = ""
@@ -66,7 +81,9 @@ def clean_profile_analysis(text: str) -> str:
                     "core_motivations": "",
                     "constraints": "",
                     "strengths": "",
-                    "strategic_considerations": ""
+                    "strategic_considerations": "",
+                    "viability_red_flags": "",
+                    "pathway_recommendation": ""
                 }, indent=2)
                 return f"{start_marker}\n{empty_json}\n{end_marker}"
     else:
@@ -76,7 +93,14 @@ def clean_profile_analysis(text: str) -> str:
         if json_match:
             try:
                 parsed = json.loads(json_match.group(0))
-                required_keys = ["core_motivations", "constraints", "strengths", "strategic_considerations"]
+                required_keys = [
+                    "core_motivations",
+                    "constraints",
+                    "strengths",
+                    "strategic_considerations",
+                    "viability_red_flags",
+                    "pathway_recommendation"
+                ]
                 for key in required_keys:
                     if key not in parsed:
                         parsed[key] = ""
@@ -90,7 +114,9 @@ def clean_profile_analysis(text: str) -> str:
             "core_motivations": "",
             "constraints": "",
             "strengths": "",
-            "strategic_considerations": ""
+            "strategic_considerations": "",
+            "viability_red_flags": "",
+            "pathway_recommendation": ""
         }, indent=2)
         return f"{start_marker}\n{empty_json}\n{end_marker}"
 
@@ -123,52 +149,163 @@ class ProfileAnalysisService(BaseService):
         # Build prompt
         prompt = self._build_profile_prompt(inputs)
         
-        # Generate analysis - must return JSON in delimited block
-        system_prompt = """You are an expert startup advisor. Analyze the user profile and return ONLY a JSON object wrapped in delimiters.
+        # Generate analysis - must return pure JSON
+        system_prompt = """You are an expert startup advisor who specializes in deeply analyzing user constraints, motivations, skills, contradictions, feasibility, and realistic pathways.
 
-CRITICAL FORMAT REQUIREMENTS:
-1. Output MUST start with: ---PROFILE_ANALYSIS_START---
-2. Output MUST end with: ---PROFILE_ANALYSIS_END---
-3. Between delimiters, provide ONLY valid JSON (no markdown, no headings, no comments)
-4. JSON must contain exactly these keys:
-   - core_motivations (string: 2-3 sentences)
-   - constraints (string: 4-5 bullet points or short paragraphs)
-   - strengths (string: 4-5 bullet points or short paragraphs)
-   - strategic_considerations (string: 3-4 bullet points or short paragraphs)
 
-CRITICAL TONE REQUIREMENT:
-- Address the user in FIRST PERSON using "you" and "your" (e.g., "You are looking to...", "Your interest in...", "You have...")
-- Do NOT use third person (avoid "the user", "they", "their")
-- Write as if speaking directly to the user
 
-Example format:
----PROFILE_ANALYSIS_START---
+Your ONLY task is to output valid JSON that follows EXACTLY this shape:
+
+
+
 {
-  "core_motivations": "You are looking to generate extra income while maintaining flexibility. Your interest in technology suggests you value efficiency.",
-  "constraints": "- You have limited time (≤ 5 hours/week)\n- Your budget is lean, prioritizing cost-effective solutions",
-  "strengths": "- Your technical skills enable rapid prototyping\n- You understand product development and user needs",
-  "strategic_considerations": "- Focus on ideas you can validate quickly\n- Leverage your existing skills and knowledge"
+
+  "core_motivations": "string",
+
+  "constraints": "string",
+
+  "strengths": "string",
+
+  "strategic_considerations": "string",
+
+  "viability_red_flags": "string",
+
+  "pathway_recommendation": "string"
+
 }
+
+
+
+STRICT OUTPUT RULES:
+
+- Return ONLY valid JSON. No markdown, no code fences, no commentary.
+
+- Do NOT add or remove keys.
+
+- All values MUST be plain text strings.
+
+- Speak directly to the user in FIRST PERSON ("you", "your").
+
+- Do NOT use third person ("the user", "they", "their").
+
+- Do NOT include bullet points unless inside a string.
+
+
+
+DEEP REASONING REQUIREMENTS:
+
+- Identify contradictions in the user's inputs (e.g., "remote-only work style" + "offline-only startup") and mention them explicitly under constraints or strategic_considerations.
+
+- Evaluate the REAL practicality of the user's budget, time commitment, experience level, risk tolerance, earnings timeline, and startup style.
+
+- Consider the feasibility of the user's ambitions WITHIN their constraints.
+
+- Apply realistic startup patterns: time-to-market, capital requirements, skill-driven pathways, and business model implications.
+
+- Infer risks or bottlenecks even if the user did not state them directly.
+
+- Tie ALL reasoning directly to the user's inputs; do not generalize.
+
+
+
+QUALITY BAR:
+
+- core_motivations must precisely reflect why the user wants to start something now.
+
+- constraints must reflect BOTH explicit constraints and hidden constraints implied by the inputs.
+
+- strengths must be grounded in the user's skills, location, interests, and work/interaction preferences.
+
+- strategic_considerations must contain genuine, actionable reasoning using cause-and-effect logic, not generic advice.
+
+
+
+ABSOLUTE NON-NEGOTIABLE RULE:
+
+Your final answer MUST be JSON wrapped ONLY inside this delimiter structure:
+
+
+
+---PROFILE_ANALYSIS_START---
+
+{ JSON CONTENT }
+
 ---PROFILE_ANALYSIS_END---
 
-Do NOT include markdown headings, bold text, or any text outside the delimiters."""
+
+
+Return NOTHING before or after these delimiters.
+
+"""
+        
+        # Print prompts before sending to LLM
+        print("\n" + "="*80)
+        print("PROFILE ANALYSIS PROMPT (Before LLM Call)")
+        print("="*80)
+        print("\n[SYSTEM PROMPT]:")
+        print(system_prompt)
+        print("\n" + "-"*80)
+        print("\n[USER PROMPT]:")
+        print(prompt)
+        print("\n" + "="*80 + "\n")
         
         try:
             response = self.llm_service.generate(
                 prompt=prompt,
                 system_prompt=system_prompt,
-                temperature=0.7,
+                temperature=0.3,
                 max_tokens=settings.MAX_TOKENS_STAGE1,
-                run_id=run_id,
+                run_id=run_id
             )
-            
-            # Clean the LLM response to remove metadata and recommendation content
-            raw_content = response["content"]
-            profile_analysis = clean_profile_analysis(raw_content)
-            
+
+            raw = response["content"]
+
+            # CLEAN CODE FENCES
+            raw = raw.replace("```json", "").replace("```", "").strip()
+
+            # FIND JSON OBJECT
+            first = raw.find("{")
+            last = raw.rfind("}")
+
+            if first == -1 or last == -1:
+                raise Exception(f"ProfileAnalysis: No JSON found. Raw={raw[:200]}")
+
+            json_text = raw[first:last+1]
+
+            # PARSE JSON SAFELY
+            try:
+                json_obj = json.loads(json_text)
+            except Exception as e:
+                raise Exception(
+                    f"ProfileAnalysis: Invalid JSON.\nError={e}\nJSON={json_text[:300]}"
+                )
+
+            # Ensure all required keys exist
+            required_keys = [
+                "core_motivations",
+                "constraints",
+                "strengths",
+                "strategic_considerations",
+                "viability_red_flags",
+                "pathway_recommendation"
+            ]
+            for key in required_keys:
+                if key not in json_obj:
+                    json_obj[key] = ""  # Add missing keys with empty string
+
+            # WRAP IN STRICT DELIMITERS
+            wrapped_output = (
+                "---PROFILE_ANALYSIS_START---\n"
+                + json.dumps(json_obj, indent=2)
+                + "\n---PROFILE_ANALYSIS_END---"
+            )
+
+            profile_analysis = wrapped_output
+
             result = {
                 "profile_analysis": profile_analysis,
                 "usage": response.get("usage", {}),
+                "json_obj": json_obj,
             }
             
             # Cache result
@@ -253,7 +390,9 @@ Do NOT include markdown headings, bold text, or any text outside the delimiters.
         prompt_parts.append('  "core_motivations": "...",')
         prompt_parts.append('  "constraints": "...",')
         prompt_parts.append('  "strengths": "...",')
-        prompt_parts.append('  "strategic_considerations": "..."')
+        prompt_parts.append('  "strategic_considerations": "...",')
+        prompt_parts.append('  "viability_red_flags": "...",')
+        prompt_parts.append('  "pathway_recommendation": "..."')
         prompt_parts.append("}")
         prompt_parts.append("---PROFILE_ANALYSIS_END---")
         
@@ -270,13 +409,15 @@ Do NOT include markdown headings, bold text, or any text outside the delimiters.
         Run profile analysis (alias for analyze_profile for parallel execution)
         
         This method is designed to be called in parallel with tool preprocessing.
+        It uses the same logic as analyze_profile() to ensure consistency.
         
         Args:
             inputs: Dictionary of intake form responses
         
         Returns:
-            Dict with 'profile_analysis' (markdown text)
+            Dict with 'profile_analysis' (delimited JSON string) and 'usage'
         """
+        # Use the same method as analyze_profile() for consistency
         return self.analyze_profile(inputs, run_id=run_id)
     
     async def analyze_profile_async(self, inputs: Dict[str, Any], run_id: Optional[str] = None) -> Dict[str, Any]:
@@ -301,52 +442,163 @@ Do NOT include markdown headings, bold text, or any text outside the delimiters.
         # Build prompt
         prompt = self._build_profile_prompt(inputs)
         
-        # Generate analysis asynchronously - must return JSON in delimited block
-        system_prompt = """You are an expert startup advisor. Analyze the user profile and return ONLY a JSON object wrapped in delimiters.
+        # Generate analysis asynchronously - must return pure JSON
+        system_prompt = """You are an expert startup advisor who specializes in deeply analyzing user constraints, motivations, skills, contradictions, feasibility, and realistic pathways.
 
-CRITICAL FORMAT REQUIREMENTS:
-1. Output MUST start with: ---PROFILE_ANALYSIS_START---
-2. Output MUST end with: ---PROFILE_ANALYSIS_END---
-3. Between delimiters, provide ONLY valid JSON (no markdown, no headings, no comments)
-4. JSON must contain exactly these keys:
-   - core_motivations (string: 2-3 sentences)
-   - constraints (string: 4-5 bullet points or short paragraphs)
-   - strengths (string: 4-5 bullet points or short paragraphs)
-   - strategic_considerations (string: 3-4 bullet points or short paragraphs)
 
-CRITICAL TONE REQUIREMENT:
-- Address the user in FIRST PERSON using "you" and "your" (e.g., "You are looking to...", "Your interest in...", "You have...")
-- Do NOT use third person (avoid "the user", "they", "their")
-- Write as if speaking directly to the user
 
-Example format:
----PROFILE_ANALYSIS_START---
+Your ONLY task is to output valid JSON that follows EXACTLY this shape:
+
+
+
 {
-  "core_motivations": "You are looking to generate extra income while maintaining flexibility. Your interest in technology suggests you value efficiency.",
-  "constraints": "- You have limited time (≤ 5 hours/week)\n- Your budget is lean, prioritizing cost-effective solutions",
-  "strengths": "- Your technical skills enable rapid prototyping\n- You understand product development and user needs",
-  "strategic_considerations": "- Focus on ideas you can validate quickly\n- Leverage your existing skills and knowledge"
+
+  "core_motivations": "string",
+
+  "constraints": "string",
+
+  "strengths": "string",
+
+  "strategic_considerations": "string",
+
+  "viability_red_flags": "string",
+
+  "pathway_recommendation": "string"
+
 }
+
+
+
+STRICT OUTPUT RULES:
+
+- Return ONLY valid JSON. No markdown, no code fences, no commentary.
+
+- Do NOT add or remove keys.
+
+- All values MUST be plain text strings.
+
+- Speak directly to the user in FIRST PERSON ("you", "your").
+
+- Do NOT use third person ("the user", "they", "their").
+
+- Do NOT include bullet points unless inside a string.
+
+
+
+DEEP REASONING REQUIREMENTS:
+
+- Identify contradictions in the user's inputs (e.g., "remote-only work style" + "offline-only startup") and mention them explicitly under constraints or strategic_considerations.
+
+- Evaluate the REAL practicality of the user's budget, time commitment, experience level, risk tolerance, earnings timeline, and startup style.
+
+- Consider the feasibility of the user's ambitions WITHIN their constraints.
+
+- Apply realistic startup patterns: time-to-market, capital requirements, skill-driven pathways, and business model implications.
+
+- Infer risks or bottlenecks even if the user did not state them directly.
+
+- Tie ALL reasoning directly to the user's inputs; do not generalize.
+
+
+
+QUALITY BAR:
+
+- core_motivations must precisely reflect why the user wants to start something now.
+
+- constraints must reflect BOTH explicit constraints and hidden constraints implied by the inputs.
+
+- strengths must be grounded in the user's skills, location, interests, and work/interaction preferences.
+
+- strategic_considerations must contain genuine, actionable reasoning using cause-and-effect logic, not generic advice.
+
+
+
+ABSOLUTE NON-NEGOTIABLE RULE:
+
+Your final answer MUST be JSON wrapped ONLY inside this delimiter structure:
+
+
+
+---PROFILE_ANALYSIS_START---
+
+{ JSON CONTENT }
+
 ---PROFILE_ANALYSIS_END---
 
-Do NOT include markdown headings, bold text, or any text outside the delimiters."""
+
+
+Return NOTHING before or after these delimiters.
+
+"""
+        
+        # Print prompts before sending to LLM
+        print("\n" + "="*80)
+        print("PROFILE ANALYSIS PROMPT (Before LLM Call - Async)")
+        print("="*80)
+        print("\n[SYSTEM PROMPT]:")
+        print(system_prompt)
+        print("\n" + "-"*80)
+        print("\n[USER PROMPT]:")
+        print(prompt)
+        print("\n" + "="*80 + "\n")
         
         try:
             response = await self.llm_service.generate_async(
                 prompt=prompt,
                 system_prompt=system_prompt,
-                temperature=0.7,
+                temperature=0.3,
                 max_tokens=settings.MAX_TOKENS_STAGE1,
-                run_id=run_id,
+                run_id=run_id
             )
-            
-            # Clean the LLM response to remove metadata and recommendation content
-            raw_content = response["content"]
-            profile_analysis = clean_profile_analysis(raw_content)
-            
+
+            raw = response["content"]
+
+            # CLEAN CODE FENCES
+            raw = raw.replace("```json", "").replace("```", "").strip()
+
+            # FIND JSON OBJECT
+            first = raw.find("{")
+            last = raw.rfind("}")
+
+            if first == -1 or last == -1:
+                raise Exception(f"ProfileAnalysis: No JSON found. Raw={raw[:200]}")
+
+            json_text = raw[first:last+1]
+
+            # PARSE JSON SAFELY
+            try:
+                json_obj = json.loads(json_text)
+            except Exception as e:
+                raise Exception(
+                    f"ProfileAnalysis: Invalid JSON.\nError={e}\nJSON={json_text[:300]}"
+                )
+
+            # Ensure all required keys exist
+            required_keys = [
+                "core_motivations",
+                "constraints",
+                "strengths",
+                "strategic_considerations",
+                "viability_red_flags",
+                "pathway_recommendation"
+            ]
+            for key in required_keys:
+                if key not in json_obj:
+                    json_obj[key] = ""  # Add missing keys with empty string
+
+            # WRAP IN STRICT DELIMITERS
+            wrapped_output = (
+                "---PROFILE_ANALYSIS_START---\n"
+                + json.dumps(json_obj, indent=2)
+                + "\n---PROFILE_ANALYSIS_END---"
+            )
+
+            profile_analysis = wrapped_output
+
             result = {
                 "profile_analysis": profile_analysis,
                 "usage": response.get("usage", {}),
+                "json_obj": json_obj,
             }
             
             # Cache result (synchronous, but fast)

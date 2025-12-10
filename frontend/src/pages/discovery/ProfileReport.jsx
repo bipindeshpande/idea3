@@ -8,6 +8,30 @@ function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
+function useDarkMode() {
+  const [isDark, setIsDark] = useState(false);
+  
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    
+    // Initial check
+    checkDarkMode();
+    
+    // Watch for changes using MutationObserver
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  return isDark;
+}
+
 function parseProfileSections(text = "") {
   if (!text) return [];
 
@@ -64,7 +88,7 @@ function parseProfileSections(text = "") {
     });
   };
   
-  // Render the four fields as text sections
+  // Render the six fields as text sections
   const sections = [];
   
   if (profileData.core_motivations) {
@@ -103,40 +127,187 @@ function parseProfileSections(text = "") {
     });
   }
   
+  if (profileData.viability_red_flags) {
+    sections.push({
+      title: "Viability Red Flags",
+      level: 2,
+      content: formatAsBullets(profileData.viability_red_flags),
+      subsections: [],
+    });
+  }
+  
+  if (profileData.pathway_recommendation) {
+    sections.push({
+      title: "Pathway Recommendation",
+      level: 2,
+      content: formatAsBullets(profileData.pathway_recommendation),
+      subsections: [],
+    });
+  }
+  
   return sections;
 }
 
-function getSectionTheme(title = "", index = 0) {
+function getSectionTheme(title = "", index = 0, isDark = false) {
   const lowerTitle = title.toLowerCase();
-  const isEven = index % 2 === 0;
   
+  // Core Motivations (Section 1)
   if (lowerTitle.includes("motivation") || lowerTitle.includes("goal") || lowerTitle.includes("objective")) {
     return {
       icon: "🎯",
-      border: "border-brand-300 dark:border-brand-600",
-      bg: "bg-brand-50 dark:bg-brand-900/20",
-      headerBg: "bg-brand-100 dark:bg-brand-900/30",
-      text: "text-brand-800 dark:text-brand-300",
+      bg: isDark ? "#112244" : "#E8EEFF",
+      border: isDark ? "#3A6BFF" : "#CAD8FF",
+      headerBg: isDark ? "#1A3A66" : "#D5E0FF", // Slightly brighter for header in dark mode
+      headerBgHover: isDark ? "#254A7A" : "#C2D1FF", // Brighter for hover in dark mode
+      text: "text-slate-800 dark:text-slate-200",
     };
   }
   
+  // Operating Constraints (Section 2)
+  if (lowerTitle.includes("constraint")) {
+    return {
+      icon: "📋",
+      bg: isDark ? "#1A2333" : "#F4F6FA",
+      border: isDark ? "#3F4B66" : "#DDE3EB",
+      headerBg: isDark ? "#253344" : "#E8ECF2", // Slightly brighter for header in dark mode
+      headerBgHover: isDark ? "#2F3F55" : "#DCE0E8", // Brighter for hover in dark mode
+      text: "text-slate-800 dark:text-slate-200",
+    };
+  }
+  
+  // Strengths and Capabilities (Section 3)
+  if (lowerTitle.includes("strength") || lowerTitle.includes("capabilit")) {
+    return {
+      icon: "✨",
+      bg: isDark ? "#1D2840" : "#EEF3FF",
+      border: isDark ? "#4860A8" : "#D5DDF7",
+      headerBg: isDark ? "#2A3555" : "#E0E8FF", // Slightly brighter for header in dark mode
+      headerBgHover: isDark ? "#354266" : "#D2DBF5", // Brighter for hover in dark mode
+      text: "text-slate-800 dark:text-slate-200",
+    };
+  }
+  
+  // Strategic Considerations (Section 4)
+  if (lowerTitle.includes("strategic") || lowerTitle.includes("consideration")) {
+    return {
+      icon: "💡",
+      bg: isDark ? "#1D2840" : "#EEF3FF",
+      border: isDark ? "#4860A8" : "#D5DDF7",
+      headerBg: isDark ? "#2A3555" : "#E0E8FF", // Slightly brighter for header in dark mode
+      headerBgHover: isDark ? "#354266" : "#D2DBF5", // Brighter for hover in dark mode
+      text: "text-slate-800 dark:text-slate-200",
+    };
+  }
+  
+  // Viability Red Flags (Section 5)
+  if (lowerTitle.includes("red flag") || lowerTitle.includes("viability")) {
+    return {
+      icon: "⚠️",
+      bg: isDark ? "#3A1E1E" : "#FFF4D6",
+      border: isDark ? "#FF7847" : "#F6C744",
+      headerBg: isDark ? "#4A2E2E" : "#FFEBB8", // Slightly brighter for header in dark mode
+      headerBgHover: isDark ? "#5A3E3E" : "#FFE29F", // Brighter for hover in dark mode
+      text: "text-slate-800 dark:text-slate-200",
+    };
+  }
+  
+  // Pathway Recommendation (Section 6)
+  if (lowerTitle.includes("pathway") || lowerTitle.includes("recommendation")) {
+    return {
+      icon: "🛤️",
+      bg: isDark ? "#0F3A2F" : "#E9F8EE",
+      border: isDark ? "#33D1A0" : "#C3EED0",
+      headerBg: isDark ? "#1A4A3F" : "#D5F2E0", // Slightly brighter for header in dark mode
+      headerBgHover: isDark ? "#255A4F" : "#C1ECD0", // Brighter for hover in dark mode
+      text: "text-slate-800 dark:text-slate-200",
+    };
+  }
+  
+  // Fallback (should not be reached)
   return {
-    icon: isEven ? "📋" : "✨",
-    border: "border-slate-300 dark:border-slate-600",
-    bg: "bg-slate-50 dark:bg-slate-800/50",
-    headerBg: "bg-slate-100 dark:bg-slate-700/50",
+    icon: "📋",
+    bg: isDark ? "#1A2333" : "#F4F6FA",
+    border: isDark ? "#3F4B66" : "#DDE3EB",
+    headerBg: isDark ? "#253344" : "#E8ECF2",
+    headerBgHover: isDark ? "#2F3F55" : "#DCE0E8",
     text: "text-slate-800 dark:text-slate-200",
   };
+}
+
+function SuccessBanner({ runId }) {
+  const isDark = useDarkMode();
+  
+  const bgColor = isDark ? "#0B3A37" : "rgba(236, 253, 245, 0.8)";
+  const borderColor = isDark ? "#1ABC9C" : "#10b981";
+  const textColor = isDark ? "#1ABC9C" : "#065f46";
+  const textColorLight = isDark ? "#4FD1B5" : "#047857";
+  const linkHoverColor = isDark ? "#5FE5C8" : "#059669";
+  
+  return (
+    <div 
+      className="mb-6 rounded-xl border p-4 shadow-sm"
+      style={{
+        backgroundColor: bgColor,
+        borderColor: borderColor,
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <span className="text-xl flex-shrink-0">✨</span>
+        <div>
+          <p 
+            className="font-semibold text-sm mb-1"
+            style={{ color: textColor }}
+          >
+            Your personalized reports are ready!
+          </p>
+          <p 
+            className="text-xs"
+            style={{ color: textColorLight }}
+          >
+            View your             <a 
+              href={`/results/recommendations${runId ? `?id=${runId}` : ''}`} 
+              className="underline font-medium transition-colors"
+              style={{ 
+                color: textColor,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = linkHoverColor;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = textColor;
+              }}
+            >
+              startup recommendations
+            </a> and detailed analysis reports.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function Section({ section, theme, sectionNumber, isOpen, onToggle }) {
   return (
     <div
-      className={`rounded-2xl border-2 ${theme.border} ${theme.bg} p-0 overflow-hidden shadow-md dark:shadow-slate-900/50`}
+      className="rounded-2xl border-2 p-0 overflow-hidden shadow-md dark:shadow-slate-900/50"
+      style={{
+        backgroundColor: theme.bg,
+        borderColor: theme.border,
+      }}
     >
       <button
         onClick={onToggle}
-        className={`w-full flex items-center justify-between gap-3 px-6 py-4 ${theme.headerBg} border-b-2 ${theme.border} hover:opacity-90 transition-opacity`}
+        className="w-full flex items-center justify-between gap-3 px-6 py-4 border-b-2 transition-colors"
+        style={{
+          backgroundColor: theme.headerBg,
+          borderColor: theme.border,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = theme.headerBgHover;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = theme.headerBg;
+        }}
       >
         <div className="flex items-center gap-3">
           <span className="text-2xl">{theme.icon}</span>
@@ -181,7 +352,9 @@ const SAMPLE_PROFILE_ANALYSIS = `---PROFILE_ANALYSIS_START---
   "core_motivations": "You're looking to generate extra income while maintaining flexibility. Your interest in technology and automation suggests you value efficiency and scalable solutions.",
   "constraints": "- Time: Limited to ≤ 5 hours/week, requiring solutions that can be built and managed part-time\n- Budget: Working with a lean budget, prioritizing cost-effective tools and strategies\n- Work style: Prefer structured, systematic approaches that allow for incremental progress",
   "strengths": "- Technical skills enable rapid prototyping and iteration\n- Understanding of product development and user needs\n- Ability to work independently and systematically",
-  "strategic_considerations": "- Focus on ideas that can be validated quickly with minimal investment\n- Have clear monetization paths\n- Leverage your existing skills and knowledge\n- Can scale without requiring full-time commitment initially"
+  "strategic_considerations": "- Focus on ideas that can be validated quickly with minimal investment\n- Have clear monetization paths\n- Leverage your existing skills and knowledge\n- Can scale without requiring full-time commitment initially",
+  "viability_red_flags": "- Limited time commitment may restrict growth potential\n- Lean budget requires careful cost management\n- Part-time approach may limit customer acquisition speed",
+  "pathway_recommendation": "Start with a low-cost digital product or SaaS tool that leverages your technical skills. Validate with a minimal viable product (MVP) within your time constraints, then gradually scale based on market response."
 }
 ---PROFILE_ANALYSIS_END---`;
 
@@ -191,6 +364,7 @@ export default function ProfileReport() {
   const runId = query.get("id");
   const isSample = query.get("sample") === "true";
   const [openSections, setOpenSections] = useState(new Set());
+  const isDark = useDarkMode();
 
   useEffect(() => {
     // Only load if not in sample mode
@@ -258,17 +432,7 @@ export default function ProfileReport() {
         </div>
         
         {!isSample && reports?.personalized_recommendations && reports.personalized_recommendations.trim() && (
-          <div className="mb-6 rounded-xl border border-emerald-200 dark:border-emerald-700 bg-emerald-50/80 dark:bg-emerald-900/20 p-4 text-emerald-800 dark:text-emerald-300 shadow-sm">
-            <div className="flex items-start gap-3">
-              <span className="text-xl flex-shrink-0">✨</span>
-              <div>
-                <p className="font-semibold text-sm mb-1 dark:text-emerald-300">Your personalized reports are ready!</p>
-                <p className="text-xs text-emerald-700 dark:text-emerald-400">
-                  View your <a href={`/results/recommendations${runId ? `?id=${runId}` : ''}`} className="underline font-medium hover:text-emerald-900 dark:hover:text-emerald-300">startup recommendations</a> and detailed analysis reports.
-                </p>
-              </div>
-            </div>
-          </div>
+          <SuccessBanner runId={runId} />
         )}
         
         {!effectiveProfileAnalysis ? (
@@ -284,7 +448,9 @@ export default function ProfileReport() {
               {'  "core_motivations": "...",'}{'\n'}
               {'  "constraints": "...",'}{'\n'}
               {'  "strengths": "...",'}{'\n'}
-              {'  "strategic_considerations": "..."'}{'\n'}
+              {'  "strategic_considerations": "...",'}{'\n'}
+              {'  "viability_red_flags": "...",'}{'\n'}
+              {'  "pathway_recommendation": "..."'}{'\n'}
               {'}'}{'\n'}
               ---PROFILE_ANALYSIS_END---
             </pre>
@@ -295,7 +461,7 @@ export default function ProfileReport() {
         ) : (
           <div className="grid gap-4">
             {sections.map((section, index) => {
-              const theme = getSectionTheme(section.title, index);
+              const theme = getSectionTheme(section.title, index, isDark);
               const sectionNumber = index + 1;
               const isSectionOpen = openSections.has(index);
               
