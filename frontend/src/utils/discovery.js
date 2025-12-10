@@ -1,6 +1,7 @@
 /**
  * Discovery API helper with streaming support using Server-Sent Events (SSE)
  */
+import { cleanStreamedText } from './streamingParser.js';
 
 /**
  * Run discovery with streaming support using EventSource (SSE)
@@ -21,39 +22,6 @@ export async function runDiscovery(payload, onChunk, onComplete, onError, option
   } else {
     return runDiscoveryPlain(payload, onChunk, onComplete, onError, timeout);
   }
-}
-
-/**
- * Filter out JSON metadata that might have leaked into content chunks
- * Removes patterns like {"run_id": "...", "status": "..."} from text
- * IMPORTANT: Does NOT filter profile analysis JSON delimiters
- */
-function filterOutJSONMetadata(text) {
-  if (!text) return text;
-  
-  // PROTECT: Don't filter if this contains profile analysis delimiters
-  // Profile analysis JSON should be preserved intact
-  if (text.includes("---PROFILE_ANALYSIS_START---") || 
-      text.includes("---PROFILE_ANALYSIS_END---")) {
-    // This is profile analysis JSON - don't filter it
-    return text;
-  }
-  
-  // Remove JSON objects that look like SSE metadata
-  // Pattern: {"run_id": "...", "status": "..."} optionally followed by punctuation
-  // More flexible pattern that handles various JSON formats
-  const jsonPattern = /\{[^{}]*"run_id"\s*:\s*"[^"]*"[^{}]*"status"\s*:\s*"[^"]*"[^{}]*\}[-\s]*/g;
-  let filtered = text.replace(jsonPattern, "");
-  
-  // Also remove standalone JSON-like objects with run_id (more flexible)
-  const runIdPattern = /\{[^{}]*"run_id"\s*:\s*"[^"]*"[^{}]*\}[-\s]*/g;
-  filtered = filtered.replace(runIdPattern, "");
-  
-  // Remove any remaining JSON-like patterns that start with { and contain run_id
-  const loosePattern = /\{[^{}]*run_id[^{}]*\}[-\s]*/g;
-  filtered = filtered.replace(loosePattern, "");
-  
-  return filtered.trim();
 }
 
 /**
@@ -139,8 +107,8 @@ async function runDiscoverySSE(payload, onChunk, onComplete, onError, timeout) {
           }
         } else {
           // Chunk event or no event type = plain text data
-          // Filter out JSON metadata that might have leaked into chunks
-          const filteredData = filterOutJSONMetadata(data);
+          // Clean SSE metadata but preserve profile markers and IDEA blocks
+          const filteredData = cleanStreamedText(data);
           if (filteredData) {
             fullData += filteredData;
             if (onChunk) {
@@ -150,7 +118,7 @@ async function runDiscoverySSE(payload, onChunk, onComplete, onError, timeout) {
         }
       } catch (e) {
         // If JSON parse fails, check if it's JSON metadata that should be filtered
-        const filteredData = filterOutJSONMetadata(data);
+        const filteredData = cleanStreamedText(data);
         if (filteredData) {
           fullData += filteredData;
           if (onChunk) {

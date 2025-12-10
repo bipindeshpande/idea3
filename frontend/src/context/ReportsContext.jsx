@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { runDiscovery } from "../utils/discovery.js";
+import { splitProfileAndRecommendations } from "../utils/streamingParser.js";
 
 const ReportsContext = createContext(null);
 const STORAGE_KEY = "sia_saved_runs";
@@ -240,93 +241,30 @@ export function ReportsProvider({ children }) {
           setIsCached(isCached); // Update cache state
           
           // Parse the streamed text into structured outputs
-          // The backend streams: profile analysis, then separator (---PROFILE_END---), then recommendations
+          // Follows SSE contract: profile analysis, then separator (---PROFILE_END---), then recommendations
           let fullData = result.fullData || "";
           
-          // Clean up any JSON metadata that might have leaked in
-          // Remove patterns like {"run_id": "...", "status": "..."}
-          fullData = fullData.replace(/\{[^}]*"run_id"[^}]*"status"[^}]*\}[-\s]*/g, "");
-          fullData = fullData.replace(/\{[^}]*"run_id"[^}]*\}[-\s]*/g, "");
+          // Guard: Only parse when both profile markers are present
+          const PROFILE_START = "---PROFILE_ANALYSIS_START---";
+          const PROFILE_END = "---PROFILE_ANALYSIS_END---";
           
-          // Split by separator to separate profile analysis from recommendations
-          const SPLIT_TOKEN = "\n\n---PROFILE_END---\n\n";
-          
-          let profileAnalysis = "";
-          let recommendations = "";
-          
-          if (fullData.includes(SPLIT_TOKEN)) {
-            const [profile, recs] = fullData.split(SPLIT_TOKEN);
-            profileAnalysis = profile.trim();
-            recommendations = recs.trim();
-          } else {
-            // No separator found - try to find recommendation markers
-            // Look for common recommendation markers that indicate start of recommendations
-            const recMarkers = [
-              "\n\n## SECTION 1: IDEA RESEARCH REPORT",
-              "\n\n## SECTION 1:",
-              "\n\n## IDEA RESEARCH REPORT",
-              "\n\n### Idea Research Report",
-              "\n\n## Recommendations",
-              "\n\n## Startup Ideas",
-              "\n\n## Final Recommendations",
-              "\n\n### Recommendations",
-              "\n##1:IDEARESEARCHREPORT",  // Handle concatenated format
-              "IDEARESEARCHREPORT",        // Handle concatenated format
-            ];
-            
-            let splitPoint = -1;
-            for (const marker of recMarkers) {
-              const idx = fullData.indexOf(marker);
-              if (idx > 0 && (splitPoint === -1 || idx < splitPoint)) {
-                splitPoint = idx;
-              }
-            }
-            
-            if (splitPoint > 0) {
-              // Found a marker - split there
-              profileAnalysis = fullData.substring(0, splitPoint).trim();
-              recommendations = fullData.substring(splitPoint).trim();
-            } else {
-              // No clear split point - check content length and characteristics
-              // Profile analysis is typically shorter and doesn't contain "Idea Research" or "Recommendation"
-              const hasRecommendationKeywords = /idea research|recommendation|startup idea/i.test(fullData);
-              const isLongContent = fullData.length > 2000;
-              
-              if (hasRecommendationKeywords && isLongContent) {
-                // Likely contains both, but can't find split - try to find first occurrence of recommendation-like content
-                // Look for patterns like "1Creating" or numbered ideas
-                const ideaPattern = /\n\d+[\.\s]*[A-Z][a-z]+/;
-                const ideaMatch = fullData.match(ideaPattern);
-                if (ideaMatch && ideaMatch.index > 100) {
-                  // Found a numbered idea - likely start of recommendations
-                  profileAnalysis = fullData.substring(0, ideaMatch.index).trim();
-                  recommendations = fullData.substring(ideaMatch.index).trim();
-                } else {
-                  // Can't determine - treat as profile only (safer for profile page)
-                  profileAnalysis = fullData;
-                  recommendations = "";
-                }
-              } else {
-                // Short content or no recommendation keywords - treat as profile analysis only
-                profileAnalysis = fullData;
-                recommendations = "";
-              }
-            }
+          if (!fullData.includes(PROFILE_START) || !fullData.includes(PROFILE_END)) {
+            // Profile markers not complete yet - don't parse, don't update UI state
+            setLoading(false);
+            resolve({ 
+              success: true, 
+              runId: actualRunId || Date.now().toString(),
+              cached: isCached
+            });
+            return;
           }
           
-          // Additional cleanup: remove any recommendation content that leaked into profile
-          // Profile analysis should not contain "Idea Research" or recommendation keywords
-          if (profileAnalysis) {
-            const recKeywordIndex = profileAnalysis.search(/idea research|recommendation report|startup idea/i);
-            if (recKeywordIndex > 0 && recKeywordIndex < profileAnalysis.length * 0.8) {
-              // Found recommendation keywords in profile - likely mis-split
-              // Keep only the part before the keywords
-              profileAnalysis = profileAnalysis.substring(0, recKeywordIndex).trim();
-            }
-          }
+          // Use contract-compliant parser to split profile and recommendations
+          const { profileAnalysis, recommendations } = splitProfileAndRecommendations(fullData);
           
           // Debug logging in development
           if (process.env.NODE_ENV === 'development') {
+            const SPLIT_TOKEN = "\n\n---PROFILE_END---\n\n";
             console.log("ReportsContext - Parsed output:", {
               fullDataLength: fullData.length,
               profileAnalysisLength: profileAnalysis.length,
@@ -426,7 +364,16 @@ export function ReportsProvider({ children }) {
             const reports = typeof data.run.reports === 'string' 
               ? JSON.parse(data.run.reports) 
               : (data.run.reports || {});
-            setReports(reports);
+            
+            // Ensure reports structure includes outputs format expected by frontend
+            const formattedReports = {
+              profile_analysis: data.run.profile_analysis || reports.profile_analysis || "",
+              personalized_recommendations: data.run.personalized_recommendations || reports.personalized_recommendations || "",
+              recommendations_structured: reports.recommendations_structured || null, // Include structured recommendations if available
+              ...reports // Include any other report fields
+            };
+            
+            setReports(formattedReports);
           } catch (e) {
             console.error("Failed to parse reports:", e);
             setReports({});

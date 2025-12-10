@@ -8,6 +8,7 @@ import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { trimFromHeading, parseTopIdeas } from "../../utils/markdown/markdown.js";
 import { personalizeCopy, buildFinalConclusion, parseRecommendationMatrix, splitFullReportSections } from "../../utils/formatters/recommendationFormatters.js";
+import { parseStructuredIdeas } from "../../utils/streamingParser.js";
 import ReactMarkdown from "react-markdown";
 
 function useQuery() {
@@ -203,7 +204,20 @@ export default function RecommendationsReport() {
 
   const markdown = useMemo(() => {
     try {
-      return trimFromHeading(reports?.personalized_recommendations ?? "", "### Comprehensive Recommendation Report");
+      let raw = reports?.personalized_recommendations ?? "";
+      
+      // Fix concatenated text (add spaces between words)
+      // Pattern: lowercase letter followed by uppercase = word boundary
+      raw = raw.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+      // Pattern: number followed by letter
+      raw = raw.replace(/(\d)([A-Za-z])/g, '$1 $2');
+      raw = raw.replace(/([A-Za-z])(\d)/g, '$1 $2');
+      // Pattern: special characters
+      raw = raw.replace(/([a-zA-Z0-9])([:;])([a-zA-Z])/g, '$1$2 $3');
+      // Pattern: acronyms
+      raw = raw.replace(/([A-Z]{2,})([a-z])/g, '$1 $2');
+      
+      return trimFromHeading(raw, "### Comprehensive Recommendation Report");
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
         console.error("Error trimming markdown:", err);
@@ -212,8 +226,53 @@ export default function RecommendationsReport() {
     }
   }, [reports]);
 
+  // Check if structured recommendations are available from backend
+  const structuredRecommendations = useMemo(() => {
+    try {
+      // Check if reports contain structured recommendations
+      if (reports && typeof reports === 'object') {
+        // Check if reports.recommendations_structured exists (from backend)
+        if (reports.recommendations_structured && Array.isArray(reports.recommendations_structured)) {
+          return reports.recommendations_structured;
+        }
+        // Also check if reports is the run object with reports field
+        if (reports.reports && reports.reports.recommendations_structured) {
+          return reports.reports.recommendations_structured;
+        }
+      }
+      return null;
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error checking structured recommendations:", err);
+      }
+      return null;
+    }
+  }, [reports]);
+
   const allIdeas = useMemo(() => {
     try {
+      // If structured recommendations available, use them directly
+      if (structuredRecommendations && Array.isArray(structuredRecommendations) && structuredRecommendations.length > 0) {
+        return structuredRecommendations.map((rec) => ({
+          index: rec.index || 0,
+          title: rec.title || `Idea ${rec.index || 0}`,
+          summary: rec.summary || "",
+          target_market: rec.target_market || "",
+          revenue_model: rec.revenue_model || "",
+          validation_score: rec.validation_score || "",
+          timeline: rec.timeline || "",
+          why_this_fits: rec.why_this_fits || ""
+        }));
+      }
+      
+      // Try parsing structured format from markdown text
+      const raw = reports?.personalized_recommendations || "";
+      const structuredParsed = parseStructuredIdeas(raw);
+      if (structuredParsed && structuredParsed.length > 0) {
+        return structuredParsed;
+      }
+      
+      // Fallback: parse from markdown (for backward compatibility)
       const parsed = parseTopIdeas(markdown, 10);
       return parsed;
     } catch (err) {
@@ -222,7 +281,7 @@ export default function RecommendationsReport() {
       }
       return [];
     }
-  }, [markdown]);
+  }, [markdown, structuredRecommendations, reports]);
   const topIdeas = allIdeas.slice(0, 3);
   const secondaryIdeas = allIdeas.slice(3);
 
