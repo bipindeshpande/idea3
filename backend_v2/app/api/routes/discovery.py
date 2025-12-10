@@ -1,5 +1,5 @@
 """Discovery API routes"""
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request, Query
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request, Query, Body
 from fastapi.responses import StreamingResponse, JSONResponse
 from sqlalchemy.orm import Session
 from typing import Dict, Any, Optional
@@ -289,23 +289,63 @@ async def create_run(
         "earnings_timeline",
         "founder_ambition"
     ]
+
+    # skills can be optional OR required — your choice.
+# For now we allow either empty dict or list.
+    OPTIONAL_FIELDS = [
+        "skills",
+        "sub_interest_area",
+        "experience_summary",
+        # legacy fields no longer used but accepted to avoid crashes
+        "goal_type",
+        "interest_area",
+        "work_style",
+        "skill_strength",
+    ]
+
+    
     missing_fields = []
     for field in required_fields:
         value = inputs.get(field)
         if not value or (isinstance(value, str) and not value.strip()):
             missing_fields.append(field)
     
-    # Validate skills - at least one category must have skills
-    skills = inputs.get("skills", {})
-    has_skills = False
-    if isinstance(skills, dict):
-        has_skills = any(
-            (cat != "other" and isinstance(val, list) and len(val) > 0) or
-            (cat == "other" and isinstance(val, str) and val.strip())
-            for cat, val in skills.items()
+    # Validate skills structure (optional)
+    skills = inputs.get("skills")
+    if skills is None:
+        # Auto-fill empty skills structure
+        inputs["skills"] = {
+            "technical": [],
+            "creative": [],
+            "physical": [],
+            "business": [],
+            "soft": [],
+            "other": ""
+        }
+    elif not isinstance(skills, dict):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid format: 'skills' must be an object with categories"
         )
-    if not has_skills:
-        missing_fields.append("skills")
+    else:
+        # Ensure all categories exist (fill missing ones)
+        default_skills = {
+            "technical": [],
+            "creative": [],
+            "physical": [],
+            "business": [],
+            "soft": [],
+            "other": ""
+        }
+        cleaned = {}
+        for cat, default in default_skills.items():
+            val = skills.get(cat, default)
+            # Normalize types
+            if cat == "other":
+                cleaned[cat] = str(val) if val else ""
+            else:
+                cleaned[cat] = val if isinstance(val, list) else []
+        inputs["skills"] = cleaned
     
     if missing_fields:
         # Log the actual inputs for debugging
@@ -387,6 +427,7 @@ async def create_run(
                 stream_completed = False
                 collected_output = ""  # Collect all streamed output for debugging
                 chunk_count = 0
+                buffer = ""  # Buffer tokens until natural boundary
                 try:
                     async for chunk in discovery_service.workflow_stream(
                         inputs=inputs,
@@ -394,56 +435,25 @@ async def create_run(
                         run_id=run_id
                     ):
                         chunk_count += 1
-                        # Allow profile analysis JSON (with delimiters) to pass through
-                        # Filter out only SSE metadata JSON (contains run_id/status)
                         if chunk:
-                            # Check if this is profile analysis JSON (has delimiters)
-                            is_profile_json = (
-                                "---PROFILE_ANALYSIS_START---" in chunk or
-                                "---PROFILE_ANALYSIS_END---" in chunk
-                            )
+                            # Accumulate chunks in buffer
+                            buffer += chunk
+                            collected_output += chunk
                             
-                            # Check if this is SSE metadata JSON (should be filtered)
-                            is_sse_metadata = (
-                                chunk.strip().startswith('{') and
-                                ('"run_id"' in chunk or '"status"' in chunk) and
-                                not is_profile_json
-                            )
-                            
-                            # Stream the chunk if it's not SSE metadata
-                            if not is_sse_metadata:
-                                collected_output += chunk  # Collect for debugging
-                                # Send chunk as plain text (SSE format)
-                                # SSE format: multiple "data:" lines are joined with \n
-                                # Send each line of the chunk as a separate "data:" line
-                                # This preserves the separator token even if it spans lines
-                                # IMPORTANT: Keep empty lines to preserve separator format
-                                chunk_lines = chunk.split("\n")
-                                for line in chunk_lines:
-                                    # Filter out SSE metadata lines but keep profile JSON
-                                    is_metadata_line = (
-                                        line.strip().startswith('{') and
-                                        ('"run_id"' in line or '"status"' in line) and
-                                        not ("---PROFILE_ANALYSIS_START---" in line or "---PROFILE_ANALYSIS_END---" in line)
-                                    )
-                                    if not is_metadata_line:
-                                        yield f"data: {line}\n"
-                                yield f"\n"  # End of event (empty line after all data lines)
+                            # Flush only when a natural boundary occurs
+                            if (
+                                "\n\n" in buffer
+                                or buffer.endswith(".")
+                                or "---PROFILE_END---" in buffer
+                                or "### IDEA_" in buffer
+                            ):
+                                # Yield ONE SSE event per buffered chunk
+                                yield f"data: {buffer}\n\n"
+                                buffer = ""
                     
-                    # DEBUG: Log the ENTIRE collected output to console
-                    print("\n" + "="*80)
-                    print("DEBUG: ENTIRE BACKEND STREAMING OUTPUT")
-                    print("="*80)
-                    print(f"Total chunks: {chunk_count}")
-                    print(f"Total length: {len(collected_output)} characters")
-                    print(f"Separator '---PROFILE_END---' found: {collected_output.find('---PROFILE_END---') >= 0}")
-                    if collected_output.find('---PROFILE_END---') >= 0:
-                        separator_pos = collected_output.find('---PROFILE_END---')
-                        print(f"Separator position: {separator_pos}")
-                    print("\n---FULL STREAMED OUTPUT TEXT---")
-                    print(collected_output)
-                    print("---END OF STREAMED OUTPUT---")
-                    print("="*80 + "\n")
+                    # Flush any remaining buffer
+                    if buffer.strip():
+                        yield f"data: {buffer}\n\n"
                     
                     stream_completed = True
                 except Exception as stream_error:
@@ -470,24 +480,36 @@ async def create_run(
                         # Parse the collected output using the separator
                         SPLIT_TOKEN = "\n\n---PROFILE_END---\n\n"
                         profile_analysis = ""
-                        recommendations = ""
+                        recommendations_raw = ""
                         
                         if SPLIT_TOKEN in collected_output:
                             parts = collected_output.split(SPLIT_TOKEN, 1)
                             profile_analysis = parts[0].strip() if len(parts) > 0 else ""
-                            recommendations = parts[1].strip() if len(parts) > 1 else ""
+                            recommendations_raw = parts[1].strip() if len(parts) > 1 else ""
                         else:
                             # Fallback: treat all as recommendations if no separator
-                            recommendations = collected_output.strip()
+                            recommendations_raw = collected_output.strip()
+                        
+                        # Parse recommendations using the new parser
+                        from app.services.recommendation_parser import RecommendationParser
+                        parsed_recommendations = RecommendationParser.parse_recommendations(recommendations_raw)
+                        
+                        # Format recommendations for frontend (markdown format for backward compatibility)
+                        recommendations_formatted = RecommendationParser.format_recommendations_for_frontend(parsed_recommendations)
+                        
+                        # If parsing failed, use raw text as fallback
+                        if not parsed_recommendations and recommendations_raw:
+                            recommendations_formatted = recommendations_raw
                         
                         # Save the parsed output
                         run.reports = {
                             "streaming_output": collected_output,  # Keep full raw output
                             "profile_analysis": profile_analysis,
-                            "personalized_recommendations": recommendations
+                            "personalized_recommendations": recommendations_formatted,  # Formatted markdown
+                            "recommendations_structured": parsed_recommendations  # Structured data
                         }
                         run.profile_analysis = profile_analysis
-                        run.personalized_recommendations = recommendations
+                        run.personalized_recommendations = recommendations_formatted
                         db.commit()
                         
                         # Also save to DiscoveryResult if needed
@@ -559,24 +581,94 @@ async def create_run(
     else:
         # Plain text format (backward compatibility)
         async def generate_stream():
+            stream_completed = False
+            collected_output = ""  # Collect all streamed output
+            
             try:
-                # Stream workflow chunks
+                # Stream workflow chunks and collect results
                 async for chunk in discovery_service.workflow_stream(
                     inputs=inputs,
                     user_id=user_id,
                     run_id=run_id
                 ):
+                    if chunk:
+                        collected_output += chunk
                     yield chunk
                 
-                # After streaming completes, save results to DB
-                try:
-                    result = discovery_service.run_discovery(
-                        inputs=inputs,
-                        user_id=user_id,
-                        run_id=run_id
-                    )
-                except Exception as e:
-                    discovery_service._log(f"Failed to save results after streaming: {e}", "ERROR")
+                stream_completed = True
+                
+                # CRITICAL: Don't call run_discovery() again - it would re-run everything!
+                # Instead, save what we already computed during streaming (same as SSE handler)
+                if stream_completed and collected_output:
+                    try:
+                        # Update run status and save the streamed output
+                        run.status = "completed"
+                        run.completed_at = datetime.now(timezone.utc)
+                        
+                        # Parse the collected output using the separator
+                        SPLIT_TOKEN = "\n\n---PROFILE_END---\n\n"
+                        profile_analysis = ""
+                        recommendations_raw = ""
+                        
+                        if SPLIT_TOKEN in collected_output:
+                            parts = collected_output.split(SPLIT_TOKEN, 1)
+                            profile_analysis = parts[0].strip() if len(parts) > 0 else ""
+                            recommendations_raw = parts[1].strip() if len(parts) > 1 else ""
+                        else:
+                            # Fallback: treat all as recommendations if no separator
+                            recommendations_raw = collected_output.strip()
+                        
+                        # Parse recommendations using the new parser
+                        from app.services.recommendation_parser import RecommendationParser
+                        parsed_recommendations = RecommendationParser.parse_recommendations(recommendations_raw)
+                        
+                        # Format recommendations for frontend (markdown format for backward compatibility)
+                        recommendations_formatted = RecommendationParser.format_recommendations_for_frontend(parsed_recommendations)
+                        
+                        # If parsing failed, use raw text as fallback
+                        if not parsed_recommendations and recommendations_raw:
+                            recommendations_formatted = recommendations_raw
+                        
+                        # Save the parsed output
+                        run.reports = {
+                            "streaming_output": collected_output,  # Keep full raw output
+                            "profile_analysis": profile_analysis,
+                            "personalized_recommendations": recommendations_formatted,  # Formatted markdown
+                            "recommendations_structured": parsed_recommendations  # Structured data
+                        }
+                        run.profile_analysis = profile_analysis
+                        run.personalized_recommendations = recommendations_formatted
+                        db.commit()
+                        
+                        # Also save to DiscoveryResult if needed
+                        discovery_result = db.query(DiscoveryResult).filter(
+                            DiscoveryResult.run_id == run_id
+                        ).first()
+                        
+                        if discovery_result:
+                            discovery_result.result = run.reports
+                            discovery_result.status = "completed"
+                            discovery_result.error_message = None
+                        else:
+                            discovery_result = DiscoveryResult(
+                                run_id=run_id,
+                                input_payload=inputs,
+                                result=run.reports,
+                                status="completed"
+                            )
+                            db.add(discovery_result)
+                        
+                        db.commit()
+                        
+                    except Exception as save_error:
+                        discovery_service._log(f"Failed to save results after streaming: {save_error}", "ERROR")
+                        # Don't fail the request, just log the error
+                        try:
+                            run.status = "completed"
+                            run.error_message = f"Streaming completed but save failed: {str(save_error)}"
+                            db.commit()
+                        except:
+                            pass
                     
             except Exception as e:
                 # Update run status on error
@@ -629,17 +721,39 @@ async def create_run_background(
     ]
     missing_fields = [field for field in required_fields if field not in inputs or not inputs[field]]
     
-    # Validate skills
-    skills = inputs.get("skills", {})
-    has_skills = False
-    if isinstance(skills, dict):
-        has_skills = any(
-            (cat != "other" and isinstance(val, list) and len(val) > 0) or
-            (cat == "other" and isinstance(val, str) and val.strip())
-            for cat, val in skills.items()
+    # Validate and normalize skills (optional)
+    skills = inputs.get("skills")
+    if skills is None:
+        inputs["skills"] = {
+            "technical": [],
+            "creative": [],
+            "physical": [],
+            "business": [],
+            "soft": [],
+            "other": ""
+        }
+    elif not isinstance(skills, dict):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid format: 'skills' must be an object with categories"
         )
-    if not has_skills:
-        missing_fields.append("skills")
+    else:
+        default_structure = {
+            "technical": [],
+            "creative": [],
+            "physical": [],
+            "business": [],
+            "soft": [],
+            "other": ""
+        }
+        normalized = {}
+        for cat, default in default_structure.items():
+            val = skills.get(cat, default)
+            if cat == "other":
+                normalized[cat] = str(val) if val else ""
+            else:
+                normalized[cat] = val if isinstance(val, list) else []
+        inputs["skills"] = normalized
     
     if missing_fields:
         raise HTTPException(
@@ -755,4 +869,55 @@ async def get_run(
             "completed_at": run.completed_at.isoformat() if run.completed_at else None,
         }
     }
+
+
+@router.post("/enhance-report", status_code=status.HTTP_200_OK)
+async def enhance_report(
+    request: Dict[str, Any] = Body(...),
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user_or_none)
+):
+    """
+    Enhance a report with additional insights (mock implementation for now)
+    
+    Request body:
+    - run_id: UUID of the run to enhance
+    
+    Returns:
+    - success: bool
+    - enhancements: Dict with enhanced insights
+    """
+    try:
+        run_id = request.get("run_id")
+        if not run_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="run_id is required"
+            )
+        
+        # Get the run
+        run = db.query(Run).filter(Run.run_id == run_id).first()
+        if not run:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Run {run_id} not found"
+            )
+        
+        # TODO: Implement actual enhancement logic
+        # For now, return mock data
+        return {
+            "success": True,
+            "enhancements": {
+                "similar_ideas": [],
+                "market_insights": [],
+                "validation_suggestions": []
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to enhance report: {str(e)}"
+        )
 

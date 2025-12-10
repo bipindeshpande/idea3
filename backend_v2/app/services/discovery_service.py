@@ -5,6 +5,7 @@ Discovery Service - Main orchestration service
 from typing import Dict, Any, Optional, AsyncIterator
 from datetime import datetime, timezone
 import time
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FutureTimeoutError
 from sqlalchemy.orm import Session
 
@@ -366,7 +367,14 @@ class DiscoveryService(BaseService):
             tool_results=tool_results
         )
 
-        system_prompt = "You are a startup advisor. Follow the required structure exactly."
+        system_prompt = """You are a startup advisor. You MUST output recommendations using the EXACT format specified in the prompt.
+
+CRITICAL RULES:
+- Output ONLY the IDEA blocks (### IDEA_1, ### IDEA_2, etc.)
+- Do NOT include any intro text, explanations, or disclaimers
+- Do NOT output markdown sections like ## SECTION or ### RECOMMENDATION
+- Each IDEA block must have exactly these fields: title, summary, target_market, revenue_model, validation_score, timeline, why_this_fits
+- Follow the format EXACTLY as specified."""
 
         llm_response = self.llm_service.generate(
             prompt=prompt,
@@ -381,6 +389,30 @@ class DiscoveryService(BaseService):
     # ----------------------------------------------------------------------
     # STREAMING WORKFLOW
     # ----------------------------------------------------------------------
+    def merge_idea_header(self, buffer: str, next_token: str) -> Optional[str]:
+        """Merge '### IDEA_' + number into '### IDEA_1'."""
+        stripped = buffer.strip()
+        # Handle both "### IDEA" (with space) and "###IDEA" (without space)
+        if stripped.startswith("### IDEA") or stripped.startswith("###IDEA"):
+            # Check if next_token is a digit, or starts with underscore followed by digit (e.g., "_1")
+            token_clean = next_token.strip()
+            if token_clean.isdigit():
+                # Normalize to "### IDEA_X" format (with space)
+                merged = f"### IDEA_{token_clean}"
+                print(f"[MERGE_IDEA_HEADER] buffer='{buffer}', next_token='{next_token}' -> merged='{merged}'")
+                return merged
+            elif token_clean.startswith("_") and token_clean[1:].isdigit():
+                # Handle "_1" format - extract digit and merge
+                digit = token_clean[1:]
+                merged = f"### IDEA_{digit}"
+                print(f"[MERGE_IDEA_HEADER] buffer='{buffer}', next_token='{next_token}' -> merged='{merged}'")
+                return merged
+            else:
+                print(f"[MERGE_IDEA_HEADER] buffer='{buffer}' starts with '### IDEA' but next_token='{next_token}' is not a digit or '_digit'")
+        else:
+            print(f"[MERGE_IDEA_HEADER] buffer='{buffer}' does not start with '### IDEA' or '###IDEA'")
+        return None
+    
     async def workflow_stream(
         self,
         inputs: Dict[str, Any],
@@ -388,78 +420,234 @@ class DiscoveryService(BaseService):
         run_id: Optional[str] = None
     ) -> AsyncIterator[str]:
         """
-        Stream the discovery workflow as text chunks
-        
-        Yields:
-            Text chunks for profile analysis, research, and recommendations
+        Stream workflow output in buffered chunks instead of token-by-token.
         """
+        print(">>> WORKFLOW_STREAM EXECUTED <<<")
         import asyncio
         
-        # OPTIMIZATION: Run Stage 1 (Profile) and Stage 2 (Research) in parallel
-        # This can save 5-10 seconds by not waiting for tools to load
-        interest_area = inputs.get("interest_area", "")
-        sub_interest = inputs.get("sub_interest_area", "")
-        
-        # Start both tasks concurrently
+        # 1. Run Profile Analysis
         loop = asyncio.get_event_loop()
-        
-        # Run profile analysis in thread pool (it's synchronous)
-        profile_task = loop.run_in_executor(
+        profile_result = await loop.run_in_executor(
             None,
             lambda: self.profile_service.analyze_profile(inputs, run_id=run_id)
         )
+        profile_text = profile_result.get("profile_analysis", "")
         
-        # Run tool loading in thread pool (it's synchronous)
-        tool_task = loop.run_in_executor(
-            None,
-            lambda: self.tool_service.load_or_execute(interest_area, sub_interest) if interest_area else {}
-        )
-        
-        # Wait for profile analysis first (user sees this)
-        try:
-            profile_result = await profile_task
-            profile_text = profile_result.get("profile_analysis", "")
+        # Profile text already includes delimiters - yield it once
+        if profile_text:
             yield profile_text
-        except Exception as e:
-            self._log(f"Profile analysis failed: {e}", "ERROR")
-            yield f"\n\nError in profile analysis: {str(e)}\n"
-            raise
-        
-        # Wait for tool results (happens in parallel, should be ready or almost ready)
+        yield "\n\n---PROFILE_END---\n\n"
+
+        # 2. Get tool results for prompt
+        interest_area = inputs.get("interest_area", "")
+        sub_interest = inputs.get("sub_interest_area", "")
         try:
-            tool_results = await tool_task
+            tool_results = await loop.run_in_executor(
+                None,
+                lambda: self.tool_service.load_or_execute(interest_area, sub_interest) if interest_area else {}
+            )
         except Exception as e:
             self._log(f"Tool research failed: {e}", "WARNING")
             tool_results = {}
         
-        # Stage 3: Final Recommendations (stream LLM output)
-        # Add clear separator between profile and recommendations
-        yield "\n\n---PROFILE_END---\n\n"
-        
-        # Extract and format profile analysis for recommendations prompt
-        # The profile_text contains JSON with delimiters, we need to extract and format it
+        # 3. Format profile for recommendations prompt
         formatted_profile = self._format_profile_for_recommendations(profile_text)
         
-        # Use the formatted profile_text from Stage 1
-        # Build prompt for Stage 3
+        # 4. Run Idea Generation (LLM Streaming) with buffering
         prompt = self.prompt_builder.build_idea_research_prompt(
             profile_analysis=formatted_profile,
             tool_results=tool_results
         )
         
-        system_prompt = "You are a startup advisor. Follow the required structure exactly."
-        
-        # Stream LLM response - filter out any JSON metadata
-        async for chunk in self.llm_service.generate_stream(
+        system_prompt = """You are a startup advisor. You MUST output recommendations using the EXACT format specified in the prompt.
+
+CRITICAL RULES:
+- Output ONLY the IDEA blocks (### IDEA_1, ### IDEA_2, etc.)
+- Do NOT include any intro text, explanations, or disclaimers
+- Do NOT output markdown sections like ## SECTION or ### RECOMMENDATION
+- Each IDEA block must have exactly these fields: title, summary, target_market, revenue_model, validation_score, timeline, why_this_fits
+- Follow the format EXACTLY as specified."""
+
+        llm_stream = self.llm_service.generate_stream(
             prompt=prompt,
             system_prompt=system_prompt,
             temperature=0.3,
             max_tokens=settings.MAX_TOKENS_STAGE2,
-        ):
-            # Filter out JSON metadata from chunks
-            cleaned_chunk = self._clean_stream_chunk(chunk)
-            if cleaned_chunk:
-                yield cleaned_chunk
+        )
+
+        # State machine for clean buffering
+        # States: NORMAL, IDEA_HEADER, FIELD_VALUE
+        buffer = ""
+        state = "NORMAL"
+        token_count = 0
+        prev_char = ""
+        in_profile = False
+        
+        async for chunk in llm_stream:
+            token_count += 1
+            t = chunk
+            
+            # Log RAW TOKEN and BUFFER BEFORE
+            print(f"\n[TOKEN #{token_count}] RAW TOKEN: {repr(t)}")
+            print(f"[TOKEN #{token_count}] STATE: {state}, in_profile: {in_profile}")
+            print(f"[TOKEN #{token_count}] BUFFER BEFORE: {repr(buffer)}")
+            
+            # Handle profile markers - pass through immediately, never buffer
+            if "---PROFILE_ANALYSIS_START---" in t:
+                if buffer.strip():
+                    print(f"[TOKEN #{token_count}] FLUSHED (before profile start): {repr(buffer.strip())}")
+                    yield buffer.strip()
+                    buffer = ""
+                print(f"[TOKEN #{token_count}] PASSING THROUGH (profile start): {repr(t)}")
+                yield t
+                in_profile = True
+                state = "NORMAL"
+                continue
+                
+            if "---PROFILE_ANALYSIS_END---" in t:
+                if buffer.strip():
+                    print(f"[TOKEN #{token_count}] FLUSHED (before profile end): {repr(buffer.strip())}")
+                    yield buffer.strip()
+                    buffer = ""
+                print(f"[TOKEN #{token_count}] PASSING THROUGH (profile end): {repr(t)}")
+                yield t
+                in_profile = False
+                state = "NORMAL"
+                continue
+            
+            # Inside profile - accumulate everything, flush on end marker only
+            if in_profile:
+                buffer += t
+                print(f"[TOKEN #{token_count}] BUFFER AFTER (profile): {repr(buffer)}")
+                prev_char = t
+                continue
+            
+            # Detect IDEA header start: "###" pattern
+            if state == "NORMAL" and ("###" in buffer or (buffer == "" and t == "#")):
+                buffer += t
+                if "###" in buffer:
+                    state = "IDEA_HEADER"
+                    print(f"[TOKEN #{token_count}] STATE -> IDEA_HEADER")
+                print(f"[TOKEN #{token_count}] BUFFER AFTER: {repr(buffer)}")
+                prev_char = t
+                continue
+            
+            # Building IDEA header
+            if state == "IDEA_HEADER":
+                buffer += t
+                
+                # Try to merge with number token
+                merge_candidate = self.merge_idea_header(buffer, t)
+                if merge_candidate:
+                    print(f"[TOKEN #{token_count}] MERGE_IDEA: {repr(buffer)} + {repr(t)} -> {repr(merge_candidate)}")
+                    buffer = merge_candidate
+                    print(f"[TOKEN #{token_count}] BUFFER AFTER MERGE: {repr(buffer)}")
+                    prev_char = t
+                    continue
+                
+                # Check if we have a complete IDEA header pattern: "### IDEA_<digit>"
+                buffer_stripped = buffer.strip()
+                is_complete_header = bool(re.match(r"^###\s*IDEA_\d+$", buffer_stripped))
+                is_partial_header = buffer_stripped.startswith("### IDEA_") and not is_complete_header
+                
+                # If we have a partial header (e.g., "### IDEA_" without digit, or "### IDEA__1" with double underscore), keep buffering
+                if is_partial_header:
+                    print(f"[TOKEN #{token_count}] BUFFERING (partial header, waiting for complete pattern): {repr(buffer)}")
+                    prev_char = t
+                    continue
+                
+                # Header complete when we have "### IDEA_X" followed by newline/space
+                if is_complete_header and (t == "\n" or t == " " or (t.strip() == "" and len(buffer) > 8)):
+                    print(f"[TOKEN #{token_count}] FLUSHED (IDEA header complete): {repr(buffer)}")
+                    yield buffer
+                    buffer = ""
+                    state = "NORMAL"
+                    print(f"[TOKEN #{token_count}] STATE -> NORMAL")
+                    prev_char = t
+                    continue
+                
+                # If we have complete header but next token is not whitespace/digit, flush header
+                if is_complete_header and len(buffer) >= 9 and not t.isdigit() and t not in [" ", "\n", ""]:
+                    # Extract complete header
+                    header_end = buffer.find("\n") if "\n" in buffer else len(buffer)
+                    header = buffer[:header_end].rstrip()
+                    remainder = buffer[header_end:] + t
+                    print(f"[TOKEN #{token_count}] FLUSHED (IDEA header, non-digit next): {repr(header)}")
+                    yield header
+                    buffer = remainder
+                    state = "NORMAL"
+                    print(f"[TOKEN #{token_count}] STATE -> NORMAL")
+                    prev_char = t
+                    continue
+                
+                print(f"[TOKEN #{token_count}] BUFFER AFTER (IDEA_HEADER): {repr(buffer)}")
+                prev_char = t
+                continue
+            
+            # Detect field start: alphanumeric followed by ":"
+            if state == "NORMAL" and (t.isalnum() or t == "_") and ":" not in buffer:
+                buffer += t
+                # Check if we just completed a field name (ends with ":")
+                if buffer.endswith(":"):
+                    state = "FIELD_VALUE"
+                    print(f"[TOKEN #{token_count}] STATE -> FIELD_VALUE (found colon)")
+                print(f"[TOKEN #{token_count}] BUFFER AFTER: {repr(buffer)}")
+                prev_char = t
+                continue
+            
+            # Building field value (after ":")
+            if state == "FIELD_VALUE" or (state == "NORMAL" and ":" in buffer):
+                if state == "NORMAL":
+                    state = "FIELD_VALUE"
+                    print(f"[TOKEN #{token_count}] STATE -> FIELD_VALUE")
+                
+                buffer += t
+                
+                # Flush on sentence end: period followed by space/newline
+                if prev_char == "." and (t == " " or t == "\n"):
+                    print(f"[TOKEN #{token_count}] FLUSHED (field complete, sentence end): {repr(buffer.strip())}")
+                    yield buffer.strip()
+                    buffer = ""
+                    state = "NORMAL"
+                    print(f"[TOKEN #{token_count}] STATE -> NORMAL")
+                    prev_char = t
+                    continue
+                
+                print(f"[TOKEN #{token_count}] BUFFER AFTER (FIELD_VALUE): {repr(buffer)}")
+                prev_char = t
+                continue
+            
+            # Handle double newline (flush outside fields)
+            # BUT: Do NOT flush if we have a partial IDEA header
+            if t == "\n" and prev_char == "\n" and state != "FIELD_VALUE":
+                # Check if buffer contains a partial IDEA header that shouldn't be flushed
+                buffer_stripped = buffer.strip()
+                is_partial_idea_header = buffer_stripped.startswith("### IDEA_") and not bool(re.match(r"^###\s*IDEA_\d+$", buffer_stripped))
+                
+                if is_partial_idea_header:
+                    print(f"[TOKEN #{token_count}] SKIPPING FLUSH (partial IDEA header detected): {repr(buffer)}")
+                    prev_char = t
+                    continue
+                
+                if buffer.strip():
+                    print(f"[TOKEN #{token_count}] FLUSHED (double newline): {repr(buffer.strip())}")
+                    yield buffer.strip()
+                buffer = ""
+                state = "NORMAL"
+                print(f"[TOKEN #{token_count}] STATE -> NORMAL")
+                prev_char = t
+                continue
+            
+            # Default: accumulate
+            buffer += t
+            print(f"[TOKEN #{token_count}] BUFFER AFTER (accumulate): {repr(buffer)}")
+            prev_char = t
+
+        # Final flush
+        if buffer.strip():
+            flushed = buffer.strip()
+            print(f"[FINAL] FLUSHED (remaining buffer): {repr(flushed)}")
+            yield flushed
     
     def _format_profile_for_recommendations(self, profile_text: str) -> str:
         """
