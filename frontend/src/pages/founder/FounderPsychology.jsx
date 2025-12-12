@@ -224,7 +224,7 @@ export default function FounderPsychology() {
       if (response.ok && data.success) {
         setToast({
           show: true,
-          message: "Founder psychology saved successfully!",
+          message: "Founder profile saved successfully!",
           type: "success"
         });
         // Optionally navigate back after a delay
@@ -261,17 +261,17 @@ export default function FounderPsychology() {
   return (
     <>
       <Seo
-        title="Founder Psychology Assessment"
-        description="Complete your founder psychology profile for personalized startup recommendations"
+        title="Founder Profile"
+        description="Complete your founder profile to help other founders understand your background, interests, and goals"
       />
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-              Founder Psychology Assessment
+              Founder Profile
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mb-8">
-              Help us understand your founder profile for more personalized startup recommendations.
+              Help other founders understand your background, interests, and goals.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">

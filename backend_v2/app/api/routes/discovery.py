@@ -817,6 +817,9 @@ async def enrich_idea(
             detail="Industry is required"
         )
     
+    # Get user_id from authenticated user
+    user_id = current_user.user_id if current_user else None
+    
     if format == "json":
         # Return JSON response (non-streaming)
         # Use tool_service.enrich_idea which includes all logging and returns both parsed and raw content
@@ -824,7 +827,8 @@ async def enrich_idea(
             idea=idea,
             industry=industry,
             profile_analysis=profile_analysis,
-            run_id=None
+            run_id=None,
+            user_id=user_id
         )
         
         # enrich_idea now returns {"parsed": {...}, "raw_content": "..."}
@@ -861,7 +865,8 @@ async def enrich_idea(
                 async for chunk in tool_service.enrich_idea_stream(
                     idea=idea,
                     industry=industry,
-                    profile_analysis=profile_analysis
+                    profile_analysis=profile_analysis,
+                    user_id=user_id
                 ):
                     if chunk:
                         buffer += chunk

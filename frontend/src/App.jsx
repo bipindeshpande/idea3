@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
-import { Link, NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useReports } from "./context/ReportsContext.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import { useTheme } from "./context/ThemeContext.jsx";
@@ -37,6 +37,9 @@ import CompareSessionsPage from "./pages/dashboard/CompareSessions.jsx";
 import RunHistoryPage from "./pages/dashboard/RunHistoryPage.jsx";
 import FounderConnectPage from "./pages/founder/FounderConnect.jsx";
 import FounderPsychologyPage from "./pages/founder/FounderPsychology.jsx";
+import PsycheQuestionnairePage from "./pages/psyche/PsycheQuestionnaire.jsx";
+import PsycheProfilePage from "./pages/psyche/PsycheProfile.jsx";
+import PsycheCompletePage from "./pages/psyche/PsycheComplete.jsx";
 // Lazy load heavy pages
 const AnalyticsPage = lazy(() => import("./pages/dashboard/Analytics.jsx"));
 const AccountPage = lazy(() => import("./pages/dashboard/Account.jsx"));
@@ -55,7 +58,8 @@ const AdminResetPasswordPage = lazy(() => import("./pages/admin/AdminResetPasswo
 // Components
 import Footer from "./components/common/Footer.jsx";
 
-const primaryNavLinks = [
+// Marketing navigation (logged-out only)
+const marketingNavLinks = [
   { label: "Product", to: "/product" },
   { label: "Pricing", to: "/pricing" },
 ];
@@ -67,23 +71,16 @@ const learnNavLinks = [
   { label: "Contact", to: "/contact" },
 ];
 
-const reportNavLinks = [
-  { label: "Profile Summary", to: "/results/profile" },
-  { label: "Top Recommendations", to: "/results/recommendations" },
-];
-
 function Navigation() {
   const { reports, inputs } = useReports();
   const { user, isAuthenticated, subscription, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const hasReports = Boolean(
-    reports?.profile_analysis || reports?.personalized_recommendations
-  );
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [learnMenuOpen, setLearnMenuOpen] = useState(false);
-  const [reportsMenuOpen, setReportsMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const learnMenuRef = useRef(null);
-  const reportsMenuRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   const handleLogout = async () => {
     await logout();
@@ -91,27 +88,27 @@ function Navigation() {
     window.location.href = "/";
   };
 
-  const desktopLinkClass = ({ isActive }) =>
-    `rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-300 ${
-      isActive ? "bg-brand-500/15 dark:bg-brand-500/20 text-brand-700 dark:text-brand-400 shadow-sm" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+  // Link styles for logged-out (marketing) navigation
+  const marketingLinkClass = ({ isActive }) =>
+    `px-4 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-300 ${
+      isActive ? "text-brand-700 dark:text-brand-400" : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
     }`;
 
-  const sessionsLinkClass = ({ isActive }) =>
-    `rounded-full border px-4 py-2 text-sm font-semibold transition whitespace-nowrap ${
-      isActive
-        ? "border-brand-400 dark:border-brand-500 bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400"
-        : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-brand-300 dark:hover:border-brand-500 hover:text-brand-700 dark:hover:text-brand-400"
+  // Link styles for logged-in (app) navigation
+  const appLinkClass = ({ isActive }) =>
+    `px-4 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-300 ${
+      isActive ? "text-brand-700 dark:text-brand-400" : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
     }`;
 
   const mobileLinkClass = ({ isActive }) =>
-    `rounded-xl px-4 py-2 text-left text-sm font-medium whitespace-nowrap ${
-      isActive ? "bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400" : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+    `px-4 py-2 text-left text-sm font-medium whitespace-nowrap ${
+      isActive ? "text-brand-700 dark:text-brand-400" : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
     }`;
 
   const closeAllMenus = () => {
     setMobileMenuOpen(false);
     setLearnMenuOpen(false);
-    setReportsMenuOpen(false);
+    setUserMenuOpen(false);
   };
 
   useEffect(() => {
@@ -124,11 +121,11 @@ function Navigation() {
         setLearnMenuOpen(false);
       }
       if (
-        reportsMenuRef.current &&
-        !reportsMenuRef.current.contains(event.target) &&
-        reportsMenuOpen
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target) &&
+        userMenuOpen
       ) {
-        setReportsMenuOpen(false);
+        setUserMenuOpen(false);
       }
     };
 
@@ -144,179 +141,136 @@ function Navigation() {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keyup", handleEscape);
     };
-  }, [learnMenuOpen, reportsMenuOpen]);
+  }, [learnMenuOpen, userMenuOpen]);
 
   return (
-    <header className="z-40 border-b-2 border-brand-200/60 dark:border-brand-800/60 bg-white/98 dark:bg-slate-900/98 backdrop-blur-lg shadow-lg shadow-brand-500/5 dark:shadow-brand-500/5">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-        <div className="flex items-center gap-4">
+    <header className="z-40 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
+        {/* Logo */}
         <NavLink
-          to="/"
-            className="text-xl font-bold tracking-tight bg-gradient-to-r from-brand-600 to-brand-700 dark:from-brand-400 dark:to-brand-500 bg-clip-text text-transparent whitespace-nowrap transition-opacity hover:opacity-80"
-            onClick={closeAllMenus}
+          to={isAuthenticated ? "/dashboard" : "/"}
+          className="text-xl font-bold tracking-tight bg-gradient-to-r from-brand-600 to-brand-700 dark:from-brand-400 dark:to-brand-500 bg-clip-text text-transparent whitespace-nowrap transition-opacity hover:opacity-80"
+          onClick={closeAllMenus}
+          title={isAuthenticated ? "Back to Dashboard" : ""}
         >
           Startup Idea Advisor
         </NavLink>
-        </div>
-        <div className="flex items-center gap-3">
-          <nav className="hidden lg:flex items-center gap-2 text-sm font-medium text-slate-600">
-            {primaryNavLinks.map(({ label, to }) => (
-              <NavLink key={to} to={to} className={desktopLinkClass} onClick={closeAllMenus}>
-                {label}
-              </NavLink>
-            ))}
-            <div className="group relative" ref={learnMenuRef}>
-              <button
-                type="button"
-                className="flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-300"
-                onClick={() => {
-                  setLearnMenuOpen((prev) => !prev);
-                  setReportsMenuOpen(false);
-                }}
-                onMouseEnter={() => {
-                  setLearnMenuOpen(true);
-                  setReportsMenuOpen(false);
-                }}
-                aria-expanded={learnMenuOpen}
-              >
-                Learn
-                <span className="text-xs">▾</span>
-              </button>
-              <div
-                className={`absolute right-0 z-40 mt-2 w-48 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 p-2 shadow-lg transition-all duration-200 ${
-                  learnMenuOpen ? "pointer-events-auto opacity-100 visible" : "pointer-events-none opacity-0 invisible"
-                } group-hover:pointer-events-auto group-hover:opacity-100 group-hover:visible`}
-                onMouseEnter={() => setLearnMenuOpen(true)}
-                onMouseLeave={() => setLearnMenuOpen(false)}
-              >
-                {learnNavLinks.map(({ label, to }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                      `block rounded-xl px-3 py-2 text-sm transition ${
-                  isActive
-                          ? "bg-brand-50 dark:bg-brand-900/30 font-semibold text-brand-700 dark:text-brand-400"
-                          : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-                }`
-              }
-                    onClick={closeAllMenus}
-            >
-              {label}
-            </NavLink>
-          ))}
-              </div>
-            </div>
-            {hasReports && (
-              <div className="group relative" ref={reportsMenuRef}>
-                <button
-                  type="button"
-                  className="flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-300"
-                  onClick={() => {
-                    setReportsMenuOpen((prev) => !prev);
-                    setLearnMenuOpen(false);
-                  }}
-                  onMouseEnter={() => {
-                    setReportsMenuOpen(true);
-                    setLearnMenuOpen(false);
-                  }}
-                  aria-expanded={reportsMenuOpen}
-                >
-                  Reports
-                  <span className="text-xs">▾</span>
-                </button>
-                <div
-                className={`absolute right-0 z-40 mt-2 w-56 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 p-2 shadow-lg transition-all duration-200 ${
-                  reportsMenuOpen ? "pointer-events-auto opacity-100 visible" : "pointer-events-none opacity-0 invisible"
-                } group-hover:pointer-events-auto group-hover:opacity-100 group-hover:visible`}
-                onMouseEnter={() => setReportsMenuOpen(true)}
-                onMouseLeave={() => setReportsMenuOpen(false)}
-                >
-                  {reportNavLinks.map(({ label, to }) => (
-          <NavLink
-                      key={to}
-                      to={to}
-            className={({ isActive }) =>
-                        `block rounded-xl px-3 py-2 text-sm transition ${
-                isActive
-                            ? "bg-brand-50 font-semibold text-brand-700"
-                            : "text-slate-600 hover:bg-slate-100"
-                        }`
-                      }
-                      onClick={closeAllMenus}
-                    >
-                      {label}
-                    </NavLink>
-                  ))}
-                </div>
-              </div>
-            )}
-          </nav>
-          <div className="hidden lg:flex items-center gap-2">
-            {isAuthenticated ? (
-              <>
-                <NavLink to="/dashboard" className={sessionsLinkClass} onClick={closeAllMenus}>
-                  Dashboard
-                </NavLink>
-                <Link
-                  to="/advisor"
-                  onClick={closeAllMenus}
-                  className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5 whitespace-nowrap"
-                >
-                  Start Run
-                </Link>
-                <div className="flex items-center gap-2 border-l border-slate-300 pl-3">
-                  <span className="text-xs text-slate-600 max-w-[150px] truncate">{user?.email}</span>
-                  <Link
-                    to="/account"
-                    className="rounded-full border border-brand-300 px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 whitespace-nowrap"
-                    onClick={closeAllMenus}
-                  >
-                    Account
-                  </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex items-center gap-6 flex-1">
+          {isAuthenticated ? (
+            // Logged-In Navigation (App Mode)
+            <>
+              <div className="flex-1"></div>
+              <div className="flex items-center gap-3">
+                {/* User Dropdown */}
+                <div className="relative" ref={userMenuRef}>
                   <button
-                    onClick={handleLogout}
-                    className="rounded-full border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800 whitespace-nowrap"
+                    type="button"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                    onClick={() => {
+                      setUserMenuOpen((prev) => !prev);
+                      setLearnMenuOpen(false);
+                    }}
+                    aria-expanded={userMenuOpen}
                   >
-                    Logout
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-xs font-semibold">
+                      {user?.email?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                    <span className="hidden xl:block max-w-[120px] truncate">{user?.email}</span>
+                    <span className="text-xs">▾</span>
                   </button>
-                  <button
-                    onClick={toggleTheme}
-                    className="rounded-full border border-slate-300 dark:border-slate-600 px-2.5 py-2 text-sm transition hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center"
-                    aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-                    title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+                  <div
+                    className={`absolute right-0 z-50 mt-2 w-56 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 shadow-lg transition-all duration-200 ${
+                      userMenuOpen ? "pointer-events-auto opacity-100 visible" : "pointer-events-none opacity-0 invisible"
+                    }`}
                   >
-                    {theme === "light" ? (
-                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                    )}
-                  </button>
+                    <div className="px-3 py-2 text-xs text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 mb-1">
+                      {user?.email}
+                    </div>
+                    <div className="mb-1">
+                      <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                        Profile & Preferences
+                      </div>
+                      <NavLink
+                        to="/founder-psychology"
+                        className={({ isActive }) =>
+                          `block rounded-lg px-3 py-2 text-sm transition ${
+                            isActive
+                              ? "bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400"
+                              : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          }`
+                        }
+                        onClick={closeAllMenus}
+                      >
+                        Founder Profile
+                      </NavLink>
+                      <NavLink
+                        to="/psyche/questionnaire"
+                        className={({ isActive }) =>
+                          `block rounded-lg px-3 py-2 text-sm transition ${
+                            isActive
+                              ? "bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400"
+                              : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          }`
+                        }
+                        onClick={closeAllMenus}
+                      >
+                        Decision & Work Style
+                      </NavLink>
+                    </div>
+                    <div className="border-t border-slate-200 dark:border-slate-700 my-1"></div>
+                    <div className="mb-1">
+                      <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                        Help
+                      </div>
+                      <button
+                        onClick={() => {
+                          closeAllMenus();
+                          navigate("/dashboard?show=getting-started");
+                        }}
+                        className="block w-full text-left rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                      >
+                        Getting Started
+                      </button>
+                      <Link
+                        to="/resources"
+                        className="block rounded-lg px-3 py-2 text-sm transition text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                        onClick={closeAllMenus}
+                      >
+                        Learn / Resources
+                      </Link>
+                    </div>
+                    <div className="border-t border-slate-200 dark:border-slate-700 my-1"></div>
+                    <div className="mb-1">
+                      <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                        System
+                      </div>
+                      <NavLink
+                        to="/account"
+                        className={({ isActive }) =>
+                          `block rounded-lg px-3 py-2 text-sm transition ${
+                            isActive
+                              ? "bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400"
+                              : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          }`
+                        }
+                        onClick={closeAllMenus}
+                      >
+                        Account Settings
+                      </NavLink>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  onClick={closeAllMenus}
-                  className="rounded-full border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800 whitespace-nowrap"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  onClick={closeAllMenus}
-                  className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5 whitespace-nowrap"
-                >
-                  Get Started
-                </Link>
                 <button
                   onClick={toggleTheme}
-                  className="rounded-full border border-slate-300 dark:border-slate-600 px-2.5 py-2 text-sm transition hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center"
+                  className="rounded-lg border border-slate-300 dark:border-slate-600 px-2.5 py-2 text-sm transition hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center"
                   aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
                   title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
                 >
@@ -330,120 +284,170 @@ function Navigation() {
                     </svg>
                   )}
                 </button>
-              </>
-            )}
-          </div>
-          <button
-            type="button"
-            className="lg:hidden rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm"
-            onClick={() => {
-              const next = !mobileMenuOpen;
-              setMobileMenuOpen(next);
-              if (!next) {
-                setLearnMenuOpen(false);
-                setReportsMenuOpen(false);
-              }
-            }}
-            aria-expanded={mobileMenuOpen}
-            aria-label="Toggle navigation menu"
-          >
-            Menu
-          </button>
-        </div>
-      </div>
-      {mobileMenuOpen && (
-        <div className="border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 shadow-inner lg:hidden">
-          <nav className="grid gap-4 p-4 text-sm">
-            <div className="space-y-2">
-              {primaryNavLinks.map(({ label, to }) => (
-                <NavLink key={to} to={to} className={mobileLinkClass} onClick={closeAllMenus}>
-                  {label}
-                </NavLink>
-              ))}
-            </div>
-              <div className="space-y-2">
-                <p className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-400">Learn</p>
-              {learnNavLinks.map(({ label, to }) => (
-                <NavLink key={to} to={to} className={mobileLinkClass} onClick={closeAllMenus}>
-                  {label}
-                </NavLink>
-              ))}
-            </div>
-            {hasReports && (
-              <div className="space-y-2">
-                <p className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-400">Reports</p>
-                {reportNavLinks.map(({ label, to }) => (
-                  <NavLink key={to} to={to} className={mobileLinkClass} onClick={closeAllMenus}>
+              </div>
+            </>
+          ) : (
+            // Logged-Out Navigation (Marketing Mode)
+            <>
+              <nav className="flex items-center gap-6">
+                {marketingNavLinks.map(({ label, to }) => (
+                  <NavLink key={to} to={to} className={marketingLinkClass} onClick={closeAllMenus}>
                     {label}
                   </NavLink>
                 ))}
-              </div>
-            )}
-            {isAuthenticated ? (
-              <div className="space-y-2">
-                <div className="px-4 py-2 text-xs text-slate-600 border-b border-slate-200">
-                  {user?.email}
+                <div className="group relative" ref={learnMenuRef}>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 transition hover:text-slate-900 dark:hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-300"
+                    onClick={() => {
+                      setLearnMenuOpen((prev) => !prev);
+                    }}
+                    onMouseEnter={() => setLearnMenuOpen(true)}
+                    aria-expanded={learnMenuOpen}
+                  >
+                    Learn
+                    <span className="text-xs">▾</span>
+                  </button>
+                  <div
+                    className={`absolute left-0 z-40 mt-2 w-48 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 shadow-lg transition-all duration-200 ${
+                      learnMenuOpen ? "pointer-events-auto opacity-100 visible" : "pointer-events-none opacity-0 invisible"
+                    } group-hover:pointer-events-auto group-hover:opacity-100 group-hover:visible`}
+                    onMouseEnter={() => setLearnMenuOpen(true)}
+                    onMouseLeave={() => setLearnMenuOpen(false)}
+                  >
+                    {learnNavLinks.map(({ label, to }) => (
+                      <NavLink
+                        key={to}
+                        to={to}
+                        className={({ isActive }) =>
+                          `block rounded-lg px-3 py-2 text-sm transition ${
+                            isActive
+                              ? "bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400"
+                              : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          }`
+                        }
+                        onClick={closeAllMenus}
+                      >
+                        {label}
+                      </NavLink>
+                    ))}
+                  </div>
                 </div>
-                <NavLink to="/dashboard" className={mobileLinkClass} onClick={closeAllMenus}>
-                  Dashboard
-                </NavLink>
-                <NavLink to="/account" className={mobileLinkClass} onClick={closeAllMenus}>
-                  Account Settings
-          </NavLink>
-                <Link
-                  to="/advisor"
-                  onClick={closeAllMenus}
-                  className="block rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-2 text-center text-sm font-semibold text-white shadow-md transition hover:from-brand-600 hover:to-brand-700 whitespace-nowrap"
-                >
-                  Start Run
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full rounded-xl border border-slate-300 dark:border-slate-600 px-4 py-2 text-center text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800 whitespace-nowrap"
-                >
-                  Logout
-                </button>
-                <button
-                  onClick={toggleTheme}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800"
-                  aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-                >
-                  {theme === "light" ? (
-                    <>
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                      </svg>
-                      <span>Dark Mode</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                      <span>Light Mode</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-2">
+              </nav>
+              <div className="ml-auto flex items-center gap-3">
                 <Link
                   to="/login"
                   onClick={closeAllMenus}
-                  className="block rounded-xl border border-slate-300 dark:border-slate-600 px-4 py-2 text-center text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800 whitespace-nowrap"
+                  className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
                   onClick={closeAllMenus}
-                  className="block rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-2 text-center text-sm font-semibold text-white shadow-md transition hover:from-brand-600 hover:to-brand-700 whitespace-nowrap"
+                  className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 whitespace-nowrap"
                 >
                   Get Started
                 </Link>
                 <button
                   onClick={toggleTheme}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="rounded-lg border border-slate-300 dark:border-slate-600 px-2.5 py-2 text-sm transition hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center"
+                  aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+                  title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+                >
+                  {theme === "light" ? (
+                    <svg className="w-4 h-4 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Mobile Navigation */}
+        <div className="lg:hidden flex items-center gap-3">
+          <button
+            type="button"
+            className="rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300"
+            onClick={() => {
+              const next = !mobileMenuOpen;
+              setMobileMenuOpen(next);
+              if (!next) {
+                setLearnMenuOpen(false);
+                setUserMenuOpen(false);
+              }
+            }}
+            aria-expanded={mobileMenuOpen}
+            aria-label="Toggle navigation menu"
+          >
+            ☰
+          </button>
+        </div>
+      </div>
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 lg:hidden">
+          <nav className="p-4 space-y-1">
+            {isAuthenticated ? (
+              // Logged-In Mobile Menu
+              <>
+                <div className="mb-2">
+                  <div className="px-4 py-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                    Profile & Preferences
+                  </div>
+                  <NavLink to="/founder-psychology" className={mobileLinkClass} onClick={closeAllMenus}>
+                    Founder Profile
+                  </NavLink>
+                  <NavLink to="/psyche/questionnaire" className={mobileLinkClass} onClick={closeAllMenus}>
+                    Decision & Work Style
+                  </NavLink>
+                </div>
+                <div className="border-t border-slate-200 dark:border-slate-700 my-2"></div>
+                <div className="mb-2">
+                  <div className="px-4 py-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                    Help
+                  </div>
+                  <button
+                    onClick={() => {
+                      closeAllMenus();
+                      navigate("/dashboard?show=getting-started");
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                  >
+                    Getting Started
+                  </button>
+                  <Link
+                    to="/resources"
+                    className="block px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                    onClick={closeAllMenus}
+                  >
+                    Learn / Resources
+                  </Link>
+                </div>
+                <div className="border-t border-slate-200 dark:border-slate-700 my-2"></div>
+                <div className="mb-2">
+                  <div className="px-4 py-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                    System
+                  </div>
+                  <NavLink to="/account" className={mobileLinkClass} onClick={closeAllMenus}>
+                    Account Settings
+                  </NavLink>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+                <button
+                  onClick={toggleTheme}
+                  className="flex w-full items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                   aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
                 >
                   {theme === "light" ? (
@@ -462,10 +466,63 @@ function Navigation() {
                     </>
                   )}
                 </button>
-              </div>
+              </>
+            ) : (
+              // Logged-Out Mobile Menu
+              <>
+                {marketingNavLinks.map(({ label, to }) => (
+                  <NavLink key={to} to={to} className={mobileLinkClass} onClick={closeAllMenus}>
+                    {label}
+                  </NavLink>
+                ))}
+                <div className="space-y-1">
+                  <p className="px-4 py-2 text-xs uppercase tracking-wide text-slate-400 dark:text-slate-400">Learn</p>
+                  {learnNavLinks.map(({ label, to }) => (
+                    <NavLink key={to} to={to} className={mobileLinkClass} onClick={closeAllMenus}>
+                      {label}
+                    </NavLink>
+                  ))}
+                </div>
+                <div className="border-t border-slate-200 dark:border-slate-700 my-2"></div>
+                <Link
+                  to="/login"
+                  onClick={closeAllMenus}
+                  className="block px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={closeAllMenus}
+                  className="block rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-2 text-center text-sm font-semibold text-white shadow-md transition hover:from-brand-600 hover:to-brand-700"
+                >
+                  Get Started
+                </Link>
+                <button
+                  onClick={toggleTheme}
+                  className="flex w-full items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                  aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+                >
+                  {theme === "light" ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                      </svg>
+                      <span>Dark Mode</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      <span>Light Mode</span>
+                    </>
+                  )}
+                </button>
+              </>
             )}
-        </nav>
-      </div>
+          </nav>
+        </div>
       )}
     </header>
   );
@@ -590,6 +647,30 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <FounderPsychologyPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/psyche/questionnaire"
+              element={
+                <ProtectedRoute>
+                  <PsycheQuestionnairePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/psyche/complete"
+              element={
+                <ProtectedRoute>
+                  <PsycheCompletePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/psyche/profile"
+              element={
+                <ProtectedRoute>
+                  <PsycheProfilePage />
                 </ProtectedRoute>
               }
             />

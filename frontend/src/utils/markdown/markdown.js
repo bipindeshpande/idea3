@@ -59,6 +59,44 @@ export function parseTopIdeas(markdown = "", limit = 5) {
     console.log('[parseTopIdeas] Markdown preview:', markdown.substring(0, 500));
   }
 
+  // Pattern 0: Handle ### IDEA_X format (from LLM output)
+  // Format: ### IDEA_1\n title: ...\n summary: ...
+  let ideaBlockRegex = /###\s*IDEA_(\d+)\s*\n([\s\S]*?)(?=###\s*IDEA_\d+|$)/g;
+  let ideaBlockMatches = [...markdown.matchAll(ideaBlockRegex)];
+  
+  if (ideaBlockMatches.length > 0) {
+    for (const match of ideaBlockMatches) {
+      const index = parseInt(match[1], 10);
+      const blockContent = match[2].trim();
+      
+      // Extract title and summary from key: value format
+      const titleMatch = blockContent.match(/title:\s*(.+?)(?:\n|$)/i);
+      const summaryMatch = blockContent.match(/summary:\s*(.+?)(?:\n|$)/i);
+      const targetMarketMatch = blockContent.match(/target_market:\s*(.+?)(?:\n|$)/i);
+      const revenueModelMatch = blockContent.match(/revenue_model:\s*(.+?)(?:\n|$)/i);
+      
+      const title = titleMatch ? titleMatch[1].trim() : '';
+      const summary = summaryMatch ? summaryMatch[1].trim() : '';
+      
+      if (title) {
+        ideas.push({
+          index,
+          title: title,
+          summary: summary || title,
+          body: blockContent,
+          fullText: match[0],
+          target_market: targetMarketMatch ? targetMarketMatch[1].trim() : '',
+          revenue_model: revenueModelMatch ? revenueModelMatch[1].trim() : '',
+        });
+      }
+    }
+    
+    // If we found ideas in IDEA_X format, return them
+    if (ideas.length > 0) {
+      return ideas.slice(0, limit);
+    }
+  }
+
   // Try multiple patterns to find ideas
   // Pattern 1: Numbered with bold: "1. **Idea Name**" or "### 1. **Idea Name**"
   // This is the expected format from the API

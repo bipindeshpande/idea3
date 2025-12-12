@@ -1540,26 +1540,94 @@ export default function RecommendationDetail() {
   // 3. No activeIdea but we have stage2Markdown (data is being parsed)
   const isLoadingPage = loading || (!hasBody && isEnriching && activeIdea) || (!activeIdea && stage2Markdown);
   
+  // Loading steps for recommendation detail
+  const detailSteps = [
+    { step: 1, total: 3, text: "Analyzing your profile", description: "Understanding your goals, skills, and constraints" },
+    { step: 2, total: 3, text: "Preparing detailed playbook", description: "Creating personalized action plans and next steps" },
+    { step: 3, total: 3, text: "Finalizing recommendations", description: "Reviewing and optimizing your personalized insights" },
+  ];
+  
+  const [detailStepIndex, setDetailStepIndex] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [detailStartTime] = useState(Date.now());
+  
+  useEffect(() => {
+    if (isLoadingPage) {
+      // Progress through steps
+      const stepInterval = setInterval(() => {
+        setDetailStepIndex((prev) => {
+          if (prev < detailSteps.length - 1) {
+            return prev + 1;
+          }
+          return prev;
+        });
+      }, 10000); // Change step every 10 seconds
+      
+      // Update elapsed time every second
+      const timeInterval = setInterval(() => {
+        setElapsedSeconds(Math.floor((Date.now() - detailStartTime) / 1000));
+      }, 1000);
+      
+      return () => {
+        clearInterval(stepInterval);
+        clearInterval(timeInterval);
+      };
+    } else {
+      // Reset when not loading
+      setDetailStepIndex(0);
+      setElapsedSeconds(0);
+    }
+  }, [isLoadingPage, detailStartTime]);
+  
+  const currentDetailStep = detailSteps[detailStepIndex];
+  const progressPercent = Math.min(95, (elapsedSeconds / 20) * 100); // Cap at 95% until complete
+  
   if (isLoadingPage) {
     return (
-      <section className="min-h-screen bg-[#FAFAFA] dark:bg-[#0D1117] flex items-center justify-center py-6">
-        <div className="w-full max-w-md px-4">
-          <div className="rounded-3xl border border-brand-200 bg-brand-50/70 p-6 shadow-soft">
-            <div className="flex items-center gap-3 text-brand-700 mb-4">
-              <span className="h-3 w-3 animate-ping rounded-full bg-brand-500"></span>
-              <p className="text-sm font-semibold uppercase tracking-wide">
-                {isEnriching ? "Loading detailed playbook..." : loading ? "Loading recommendation details..." : "Preparing recommendation details..."}
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+        <div className="mx-4 w-full max-w-md rounded-3xl border-2 border-brand-300 bg-white p-8 shadow-2xl">
+          <div className="text-center">
+            <div className="mb-6 flex justify-center">
+              <div className="relative">
+                <div className="h-16 w-16 animate-spin rounded-full border-4 border-brand-200 border-t-brand-600"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-2xl">🚀</span>
+                </div>
+              </div>
+            </div>
+            
+            <h3 className="mb-2 text-xl font-bold text-slate-900">
+              {isEnriching ? "Generating Detailed Playbook" : "Generating Recommendations"}
+            </h3>
+            <p className="mb-2 text-sm text-slate-600">
+              Step {currentDetailStep.step} of {currentDetailStep.total}
+            </p>
+            
+            <div className="mb-4 h-2 w-full overflow-hidden rounded-full bg-brand-100">
+              <div 
+                className="h-full bg-gradient-to-r from-brand-400 via-brand-500 to-brand-600 transition-all duration-1000"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            
+            <p className="mb-1 text-base font-semibold text-brand-700">
+              {currentDetailStep.text}...
+            </p>
+            <p className="text-xs text-slate-500">
+              {currentDetailStep.description}
+            </p>
+            
+            <div className="mt-4 space-y-1">
+              <p className="text-xs text-slate-500">
+                Time elapsed: {elapsedSeconds}s
+              </p>
+              <p className="text-xs font-medium text-brand-600">
+                Generating recommendations...
               </p>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-brand-100">
-              <div className="h-full w-full animate-progress bg-gradient-to-r from-brand-400 via-brand-500 to-brand-600" />
-            </div>
-            <p className="mt-4 text-sm text-brand-800">
-              {isEnriching ? "Preparing recommendations..." : "Analyzing your profile..."}
-            </p>
           </div>
         </div>
-      </section>
+      </div>
     );
   }
 
@@ -1577,6 +1645,14 @@ export default function RecommendationDetail() {
 
           <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 text-sm">
+          {isAuthenticated && (
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+            >
+              ← Back to Dashboard
+            </Link>
+          )}
           <button
             onClick={() => navigate(backPath, { state: backState })}
             className="inline-flex items-center gap-2 text-[#2563EB] dark:text-[#3B82F6] hover:text-[#1D4ED8] dark:hover:text-[#1E40AF] transition-colors"

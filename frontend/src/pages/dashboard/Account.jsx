@@ -53,18 +53,6 @@ export default function AccountPage() {
   const [psychologyData, setPsychologyData] = useState(null);
   const [loadingPsychology, setLoadingPsychology] = useState(true);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login", { state: { from: { pathname: "/account" } } });
-      return;
-    }
-    // Clear any previous errors when component mounts
-    setError("");
-    setSuccess("");
-    loadSubscription();
-    loadPsychology();
-  }, [isAuthenticated, navigate, loadPsychology]);
-
   const loadPsychology = useCallback(async () => {
     try {
       setLoadingPsychology(true);
@@ -87,6 +75,18 @@ export default function AccountPage() {
       setLoadingPsychology(false);
     }
   }, [getAuthHeaders]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: { pathname: "/account" } } });
+      return;
+    }
+    // Clear any previous errors when component mounts
+    setError("");
+    setSuccess("");
+    loadSubscription();
+    loadPsychology();
+  }, [isAuthenticated, navigate, loadPsychology]);
 
   const loadSubscription = async () => {
     try {
@@ -366,67 +366,53 @@ export default function AccountPage() {
         </div>
       </div>
 
-      {/* Founder Psychology Profile */}
+      {/* About You */}
       <div className="mb-8 rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-soft">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">Founder Psychology Profile</h2>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Manage your psychological assessment for personalized recommendations</p>
-          </div>
-          <Link
-            to="/founder-psychology"
-            className="rounded-xl border border-brand-300 dark:border-brand-700 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-brand-700 dark:text-brand-300 shadow-sm transition-all duration-200 hover:bg-brand-50 dark:hover:bg-brand-900/20"
-          >
-            {psychologyData?.archetype ? "Edit Profile" : "Complete Profile"}
-          </Link>
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">About You</h2>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Complete assessments to personalize your experience</p>
         </div>
-        {loadingPsychology ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">Loading profile status...</p>
-        ) : (
-          <>
-            <div className="grid gap-6 md:grid-cols-2">
-              <div>
-                <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Status</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-50">
-                  {psychologyData?.archetype ? (
-                    <span className="text-emerald-600 dark:text-emerald-400">✓ Completed</span>
-                  ) : (
-                    <span className="text-slate-500 dark:text-slate-400">Not Started</span>
-                  )}
-                </p>
-              </div>
-              {psychologyData?.archetype && (
-                <div>
-                  <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Archetype</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-50">
-                    {psychologyData.archetype}
-                  </p>
-                </div>
-              )}
+        
+        {/* Decision & Work Style Card */}
+        <div className="mb-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-6">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Decision & Work Style</h3>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Used by the system to personalize and explain startup recommendations.</p>
             </div>
-            {psychologyData?.archetype && (
-              <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-                  Your profile includes: {[
-                    psychologyData.motivation && "Motivation",
-                    psychologyData.fear && "Fear Assessment",
-                    psychologyData.decision_style && "Decision Style",
-                    psychologyData.energy_pattern && "Energy Pattern",
-                    psychologyData.consistency_pattern && "Consistency Pattern",
-                    psychologyData.risk_approach && "Risk Approach",
-                    psychologyData.success_definition && "Success Definition"
-                  ].filter(Boolean).join(", ")}
-                </p>
-                <Link
-                  to="/founder-psychology"
-                  className="inline-block rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition"
-                >
-                  Edit Psychology Profile
-                </Link>
-              </div>
-            )}
-          </>
-        )}
+            <Link
+              to="/psyche/questionnaire"
+              className="rounded-xl border border-purple-300/60 dark:border-purple-700/60 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-purple-700 dark:text-purple-300 shadow-sm transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:-translate-y-0.5 whitespace-nowrap"
+            >
+              Complete Assessment
+            </Link>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-slate-500 dark:text-slate-400">Takes about 3–4 minutes</p>
+            <Link
+              to="/psyche/profile?details=true"
+              className="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400 transition"
+            >
+              View Details (Advanced)
+            </Link>
+          </div>
+        </div>
+
+        {/* Founder Profile Card */}
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-6">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Founder Profile</h3>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Helps other founders understand your background, interests, and goals.</p>
+            </div>
+            <Link
+              to="/founder-psychology"
+              className="rounded-xl border border-brand-300 dark:border-brand-700 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-brand-700 dark:text-brand-300 shadow-sm transition-all duration-200 hover:bg-brand-50 dark:hover:bg-brand-900/20"
+            >
+              {psychologyData?.archetype ? "Edit Profile" : "Complete Profile"}
+            </Link>
+          </div>
+        </div>
       </div>
 
       {/* Change Password */}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ideabunch.com/sitemap.xml

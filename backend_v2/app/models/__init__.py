@@ -9,6 +9,7 @@ from app.models.llm_usage import LLMUsage
 from app.models.validation import Validation
 from app.models.action import Action
 from app.models.note import Note
+from app.models.psyche_profile import PsycheProfile
 
-__all__ = ["Run", "User", "CacheEntry", "DiscoveryResult", "ErrorLog", "RateLimitLog", "Validation", "Action", "Note"]
+__all__ = ["Run", "User", "CacheEntry", "DiscoveryResult", "ErrorLog", "RateLimitLog", "Validation", "Action", "Note", "PsycheProfile"]
 

@@ -378,6 +378,14 @@ export default function IdeaValidator() {
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-12">
+      {isAuthenticated && (
+        <Link
+          to="/dashboard"
+          className="mb-6 inline-flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+        >
+          ← Back to Dashboard
+        </Link>
+      )}
       <Seo
         title="Validate Your Startup Idea | Free AI-Powered Validation Tool | Startup Idea Advisor"
         description="Validate your startup idea with our free AI-powered tool. Get comprehensive analysis across 10 key parameters."

@@ -300,7 +300,7 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
           <p className="text-xs text-red-500">{errors.startup_category}</p>
         )}
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          This helps us show you relevant startup ideas. Select "Both" if you're open to any type.
+          This filters out ideas that won't match your preferred business type. Select "Both" if you're open to any type.
         </p>
       </div>
 
@@ -377,7 +377,7 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
             Entrepreneurial Capabilities <span className="text-brand-500">*</span>
           </label>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            These skills help us tailor ideas to your capabilities. Select all that apply.
+            This ensures I only suggest ideas you can actually execute. Select all that apply.
           </p>
         </div>
         

@@ -272,9 +272,21 @@ export default function HomePage() {
     }
   };
 
+  // Conversational headers per step
+  const conversationalHeaders = [
+    {
+      title: "Let's start with the basics.",
+      description: "This helps me narrow down ideas that actually fit your time, budget, and risk comfort."
+    },
+    {
+      title: "Let's review what you've shared.",
+      description: "Make sure everything looks right, then I'll start working on ideas for you."
+    }
+  ];
+
   const screenTitles = [
-    "Intake Form",
-    "Review"
+    "Tell me a bit about you",
+    "Review Your Information"
   ];
 
   const screenDescriptions = [
@@ -320,6 +332,14 @@ export default function HomePage() {
 
       <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-500/90 via-brand-600 to-brand-800 p-[1px] shadow-xl shadow-brand-500/25">
         <div className="relative rounded-[calc(1rem-1px)] bg-white/95 dark:bg-slate-800/95 px-6 py-6 sm:px-8">
+          {isAuthenticated && (
+            <Link
+              to="/dashboard"
+              className="mb-4 inline-flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+            >
+              ← Back to Dashboard
+            </Link>
+          )}
           <div className="max-w-3xl space-y-6">
             <span className="inline-flex items-center rounded-full bg-gradient-to-r from-brand-50 to-brand-100/50 dark:from-brand-900/40 dark:to-brand-800/30 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300 shadow-sm border border-brand-200/50 dark:border-brand-700/30">
               AI co-pilot for side hustles & founders
@@ -356,6 +376,16 @@ export default function HomePage() {
         onSubmit={handleSubmit}
         className="grid gap-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 p-6 shadow-lg backdrop-blur"
       >
+        {/* Persistent conversational header */}
+        <div className="mb-6 rounded-xl border border-brand-200/60 dark:border-brand-700/60 bg-brand-50/50 dark:bg-brand-900/20 p-4">
+          <p className="text-base font-semibold text-slate-900 dark:text-slate-50">
+            {conversationalHeaders[screen].title}
+          </p>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            {conversationalHeaders[screen].description}
+          </p>
+        </div>
+
         <header className="space-y-3">
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
             {screenTitles[screen]}
@@ -367,8 +397,8 @@ export default function HomePage() {
 
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-            <span>Screen {screen + 1} of 2</span>
-            <span>{progressPercent}% complete</span>
+            <span>Step {screen + 1} of 2</span>
+            <span>{screen === 0 ? "About 2 minutes left" : "Almost done"}</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
             <div
@@ -379,6 +409,15 @@ export default function HomePage() {
         </div>
 
         {renderScreenContent()}
+
+        {/* End-of-step conversational transition */}
+        {screen === 0 && (
+          <div className="mt-6 rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/30 p-4">
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              So far so good. One more step and I'll start working on ideas for you.
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center gap-4">
           {screen > 0 && (
@@ -417,68 +456,11 @@ export default function HomePage() {
           <p className="text-xs text-slate-500 mt-2">
             Want more personalized recommendations?{" "}
             <Link to="/founder-psychology" className="text-brand-600 underline hover:text-brand-700">
-              Complete your Founder Psychology profile
+              Complete your Founder Profile
             </Link>
           </p>
         )}
       </form>
-
-      <section className="grid gap-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 p-6 shadow-lg">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Why founders use Startup Idea Advisor</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            {
-              title: "Personalized insight",
-              body: "Ideas are tailored to your skills, budget, time, and appetite for risk—no generic lists.",
-            },
-            {
-              title: "Advisor-grade analysis",
-              body: "Each report includes market research, financial outlook, and risk mitigation steps.",
-            },
-            {
-              title: "Faster validation",
-              body: "Iterate quickly with saved runs, PDF exports, and 30/60/90 day roadmaps.",
-            },
-          ].map((item) => (
-            <div key={item.title} className="group relative overflow-hidden rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 p-5 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">{item.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="grid gap-4 rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-soft">
-        <h2 className="text-xl font-semibold text-slate-900">Trusted by builders at</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            {
-              quote: "It distilled my 12-year finance career into side-hustle ideas I can test on weekends.",
-              name: "Priya S.",
-              title: "VP Strategy, FinTech",
-            },
-            {
-              quote: "The platform nailed ideas that fit my budget and network—without me spending weeks researching.",
-              name: "Daniel M.",
-              title: "Product Lead, HealthTech",
-            },
-            {
-              quote: "Finally an advisor-grade ideation process I can rerun whenever my focus shifts.",
-              name: "Lina R.",
-              title: "Solo Founder",
-            },
-          ].map((item) => (
-            <blockquote
-              key={item.name}
-              className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 text-sm text-slate-600 dark:text-slate-300 shadow-sm"
-            >
-              <p className="italic">"{item.quote}"</p>
-              <p className="mt-3 font-semibold text-slate-800 dark:text-slate-200">{item.name}</p>
-              <p className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">{item.title}</p>
-            </blockquote>
-          ))}
-        </div>
-      </section>
 
       {reports && (
         <section className="rounded-3xl border border-brand-200 dark:border-brand-700 bg-brand-50/80 dark:bg-brand-900/30 p-6 text-brand-900 dark:text-brand-300 shadow-inner">

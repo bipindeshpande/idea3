@@ -9,6 +9,7 @@ from .subscription import router as subscription_router
 from .public import router as public_router
 from .founder import router as founder_router
 from .validation import router as validation_router
+from .psyche import router as psyche_router
 
 router = APIRouter()
 
@@ -22,4 +23,5 @@ router.include_router(subscription_router, prefix="/subscription", tags=["subscr
 router.include_router(public_router, prefix="/public", tags=["public"])
 router.include_router(founder_router, prefix="/founder", tags=["founder"])
 router.include_router(validation_router, prefix="", tags=["validation"])
+router.include_router(psyche_router)  # Already has /api/psyche prefix
 

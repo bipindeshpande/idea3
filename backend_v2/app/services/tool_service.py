@@ -4,6 +4,7 @@ import json
 
 from app.services.base_service import BaseService
 from app.services.llm_service import LLMService
+from app.services.psyche_scoring_service import PsycheScoringService
 from app.utils.file_logger import write_to_log, write_section_to_log
 
 
@@ -16,6 +17,7 @@ class ToolService(BaseService):
     def __init__(self, db, redis_client=None):
         super().__init__(db, redis_client)
         self.llm_service = LLMService(db, redis_client)
+        self.psyche_scoring_service = PsycheScoringService(db, redis_client)
         # Test file logger on initialization
         try:
             write_to_log("ToolService initialized", "INFO", "ToolService")
@@ -30,7 +32,8 @@ class ToolService(BaseService):
         idea: Dict[str, Any],
         industry: str,
         profile_analysis: Dict[str, Any],
-        run_id: Optional[str] = None
+        run_id: Optional[str] = None,
+        user_id: Optional[str] = None
     ):
         """
         Stream enriched playbook for a specific idea (SSE format).
@@ -46,32 +49,9 @@ class ToolService(BaseService):
             return
         
         # Build personalized enrichment prompt
-        prompt = self._build_enrichment_prompt(idea, industry, profile_analysis)
+        prompt = self._build_enrichment_prompt(idea, industry, profile_analysis, user_id)
         
-        system_prompt = """You are an expert startup advisor creating a comprehensive playbook. Provide detailed, personalized insights for this specific startup idea, considering the user's unique constraints, strengths, and motivations.
-
-CRITICAL: You MUST output EXACTLY these sections in this EXACT order with these EXACT headings. Use markdown format with ### for headings.
-
-### Intro
-### Why this Idea Fits You
-### Financial Snapshot
-### Execution Path
-### Customer Persona
-### Market Opportunity
-### Key Risks & Mitigations
-### Validation Questions
-### Immediate Experiments
-### Immediate Next Steps
-### Timeline & Effort
-### Decision Checklist
-### Additional Insights
-
-RULES:
-- Use EXACTLY these headings - no variations, no synonyms, no different capitalization
-- Every section MUST appear - even if empty, include the heading
-- Use markdown format: ### Heading (with three # symbols)
-- Each section should contain 3-5 sentences of actionable, personalized insights
-- Return ONLY the sections above - no other content"""
+        system_prompt = self._build_enrichment_system_prompt()
         
         try:
             self._log(f"ToolService: Streaming enrichment for idea '{idea_title}' in '{industry}'", "INFO")
@@ -116,7 +96,8 @@ RULES:
         idea: Dict[str, Any],
         industry: str,
         profile_analysis: Dict[str, Any],
-        run_id: Optional[str] = None
+        run_id: Optional[str] = None,
+        user_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Get personalized research for a specific idea.
@@ -140,32 +121,9 @@ RULES:
             return self._get_empty_enrichment_output()
         
         # Build personalized enrichment prompt
-        prompt = self._build_enrichment_prompt(idea, industry, profile_analysis)
+        prompt = self._build_enrichment_prompt(idea, industry, profile_analysis, user_id)
         
-        system_prompt = """You are an expert startup advisor creating a comprehensive playbook. Provide detailed, personalized insights for this specific startup idea, considering the user's unique constraints, strengths, and motivations.
-
-CRITICAL: You MUST output EXACTLY these sections in this EXACT order with these EXACT headings. Use markdown format with ### for headings.
-
-### Intro
-### Why this Idea Fits You
-### Financial Snapshot
-### Execution Path
-### Customer Persona
-### Market Opportunity
-### Key Risks & Mitigations
-### Validation Questions
-### Immediate Experiments
-### Immediate Next Steps
-### Timeline & Effort
-### Decision Checklist
-### Additional Insights
-
-RULES:
-- Use EXACTLY these headings - no variations, no synonyms, no different capitalization
-- Every section MUST appear - even if empty, include the heading
-- Use markdown format: ### Heading (with three # symbols)
-- Each section should contain 3-5 sentences of actionable, personalized insights
-- Return ONLY the sections above - no other content"""
+        system_prompt = self._build_enrichment_system_prompt()
         
         try:
             self._log(f"ToolService: Enriching idea '{idea_title}' in '{industry}'", "INFO")
@@ -244,11 +202,76 @@ RULES:
                 "raw_content": ""
             }
     
+    def _build_enrichment_system_prompt(self) -> str:
+        """Build the system prompt for enrichment with all required instructions."""
+        return """You are an expert startup advisor creating a comprehensive playbook. Provide detailed, personalized insights for this specific startup idea, considering the user's unique constraints, strengths, and motivations.
+
+CRITICAL: You MUST output EXACTLY these sections in this EXACT order with these EXACT headings. Use markdown format with ### for headings.
+
+### Intro
+### Why this Idea Fits You
+### Financial Snapshot
+### Execution Path
+### Customer Persona
+### Market Opportunity
+### Key Risks & Mitigations
+### Validation Questions
+### Immediate Experiments
+### Immediate Next Steps
+### Timeline & Effort
+### Decision Checklist
+### Additional Insights
+
+RULES:
+- Use EXACTLY these headings - no variations, no synonyms, no different capitalization
+- Every section MUST appear - even if empty, include the heading
+- Use markdown format: ### Heading (with three # symbols)
+- Each section should contain 3-5 sentences of actionable, personalized insights
+- Return ONLY the sections above - no other content
+
+### Why this Idea Fits You - CRITICAL INSTRUCTIONS:
+
+In this section, you MUST:
+1. Clearly state ONE strong reason this idea fits the user (grounded in their constraints, preferences, or operating style)
+2. Clearly state ONE meaningful tension or stretch this idea creates for the user (a practical challenge they'll face)
+
+Both must be grounded in the user's constraints, preferences, or operating style.
+
+Do NOT:
+- Use personality trait names (e.g., "high conscientiousness", "low risk tolerance")
+- Mention assessments or scores
+- Use psychological terminology
+- Frame in terms of traits or psychological labels
+
+Frame everything in practical terms:
+- Work style preferences (e.g., "structured planning", "fast iteration")
+- Execution preferences (e.g., "thoroughness over speed", "flexibility over structure")
+- Risk comfort (e.g., "cautious with irreversible risk", "comfortable with calculated risks")
+- Constraints (e.g., "time commitment", "budget limitations", "skill requirements")
+
+REQUIRED ACTIONS (Global):
+- Filter ideas that conflict with the user's work preferences and decision-making approach
+- Rank ideas that best align with their motivation and how they prefer to work
+- Explain why each recommendation fits their preferences in practical, work-oriented terms
+- Warn about potential friction points based on their work style
+- If applicable, explicitly mention ONE alternative direction, approach, or variant that was deprioritized or excluded due to the user's preferences or constraints
+  * This should be phrased practically (e.g., speed, risk, structure, effort), not psychologically
+  * Example: "More speculative, research-heavy analytics products were deprioritized due to your preference for structured execution and cautious risk posture."
+
+CRITICAL EXPLANATION RULE:
+Do NOT mention personality traits, scores, assessments, or labels.
+All explanations must be framed in practical work style, execution preferences, risk comfort, and constraints.
+Example: "This idea allows you to build deep expertise" NOT "This fits your high mastery motivation"
+Example: "This requires rapid pivoting" NOT "This conflicts with your low openness trait"
+
+ABSOLUTE RULE: If any other context suggests different patterns than the user's deterministic preferences, TRUST THE PREFERENCES. Do not infer or override."""
+    
     def _build_enrichment_prompt(
         self,
         idea: Dict[str, Any],
         industry: str,
-        profile: Dict[str, Any]
+        profile: Dict[str, Any],
+        user_id: Optional[str] = None
     ) -> str:
         """Build premium enrichment prompt with comprehensive playbook."""
         idea_title = idea.get("title", "")
@@ -267,6 +290,102 @@ RULES:
         red_flags = profile.get("viability_red_flags", "None identified")
         strategic = profile.get("strategic_considerations", "")
         
+        # Get psyche profile if user_id is available
+        psyche_section = ""
+        if user_id:
+            psyche_profile = self.psyche_scoring_service.get_profile_for_ai(user_id)
+            if psyche_profile:
+                psyche_section = "\n\nUSER WORK PREFERENCES (Deterministic):\n"
+                psyche_section += "CRITICAL: These behavioral patterns are DETERMINISTIC and must be used as-is. DO NOT infer or contradict these patterns from other context.\n"
+                
+                # Translate personality traits into behavioral descriptors
+                if psyche_profile.get("personality"):
+                    personality = psyche_profile["personality"]
+                    behaviors = []
+                    
+                    # Openness (O)
+                    if personality.get("O", 0.5) > 0.67:
+                        behaviors.append("User prefers exploring new ideas and possibilities over following established paths.")
+                    elif personality.get("O", 0.5) < 0.33:
+                        behaviors.append("User prefers proven approaches and familiar methods over experimental ones.")
+                    
+                    # Conscientiousness (C)
+                    if personality.get("C", 0.5) > 0.67:
+                        behaviors.append("User prefers structured planning, organization, and clarity over fast iteration.")
+                    elif personality.get("C", 0.5) < 0.33:
+                        behaviors.append("User prefers flexibility and spontaneity over rigid structure.")
+                    
+                    # Extraversion (E)
+                    if personality.get("E", 0.5) > 0.67:
+                        behaviors.append("User is energized by collaboration and team interaction.")
+                    elif personality.get("E", 0.5) < 0.33:
+                        behaviors.append("User prefers working independently or in small, focused groups.")
+                    
+                    # Agreeableness (A)
+                    if personality.get("A", 0.5) > 0.67:
+                        behaviors.append("User prefers finding common ground and building consensus.")
+                    elif personality.get("A", 0.5) < 0.33:
+                        behaviors.append("User is comfortable challenging ideas and engaging in debate.")
+                    
+                    # Neuroticism (N) - inverted to stress response
+                    if personality.get("N", 0.5) < 0.33:
+                        behaviors.append("User stays calm and adapts well when things go wrong.")
+                    elif personality.get("N", 0.5) > 0.67:
+                        behaviors.append("User may feel more stress under uncertainty and prefers stable situations.")
+                    
+                    if behaviors:
+                        psyche_section += "\nHow User Prefers to Work:\n"
+                        for behavior in behaviors:
+                            psyche_section += f"- {behavior}\n"
+                
+                # Translate decision style into behavioral descriptors
+                if psyche_profile.get("decision_style"):
+                    decision = psyche_profile["decision_style"]
+                    decision_behaviors = []
+                    
+                    if "risk" in decision:
+                        if decision["risk"] < 0.4:
+                            decision_behaviors.append("User is cautious with irreversible risk, especially early in a venture.")
+                        elif decision["risk"] > 0.6:
+                            decision_behaviors.append("User is comfortable taking calculated risks when the potential payoff is clear.")
+                    
+                    if "speed_vs_certainty" in decision:
+                        if decision["speed_vs_certainty"] > 0.6:
+                            decision_behaviors.append("User prefers thoroughness and certainty over speed when making important decisions.")
+                        elif decision["speed_vs_certainty"] < 0.4:
+                            decision_behaviors.append("User prefers quick action and iteration over waiting for perfect information.")
+                    
+                    if "maximize" in decision:
+                        if decision["maximize"] > 0.6:
+                            decision_behaviors.append("User tends to compare many options thoroughly before choosing.")
+                        elif decision["maximize"] < 0.4:
+                            decision_behaviors.append("User is comfortable choosing the first option that meets their core requirements.")
+                    
+                    if decision_behaviors:
+                        psyche_section += "\nDecision-Making Approach:\n"
+                        for behavior in decision_behaviors:
+                            psyche_section += f"- {behavior}\n"
+                
+                # Translate motivation into behavioral descriptors
+                if psyche_profile.get("motivation"):
+                    motivation = psyche_profile["motivation"]
+                    # Find dominant motivation
+                    dominant = max(motivation.items(), key=lambda x: x[1])
+                    motivation_behaviors = []
+                    
+                    if dominant[1] > 0.4:  # Significant preference
+                        if dominant[0] == "mastery":
+                            motivation_behaviors.append("User is motivated by skill-building, depth, and expertise over quick wins.")
+                        elif dominant[0] == "autonomy":
+                            motivation_behaviors.append("User is motivated by independence, control, and freedom to work on their own terms.")
+                        elif dominant[0] == "purpose":
+                            motivation_behaviors.append("User is motivated by meaningful impact and creating change over personal gain.")
+                    
+                    if motivation_behaviors:
+                        psyche_section += "\nWhat Drives the User:\n"
+                        for behavior in motivation_behaviors:
+                            psyche_section += f"- {behavior}\n"
+        
         prompt = f"""Create a comprehensive startup playbook for this specific idea in the {industry} industry.
 
 IDEA:
@@ -280,7 +399,7 @@ Operating Constraints: {constraints}
 Strengths & Capabilities: {strengths}
 Core Motivations: {motivations}
 Strategic Considerations: {strategic}
-Viability Red Flags: {red_flags}
+Viability Red Flags: {red_flags}{psyche_section}
 
 You MUST output EXACTLY these sections in this EXACT order with these EXACT markdown headings:
 
@@ -288,7 +407,11 @@ You MUST output EXACTLY these sections in this EXACT order with these EXACT mark
 Provide a brief introduction to this idea and why it's worth exploring.
 
 ### Why this Idea Fits You
-Analyze how well this idea fits the user's profile. Highlight which strengths are most valuable, which constraints need workarounds, and specific ways to leverage their unique situation.
+In this section, you MUST:
+1. Clearly state ONE strong reason this idea fits the user (grounded in their constraints, preferences, or operating style)
+2. Clearly state ONE meaningful tension or stretch this idea creates for the user (a practical challenge they'll face)
+
+Both must be grounded in the user's constraints, preferences, or operating style. Frame everything in practical work style, execution preferences, risk comfort, and constraints - NOT personality traits or psychological terms.
 
 ### Financial Snapshot
 Provide specific cost estimates (setup, monthly, scaling) and financial projections. Consider their budget constraints and suggest cost-effective alternatives. Include startup costs, break-even timeline, and revenue potential.

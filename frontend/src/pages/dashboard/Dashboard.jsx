@@ -14,6 +14,7 @@ import DashboardActiveIdeasTab from "../../components/dashboard/DashboardActiveI
 import DashboardSessionsTab from "../../components/dashboard/DashboardSessionsTab.jsx";
 import DashboardSearchTab from "../../components/dashboard/DashboardSearchTab.jsx";
 import DashboardCompareTab from "../../components/dashboard/DashboardCompareTab.jsx";
+import GettingStarted from "../../components/common/GettingStarted.jsx";
 
 const STORAGE_KEY = "sia_saved_runs";
 
@@ -59,6 +60,7 @@ export default function DashboardPage() {
   const [comparing, setComparing] = useState(false);
   const [autoCompareTrigger, setAutoCompareTrigger] = useState(false); // Flag to trigger auto-comparison
   const [psychologyEmpty, setPsychologyEmpty] = useState(false); // Track if psychology profile is empty
+  const [showGettingStarted, setShowGettingStarted] = useState(false); // Show orientation
 
   // ... existing loadRuns, useEffect, loadDashboardData, and other functions remain the same ...
   
@@ -249,6 +251,28 @@ export default function DashboardPage() {
       setLoadingNotes(false);
     }
   }, [isAuthenticated, loadDashboardData]);
+
+  // Check URL for getting started parameter
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("show") === "getting-started") {
+      setShowGettingStarted(true);
+    }
+  }, [location.search]);
+
+  // Auto-show orientation on first run (when run_count == 0)
+  useEffect(() => {
+    if (isAuthenticated && !loadingRuns) {
+      const totalRuns = apiRuns.length + allRuns.length;
+      if (totalRuns === 0) {
+        // Check if user has dismissed orientation before
+        const hasSeenOrientation = localStorage.getItem("sia_has_seen_orientation");
+        if (!hasSeenOrientation && !showGettingStarted) {
+          setShowGettingStarted(true);
+        }
+      }
+    }
+  }, [isAuthenticated, loadingRuns, apiRuns.length, allRuns.length, showGettingStarted]);
 
   // Extract all ideas from runs when apiRuns changes
   useEffect(() => {
@@ -1118,38 +1142,21 @@ export default function DashboardPage() {
         description="Access your saved AI-generated startup reports, compare runs, and revisit recommendations."
         path="/dashboard"
       />
-      
-      {/* Small Psychology Banner */}
-      {isAuthenticated && psychologyEmpty && (
-        <div className="mb-4 rounded-lg border border-brand-200 dark:border-brand-800 bg-gradient-to-r from-brand-50 to-brand-100/50 dark:from-brand-900/30 dark:to-brand-800/20 p-3 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-brand-800 dark:text-brand-300">
-              Complete your Founder Psychology profile for more personalized recommendations.
-            </p>
-            <Link
-              to="/founder-psychology"
-              className="ml-3 rounded-md bg-brand-600 hover:bg-brand-700 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition whitespace-nowrap"
-            >
-              Complete Profile
-            </Link>
-          </div>
-        </div>
-      )}
-      
-      {/* Psychology Profile Complete - Edit Link */}
-      {isAuthenticated && !psychologyEmpty && (
-        <div className="mb-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 p-3 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
-              ✓ Founder Psychology profile completed
-            </p>
-            <Link
-              to="/founder-psychology"
-              className="ml-3 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition hover:bg-slate-50 dark:hover:bg-slate-700 whitespace-nowrap"
-            >
-              Edit Profile
-            </Link>
-          </div>
+
+      {/* First-Run Orientation */}
+      {showGettingStarted && (
+        <div className="mb-6">
+          <GettingStarted
+            onDismiss={() => {
+              setShowGettingStarted(false);
+              localStorage.setItem("sia_has_seen_orientation", "true");
+              // Remove query parameter if present
+              const params = new URLSearchParams(location.search);
+              if (params.get("show") === "getting-started") {
+                navigate("/dashboard", { replace: true });
+              }
+            }}
+          />
         </div>
       )}
 
@@ -1164,19 +1171,22 @@ export default function DashboardPage() {
                 : "Manage your startup idea validations and discoveries."}
             </p>
           </div>
-          <div className="flex gap-3">
-            <Link
-              to="/validate-idea"
-              className="rounded-xl border border-brand-300/60 dark:border-brand-700/60 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-brand-700 dark:text-brand-300 shadow-sm transition-all duration-200 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:-translate-y-0.5 whitespace-nowrap"
-            >
-              Validate Idea
-            </Link>
-            <Link
-              to="/advisor#intake-form"
-              className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5 whitespace-nowrap"
-            >
-              Discover Ideas
-            </Link>
+          <div className="flex flex-col items-end gap-2">
+            <p className="text-sm text-slate-500 dark:text-slate-400">What would you like to do?</p>
+            <div className="flex gap-3">
+              <Link
+                to="/validate-idea"
+                className="rounded-xl border border-brand-300/60 dark:border-brand-700/60 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-brand-700 dark:text-brand-300 shadow-sm transition-all duration-200 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:-translate-y-0.5 whitespace-nowrap"
+              >
+                Validate Idea
+              </Link>
+              <Link
+                to="/advisor#intake-form"
+                className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5 whitespace-nowrap"
+              >
+                Discover Ideas
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -1302,14 +1312,39 @@ export default function DashboardPage() {
 
             {/* Your Saved Ideas */}
             {activeTab === "ideas" && (
-              <DashboardActiveIdeasTab
-                actions={actions}
-                notes={notes}
-                loadingActions={loadingActions}
-                loadingNotes={loadingNotes}
-                allRuns={allRuns}
-                allValidations={allValidations}
-              />
+              <>
+                <DashboardActiveIdeasTab
+                  actions={actions}
+                  notes={notes}
+                  loadingActions={loadingActions}
+                  loadingNotes={loadingNotes}
+                  allRuns={allRuns}
+                  allValidations={allValidations}
+                />
+                {/* Subtle Founder Profile suggestion - only shown after completing discovery runs */}
+                {isAuthenticated && psychologyEmpty && allRuns.length > 0 && (
+                  <div className="mt-6 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 text-slate-400 dark:text-slate-500">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <span className="font-medium text-slate-700 dark:text-slate-300">Complete your Founder Profile</span> to get more personalized recommendations in future discovery runs.
+                        </p>
+                        <Link
+                          to="/founder-psychology"
+                          className="mt-2 inline-block text-sm font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition"
+                        >
+                          Complete Profile →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Search */}
