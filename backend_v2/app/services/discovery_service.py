@@ -688,9 +688,36 @@ REALISM ENFORCEMENT:
             run_id=run_id,
         )
 
-        # Parse ideas from LLM response
+        # Parse ideas from LLM response with uniqueness filtering
         from app.services.recommendation_parser import RecommendationParser
         parsed_ideas = RecommendationParser.parse_recommendations(llm_response["content"])
+        
+        # Regenerate if we have fewer than 3 unique ideas
+        max_regeneration_attempts = 3
+        regeneration_attempt = 0
+        while len(parsed_ideas) < 3 and regeneration_attempt < max_regeneration_attempts:
+            regeneration_attempt += 1
+            logger.warning(f"Only {len(parsed_ideas)} unique ideas found. Regenerating (attempt {regeneration_attempt}/{max_regeneration_attempts})...")
+            
+            # Regenerate with slightly higher temperature to encourage diversity
+            llm_response = self.llm_service.generate(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                temperature=0.4,  # Slightly higher for diversity
+                max_tokens=settings.MAX_TOKENS_STAGE2,
+                run_id=run_id,
+            )
+            
+            new_ideas = RecommendationParser.parse_recommendations(llm_response["content"])
+            
+            # Merge with existing ideas (uniqueness filter will handle duplicates)
+            all_ideas = parsed_ideas + new_ideas
+            parsed_ideas = RecommendationParser._filter_unique_ideas(all_ideas)
+            
+            logger.info(f"After regeneration attempt {regeneration_attempt}: {len(parsed_ideas)} unique ideas")
+        
+        if len(parsed_ideas) < 3:
+            logger.warning(f"Only {len(parsed_ideas)} unique ideas after {max_regeneration_attempts} attempts. Proceeding with available ideas.")
         
         # Parse profile analysis for ranking
         import json
@@ -710,14 +737,32 @@ REALISM ENFORCEMENT:
             except (json.JSONDecodeError, ValueError):
                 profile_data = {"raw": profile_analysis}
         
-        # Rank ideas based on profile match
-        ranked_ideas = self._rank_ideas(parsed_ideas, profile_data, inputs)
+        # Log parsed ideas before processing
+        logger.info(f"[_run_stage2] Parsed {len(parsed_ideas)} ideas before ranking")
+        for idx, idea in enumerate(parsed_ideas, 1):
+            logger.info(f"[_run_stage2] Idea {idx}: id={idea.get('id')}, index={idea.get('index')}, title={(idea.get('title') or '')[:50]}")
+        
+        # Ensure deep cloning before ranking to prevent reference reuse
+        import copy
+        ranked_ideas = self._rank_ideas([copy.deepcopy(idea) for idea in parsed_ideas], profile_data, inputs)
+        
+        # Log ranked ideas
+        logger.info(f"[_run_stage2] Ranked {len(ranked_ideas)} ideas")
+        for idx, idea in enumerate(ranked_ideas, 1):
+            logger.info(f"[_run_stage2] Ranked Idea {idx}: id={idea.get('id')}, index={idea.get('index')}, title={(idea.get('title') or '')[:50]}")
         
         # Add lightweight next_steps to each idea (Discovery-level, not Validation-level)
-        ideas_with_next_steps = self._add_discovery_next_steps(ranked_ideas, profile_data, inputs)
+        # Deep clone again to prevent reference reuse
+        ideas_with_next_steps = self._add_discovery_next_steps([copy.deepcopy(idea) for idea in ranked_ideas], profile_data, inputs)
         
         # Clean ideas to ensure only seed-level fields (but keep enrichment.next_steps)
-        cleaned_ideas = self._clean_seed_ideas(ideas_with_next_steps)
+        # Deep clone again to prevent reference reuse
+        cleaned_ideas = self._clean_seed_ideas([copy.deepcopy(idea) for idea in ideas_with_next_steps])
+        
+        # Log final cleaned ideas
+        logger.info(f"[_run_stage2] Final {len(cleaned_ideas)} cleaned ideas")
+        for idx, idea in enumerate(cleaned_ideas, 1):
+            logger.info(f"[_run_stage2] Final Idea {idx}: id={idea.get('id')}, index={idea.get('index')}, title={(idea.get('title') or '')[:50]}, summary={(idea.get('summary') or '')[:50]}")
         
         # Rebuild output with ranked ideas
         from app.services.recommendation_parser import RecommendationParser
@@ -1346,12 +1391,16 @@ REALISM ENFORCEMENT:
         
         # Sort by score (descending) and return ideas
         scored_ideas.sort(key=lambda x: x[0], reverse=True)
-        ranked = [idea for _, idea in scored_ideas]
         
-        # Update indices to reflect ranking
-        for idx, idea in enumerate(ranked, 1):
-            idea['index'] = idx
-            idea['rank_score'] = scored_ideas[idx - 1][0]
+        # Deep clone ideas and update indices to reflect ranking
+        import copy
+        ranked = []
+        for idx, (score, idea) in enumerate(scored_ideas, 1):
+            # Deep clone to prevent reference reuse
+            ranked_idea = copy.deepcopy(idea)
+            ranked_idea['index'] = idx
+            ranked_idea['rank_score'] = score
+            ranked.append(ranked_idea)
         
         self._log(f"Ranked {len(ranked)} ideas by profile match", "INFO")
         return ranked
@@ -1376,8 +1425,10 @@ REALISM ENFORCEMENT:
         """
         enriched_ideas = []
         
+        # Deep clone to prevent reference reuse
+        import copy
         for idea in ideas:
-            enriched_idea = idea.copy()
+            enriched_idea = copy.deepcopy(idea)
             
             # Generate lightweight next_steps
             next_steps = self._generate_lightweight_next_steps(idea, profile_data, inputs)
@@ -1535,10 +1586,14 @@ Keep responses brief - 3-5 bullet points only. No long explanations."""
             "revenue_models", "opportunity_landscape"
         }
         
+        # Deep clone to prevent reference reuse
+        import copy
         cleaned = []
         for idea in ideas:
             cleaned_idea = {}
-            for key, value in idea.items():
+            # Deep clone the idea first
+            idea_copy = copy.deepcopy(idea)
+            for key, value in idea_copy.items():
                 # Only include allowed seed fields
                 if key in ALLOWED_SEED_FIELDS:
                     # Special handling for enrichment - only keep next_steps

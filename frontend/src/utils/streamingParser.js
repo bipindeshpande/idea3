@@ -8,6 +8,73 @@
  * - Profile JSON is extracted from between markers
  */
 
+// Generate UUID v4 for unique idea IDs
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// Deep clone an object to prevent reference reuse
+function deepClone(obj) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (obj instanceof Date) return new Date(obj.getTime());
+  if (obj instanceof Array) return obj.map(item => deepClone(item));
+  if (typeof obj === 'object') {
+    const cloned = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        cloned[key] = deepClone(obj[key]);
+      }
+    }
+    return cloned;
+  }
+  return obj;
+}
+
+// Filter out duplicate ideas based on title and summary
+function filterUniqueIdeas(ideas) {
+  if (!ideas || ideas.length === 0) return [];
+  
+  const seenTitles = new Set();
+  const seenSummaries = new Set();
+  const uniqueIdeas = [];
+  
+  for (const idea of ideas) {
+    // Deep clone to prevent reference reuse
+    const ideaCopy = deepClone(idea);
+    
+    const title = (ideaCopy.title || '').trim().toLowerCase();
+    const summary = (ideaCopy.summary || '').trim().toLowerCase();
+    
+    // Skip if title or summary is empty
+    if (!title || !summary) {
+      console.warn(`[parseStructuredIdeas] Skipping idea with empty title or summary: id=${ideaCopy.id}`);
+      continue;
+    }
+    
+    // Skip if we've seen this exact title or summary before
+    if (seenTitles.has(title)) {
+      console.warn(`[parseStructuredIdeas] Skipping duplicate title: '${title.substring(0, 50)}...' (id=${ideaCopy.id})`);
+      continue;
+    }
+    
+    if (seenSummaries.has(summary)) {
+      console.warn(`[parseStructuredIdeas] Skipping duplicate summary: '${summary.substring(0, 50)}...' (id=${ideaCopy.id})`);
+      continue;
+    }
+    
+    // Add to unique set
+    seenTitles.add(title);
+    seenSummaries.add(summary);
+    uniqueIdeas.push(ideaCopy);
+  }
+  
+  return uniqueIdeas;
+}
+
 /**
  * Parse complete streamed data into structured format
  * Accumulates all chunks and parses profile + ideas when complete
@@ -81,16 +148,19 @@ export function parseStreamedData(buffer = "") {
       continue;
     }
     
-    const ideaId = parseInt(headerMatch[1], 10);
+    const ideaNumber = parseInt(headerMatch[1], 10);
+    // Generate unique UUID for each idea
     const idea = {
-      id: ideaId,
+      id: generateUUID(), // Use UUID instead of ideaNumber
+      index: ideaNumber, // Keep index for display/ordering
       title: "",
       summary: "",
       target_market: "",
       revenue_model: "",
       validation_score: "",
       timeline: "",
-      why_this_fits: ""
+      why_this_fits: "",
+      body: ""
     };
     
     // Extract content after header
@@ -150,9 +220,19 @@ export function parseStreamedData(buffer = "") {
     
     // Only add idea if it has at least a title
     if (idea.title) {
-      result.ideas.push(idea);
+      // Deep clone to prevent reference reuse
+      result.ideas.push(deepClone(idea));
     }
   }
+  
+  // Apply uniqueness filter
+  result.ideas = filterUniqueIdeas(result.ideas);
+  
+  // Log results for verification
+  console.log(`[parseStreamedData] Parsed ${result.ideas.length} unique ideas`);
+  result.ideas.forEach((idea, idx) => {
+    console.log(`[parseStreamedData] Idea ${idx + 1}: id=${idea.id}, title=${(idea.title || '').substring(0, 50)}, summary=${(idea.summary || '').substring(0, 50)}`);
+  });
   
   return result;
 }
@@ -197,16 +277,18 @@ export function parseStructuredIdeas(text = "") {
     const contentStart = headerMatch[0].length;
     const ideaContent = trimmed.substring(contentStart).trim();
     
+    // Generate unique UUID for each idea
     const idea = {
-      index: ideaNumber,
-      id: ideaNumber,
+      id: generateUUID(), // Use UUID instead of ideaNumber
+      index: ideaNumber, // Keep index for display/ordering
       title: "",
       summary: "",
       target_market: "",
       revenue_model: "",
       validation_score: "",
       timeline: "",
-      why_this_fits: ""
+      why_this_fits: "",
+      body: ""
     };
     
     // Parse field:value pairs from the content
@@ -262,11 +344,21 @@ export function parseStructuredIdeas(text = "") {
     
     // Only add idea if it has at least a title
     if (idea.title) {
-      ideas.push(idea);
+      // Deep clone to prevent reference reuse
+      ideas.push(deepClone(idea));
     }
   }
   
-  return ideas;
+  // Apply uniqueness filter
+  const uniqueIdeas = filterUniqueIdeas(ideas);
+  
+  // Log results for verification
+  console.log(`[parseStructuredIdeas] Parsed ${ideas.length} ideas, ${uniqueIdeas.length} unique after filtering`);
+  uniqueIdeas.forEach((idea, idx) => {
+    console.log(`[parseStructuredIdeas] Idea ${idx + 1}: id=${idea.id}, title=${(idea.title || '').substring(0, 50)}, summary=${(idea.summary || '').substring(0, 50)}`);
+  });
+  
+  return uniqueIdeas;
 }
 
 /**
