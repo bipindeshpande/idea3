@@ -144,12 +144,6 @@ export default function ProductPage() {
           >
             Discover Ideas 💡
           </Link>
-          <Link
-            to="/results/recommendations/full?sample=true"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-brand-300/60 dark:border-brand-700/60 bg-white dark:bg-slate-800 px-6 py-3 text-sm font-semibold text-brand-700 dark:text-brand-300 shadow-sm transition-all duration-200 hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:-translate-y-0.5"
-          >
-            View Sample Report
-          </Link>
         </div>
       </header>
 

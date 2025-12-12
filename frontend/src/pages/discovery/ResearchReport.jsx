@@ -28,7 +28,7 @@ export default function ResearchReport() {
           <span className="tag-chip">💵 Budget: {inputs.budget_range}</span>
           <span className="tag-chip">📚 Focus: {inputs.sub_interest_area || inputs.interest_area}</span>
           <span className="tag-chip">🛠️ Skill: {inputs.skill_strength}</span>
-          <span className="tag-chip">🤝 Work Style: {inputs.work_style || "Flexible"}</span>
+          <span className="tag-chip">🤝 Work Style: {inputs.preferred_work_style || "Flexible"}</span>
         </div>
       </header>
 

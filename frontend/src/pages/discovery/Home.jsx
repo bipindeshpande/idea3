@@ -4,15 +4,14 @@ import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import Seo from "../../components/common/Seo.jsx";
 import DiscoveryLoadingIndicator from "../../components/discovery/DiscoveryLoadingIndicator.jsx";
-import IntakeScreenOne from "./IntakeScreenOne.jsx";
-import IntakeScreenTwo from "./IntakeScreenTwo.jsx";
+import IntakeScreen from "./IntakeScreen.jsx";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { inputs, setInputs, loading, error, runCrew, reports, streamingOutput, isCached } = useReports();
+  const { inputs, setInputs, loading, error, runCrew, reports, streamingOutput, isCached, requestStartTime, requestDuration } = useReports();
   const { isAuthenticated } = useAuth();
   const [localInputs, setLocalInputs] = useState(inputs || {});
-  const [screen, setScreen] = useState(0); // 0 = Screen 1, 1 = Screen 2, 2 = Review
+  const [screen, setScreen] = useState(0); // 0 = Form, 1 = Review
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState(false);
 
@@ -53,16 +52,22 @@ export default function HomePage() {
     setErrors(updatedErrors);
   };
 
-  const validateScreenOne = () => {
+  const validateForm = () => {
     const newErrors = {};
     const required = [
+      "startup_category",
       "time_commitment",
       "budget_range",
       "risk_tolerance",
       "preferred_work_style",
       "startup_style",
       "customer_interaction",
-      "location_context"
+      "location_context",
+      "business_region",
+      "industry_interest",
+      "business_type",
+      "earnings_timeline",
+      "founder_ambition"
     ];
 
     required.forEach(field => {
@@ -81,28 +86,8 @@ export default function HomePage() {
       newErrors.skills = "Please select at least one skill";
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateScreenTwo = () => {
-    const newErrors = {};
-    const required = [
-      "industry_interest",
-      "business_type",
-      "earnings_timeline",
-      "founder_ambition"
-    ];
-
-    required.forEach(field => {
-      if (!localInputs[field] || (typeof localInputs[field] === "string" && !localInputs[field].trim())) {
-        newErrors[field] = "This field is required";
-      }
-    });
-
     // Validate sub_interest_area if not custom
     if (localInputs.industry_interest && localInputs.industry_interest !== "Other") {
-      // Import sub-interest mapping inline
       const SUB_INTEREST_MAPPING = {
         "Food & Beverage": ["Restaurant/Cafe", "Food Delivery", "Meal Prep", "Beverage Brand", "Catering", "Food Tech"],
         "Retail & E-commerce": ["D2C Brand", "Dropshipping", "Print-on-Demand", "Marketplace", "Subscription Box", "B2B Wholesale"],
@@ -135,18 +120,10 @@ export default function HomePage() {
 
   const handleNext = () => {
     if (screen === 0) {
-      if (validateScreenOne()) {
+      if (validateForm()) {
         setTouched(false);
         setErrors({});
-        setScreen(1);
-      } else {
-        setTouched(true);
-      }
-    } else if (screen === 1) {
-      if (validateScreenTwo()) {
-        setTouched(false);
-        setErrors({});
-        setScreen(2); // Review screen
+        setScreen(1); // Review screen
       } else {
         setTouched(true);
       }
@@ -159,9 +136,77 @@ export default function HomePage() {
     setScreen((prev) => Math.max(prev - 1, 0));
   };
 
+  // Dev-only auto-fill handler
+  const handleAutoFill = () => {
+    const SUB_INTEREST_MAPPING = {
+      "Food & Beverage": ["Restaurant/Cafe", "Food Delivery", "Meal Prep", "Beverage Brand", "Catering", "Food Tech"],
+      "Retail & E-commerce": ["D2C Brand", "Dropshipping", "Print-on-Demand", "Marketplace", "Subscription Box", "B2B Wholesale"],
+      "Education": ["Online Courses", "Coaching Platforms", "Tutoring", "Skill Assessment", "Gamified Learning", "AI Learning"],
+      "Fitness & Sports": ["Fitness App", "Personal Training", "Sports Equipment", "Wellness Coaching", "Nutrition Planning"],
+      "Kids & Parenting": ["Educational Toys", "Parenting Apps", "Childcare Services", "Kids Activities", "Family Products"],
+      "Beauty & Wellness": ["Skincare Brand", "Beauty Services", "Wellness App", "Spa Services", "Beauty Tech"],
+      "Home Services": ["Cleaning", "Handyman", "Landscaping", "Home Automation", "Interior Design", "Maintenance"],
+      "Travel & Tourism": ["Travel Planning", "Local Experiences", "Accommodation", "Travel Tech", "Tourism Services"],
+      "Manufacturing / Crafts": ["Custom Products", "Handmade Goods", "3D Printing", "Craft Supplies", "Artisan Marketplace"],
+      "Finance / Accounting": ["Personal Finance", "Small Business Finance", "Tax Services", "Investment Tools", "Financial Planning"],
+      "AI & Automation": ["Chatbots", "Workflow Automation", "Predictive Analytics", "AI Tools", "Process Automation"],
+      "Software / SaaS": ["B2B SaaS", "Productivity Tools", "Developer Tools", "Business Software", "Platform Services"],
+      "Freelancing / Consulting": ["Consulting Services", "Freelance Marketplace", "Expert Network", "Business Advisory", "Professional Services"],
+      "Agriculture / Gardening": ["Urban Farming", "Garden Services", "Agricultural Tech", "Plant Care", "Sustainable Farming"],
+      "Social Impact": ["Non-profit", "Social Enterprise", "Community Services", "Environmental Solutions", "Charity Tech"],
+      "Local Services": ["Local Marketplace", "Community Services", "Neighborhood Services", "Local Delivery", "Community Events"],
+      "Other": ["Custom Sub-Area Text Field"]
+    };
+
+    const SAMPLE_INPUTS = {
+      startup_category: "tech",
+      time_commitment: "10–20 hrs/week",
+      budget_range: "$1,000–5,000",
+      risk_tolerance: "Moderate",
+      preferred_work_style: "Remote-friendly",
+      startup_style: "Online-only business",
+      customer_interaction: "Somewhat comfortable",
+      location_context: "Urban",
+      business_region: "United States / Canada",
+      skills: {
+        product_creation: ["Coding", "AI & Automation"],
+        sales_marketing: ["Social Media", "Marketing / Advertising"],
+        operational: ["Project Management", "Time Management"],
+        digital: ["AI Tools", "Web Building"],
+        personality: ["Problem Solving", "Leadership"],
+        other: ""
+      },
+      industry_interest: "AI & Automation",
+      sub_interest_area: "Chatbots",
+      business_type: "Digital product",
+      earnings_timeline: "90 days",
+      founder_ambition: "Full-time business",
+      experience_summary: "10 years in software development, experience with AI/ML projects, strong background in building SaaS products and managing technical teams."
+    };
+
+    const updated = { ...SAMPLE_INPUTS };
+    // Handle sub_interest_area based on industry_interest
+    const subOptions = SUB_INTEREST_MAPPING[updated.industry_interest] || [];
+    if (subOptions.length === 1 && subOptions[0] === "Custom Sub-Area Text Field") {
+      updated.sub_interest_area = "";
+    } else {
+      updated.sub_interest_area = subOptions[0] || "";
+    }
+    setLocalInputs(updated);
+    handleInputChange(updated);
+    
+    // Scroll to form after auto-fill
+    setTimeout(() => {
+      const formElement = document.getElementById("intake-form");
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (screen === 2) {
+    if (screen === 1) {
       setInputs(localInputs);
       const { success, runId } = await runCrew(localInputs);
       if (success) {
@@ -173,15 +218,7 @@ export default function HomePage() {
   const renderScreenContent = () => {
     if (screen === 0) {
       return (
-        <IntakeScreenOne
-          inputs={localInputs}
-          onChange={handleInputChange}
-          errors={touched ? errors : {}}
-        />
-      );
-    } else if (screen === 1) {
-      return (
-        <IntakeScreenTwo
+        <IntakeScreen
           inputs={localInputs}
           onChange={handleInputChange}
           errors={touched ? errors : {}}
@@ -203,6 +240,7 @@ export default function HomePage() {
                 <p><strong>Startup Style:</strong> {localInputs.startup_style || "Not set"}</p>
                 <p><strong>Customer Interaction:</strong> {localInputs.customer_interaction || "Not set"}</p>
                 <p><strong>Location:</strong> {localInputs.location_context || "Not set"}</p>
+                <p><strong>Business Region:</strong> {localInputs.business_region || "Not set"}</p>
                 <p><strong>Skills:</strong> {
                   localInputs.skills ? Object.entries(localInputs.skills)
                     .filter(([cat, val]) => cat !== "other" && Array.isArray(val) && val.length > 0)
@@ -235,22 +273,25 @@ export default function HomePage() {
   };
 
   const screenTitles = [
-    "About You",
-    "Your Interests & Goals",
+    "Intake Form",
     "Review"
   ];
 
   const screenDescriptions = [
-    "Tell us about your availability, preferences, and skills",
-    "Share your industry interests and business goals",
+    "Tell us about your availability, preferences, skills, and interests",
     "Review your information before generating recommendations"
   ];
 
-  const progressPercent = Math.round(((screen + 1) / 3) * 100);
+  const progressPercent = Math.round(((screen + 1) / 2) * 100);
 
   return (
     <div className="grid gap-12">
-      {loading && <DiscoveryLoadingIndicator streamingOutput={streamingOutput} isCached={isCached} />}
+      {loading && <DiscoveryLoadingIndicator 
+        streamingOutput={streamingOutput} 
+        isCached={isCached}
+        startTime={requestStartTime}
+        duration={requestDuration}
+      />}
       <Seo
         title="AI Startup Idea Generator | Startup Idea Advisor"
         description="Provide your goals, availability, and expertise—our AI advisor researches markets and delivers personalized startup recommendations."
@@ -286,6 +327,26 @@ export default function HomePage() {
             <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-300">
               Share your goals, time, and strengths. Our AI advisor researches markets, evaluates risks, and hands you advisor-grade recommendations within minutes.
             </p>
+            {process.env.NODE_ENV === 'development' && (
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleAutoFill}
+                  className="rounded-lg bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 text-sm font-semibold transition-colors shadow-sm"
+                >
+                  🔧 Auto-Fill Form (Dev Only)
+                </button>
+                {screen === 0 && (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="rounded-lg bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:from-brand-600 hover:to-brand-700"
+                  >
+                    Continue to Review (Dev Only)
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -306,7 +367,7 @@ export default function HomePage() {
 
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-            <span>Screen {screen + 1} of 3</span>
+            <span>Screen {screen + 1} of 2</span>
             <span>{progressPercent}% complete</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
@@ -329,7 +390,7 @@ export default function HomePage() {
               Back
             </button>
           )}
-          {screen < 2 && (
+          {screen < 1 && (
             <button
               type="button"
               onClick={handleNext}
@@ -338,7 +399,7 @@ export default function HomePage() {
               Continue
             </button>
           )}
-          {screen === 2 && (
+          {screen === 1 && (
             <button
               type="submit"
               disabled={loading}

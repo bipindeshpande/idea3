@@ -97,6 +97,8 @@ const PERSONALIZATION_RULES = [
 
 // Cache for personalizeCopy to avoid re-processing same text
 const personalizeCache = new Map();
+import { logToFile, logSectionToFile } from "../fileLogger.js";
+
 const MAX_CACHE_SIZE = 1000;
 
 export function personalizeCopy(text = "") {
@@ -125,21 +127,107 @@ export function personalizeCopy(text = "") {
 }
 
 export function splitIdeaSections(body = "") {
-  if (!body) return {};
-  const sections = { intro: [] };
-  let current = "intro";
-  body.split(/\r?\n/).forEach((line) => {
-    const headingMatch = line.trim().match(/^\*\*(.+?)\*\*:?$/);
+  if (!body) {
+    const msg = "splitIdeaSections: Empty body provided";
+    console.log(msg);
+    logToFile(msg, "WARN", "splitIdeaSections");
+    return {};
+  }
+  
+  // Fixed section headings mapping (exact match only)
+  // FIX #2: Support both lowercase and title case headings from backend
+  const FIXED_HEADINGS = {
+    "### intro": "intro",
+    "### Intro": "intro",
+    "### why this idea fits you": "why_fits",
+    "### Why this Idea Fits You": "why_fits",
+    "### financial snapshot": "financial_snapshot",
+    "### Financial Snapshot": "financial_snapshot",
+    "### execution path": "execution_path",
+    "### Execution Path": "execution_path",
+    "### customer persona": "customer_persona",
+    "### Customer Persona": "customer_persona",
+    "### market opportunity": "market_opportunity",
+    "### Market Opportunity": "market_opportunity",
+    "### key risks & mitigations": "key_risks",
+    "### Key Risks & Mitigations": "key_risks",
+    "### validation questions": "validation_questions",
+    "### Validation Questions": "validation_questions",
+    "### immediate experiments": "immediate_experiments",
+    "### Immediate Experiments": "immediate_experiments",
+    "### immediate next steps": "immediate_next_steps",
+    "### Immediate Next Steps": "immediate_next_steps",
+    "### timeline & effort": "timeline_effort",
+    "### Timeline & Effort": "timeline_effort",
+    "### decision checklist": "decision_checklist",
+    "### Decision Checklist": "decision_checklist",
+    "### additional insights": "additional_insights",
+    "### Additional Insights": "additional_insights",
+  };
+  
+  const parseInfo = `Parsing body, length: ${body.length}\nFirst 500 chars: ${body.substring(0, 500)}`;
+  console.log("splitIdeaSections: Parsing body, length:", body.length);
+  console.log("splitIdeaSections: First 500 chars:", body.substring(0, 500));
+  logToFile(parseInfo, "INFO", "splitIdeaSections");
+  
+  const sections = {};
+  let current = null;
+  const lines = body.split(/\r?\n/);
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    
+    // FIX #2: Check for exact markdown heading match (### Heading)
+    // Support both ### Heading and ###Heading (with or without space)
+    const headingMatch = trimmed.match(/^###\s*(.+)$/i);
     if (headingMatch) {
-      current = headingMatch[1].trim().toLowerCase();
-      sections[current] = sections[current] || [];
-    } else {
+      const headingText = headingMatch[1].trim().toLowerCase();
+      const fullHeading = `### ${headingText}`;
+      console.log("splitIdeaSections: Found heading:", fullHeading, "| normalized:", headingText);
+      logToFile(`Found heading: ${fullHeading}`, "DEBUG", "splitIdeaSections");
+      
+      // Find matching fixed heading (case-insensitive comparison)
+      let found = false;
+      for (const [fixedHeading, sectionKey] of Object.entries(FIXED_HEADINGS)) {
+        const normalizedFixed = fixedHeading.replace(/^###\s*/i, "").toLowerCase();
+        if (headingText === normalizedFixed) {
+          current = sectionKey;
+          sections[current] = sections[current] || [];
+          console.log("splitIdeaSections: ✅ Matched heading to section:", sectionKey, "| heading:", headingText);
+          logToFile(`Matched heading to section: ${sectionKey}`, "DEBUG", "splitIdeaSections");
+          found = true;
+          break;
+        }
+      }
+      // If no match found, log warning and reset current
+      if (!found) {
+        const warnMsg = `No match for heading: ${headingText}, Available headings: ${Object.keys(FIXED_HEADINGS).join(", ")}`;
+        console.warn("splitIdeaSections: ⚠️ No match for heading:", headingText, "| Available headings:", Object.keys(FIXED_HEADINGS));
+        logToFile(warnMsg, "WARN", "splitIdeaSections");
+        current = null;  // Reset so content doesn't go to wrong section
+      }
+    } else if (trimmed.length > 0 && current) {
+      // Add content to current section
       sections[current].push(line.replace(/\*\*/g, ""));
     }
-  });
-  return Object.fromEntries(
-    Object.entries(sections).map(([key, value]) => [key, personalizeCopy(value.join("\n").trim())])
+  }
+  
+  // Convert arrays to strings and personalize
+  const result = Object.fromEntries(
+    Object.entries(sections).map(([key, value]) => [
+      key,
+      personalizeCopy(Array.isArray(value) ? value.join("\n").trim() : (value || "").trim())
+    ])
   );
+  
+  const sectionsWithContent = Object.keys(result).filter(k => result[k]);
+  console.log("splitIdeaSections: Parsed sections with content:", sectionsWithContent);
+  console.log("splitIdeaSections: Result keys:", Object.keys(result));
+  
+  const parseResult = `Parsed sections with content: ${sectionsWithContent.join(", ")}\nResult keys: ${Object.keys(result).join(", ")}\nFull result: ${JSON.stringify(result, null, 2)}`;
+  logSectionToFile("splitIdeaSections - PARSED RESULT", parseResult, "INFO", "splitIdeaSections");
+  
+  return result;
 }
 
 export function formatSectionHeading(raw = "") {
@@ -1138,6 +1226,38 @@ export function extractTimelineSlice(markdown = "", segmentIndex = 0) {
     console.log('[extractTimelineSlice] Markdown preview:', markdown.substring(0, 200));
   }
   
+  // FIX: First, try to parse as simple bullet list (- prefix)
+  // This handles enrichment markdown that uses simple bullets like:
+  // - MVP Development: 4–6 weeks...
+  // - Launch: Aim for 3 months...
+  const lines = markdown.split(/\r?\n/);
+  const bulletLines = lines
+    .map(line => line.trim())
+    .filter(line => {
+      // Match lines starting with - or * (bullet points)
+      return /^[-*]\s+/.test(line);
+    })
+    .map(line => {
+      // Remove bullet prefix and clean up
+      return line.replace(/^[-*]\s+/, "").trim();
+    })
+    .filter(line => line.length > 0);
+  
+  if (bulletLines.length > 0) {
+    console.log(`[extractTimelineSlice] Found ${bulletLines.length} bullet points`);
+    // Return the requested segment if it exists, otherwise return all bullets as fallback
+    if (bulletLines[segmentIndex]) {
+      console.log(`[extractTimelineSlice] Returning bullet segment ${segmentIndex}:`, bulletLines[segmentIndex].substring(0, 80));
+      return bulletLines[segmentIndex];
+    }
+    // If segmentIndex is out of range, return first bullet or all bullets joined
+    if (segmentIndex === 0) {
+      return bulletLines[0];
+    }
+    // For other indices, return the first bullet as fallback
+    return bulletLines[0];
+  }
+  
   // First, try to parse as markdown table
   const rows = markdown.match(/\|.*\|/g);
   if (rows && rows.length >= 3) {
@@ -1156,7 +1276,6 @@ export function extractTimelineSlice(markdown = "", segmentIndex = 0) {
   }
   
   // Split by lines for more reliable parsing
-  const lines = markdown.split(/\r?\n/);
   const segments = [];
   let currentSegment = [];
   let currentSegmentIndex = -1;
@@ -1250,6 +1369,14 @@ export function extractTimelineSlice(markdown = "", segmentIndex = 0) {
     console.log(`[extractTimelineSlice] No segment found for index ${segmentIndex}. Found segments:`, segments.map((s, i) => ({ index: i, length: s?.length || 0 })));
     console.log(`[extractTimelineSlice] Markdown lines count:`, lines.length);
     console.log(`[extractTimelineSlice] First 10 lines:`, lines.slice(0, 10));
+  }
+  
+  // FIX: Fallback - if no segments found, return the whole timeline_effort text
+  // This prevents UI from breaking when timeline parsing fails
+  const trimmedMarkdown = markdown.trim();
+  if (trimmedMarkdown.length > 0) {
+    console.log(`[extractTimelineSlice] No segments found, returning full markdown as fallback (length: ${trimmedMarkdown.length})`);
+    return trimmedMarkdown;
   }
   
   return "Define clear milestones for this period.";

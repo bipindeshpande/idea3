@@ -157,3 +157,7 @@ In Docker Desktop Exec tab:
 - Docker Desktop logs only show recent entries
 - Use the `INFO stats` command to see cumulative statistics
 
+
+
+
+

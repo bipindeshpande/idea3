@@ -1,5 +1,5 @@
 import { useState, memo } from "react";
-import { intakeScreen } from "../../config/intakeScreen.js";
+import { formFieldsConfig } from "../../config/formFieldsConfig.js";
 
 function DashboardSearchTab({
   advancedSearch,
@@ -28,6 +28,28 @@ function DashboardSearchTab({
   setAutoCompareTrigger,
   performComparison,
 }) {
+  // Debug logging for search
+  if (process.env.NODE_ENV === 'development' && searchPerformed) {
+    console.log("[DashboardSearchTab] Search state:", {
+      searchType: advancedSearch.searchType,
+      searchQuery: searchQuery,
+      allIdeasCount: allIdeas.length,
+      filteredIdeasCount: filteredIdeas.length,
+      filters: {
+        goalType: advancedSearch.goalType,
+        interestArea: advancedSearch.interestArea,
+        budgetRange: advancedSearch.budgetRange,
+        timeCommitment: advancedSearch.timeCommitment,
+        dateFilter: dateFilter,
+      },
+      sampleIdea: allIdeas[0] ? {
+        id: allIdeas[0].id,
+        title: allIdeas[0].title,
+        runInputs: allIdeas[0].runInputs ? Object.keys(allIdeas[0].runInputs) : null,
+      } : null,
+    });
+  }
+
   return (
     <div className="space-y-6">
       <div className="mb-6">
@@ -72,57 +94,52 @@ function DashboardSearchTab({
             {/* Search Fields Grid */}
             {advancedSearch.searchType === "ideas" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Goal Type */}
-                {(() => {
-                  const goalTypeField = intakeScreen.fields.find(f => f.id === "goal_type");
-                  return (
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                        Goal Type
-                      </label>
-                      <select
-                        value={advancedSearch.goalType}
-                        onChange={(e) => setAdvancedSearch({...advancedSearch, goalType: e.target.value})}
-                        className="w-full rounded-lg border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
-                      >
-                        <option value="all">All Goal Types</option>
-                        {goalTypeField?.options?.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  );
-                })()}
+                {/* Founder Ambition */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Founder Ambition
+                  </label>
+                  <select
+                    value={advancedSearch.goalType}
+                    onChange={(e) => setAdvancedSearch({...advancedSearch, goalType: e.target.value})}
+                    className="w-full rounded-lg border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
+                  >
+                    <option value="all">All Goals</option>
+                    <option value="Side income">Side income</option>
+                    <option value="Full-time business">Full-time business</option>
+                    <option value="Scalable venture">Scalable venture</option>
+                    <option value="Turn hobby into business">Turn hobby into business</option>
+                    <option value="Social Impact">Social Impact</option>
+                    <option value="Part-time business">Part-time business</option>
+                  </select>
+                </div>
 
-                {/* Interest Area */}
-                {(() => {
-                  const interestAreaField = intakeScreen.fields.find(f => f.id === "interest_area");
-                  return (
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                        Interest Area
-                      </label>
-                      <select
-                        value={advancedSearch.interestArea}
-                        onChange={(e) => setAdvancedSearch({...advancedSearch, interestArea: e.target.value})}
-                        className="w-full rounded-lg border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
-                      >
-                        <option value="all">All Interest Areas</option>
-                        {interestAreaField?.options?.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  );
-                })()}
+                {/* Industry Interest */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Industry Interest
+                  </label>
+                  <select
+                    value={advancedSearch.interestArea}
+                    onChange={(e) => setAdvancedSearch({...advancedSearch, interestArea: e.target.value})}
+                    className="w-full rounded-lg border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
+                  >
+                    <option value="all">All Industries</option>
+                    <option value="AI & Automation">AI & Automation</option>
+                    <option value="Freelancing / Consulting">Freelancing / Consulting</option>
+                    <option value="Education">Education</option>
+                    <option value="Beauty & Wellness">Beauty & Wellness</option>
+                    <option value="Finance / Accounting">Finance / Accounting</option>
+                    <option value="Retail & E-commerce">Retail & E-commerce</option>
+                    <option value="Social Impact">Social Impact</option>
+                    <option value="Travel & Tourism">Travel & Tourism</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
 
                 {/* Budget Range */}
                 {(() => {
-                  const budgetField = intakeScreen.fields.find(f => f.id === "budget_range");
+                  const budgetField = formFieldsConfig.fields.find(f => f.id === "budget_range");
                   return (
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -146,7 +163,7 @@ function DashboardSearchTab({
 
                 {/* Time Commitment */}
                 {(() => {
-                  const timeField = intakeScreen.fields.find(f => f.id === "time_commitment");
+                  const timeField = formFieldsConfig.fields.find(f => f.id === "time_commitment");
                   return (
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -196,10 +213,25 @@ function DashboardSearchTab({
                   const queryParts = [];
                   if (advancedSearch.goalType && advancedSearch.goalType !== "all") queryParts.push(advancedSearch.goalType);
                   if (advancedSearch.interestArea && advancedSearch.interestArea !== "all") queryParts.push(advancedSearch.interestArea);
-                  if (advancedSearch.ideaDescription) queryParts.push(advancedSearch.ideaDescription);
-                  setSearchQuery(queryParts.join(" ").trim() || " ");
-                  setSearchInput(queryParts.join(" ").trim());
+                  if (advancedSearch.ideaDescription && advancedSearch.ideaDescription.trim()) queryParts.push(advancedSearch.ideaDescription.trim());
+                  
+                  const finalQuery = queryParts.join(" ").trim();
+                  // Set query to empty string if no filters, so allIdeas will be shown
+                  setSearchQuery(finalQuery);
+                  setSearchInput(finalQuery);
                   setSearchPerformed(true);
+                  
+                  if (process.env.NODE_ENV === 'development') {
+                    console.log("[DashboardSearchTab] Search triggered:", {
+                      query: finalQuery,
+                      filters: {
+                        goalType: advancedSearch.goalType,
+                        interestArea: advancedSearch.interestArea,
+                        budgetRange: advancedSearch.budgetRange,
+                        timeCommitment: advancedSearch.timeCommitment,
+                      },
+                    });
+                  }
                 }}
                 className="flex-1 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5"
               >
@@ -248,8 +280,13 @@ function DashboardSearchTab({
           {advancedSearch.searchType === "ideas" && filteredIdeas.length > 0 && selectedSearchIdeas.size > 0 && (
             <button
               onClick={async () => {
-                const selectedIdeasData = filteredIdeas.filter(idea => selectedSearchIdeas.has(idea.id));
-                const selectedIds = new Set(selectedIdeasData.map(idea => idea.id));
+                // Normalize IDs for comparison
+                const normalizedSelectedSet = new Set(Array.from(selectedSearchIdeas).map(id => String(id)));
+                const selectedIdeasData = filteredIdeas.filter(idea => {
+                  const normalizedId = String(idea.id || '');
+                  return normalizedSelectedSet.has(normalizedId);
+                });
+                const selectedIds = new Set(selectedIdeasData.map(idea => String(idea.id || '')));
                 setSelectedIdeas(selectedIds);
                 setComparisonData(null);
                 setAutoCompareTrigger(true);
@@ -280,10 +317,14 @@ function DashboardSearchTab({
           {advancedSearch.searchType === "ideas" && filteredIdeas.length > 0 && (
             <div className="grid gap-4">
               {filteredIdeas.map((idea) => {
-                const isSelected = selectedSearchIdeas.has(idea.id);
+                // Normalize ID for comparison
+                const normalizedId = String(idea.id || '');
+                const normalizedSelectedSet = new Set(Array.from(selectedSearchIdeas).map(id => String(id)));
+                const isSelected = normalizedSelectedSet.has(normalizedId);
+                
                 return (
                   <div
-                    key={idea.id}
+                    key={normalizedId}
                     className={`rounded-xl border p-4 transition-all ${
                       isSelected
                         ? "border-brand-500 bg-brand-50 dark:bg-brand-900/20"
@@ -295,15 +336,15 @@ function DashboardSearchTab({
                         type="checkbox"
                         checked={isSelected}
                         onChange={(e) => {
-                          const newSet = new Set(selectedSearchIdeas);
-                          if (newSet.has(idea.id)) {
-                            newSet.delete(idea.id);
+                          const newSet = new Set(Array.from(selectedSearchIdeas).map(id => String(id)));
+                          if (newSet.has(normalizedId)) {
+                            newSet.delete(normalizedId);
                           } else {
                             if (newSet.size >= 5) {
                               alert("Maximum 5 ideas can be compared at once");
                               return;
                             }
-                            newSet.add(idea.id);
+                            newSet.add(normalizedId);
                           }
                           setSelectedSearchIdeas(newSet);
                         }}
@@ -357,11 +398,33 @@ function DashboardSearchTab({
           {((advancedSearch.searchType === "ideas" && filteredIdeas.length === 0) ||
             (advancedSearch.searchType === "validations" && filteredValidations.length === 0)) && (
             <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/80 dark:bg-slate-800/50 p-6 text-center">
-              <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
-                {advancedSearch.searchType === "ideas" ? "No ideas found matching your search criteria." : "No validations found matching your search criteria."}
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                {advancedSearch.searchType === "ideas" 
+                  ? `No ideas found. ${allIdeas.length === 0 ? "No ideas available yet." : "Adjust your filters."}`
+                  : `No validations found. ${allValidations.length === 0 ? "No validations available yet." : "Adjust your filters."}`}
               </p>
+              {allIdeas.length > 0 && advancedSearch.searchType === "ideas" && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                  Showing 0 of {allIdeas.length} ideas. Try removing filters or changing your search query.
+                </p>
+              )}
+              {allValidations.length > 0 && advancedSearch.searchType === "validations" && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                  Showing 0 of {allValidations.length} validations. Try removing filters or changing your search query.
+                </p>
+              )}
               <button
                 onClick={() => {
+                  setAdvancedSearch({
+                    goalType: "all",
+                    interestArea: "all",
+                    ideaDescription: "",
+                    budgetRange: "all",
+                    timeCommitment: "all",
+                    workStyle: "all",
+                    skillStrength: "all",
+                    searchType: advancedSearch.searchType,
+                  });
                   setSearchInput("");
                   setSearchQuery("");
                   setDateFilter("all");

@@ -44,7 +44,7 @@ export function ValidationProvider({ children }) {
     }
   }, []);
 
-  const validateIdea = useCallback(async (answers, explanation, validationId = null) => {
+  const validateIdea = useCallback(async (answers, explanation, validationId = null, ideaId = null, ideaMetadata = null) => {
     setLoading(true);
     setError("");
     setCategoryAnswers(answers);
@@ -58,16 +58,26 @@ export function ValidationProvider({ children }) {
         : "/api/validate-idea";
       const method = isEdit ? "PUT" : "POST";
 
+      const requestBody = {
+        category_answers: answers,
+        idea_explanation: explanation,
+      };
+
+      // Add optional idea_id and metadata if provided (for recommendation ideas)
+      if (ideaId) {
+        requestBody.idea_id = ideaId;
+      }
+      if (ideaMetadata) {
+        requestBody.idea_metadata = ideaMetadata;
+      }
+
       const response = await fetch(url, {
         method: method,
         headers: {
           "Content-Type": "application/json",
           ...getAuthHeaders(),
         },
-        body: JSON.stringify({
-          category_answers: answers,
-          idea_explanation: explanation,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -106,19 +116,39 @@ export function ValidationProvider({ children }) {
     // Strip "val_" prefix if present
     const cleanId = validationId.toString().replace(/^val_/, '');
     
-    // If authenticated, try to load from API first
-    if (isAuthenticated && getAuthHeaders) {
-      try {
-        // Try to fetch from /api/user/activity and find the validation
-        const response = await fetch('/api/user/activity', {
+    // Try to load directly from GET /api/validate-idea/{id} first
+    try {
+      const response = await fetch(`/api/validate-idea/${cleanId}`, {
+        headers: getAuthHeaders(),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const validationResult = data.validation_result || data.validation || {};
+        
+        const validationData = {
+          id: data.validation_id || data.id || cleanId,
+          validation_id: data.validation_id || data.id,
+          timestamp: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+          categoryAnswers: data.category_answers || {},
+          ideaExplanation: data.idea_explanation || "",
+          validation: validationResult,
+        };
+        
+        setCurrentValidation(validationData);
+        setCategoryAnswers(data.category_answers || {});
+        setIdeaExplanation(data.idea_explanation || "");
+        return validationData;
+      } else if (response.status === 404 && isAuthenticated) {
+        // If not found and user is authenticated, try user/activity as fallback
+        const activityResponse = await fetch('/api/user/activity', {
           headers: getAuthHeaders(),
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          const validations = data.activity?.validations || [];
+        if (activityResponse.ok) {
+          const activityData = await activityResponse.json();
+          const validations = activityData.activity?.validations || activityData.validations || [];
           
-          // Find validation by validation_id or id
           const validation = validations.find(v => {
             const vid = v.validation_id || v.id;
             const vidStr = String(vid).replace(/^val_/, '');
@@ -126,7 +156,6 @@ export function ValidationProvider({ children }) {
           });
           
           if (validation) {
-            // Parse validation_result to get the full validation data
             const validationResult = validation.validation_result || {};
             const validationData = {
               id: validation.validation_id || validation.id,
@@ -143,9 +172,9 @@ export function ValidationProvider({ children }) {
             return validationData;
           }
         }
-      } catch (error) {
-        console.error("Failed to load validation from API:", error);
       }
+    } catch (error) {
+      console.error("Failed to load validation from API:", error);
     }
     
     // Fallback to localStorage
@@ -188,6 +217,64 @@ export function ValidationProvider({ children }) {
     setError("");
   }, []);
 
+  const validateRecommendationIdea = useCallback(async (idea, inputs, profileAnalysis = null) => {
+    /**
+     * Validate a recommendation idea from discovery results
+     * 
+     * @param {Object} idea - Idea object with title, summary, etc.
+     * @param {Object} inputs - User intake inputs from discovery run
+     * @param {string} profileAnalysis - Optional profile analysis text
+     */
+    setLoading(true);
+    setError("");
+
+    try {
+      // Build category_answers from idea and inputs
+      const category_answers = {
+        business_archetype: idea.business_type || inputs?.business_type || "",
+        delivery_channel: idea.delivery_mode || inputs?.delivery_channel || "",
+        target_market: idea.target_market || "",
+        revenue_model: idea.revenue_model || "",
+        // Map from user inputs
+        time_commitment: inputs?.time_commitment || "",
+        budget_range: inputs?.budget_range || "",
+        risk_tolerance: inputs?.risk_tolerance || "",
+        skills: inputs?.skills || {},
+      };
+
+      // Build idea explanation from idea details
+      const idea_explanation = idea.summary || idea.description || idea.title || "";
+      
+      // Build idea metadata
+      const idea_metadata = {
+        title: idea.title || "",
+        summary: idea.summary || "",
+        target_market: idea.target_market || "",
+        revenue_model: idea.revenue_model || "",
+        delivery_mode: idea.delivery_mode || "",
+      };
+
+      // Build idea_id from idea index if available
+      const idea_id = idea.index !== undefined ? `idea_${idea.index}` : null;
+
+      // Call validateIdea with idea metadata
+      const result = await validateIdea(
+        category_answers,
+        idea_explanation,
+        null, // validationId - creating new
+        idea_id,
+        idea_metadata
+      );
+
+      return result;
+    } catch (err) {
+      setError(err.message || "Unexpected error");
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [validateIdea]);
+
   const value = useMemo(
     () => ({
       currentValidation,
@@ -196,6 +283,7 @@ export function ValidationProvider({ children }) {
       loading,
       error,
       validateIdea,
+      validateRecommendationIdea,
       loadValidationById,
       getSavedValidations,
       deleteValidation,
@@ -211,6 +299,7 @@ export function ValidationProvider({ children }) {
       loading,
       error,
       validateIdea,
+      validateRecommendationIdea,
       loadValidationById,
       getSavedValidations,
       deleteValidation,

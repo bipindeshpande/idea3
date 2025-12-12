@@ -61,8 +61,10 @@ class UserService(BaseService):
         """
         Get user activity list (runs and validations)
         
-        Returns mock data structure for now - will be refined later
+        Returns runs and validations from database
         """
+        from app.models.validation import Validation
+        
         # Get user's runs
         runs = self.db.query(Run).filter(
             and_(
@@ -73,51 +75,245 @@ class UserService(BaseService):
         
         runs_list = [run.to_dict() for run in runs]
         
-        # Mock validations (will be refined when validation model exists)
-        validations = []
+        # Get user's validations
+        validations = self.db.query(Validation).filter(
+            and_(
+                Validation.user_id == user_id,
+                Validation.deleted_at.is_(None)
+            )
+        ).order_by(desc(Validation.created_at)).limit(limit).all()
+        
+        validations_list = [validation.to_dict() for validation in validations]
+        
+        # Ensure activity format matches frontend expectations
+        activity = {
+            "runs": runs_list,
+            "validations": validations_list
+        }
         
         return {
             "success": True,
+            "activity": activity,
             "runs": runs_list,
-            "validations": validations
+            "validations": validations_list
         }
     
     def get_user_actions(self, user_id: str, idea_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Get user actions feed
         
-        Returns mock data for now - will be refined later
+        Args:
+            user_id: User ID
+            idea_id: Optional filter by idea ID
+            
+        Returns:
+            List of user actions
         """
-        # Mock actions data structure
-        actions = []
+        from app.models.action import Action
         
-        # If idea_id is provided, filter by idea (mock for now)
+        query = self.db.query(Action).filter(Action.user_id == user_id)
+        
         if idea_id:
-            # Will filter by idea_id when actions model exists
-            pass
+            query = query.filter(Action.idea_id == idea_id)
+        
+        actions = query.order_by(desc(Action.created_at)).all()
         
         return {
             "success": True,
-            "actions": actions
+            "actions": [action.to_dict() for action in actions]
+        }
+    
+    def create_action(
+        self, 
+        user_id: str, 
+        idea_id: str, 
+        action_text: str, 
+        status: str = "pending",
+        due_date: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Create a new action for a user
+        
+        Args:
+            user_id: User ID
+            idea_id: Idea ID
+            action_text: Action text
+            status: Action status (default: "pending")
+            due_date: Optional due date (ISO format string)
+            
+        Returns:
+            Created action
+        """
+        from app.models.action import Action
+        from datetime import datetime
+        
+        # Parse due_date if provided
+        parsed_due_date = None
+        if due_date:
+            try:
+                parsed_due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00')).date()
+            except (ValueError, AttributeError):
+                # If parsing fails, leave as None
+                pass
+        
+        action = Action(
+            user_id=user_id,
+            idea_id=idea_id,
+            action_text=action_text,
+            status=status,
+            due_date=parsed_due_date
+        )
+        
+        self.db.add(action)
+        self.db.commit()
+        self.db.refresh(action)
+        
+        return {
+            "success": True,
+            "action": action.to_dict()
+        }
+    
+    def update_action(self, user_id: str, action_id: str, status: str) -> Dict[str, Any]:
+        """
+        Update an action's status
+        
+        Args:
+            user_id: User ID (for authorization)
+            action_id: Action ID
+            status: New status
+            
+        Returns:
+            Updated action
+        """
+        from app.models.action import Action
+        
+        action = self.db.query(Action).filter(
+            and_(
+                Action.id == action_id,
+                Action.user_id == user_id
+            )
+        ).first()
+        
+        if not action:
+            raise ValueError("Action not found")
+        
+        action.status = status
+        self.db.commit()
+        self.db.refresh(action)
+        
+        return {
+            "success": True,
+            "action": action.to_dict()
         }
     
     def get_user_notes(self, user_id: str, idea_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Get user notes list
         
-        Returns mock data for now - will be refined later
+        Args:
+            user_id: User ID
+            idea_id: Optional filter by idea ID
+            
+        Returns:
+            List of user notes
         """
-        # Mock notes data structure
-        notes = []
+        from app.models.note import Note
         
-        # If idea_id is provided, filter by idea (mock for now)
+        query = self.db.query(Note).filter(Note.user_id == user_id)
+        
         if idea_id:
-            # Will filter by idea_id when notes model exists
-            pass
+            query = query.filter(Note.idea_id == idea_id)
+        
+        notes = query.order_by(desc(Note.created_at)).all()
         
         return {
             "success": True,
-            "notes": notes
+            "notes": [note.to_dict() for note in notes]
+        }
+    
+    def create_note(
+        self, 
+        user_id: str, 
+        idea_id: str, 
+        content: str, 
+        tags: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """
+        Create a new note for a user
+        
+        Args:
+            user_id: User ID
+            idea_id: Idea ID
+            content: Note content
+            tags: Optional list of tags
+            
+        Returns:
+            Created note
+        """
+        from app.models.note import Note
+        
+        note = Note(
+            user_id=user_id,
+            idea_id=idea_id,
+            content=content,
+            tags=tags if tags else []
+        )
+        
+        self.db.add(note)
+        self.db.commit()
+        self.db.refresh(note)
+        
+        return {
+            "success": True,
+            "note": note.to_dict()
+        }
+    
+    def compare_sessions(
+        self, 
+        user_id: str, 
+        run_ids: List[str], 
+        validation_ids: List[str]
+    ) -> Dict[str, Any]:
+        """
+        Compare multiple discovery sessions
+        
+        Args:
+            user_id: User ID (for authorization)
+            run_ids: List of run IDs to compare
+            validation_ids: List of validation IDs to compare (not implemented yet)
+            
+        Returns:
+            Comparison data with runs and their reports
+        """
+        from app.models.run import Run
+        
+        # Fetch runs that belong to the user
+        runs = self.db.query(Run).filter(
+            and_(
+                Run.run_id.in_(run_ids),
+                Run.user_id == user_id,
+                Run.deleted_at.is_(None)
+            )
+        ).all()
+        
+        # Build comparison structure
+        runs_data = []
+        for run in runs:
+            runs_data.append({
+                "run_id": run.run_id,
+                "inputs": run.inputs,
+                "reports": run.reports,
+                "created_at": run.created_at.isoformat() if run.created_at else None,
+            })
+        
+        # TODO: Add validation comparison when needed
+        
+        return {
+            "success": True,
+            "comparison": {
+                "runs": runs_data,
+                "validations": []  # Placeholder for future validation comparison
+            }
         }
     
     def get_subscription_status(self, user_id: str) -> Dict[str, Any]:
@@ -263,6 +459,27 @@ class UserService(BaseService):
                 "current_period_start": period_start.isoformat(),
                 "current_period_end": period_end.isoformat(),
                 "cancel_at_period_end": False,
+            }
+        }
+    
+    def get_smart_recommendations(self, user_id: str) -> Dict[str, Any]:
+        """
+        Get smart recommendations based on user's validation history
+        
+        Returns similar high-scoring ideas from validation history
+        For now, returns mock data - will be refined later with actual validation data
+        """
+        # TODO: Implement actual logic to:
+        # 1. Query validation results for this user
+        # 2. Find high-scoring validations (score >= 7)
+        # 3. Group by similar ideas/patterns
+        # 4. Return top similar ideas
+        
+        # Mock data for now
+        return {
+            "success": True,
+            "insights": {
+                "similar_ideas": []  # Empty for now - will be populated when validation data is available
             }
         }
 

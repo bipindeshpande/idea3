@@ -779,18 +779,6 @@ export default function RecommendationsReport() {
                     </tbody>
                   </table>
                 </div>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <Link
-                    to={
-                      runId || currentRunId
-                        ? `/results/recommendations/full?id=${runId || currentRunId}`
-                        : "/results/recommendations/full"
-                    }
-                    className="inline-flex items-center gap-2 rounded-xl border border-brand-300 bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:border-brand-400 hover:text-brand-800"
-                  >
-                    View full recommendation report
-                  </Link>
-                </div>
               </div>
             )}
 

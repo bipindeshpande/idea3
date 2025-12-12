@@ -1,7 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { filterInterestAreas, filterSubcategories, orderInterestAreas } from "../../utils/startupCategoryConfig.js";
+import { ToastContainer } from "../../components/common/Toast.jsx";
 
 const fieldClasses =
   "w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-slate-800/70 px-4 py-3 text-slate-800 dark:text-slate-200 shadow-sm transition focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 text-sm";
+
+const STORAGE_KEY = "dev_intake_form_screen_two";
+
+// Sample data for development auto-fill
+const SAMPLE_INPUTS = {
+  startup_category: "tech",
+  industry_interest: "AI & Automation",
+  sub_interest_area: "Chatbots",
+  business_type: "Digital product",
+  earnings_timeline: "90 days",
+  founder_ambition: "Full-time business",
+  experience_summary: "10 years in software development, experience with AI/ML projects, strong background in building SaaS products and managing technical teams."
+};
 
 // Sub-interest mapping (expanded from existing)
 const SUB_INTEREST_MAPPING = {
@@ -58,21 +73,115 @@ const SUB_INTEREST_MAPPING = {
 
 export default function IntakeScreenTwo({ inputs, onChange, errors = {} }) {
   const [localInputs, setLocalInputs] = useState(inputs || {});
+  const [toasts, setToasts] = useState([]);
+  const prevCategoryRef = useRef(localInputs.startup_category || "");
+  const [isAnimating, setIsAnimating] = useState(false);
 
+  // Load from localStorage on mount (dev only) - only if inputs are empty
   useEffect(() => {
-    setLocalInputs(inputs || {});
+    if (process.env.NODE_ENV === 'development' && (!inputs || Object.keys(inputs).length === 0)) {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setLocalInputs(parsed);
+          onChange(parsed);
+        }
+      } catch (e) {
+        console.warn("Failed to load intake form from localStorage:", e);
+      }
+    }
+  }, []); // Only run on mount
+
+  // Sync with parent inputs
+  useEffect(() => {
+    if (inputs && Object.keys(inputs).length > 0) {
+      setLocalInputs(inputs);
+    }
   }, [inputs]);
+
+  // Save to localStorage on change (dev only)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && localInputs && Object.keys(localInputs).length > 0) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(localInputs));
+      } catch (e) {
+        console.warn("Failed to save intake form to localStorage:", e);
+      }
+    }
+  }, [localInputs]);
+
+  // Toast helper
+  const addToast = (message, type = "info") => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
 
   const handleChange = (field, value) => {
     const updated = { ...localInputs, [field]: value };
     
+    // Handle startup_category change - clear industry/sub if they become invalid
+    if (field === "startup_category") {
+      const prevCategory = prevCategoryRef.current;
+      prevCategoryRef.current = value;
+      
+      // Trigger animation
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 300);
+      
+      const currentIndustry = updated.industry_interest;
+      let fieldsCleared = false;
+      
+      if (currentIndustry) {
+        const allIndustries = Object.keys(SUB_INTEREST_MAPPING);
+        const filteredIndustries = filterInterestAreas(allIndustries, value);
+        if (!filteredIndustries.includes(currentIndustry)) {
+          updated.industry_interest = "";
+          updated.sub_interest_area = "";
+          fieldsCleared = true;
+        } else {
+          // Industry is still valid, but check subcategory
+          const currentSub = updated.sub_interest_area;
+          if (currentSub) {
+            const allSubs = SUB_INTEREST_MAPPING[currentIndustry] || [];
+            const filteredSubs = filterSubcategories(allSubs, currentIndustry, value);
+            if (!filteredSubs.includes(currentSub)) {
+              updated.sub_interest_area = "";
+              fieldsCleared = true;
+            }
+          }
+        }
+      }
+      
+      // Show toast if category changed and fields were cleared
+      if (prevCategory && prevCategory !== value && fieldsCleared) {
+        addToast("Industry options updated based on your selection.", "info");
+      }
+    }
+    
     // Handle sub_interest_area based on industry_interest
     if (field === "industry_interest") {
       const subOptions = SUB_INTEREST_MAPPING[value] || [];
-      if (subOptions.length === 1 && subOptions[0] === "Custom Sub-Area Text Field") {
+      const startupCategory = updated.startup_category || localInputs.startup_category;
+      
+      // Special handling for "Other" - always show custom field, don't filter
+      if (value === "Other") {
         updated.sub_interest_area = "";
       } else {
-        updated.sub_interest_area = subOptions[0] || "";
+        const filteredSubs = filterSubcategories(subOptions, value, startupCategory);
+        
+        if (filteredSubs.length === 1 && filteredSubs[0] === "Custom Sub-Area Text Field") {
+          updated.sub_interest_area = "";
+        } else {
+          updated.sub_interest_area = filteredSubs[0] || "";
+        }
       }
     }
     
@@ -80,12 +189,88 @@ export default function IntakeScreenTwo({ inputs, onChange, errors = {} }) {
     onChange(updated);
   };
 
+  const startupCategory = localInputs.startup_category || "";
   const industryInterest = localInputs.industry_interest || "";
-  const subOptions = SUB_INTEREST_MAPPING[industryInterest] || [];
-  const isCustomSubInterest = subOptions.length === 1 && subOptions[0] === "Custom Sub-Area Text Field";
+  
+  // Get ALL interest areas (static, hardcoded - no API calls)
+  const allInterestAreas = Object.keys(SUB_INTEREST_MAPPING);
+  
+  // Filter interest areas based on startup_category (only if category is selected)
+  // If no category selected, show all areas
+  let filteredInterestAreas = startupCategory 
+    ? filterInterestAreas(allInterestAreas, startupCategory)
+    : allInterestAreas;
+  
+  // Order interest areas for better UX
+  filteredInterestAreas = orderInterestAreas(filteredInterestAreas, startupCategory);
+  
+  // Get ALL subcategories for selected industry (static, hardcoded - no API calls)
+  const allSubOptions = SUB_INTEREST_MAPPING[industryInterest] || [];
+  
+  // Filter subcategories based on startup_category (only if category is selected)
+  // Special handling: "Other" always shows custom field, no filtering
+  let subOptions;
+  let isCustomSubInterest = false;
+  
+  if (industryInterest === "Other") {
+    // Always show custom field for "Other"
+    subOptions = ["Custom Sub-Area Text Field"];
+    isCustomSubInterest = true;
+  } else {
+    subOptions = startupCategory && industryInterest
+      ? filterSubcategories(allSubOptions, industryInterest, startupCategory)
+      : allSubOptions;
+    isCustomSubInterest = subOptions.length === 1 && subOptions[0] === "Custom Sub-Area Text Field";
+  }
 
   return (
     <div className="grid gap-4 sm:gap-5">
+      {/* Toast Container */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      
+      {/* Startup Category - FIRST FIELD */}
+      <div className="grid gap-1.5">
+        <label htmlFor="startup_category" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+          Startup Category <span className="text-brand-500">*</span>
+        </label>
+        <select
+          id="startup_category"
+          className={fieldClasses}
+          value={startupCategory}
+          onChange={(e) => handleChange("startup_category", e.target.value)}
+        >
+          <option value="">Select...</option>
+          <option value="tech">💻 Tech (Software, AI, Digital Products)</option>
+          <option value="non_tech">🛍️ Non-Tech (Physical, Service-Based, Offline)</option>
+          <option value="both">🔀 Both (Open to Any Type)</option>
+        </select>
+        {errors.startup_category && (
+          <p className="text-xs text-red-500">{errors.startup_category}</p>
+        )}
+        <div className="space-y-1">
+          {!startupCategory && (
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Start by selecting Tech or Non-Tech to see relevant options...
+            </p>
+          )}
+          {startupCategory === "tech" && (
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+              💻 Tech: Online, AI, automation, SaaS, tools
+            </p>
+          )}
+          {startupCategory === "non_tech" && (
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+              🛍️ Non-Tech: Physical, service-based, offline businesses
+            </p>
+          )}
+          {startupCategory === "both" && (
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+              🔀 Both: Explore everything
+            </p>
+          )}
+        </div>
+      </div>
+
       {/* Industry Interest - Full width */}
       <div className="grid gap-1.5">
         <label htmlFor="industry_interest" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -93,28 +278,17 @@ export default function IntakeScreenTwo({ inputs, onChange, errors = {} }) {
         </label>
         <select
           id="industry_interest"
-          className={fieldClasses}
+          className={`${fieldClasses} ${isAnimating ? 'opacity-50' : 'opacity-100'} transition-opacity duration-300`}
           value={industryInterest}
           onChange={(e) => handleChange("industry_interest", e.target.value)}
+          disabled={!startupCategory}
         >
-          <option value="">Select...</option>
-          <option value="Food & Beverage">Food & Beverage</option>
-          <option value="Retail & E-commerce">Retail & E-commerce</option>
-          <option value="Education">Education</option>
-          <option value="Fitness & Sports">Fitness & Sports</option>
-          <option value="Kids & Parenting">Kids & Parenting</option>
-          <option value="Beauty & Wellness">Beauty & Wellness</option>
-          <option value="Home Services">Home Services</option>
-          <option value="Travel & Tourism">Travel & Tourism</option>
-          <option value="Manufacturing / Crafts">Manufacturing / Crafts</option>
-          <option value="Finance / Accounting">Finance / Accounting</option>
-          <option value="AI & Automation">AI & Automation</option>
-          <option value="Software / SaaS">Software / SaaS</option>
-          <option value="Freelancing / Consulting">Freelancing / Consulting</option>
-          <option value="Agriculture / Gardening">Agriculture / Gardening</option>
-          <option value="Social Impact">Social Impact</option>
-          <option value="Local Services">Local Services</option>
-          <option value="Other">Other</option>
+          <option value="">{startupCategory ? "Select..." : "Start by selecting Tech or Non-Tech..."}</option>
+          {filteredInterestAreas.map((area) => (
+            <option key={area} value={area}>
+              {area}
+            </option>
+          ))}
         </select>
         {errors.industry_interest && (
           <p className="text-xs text-red-500">{errors.industry_interest}</p>
@@ -131,7 +305,7 @@ export default function IntakeScreenTwo({ inputs, onChange, errors = {} }) {
             <input
               id="sub_interest_area"
               type="text"
-              className={fieldClasses}
+              className={`${fieldClasses} transition-opacity duration-300`}
               value={localInputs.sub_interest_area || ""}
               onChange={(e) => handleChange("sub_interest_area", e.target.value)}
               placeholder="Describe your specific focus area"
@@ -139,7 +313,7 @@ export default function IntakeScreenTwo({ inputs, onChange, errors = {} }) {
           ) : (
             <select
               id="sub_interest_area"
-              className={fieldClasses}
+              className={`${fieldClasses} transition-opacity duration-300`}
               value={localInputs.sub_interest_area || ""}
               onChange={(e) => handleChange("sub_interest_area", e.target.value)}
             >
@@ -150,6 +324,11 @@ export default function IntakeScreenTwo({ inputs, onChange, errors = {} }) {
                 </option>
               ))}
             </select>
+          )}
+          {startupCategory && startupCategory !== "both" && !isCustomSubInterest && (
+            <p className="text-xs text-slate-500 dark:text-slate-400 italic">
+              Sub-areas are filtered based on your Tech / Non-Tech selection.
+            </p>
           )}
           {errors.sub_interest_area && (
             <p className="text-xs text-red-500">{errors.sub_interest_area}</p>
@@ -249,6 +428,30 @@ export default function IntakeScreenTwo({ inputs, onChange, errors = {} }) {
           <p className="text-xs text-red-500">{errors.experience_summary}</p>
         )}
       </div>
+
+      {/* Dev-only Auto-Fill Button */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <button
+            type="button"
+            onClick={() => {
+              const updated = { ...SAMPLE_INPUTS };
+              // Handle sub_interest_area based on industry_interest
+              const subOptions = SUB_INTEREST_MAPPING[updated.industry_interest] || [];
+              if (subOptions.length === 1 && subOptions[0] === "Custom Sub-Area Text Field") {
+                updated.sub_interest_area = "";
+              } else {
+                updated.sub_interest_area = subOptions[0] || "";
+              }
+              setLocalInputs(updated);
+              onChange(updated);
+            }}
+            className="w-full rounded-lg bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 text-sm font-semibold transition-colors shadow-sm"
+          >
+            🔧 Auto-Fill Sample Inputs (Dev Only)
+          </button>
+        </div>
+      )}
     </div>
   );
 }

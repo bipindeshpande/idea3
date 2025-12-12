@@ -1,9 +1,9 @@
 // Import from JSON file (updated by admin panel)
 // Fallback to default values if JSON file doesn't exist or is invalid
-import intakeScreenData from "./intakeScreen.json";
+import formFieldsConfigData from "./formFieldsConfig.json";
 
 // Default fallback data
-const defaultIntakeScreen = {
+const defaultFormFieldsConfig = {
   screen_id: "idea_finder_input",
   screen_title: "Tell Us About You",
   description:
@@ -146,13 +146,6 @@ const defaultIntakeScreen = {
       },
     },
     {
-      id: "work_style",
-      label: "Preferred Work Style",
-      type: "picklist",
-      options: ["Solo", "Small Team", "Community-Based", "Remote Only", "Requires Physical Presence"],
-      required: false,
-    },
-    {
       id: "skill_strength",
       label: "Primary Skill Strength",
       type: "picklist",
@@ -181,14 +174,18 @@ const defaultIntakeScreen = {
 };
 
 // Merge JSON data with defaults (JSON takes precedence)
-export const intakeScreen = {
-  screen_id: intakeScreenData?.screen_id || defaultIntakeScreen.screen_id,
-  screen_title: intakeScreenData?.screen_title || defaultIntakeScreen.screen_title,
-  description: intakeScreenData?.description || defaultIntakeScreen.description,
-  fields: intakeScreenData?.fields || defaultIntakeScreen.fields,
-  output_object: intakeScreenData?.output_object || defaultIntakeScreen.output_object,
+export const formFieldsConfig = {
+  screen_id: formFieldsConfigData?.screen_id || defaultFormFieldsConfig.screen_id,
+  screen_title: formFieldsConfigData?.screen_title || defaultFormFieldsConfig.screen_title,
+  description: formFieldsConfigData?.description || defaultFormFieldsConfig.description,
+  fields: formFieldsConfigData?.fields || defaultFormFieldsConfig.fields,
+  output_object: formFieldsConfigData?.output_object || defaultFormFieldsConfig.output_object,
 };
 
-export const REQUIRED_FIELDS = intakeScreen.fields
+export const REQUIRED_FIELDS = formFieldsConfig.fields
   .filter((field) => field.required)
   .map((field) => field.id);
+
+
+
+

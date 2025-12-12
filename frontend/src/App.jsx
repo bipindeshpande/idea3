@@ -21,8 +21,6 @@ import HomePage from "./pages/discovery/Home.jsx";
 import ProfileReport from "./pages/discovery/ProfileReport.jsx";
 import RecommendationsReport from "./pages/discovery/RecommendationsReport.jsx";
 import RecommendationDetail from "./pages/discovery/RecommendationDetail.jsx";
-// Lazy load heavy pages
-const RecommendationFullReport = lazy(() => import("./pages/discovery/RecommendationFullReport.jsx"));
 
 // Validation pages
 import IdeaValidator from "./pages/validation/IdeaValidator.jsx";
@@ -72,7 +70,6 @@ const learnNavLinks = [
 const reportNavLinks = [
   { label: "Profile Summary", to: "/results/profile" },
   { label: "Top Recommendations", to: "/results/recommendations" },
-  { label: "Full Recommendation", to: "/results/recommendations/full" },
 ];
 
 function Navigation() {
@@ -640,27 +637,17 @@ export default function App() {
             <Route
               path="/results/recommendations"
               element={
-                <ProtectedRoute>
+                <SampleReportRoute>
                   <RecommendationsReport />
-                </ProtectedRoute>
+                </SampleReportRoute>
               }
             />
             <Route
               path="/results/recommendations/:ideaIndex"
               element={
-                <ProtectedRoute>
+                <SampleReportRoute>
                   <RecommendationDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/results/recommendations/full"
-              element={
-                <Suspense fallback={<LoadingIndicator simple={true} message="Loading report..." />}>
-                  <SampleReportRoute>
-                    <RecommendationFullReport />
-                  </SampleReportRoute>
-                </Suspense>
+                </SampleReportRoute>
               }
             />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -674,12 +661,18 @@ export default function App() {
 }
 
 function SampleReportRoute({ children }) {
-  const { search } = useLocation();
+  const { search, pathname } = useLocation();
   const query = new URLSearchParams(search);
   const isSample = query.get("sample") === "true";
   
   // If it's a sample report, allow access without authentication
   if (isSample) {
+    return <>{children}</>;
+  }
+  
+  // For recommendation reports, allow access without authentication
+  // They can load from localStorage cache or show appropriate message
+  if (pathname.startsWith("/results/recommendations")) {
     return <>{children}</>;
   }
   

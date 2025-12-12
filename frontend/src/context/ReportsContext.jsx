@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { runDiscovery } from "../utils/discovery.js";
 import { splitProfileAndRecommendations } from "../utils/streamingParser.js";
@@ -43,6 +43,8 @@ function saveRun(run) {
 function buildDefaultInputs() {
   // New universal intake schema defaults
   return {
+    // Startup Category (FIRST FIELD)
+    startup_category: "",
     // Screen 1 - About You
     time_commitment: "",
     budget_range: "",
@@ -110,6 +112,8 @@ export function ReportsProvider({ children }) {
   const [isCached, setIsCached] = useState(false);
   const [requestStartTime, setRequestStartTime] = useState(null);
   const [requestDuration, setRequestDuration] = useState(null);
+  // Enrichment cache: Map<ideaId, enrichmentBody>
+  const [enrichmentCache, setEnrichmentCache] = useState(new Map());
   const { getAuthHeaders } = useAuth();
 
   const setInputs = useCallback((nextInputs) => {
@@ -395,6 +399,38 @@ export function ReportsProvider({ children }) {
     return null;
   }, []);
 
+  // Get enrichment from cache
+  const getEnrichment = useCallback((ideaId) => {
+    if (!ideaId) return null;
+    return enrichmentCache.get(ideaId) || null;
+  }, [enrichmentCache]);
+
+  // Set enrichment in cache
+  const setEnrichment = useCallback((ideaId, enrichmentBody) => {
+    if (!ideaId || !enrichmentBody) return;
+    setEnrichmentCache(prev => {
+      const next = new Map(prev);
+      next.set(ideaId, enrichmentBody);
+      console.log(`[EnrichmentCache] Stored enrichment for ${ideaId}, cache size: ${next.size}`);
+      return next;
+    });
+  }, []);
+
+  // Log runs count on mount and when runs change (for debugging)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      const savedRuns = loadSavedRuns();
+      console.log("[ReportsContext] Saved runs count:", savedRuns.length);
+      if (savedRuns.length > 0) {
+        console.log("[ReportsContext] Sample run:", {
+          id: savedRuns[0].id,
+          hasOutputs: !!savedRuns[0].outputs,
+          hasRecommendations: !!savedRuns[0].outputs?.personalized_recommendations,
+        });
+      }
+    }
+  }, []);
+
   const value = useMemo(
     () => ({ 
       inputs, 
@@ -411,9 +447,11 @@ export function ReportsProvider({ children }) {
       streamingOutput,
       isCached,
       requestStartTime,
-      requestDuration
+      requestDuration,
+      getEnrichment,
+      setEnrichment
     }),
-    [inputs, reports, loading, error, runCrew, loadRunById, currentRunId, deleteRun, clearAllSavedRuns, loadFromRecentDiscoveryCache, setInputs, streamingOutput, isCached, requestStartTime, requestDuration]
+    [inputs, reports, loading, error, runCrew, loadRunById, currentRunId, deleteRun, clearAllSavedRuns, loadFromRecentDiscoveryCache, setInputs, streamingOutput, isCached, requestStartTime, requestDuration, getEnrichment, setEnrichment]
   );
 
   return (

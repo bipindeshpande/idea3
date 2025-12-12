@@ -1,10 +1,66 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const fieldClasses =
   "w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-slate-800/70 px-4 py-3 text-slate-800 dark:text-slate-200 shadow-sm transition focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 text-sm";
 
+const STORAGE_KEY = "dev_intake_form_screen_one";
+
+// Sample data for development auto-fill
+const SAMPLE_INPUTS = {
+  time_commitment: "10–20 hrs/week",
+  budget_range: "$1,000–5,000",
+  risk_tolerance: "Moderate",
+  preferred_work_style: "Remote-friendly",
+  startup_style: "Online-only business",
+  customer_interaction: "Somewhat comfortable",
+  location_context: "Urban",
+  business_region: "United States / Canada",
+  skills: {
+    product_creation: ["Coding", "AI & Automation"],
+    sales_marketing: ["Social Media", "Marketing / Advertising"],
+    operational: ["Project Management", "Time Management"],
+    digital: ["AI Tools", "Web Building"],
+    personality: ["Problem Solving", "Leadership"],
+    other: ""
+  }
+};
+
 export default function IntakeScreenOne({ inputs, onChange, onNext, errors = {} }) {
   const [localInputs, setLocalInputs] = useState(inputs || {});
+
+  // Load from localStorage on mount (dev only) - only if inputs are empty
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && (!inputs || Object.keys(inputs).length === 0)) {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setLocalInputs(parsed);
+          onChange(parsed);
+        }
+      } catch (e) {
+        console.warn("Failed to load intake form from localStorage:", e);
+      }
+    }
+  }, []); // Only run on mount
+
+  // Sync with parent inputs when they change
+  useEffect(() => {
+    if (inputs && Object.keys(inputs).length > 0) {
+      setLocalInputs(inputs);
+    }
+  }, [inputs]);
+
+  // Save to localStorage on change (dev only)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && localInputs && Object.keys(localInputs).length > 0) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(localInputs));
+      } catch (e) {
+        console.warn("Failed to save intake form to localStorage:", e);
+      }
+    }
+  }, [localInputs]);
 
   const handleChange = (field, value) => {
     const updated = { ...localInputs, [field]: value };
@@ -26,19 +82,54 @@ export default function IntakeScreenOne({ inputs, onChange, onNext, errors = {} 
   };
 
   const skillCategories = {
-    technical: ["Coding", "AI/Data", "Automation", "Web development", "Data Analysis"],
-    creative: ["Writing", "Design", "Video/Photo", "Art/Music", "Content Creation"],
-    physical: ["Cooking", "Fitness", "Crafts", "Beauty services", "Repairs"],
-    business: ["Strategy", "Management", "Finance", "Teaching", "Coaching"],
-    soft: ["Communication", "Leadership", "Empathy", "Problem Solving", "Team Building"],
+    product_creation: [
+      "Cooking / Food Prep",
+      "Crafting / Handmade",
+      "Beauty Services",
+      "Fitness Coaching",
+      "Photography / Videography",
+      "Writing / Content",
+      "Graphic Design",
+      "Coding",
+      "AI & Automation"
+    ],
+    sales_marketing: [
+      "Social Media",
+      "Customer Interaction",
+      "Community Building",
+      "Marketing / Advertising",
+      "SEO / Blogging"
+    ],
+    operational: [
+      "Budgeting",
+      "Inventory Management",
+      "Logistics",
+      "Teaching / Coaching",
+      "Time Management",
+      "Project Management"
+    ],
+    digital: [
+      "AI Tools",
+      "Low-code / No-code",
+      "Web Building",
+      "Automation",
+      "Data Analysis"
+    ],
+    personality: [
+      "Empathy",
+      "Leadership",
+      "Problem Solving",
+      "Team Building",
+      "Persuasion"
+    ]
   };
 
   const skillCategoryLabels = {
-    technical: "Technical",
-    creative: "Creative",
-    physical: "Physical",
-    business: "Business",
-    soft: "Soft Skills",
+    product_creation: "Product Creation Skills",
+    sales_marketing: "Sales & Marketing Skills",
+    operational: "Operational Skills",
+    digital: "Digital Skills",
+    personality: "Personality Strengths",
   };
 
   return (
@@ -113,16 +204,18 @@ export default function IntakeScreenOne({ inputs, onChange, onNext, errors = {} 
       <div className="grid gap-4">
         <div>
           <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-            Skills <span className="text-brand-500">*</span>
+            Entrepreneurial Capabilities <span className="text-brand-500">*</span>
           </label>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Select all that apply</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            These skills help us tailor ideas to your capabilities. Select all that apply.
+          </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(skillCategories).map(([category, skills]) => (
             <div 
               key={category} 
-              className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-3 space-y-2.5"
+              className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 p-4 space-y-3 shadow-sm"
             >
               <h4 className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 {skillCategoryLabels[category]}
@@ -138,7 +231,7 @@ export default function IntakeScreenOne({ inputs, onChange, onNext, errors = {} 
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap ${
                         isSelected
                           ? "bg-brand-500 text-white shadow-md shadow-brand-500/20 ring-2 ring-brand-200 dark:ring-brand-800"
-                          : "bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-brand-300 dark:hover:border-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20"
+                          : "bg-slate-50 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-brand-300 dark:hover:border-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20"
                       }`}
                     >
                       {skill}
@@ -184,11 +277,13 @@ export default function IntakeScreenOne({ inputs, onChange, onNext, errors = {} 
             onChange={(e) => handleChange("preferred_work_style", e.target.value)}
           >
             <option value="">Select...</option>
-            <option value="Solo">Solo</option>
-            <option value="Small team">Small team</option>
-            <option value="Remote only">Remote only</option>
-            <option value="On-site OK">On-site OK</option>
-            <option value="No preference">No preference</option>
+            <option value="Independent / Solo">Independent / Solo</option>
+            <option value="Small collaborative team">Small collaborative team</option>
+            <option value="Hands-on / Active work">Hands-on / Active work</option>
+            <option value="Creative / Maker work">Creative / Maker work</option>
+            <option value="People-facing / Service-oriented">People-facing / Service-oriented</option>
+            <option value="Remote-friendly">Remote-friendly</option>
+            <option value="Flexible / No preference">Flexible / No preference</option>
           </select>
           {errors.preferred_work_style && (
             <p className="text-xs text-red-500">{errors.preferred_work_style}</p>
@@ -206,12 +301,13 @@ export default function IntakeScreenOne({ inputs, onChange, onNext, errors = {} 
             onChange={(e) => handleChange("startup_style", e.target.value)}
           >
             <option value="">Select...</option>
-            <option value="Online only">Online only</option>
-            <option value="Offline only">Offline only</option>
-            <option value="Hybrid">Hybrid</option>
-            <option value="Home-based">Home-based</option>
-            <option value="Community-based">Community-based</option>
-            <option value="Travel-based">Travel-based</option>
+            <option value="Home-based business">Home-based business</option>
+            <option value="Local service business">Local service business</option>
+            <option value="Online-only business">Online-only business</option>
+            <option value="Content / creator-led business">Content / creator-led business</option>
+            <option value="Low-cost / bootstrapped">Low-cost / bootstrapped</option>
+            <option value="Tech-assisted but not tech-intensive">Tech-assisted but not tech-intensive</option>
+            <option value="Community-driven / local engagement">Community-driven / local engagement</option>
           </select>
           {errors.startup_style && (
             <p className="text-xs text-red-500">{errors.startup_style}</p>
@@ -263,6 +359,48 @@ export default function IntakeScreenOne({ inputs, onChange, onNext, errors = {} 
           )}
         </div>
       </div>
+
+      {/* Business Region */}
+      <div className="grid gap-1.5">
+        <label htmlFor="business_region" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+          Business Region <span className="text-brand-500">*</span>
+        </label>
+        <select
+          id="business_region"
+          className={fieldClasses}
+          value={localInputs.business_region || ""}
+          onChange={(e) => handleChange("business_region", e.target.value)}
+        >
+          <option value="">Select...</option>
+          <option value="United States / Canada">United States / Canada</option>
+          <option value="Europe">Europe</option>
+          <option value="India">India</option>
+          <option value="Middle East">Middle East</option>
+          <option value="Southeast Asia">Southeast Asia</option>
+          <option value="Africa">Africa</option>
+          <option value="Latin America">Latin America</option>
+          <option value="Global / Online">Global / Online</option>
+        </select>
+        {errors.business_region && (
+          <p className="text-xs text-red-500">{errors.business_region}</p>
+        )}
+      </div>
+
+      {/* Dev-only Auto-Fill Button */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <button
+            type="button"
+            onClick={() => {
+              setLocalInputs(SAMPLE_INPUTS);
+              onChange(SAMPLE_INPUTS);
+            }}
+            className="w-full rounded-lg bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 text-sm font-semibold transition-colors shadow-sm"
+          >
+            🔧 Auto-Fill Sample Inputs (Dev Only)
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { validationQuestions } from "../../config/validationQuestions.js";
-import { intakeScreen } from "../../config/intakeScreen.js";
+import { formFieldsConfig } from "../../config/formFieldsConfig.js";
 
 const ADMIN_PASSWORD = "admin2024"; // Change this to your desired password
 const ADMIN_STORAGE_KEY = "sia_admin_authenticated";
@@ -581,9 +581,9 @@ function ValidationQuestionsEditor() {
 }
 
 function IntakeFieldsEditor() {
-  const [screenTitle, setScreenTitle] = useState(intakeScreen.screen_title);
-  const [screenDescription, setScreenDescription] = useState(intakeScreen.description);
-  const [fields, setFields] = useState(intakeScreen.fields);
+  const [screenTitle, setScreenTitle] = useState(formFieldsConfig.screen_title);
+  const [screenDescription, setScreenDescription] = useState(formFieldsConfig.description);
+  const [fields, setFields] = useState(formFieldsConfig.fields);
   const [saved, setSaved] = useState(false);
 
   const handleSave = async () => {
@@ -596,7 +596,7 @@ function IntakeFieldsEditor() {
           "Authorization": `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          screen_id: intakeScreen.screen_id,
+          screen_id: formFieldsConfig.screen_id,
           screen_title: screenTitle,
           description: screenDescription,
           fields: fields,

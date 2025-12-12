@@ -14,158 +14,50 @@ from app.core.redis_client import get_redis
 from rq import Queue
 from worker.tasks import run_stage2
 from datetime import datetime, timezone
+from app.utils.file_logger import write_to_log, write_section_to_log
 import uuid
 import json
 
 
-def map_old_to_new_schema(old_inputs: Dict[str, Any]) -> Dict[str, Any]:
+def ensure_defaults(inputs: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Map old intake schema to new universal intake schema for backward compatibility.
+    Ensure all required fields have defaults if missing.
     """
-    if not old_inputs or not isinstance(old_inputs, dict):
-        return old_inputs
-    
-    # Check if already new schema (has new fields AND doesn't have old fields)
-    has_new_fields = any(key in old_inputs for key in [
-        "risk_tolerance", "preferred_work_style", "industry_interest", "founder_ambition"
-    ])
-    has_old_fields = any(key in old_inputs for key in [
-        "goal_type", "interest_area", "work_style", "skill_strength"
-    ])
-    
-    if has_new_fields and not has_old_fields:
-        # Already new schema - ensure all required fields have defaults if missing
-        mapped = old_inputs.copy()
-        # Set defaults for missing required fields
-        if "risk_tolerance" not in mapped or not mapped.get("risk_tolerance"):
-            mapped["risk_tolerance"] = "Moderate"
-        if "preferred_work_style" not in mapped or not mapped.get("preferred_work_style"):
-            mapped["preferred_work_style"] = "No preference"
-        if "startup_style" not in mapped or not mapped.get("startup_style"):
-            mapped["startup_style"] = "Online only"
-        if "customer_interaction" not in mapped or not mapped.get("customer_interaction"):
-            mapped["customer_interaction"] = "Somewhat comfortable"
-        if "location_context" not in mapped or not mapped.get("location_context"):
-            mapped["location_context"] = "Urban"
-        if "business_type" not in mapped or not mapped.get("business_type"):
-            mapped["business_type"] = "No preference"
-        if "earnings_timeline" not in mapped or not mapped.get("earnings_timeline"):
-            mapped["earnings_timeline"] = "90 days"
-        # Ensure skills structure
-        if "skills" not in mapped or not isinstance(mapped.get("skills"), dict):
-            mapped["skills"] = {
-                "technical": [],
-                "creative": [],
-                "physical": [],
-                "business": [],
-                "soft": [],
-                "other": ""
-            }
-        return mapped
-    
-    # Map old to new
-    mapped = {}
-    
-    # Direct mappings
-    if "time_commitment" in old_inputs:
-        mapped["time_commitment"] = old_inputs["time_commitment"]
-    if "budget_range" in old_inputs:
-        mapped["budget_range"] = old_inputs["budget_range"]
-    if "experience_summary" in old_inputs:
-        mapped["experience_summary"] = old_inputs["experience_summary"]
-    
-    # Map interest_area to industry_interest
-    if "interest_area" in old_inputs:
-        interest_mapping = {
-            "AI / Automation": "AI & Automation",
-            "Consulting & Professional Services": "Freelancing / Consulting",
-            "Education / EdTech": "Education",
-            "Healthcare / Wellness": "Beauty & Wellness",
-            "Finance / Investment": "Finance / Accounting",
-            "E-commerce / Retail": "Retail & E-commerce",
-            "Content / Media / Creator Economy": "Other",
-            "Sustainability / Green Tech": "Social Impact",
-            "Lifestyle / Travel / Food": "Travel & Tourism",
-            "Other (Custom)": "Other"
-        }
-        mapped["industry_interest"] = interest_mapping.get(old_inputs["interest_area"], old_inputs["interest_area"])
-    
-    if "sub_interest_area" in old_inputs:
-        mapped["sub_interest_area"] = old_inputs["sub_interest_area"]
-    
-    # Map work_style to preferred_work_style
-    if "work_style" in old_inputs:
-        work_style_mapping = {
-            "Solo": "Solo",
-            "Small Team": "Small team",
-            "Community-Based": "Community-based",
-            "Remote Only": "Remote only",
-            "Requires Physical Presence": "On-site OK"
-        }
-        mapped["preferred_work_style"] = work_style_mapping.get(old_inputs["work_style"], old_inputs["work_style"])
-    
-    # Map skill_strength to skills
-    if "skill_strength" in old_inputs:
-        skill_mapping = {
-            "Technical / Automation": {"technical": ["Coding", "Automation"]},
-            "Analytical / Strategic": {"business": ["Strategy"]},
-            "Creative / Design": {"creative": ["Design"]},
-            "Operational / Process": {"business": ["Management"]},
-            "Communication / Community": {"soft": ["Communication"]},
-            "Financial / Analytical": {"business": ["Finance"]},
-            "Research / Insight-Driven": {"business": ["Strategy"]},
-            "Other / Mixed": {}
-        }
-        mapped["skills"] = skill_mapping.get(old_inputs["skill_strength"], {})
-    
-    # Map goal_type to founder_ambition
-    if "goal_type" in old_inputs:
-        goal_mapping = {
-            "Extra Income": "Side income",
-            "Replace Full-Time Job": "Full-time business",
-            "Passive Income": "Scalable venture",
-            "Passion Project": "Turn hobby into business",
-            "Social Impact / Non-Profit": "Social Impact",
-            "Tech-Driven Venture": "Scalable venture",
-            "Consulting / Knowledge Business": "Part-time business",
-            "Experimental / Learning Project": "Side income"
-        }
-        mapped["founder_ambition"] = goal_mapping.get(old_inputs["goal_type"], "Side income")
+    if not inputs or not isinstance(inputs, dict):
+        inputs = {}
     
     # Set defaults for missing required fields
-    if "risk_tolerance" not in mapped:
-        mapped["risk_tolerance"] = "Moderate"
-    if "preferred_work_style" not in mapped:
-        mapped["preferred_work_style"] = "No preference"
-    if "startup_style" not in mapped:
-        mapped["startup_style"] = "Online only"
-    if "customer_interaction" not in mapped:
-        mapped["customer_interaction"] = "Somewhat comfortable"
-    if "location_context" not in mapped:
-        mapped["location_context"] = "Urban"
-    if "business_type" not in mapped:
-        mapped["business_type"] = "No preference"
-    if "earnings_timeline" not in mapped:
-        mapped["earnings_timeline"] = "90 days"
+    if "startup_category" not in inputs or not inputs.get("startup_category"):
+        inputs["startup_category"] = "both"  # Default to "both" if not specified
+    if "risk_tolerance" not in inputs or not inputs.get("risk_tolerance"):
+        inputs["risk_tolerance"] = "Moderate"
+    if "preferred_work_style" not in inputs or not inputs.get("preferred_work_style"):
+        inputs["preferred_work_style"] = "Flexible / No preference"
+    if "startup_style" not in inputs or not inputs.get("startup_style"):
+        inputs["startup_style"] = "Online-only business"
+    if "customer_interaction" not in inputs or not inputs.get("customer_interaction"):
+        inputs["customer_interaction"] = "Somewhat comfortable"
+    if "location_context" not in inputs or not inputs.get("location_context"):
+        inputs["location_context"] = "Urban"
+    if "business_region" not in inputs or not inputs.get("business_region"):
+        inputs["business_region"] = "Global / Online"
+    if "business_type" not in inputs or not inputs.get("business_type"):
+        inputs["business_type"] = "No preference"
+    if "earnings_timeline" not in inputs or not inputs.get("earnings_timeline"):
+        inputs["earnings_timeline"] = "90 days"
     
-    # Ensure skills structure
-    if "skills" not in mapped or not isinstance(mapped["skills"], dict):
-        mapped["skills"] = {
-            "technical": [],
-            "creative": [],
-            "physical": [],
-            "business": [],
-            "soft": [],
+    # Ensure skills structure (new capability groups)
+    if "skills" not in inputs or not isinstance(inputs.get("skills"), dict):
+        inputs["skills"] = {
+            "product_creation": [],
+            "sales_marketing": [],
+            "operational": [],
+            "digital": [],
+            "personality": [],
             "other": ""
         }
     
-    # Merge with any other fields from old_inputs
-    for key, value in old_inputs.items():
-        if key not in ["goal_type", "interest_area", "work_style", "skill_strength"]:
-            if key not in mapped:
-                mapped[key] = value
-    
-    return mapped
+    return inputs
 
 
 router = APIRouter(prefix="/api", tags=["discovery"])
@@ -173,6 +65,9 @@ router = APIRouter(prefix="/api", tags=["discovery"])
 
 class RunRequest(BaseModel):
     """Request model for discovery run - Universal Intake Schema"""
+    # Startup Category (FIRST FIELD)
+    startup_category: Optional[str] = None  # "tech", "non_tech", or "both"
+    
     # Screen 1 - About You
     time_commitment: Optional[str] = None
     budget_range: Optional[str] = None
@@ -182,6 +77,7 @@ class RunRequest(BaseModel):
     skills: Optional[Dict[str, Any]] = None  # {technical: [], creative: [], etc., other: ""}
     customer_interaction: Optional[str] = None
     location_context: Optional[str] = None
+    business_region: Optional[str] = None
     
     # Screen 2 - Interests & Goals
     industry_interest: Optional[str] = None
@@ -191,11 +87,6 @@ class RunRequest(BaseModel):
     founder_ambition: Optional[str] = None
     experience_summary: Optional[str] = None
     
-    # Backward compatibility - old fields (will be mapped to new schema)
-    goal_type: Optional[str] = None
-    interest_area: Optional[str] = None
-    work_style: Optional[str] = None
-    skill_strength: Optional[str] = None
 
 
 class RunResponse(BaseModel):
@@ -271,12 +162,13 @@ async def create_run(
     # Convert request to dict, filtering None values (Pydantic v2 syntax)
     raw_inputs = request.model_dump(exclude_none=True)
     
-    # Map old schema to new schema if needed (backward compatibility)
-    inputs = map_old_to_new_schema(raw_inputs)
+    # Ensure all required fields have defaults
+    inputs = ensure_defaults(raw_inputs)
     
     # Validate required fields (new universal schema)
     # Check both existence and non-empty values
     required_fields = [
+        "startup_category",
         "time_commitment",
         "budget_range",
         "risk_tolerance",
@@ -284,6 +176,7 @@ async def create_run(
         "startup_style",
         "customer_interaction",
         "location_context",
+        "business_region",
         "industry_interest",
         "business_type",
         "earnings_timeline",
@@ -704,9 +597,10 @@ async def create_run_background(
     Returns run_id immediately.
     """
     raw_inputs = request.model_dump(exclude_none=True)
-    inputs = map_old_to_new_schema(raw_inputs)
+    inputs = ensure_defaults(raw_inputs)
     
     required_fields = [
+        "startup_category",
         "time_commitment",
         "budget_range",
         "risk_tolerance",
@@ -714,6 +608,7 @@ async def create_run_background(
         "startup_style",
         "customer_interaction",
         "location_context",
+        "business_region",
         "industry_interest",
         "business_type",
         "earnings_timeline",
@@ -833,6 +728,172 @@ def _format_cached_result(cached_result: Dict[str, Any]) -> str:
     return "".join(lines)
 
 
+@router.post("/discovery/enrich_idea", status_code=status.HTTP_200_OK)
+async def enrich_idea(
+    request: Dict[str, Any] = Body(...),
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user_or_none),
+    format: str = Query("sse", regex="^(sse|json)$", description="Response format: 'sse' for Server-Sent Events or 'json' for JSON")
+):
+    """
+    Enrich a specific idea with personalized premium playbook (on-demand).
+    
+    Request body:
+    {
+        "idea": {
+            "title": "...",
+            "summary": "...",
+            "target_market": "...",
+            "revenue_model": "..."
+        },
+        "industry": "ai",
+        "profile_analysis": {
+            "core_motivations": "...",
+            "operating_constraints": "...",
+            "strengths_and_capabilities": "...",
+            "strategic_considerations": "...",
+            "viability_red_flags": "..."
+        }
+    }
+    
+    Returns:
+    - SSE stream (default): Streams enriched playbook as Server-Sent Events
+    - JSON (format=json): Returns structured enrichment object
+    """
+    # Log that enrichment endpoint was called (at the very start)
+    try:
+        idea_title = request.get("idea", {}).get("title", "Unknown")
+        industry_param = request.get("industry", "")
+        write_to_log(f"=== ENRICHMENT API ENDPOINT CALLED === Idea: {idea_title}, Industry: {industry_param}, Format: {format}", "INFO", "DiscoveryAPI")
+    except Exception as log_err:
+        print(f"Warning: Failed to write endpoint call log: {log_err}")
+        import traceback
+        traceback.print_exc()
+    
+    from app.services.tool_service import ToolService
+    from app.core.redis_client import get_redis
+    
+    redis_client = get_redis()
+    tool_service = ToolService(db, redis_client)
+    
+    # Extract request data
+    idea = request.get("idea", {})
+    industry = request.get("industry", "")
+    profile_analysis_raw = request.get("profile_analysis", {})
+    
+    # Handle profile_analysis - it might be a string (markdown) or a dict
+    profile_analysis = {}
+    if isinstance(profile_analysis_raw, str):
+        # Try to extract JSON from the markdown string
+        # Look for JSON between PROFILE_ANALYSIS_START and PROFILE_ANALYSIS_END markers
+        try:
+            from app.utils.text_cleaner import extract_profile_json
+            import json
+            json_str = extract_profile_json(profile_analysis_raw)
+            if json_str:
+                profile_analysis = json.loads(json_str)
+            else:
+                profile_analysis = {}
+        except Exception as e:
+            # If parsing fails, use empty dict
+            print(f"Warning: Failed to parse profile_analysis from string: {e}")
+            import traceback
+            traceback.print_exc()
+            profile_analysis = {}
+    elif isinstance(profile_analysis_raw, dict):
+        profile_analysis = profile_analysis_raw
+    else:
+        profile_analysis = {}
+    
+    if not idea.get("title") or not idea.get("summary"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Idea must have 'title' and 'summary' fields"
+        )
+    
+    if not industry:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Industry is required"
+        )
+    
+    if format == "json":
+        # Return JSON response (non-streaming)
+        # Use tool_service.enrich_idea which includes all logging and returns both parsed and raw content
+        enrichment_result = tool_service.enrich_idea(
+            idea=idea,
+            industry=industry,
+            profile_analysis=profile_analysis,
+            run_id=None
+        )
+        
+        # enrich_idea now returns {"parsed": {...}, "raw_content": "..."}
+        parsed_result = enrichment_result.get("parsed", {})
+        raw_content = enrichment_result.get("raw_content", "")
+        
+        response_payload = {
+            "success": True,
+            "enrichment": {
+                "body": raw_content,  # Return raw markdown for frontend parsing
+                "parsed": parsed_result  # Also include parsed for debugging
+            }
+        }
+        
+        try:
+            payload_text = json.dumps(response_payload, indent=2)
+            write_section_to_log("JSON PAYLOAD RETURNED TO FRONTEND", payload_text, "INFO", "DiscoveryAPI")
+        except Exception as log_err:
+            print(f"Warning: Failed to write payload log: {log_err}")
+            import traceback
+            traceback.print_exc()
+        
+        return response_payload
+    else:
+        # Stream SSE response
+        async def generate_enrichment_sse():
+            try:
+                # Send initial event
+                yield f"event: start\n"
+                yield f"data: {json.dumps({'status': 'enriching', 'idea': idea.get('title', '')})}\n\n"
+                
+                # Stream enrichment chunks
+                buffer = ""
+                async for chunk in tool_service.enrich_idea_stream(
+                    idea=idea,
+                    industry=industry,
+                    profile_analysis=profile_analysis
+                ):
+                    if chunk:
+                        buffer += chunk
+                        # Flush on natural boundaries
+                        if "\n\n" in buffer or buffer.endswith(":"):
+                            # Format as SSE data event
+                            yield f"data: {buffer}\n\n"
+                            buffer = ""
+                
+                # Flush remaining buffer
+                if buffer.strip():
+                    yield f"data: {buffer}\n\n"
+                
+                # Send completion event
+                yield f"event: complete\n"
+                yield f"data: {json.dumps({'status': 'completed'})}\n\n"
+                
+            except Exception as e:
+                yield f"event: error\n"
+                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        
+        return StreamingResponse(
+            generate_enrichment_sse(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no"
+            }
+        )
+
+
 @router.get("/user/run/{run_id}", status_code=status.HTTP_200_OK)
 async def get_run(
     run_id: str,
@@ -842,33 +903,47 @@ async def get_run(
     """
     Get a discovery run by ID
     """
-    run = db.query(Run).filter(Run.run_id == run_id).first()
-    
-    if not run:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Run {run_id} not found"
-        )
-    
-    # TODO: Check user authorization
-    
-    # JSONB columns return Python dicts directly (no parsing needed)
-    reports = run.reports or {}
-    
-    return {
-        "success": True,
-        "run": {
-            "run_id": run.run_id,
-            "user_id": run.user_id,
-            "inputs": run.inputs,
-            "reports": reports,
-            "profile_analysis": run.profile_analysis,
-            "personalized_recommendations": run.personalized_recommendations,
-            "status": run.status,
-            "created_at": run.created_at.isoformat() if run.created_at else None,
-            "completed_at": run.completed_at.isoformat() if run.completed_at else None,
+    try:
+        run = db.query(Run).filter(Run.run_id == run_id).first()
+        
+        if not run:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Run {run_id} not found"
+            )
+        
+        # TODO: Check user authorization
+        
+        # Normalize inputs to ensure backward compatibility with old runs
+        # Old runs might not have startup_category, so we add it with default value
+        normalized_inputs = ensure_defaults(run.inputs or {})
+        
+        # JSONB columns return Python dicts directly (no parsing needed)
+        reports = run.reports or {}
+        
+        return {
+            "success": True,
+            "run": {
+                "run_id": run.run_id,
+                "user_id": run.user_id,
+                "inputs": normalized_inputs,
+                "reports": reports,
+                "profile_analysis": run.profile_analysis,
+                "personalized_recommendations": run.personalized_recommendations,
+                "status": run.status,
+                "created_at": run.created_at.isoformat() if run.created_at else None,
+                "completed_at": run.completed_at.isoformat() if run.completed_at else None,
+            }
         }
-    }
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch run: {str(e)}"
+        )
 
 
 @router.post("/enhance-report", status_code=status.HTTP_200_OK)

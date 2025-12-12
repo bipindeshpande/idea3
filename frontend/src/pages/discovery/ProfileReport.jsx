@@ -100,20 +100,20 @@ function parseProfileSections(text = "") {
     });
   }
   
-  if (profileData.constraints) {
+  if (profileData.operating_constraints) {
     sections.push({
       title: "Operating Constraints",
       level: 2,
-      content: formatAsBullets(profileData.constraints),
+      content: formatAsBullets(profileData.operating_constraints),
       subsections: [],
     });
   }
   
-  if (profileData.strengths) {
+  if (profileData.strengths_and_capabilities) {
     sections.push({
       title: "Strengths and Capabilities",
       level: 2,
-      content: formatAsBullets(profileData.strengths),
+      content: formatAsBullets(profileData.strengths_and_capabilities),
       subsections: [],
     });
   }
@@ -350,8 +350,8 @@ function Section({ section, theme, sectionNumber, isOpen, onToggle }) {
 const SAMPLE_PROFILE_ANALYSIS = `---PROFILE_ANALYSIS_START---
 {
   "core_motivations": "You're looking to generate extra income while maintaining flexibility. Your interest in technology and automation suggests you value efficiency and scalable solutions.",
-  "constraints": "- Time: Limited to ≤ 5 hours/week, requiring solutions that can be built and managed part-time\n- Budget: Working with a lean budget, prioritizing cost-effective tools and strategies\n- Work style: Prefer structured, systematic approaches that allow for incremental progress",
-  "strengths": "- Technical skills enable rapid prototyping and iteration\n- Understanding of product development and user needs\n- Ability to work independently and systematically",
+  "operating_constraints": "- Time: Limited to ≤ 5 hours/week, requiring solutions that can be built and managed part-time\n- Budget: Working with a lean budget, prioritizing cost-effective tools and strategies\n- Work style: Prefer structured, systematic approaches that allow for incremental progress",
+  "strengths_and_capabilities": "- Technical skills enable rapid prototyping and iteration\n- Understanding of product development and user needs\n- Ability to work independently and systematically",
   "strategic_considerations": "- Focus on ideas that can be validated quickly with minimal investment\n- Have clear monetization paths\n- Leverage your existing skills and knowledge\n- Can scale without requiring full-time commitment initially",
   "viability_red_flags": "- Limited time commitment may restrict growth potential\n- Lean budget requires careful cost management\n- Part-time approach may limit customer acquisition speed",
   "pathway_recommendation": "Start with a low-cost digital product or SaaS tool that leverages your technical skills. Validate with a minimal viable product (MVP) within your time constraints, then gradually scale based on market response."
@@ -446,8 +446,8 @@ export default function ProfileReport() {
               ---PROFILE_ANALYSIS_START---{'\n'}
               {'{'}{'\n'}
               {'  "core_motivations": "...",'}{'\n'}
-              {'  "constraints": "...",'}{'\n'}
-              {'  "strengths": "...",'}{'\n'}
+              {'  "operating_constraints": "...",'}{'\n'}
+              {'  "strengths_and_capabilities": "...",'}{'\n'}
               {'  "strategic_considerations": "...",'}{'\n'}
               {'  "viability_red_flags": "...",'}{'\n'}
               {'  "pathway_recommendation": "..."'}{'\n'}

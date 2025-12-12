@@ -1,0 +1,2258 @@
+{
+  "business_models": [
+    "Subscription Meal Kits",
+    "Food Delivery Service",
+    "Online Grocery Store",
+    "Cloud Kitchen",
+    "Health-focused Food Products",
+    "Food Truck",
+    "Restaurant Franchise",
+    "Catering Services",
+    "Private Label Products",
+    "Meal Prep Services"
+  ],
+  "target_segments": [
+    "Health-conscious Consumers",
+    "Busy Professionals",
+    "Families with Children",
+    "College Students",
+    "Vegans and Vegetarians",
+    "Foodies and Culinary Enthusiasts",
+    "Elderly Population",
+    "Fitness Enthusiasts",
+    "Ethnic Food Lovers",
+    "Sustainable Food Advocates"
+  ],
+  "value_props": {
+    "convenience": [
+      "Easy online ordering",
+      "Quick meal prep solutions",
+      "Home delivery options"
+    ],
+    "cost-savings": [
+      "Bulk buying discounts",
+      "Subscription savings",
+      "Affordable meal options"
+    ],
+    "personalization": [
+      "Customized meal plans",
+      "Dietary preference options",
+      "Tailored subscription boxes"
+    ],
+    "quality": [
+      "Fresh, organic ingredients",
+      "Locally sourced products",
+      "High nutritional value"
+    ],
+    "sustainability": [
+      "Eco-friendly packaging",
+      "Sustainable sourcing practices",
+      "Waste reduction initiatives"
+    ]
+  },
+  "skill_tags": {
+    "data analysis": [
+      "Market trend analysis",
+      "Customer behavior insights",
+      "Sales forecasting"
+    ],
+    "digital marketing": [
+      "Social media campaigns",
+      "SEO strategies",
+      "Email marketing"
+    ],
+    "supply chain management": [
+      "Inventory optimization",
+      "Supplier negotiation",
+      "Logistics coordination"
+    ],
+    "culinary skills": [
+      "Recipe development",
+      "Food presentation",
+      "Nutritional knowledge"
+    ],
+    "customer service": [
+      "Client relationship management",
+      "Feedback handling",
+      "Service quality improvement"
+    ]
+  },
+  "budget_bins": {
+    "low": "Feasible for small-scale operations or startups.",
+    "medium": "Suitable for growing businesses with moderate investment.",
+    "high": "Ideal for large-scale operations or franchise models."
+  },
+  "constraints_map": {
+    "time": "Rapid market changes require quick adaptation.",
+    "budget": "Limited funds can restrict marketing and growth.",
+    "skills": "Lack of expertise can hinder operational efficiency."
+  },
+  "trend_summary": [
+    "Rise of plant-based diets",
+    "Increased demand for transparency in sourcing",
+    "Growth of online food delivery services",
+    "Focus on health and wellness products",
+    "Sustainability becoming a key purchasing factor",
+    "Expansion of ghost kitchens",
+    "Local sourcing gaining popularity",
+    "Technology integration in food services",
+    "Personalized nutrition trends",
+    "Experiential dining experiences"
+  ],
+  "competitor_notes": [
+    "High competition in food delivery space.",
+    "Emerging players focusing on niche markets.",
+    "Established brands leveraging technology effectively.",
+    "Consumer loyalty driven by quality and service.",
+    "Innovative marketing strategies are crucial."
+  ],
+  "markdown_template": "# Industry Overview\n\n## Business Models\n\n## Target Segments\n\n## Value Propositions\n\n## Skill Tags\n\n## Budget Bins\n\n## Constraints\n\n## Trends\n\n## Competitor Insights\n",
+  "idea_fragments": {
+    "problems": [
+      {
+        "id": "problem_1",
+        "text": "Consumers struggle to find healthy meal options."
+      },
+      {
+        "id": "problem_2",
+        "text": "Busy professionals lack time to cook."
+      },
+      {
+        "id": "problem_3",
+        "text": "Food waste is a significant issue."
+      },
+      {
+        "id": "problem_4",
+        "text": "Dietary restrictions complicate meal planning."
+      },
+      {
+        "id": "problem_5",
+        "text": "High costs deter healthy eating."
+      },
+      {
+        "id": "problem_6",
+        "text": "Limited access to fresh produce in urban areas."
+      },
+      {
+        "id": "problem_7",
+        "text": "Consumers want more transparency in sourcing."
+      },
+      {
+        "id": "problem_8",
+        "text": "Food delivery services can be unreliable."
+      },
+      {
+        "id": "problem_9",
+        "text": "Finding sustainable food options is challenging."
+      },
+      {
+        "id": "problem_10",
+        "text": "Lack of variety in meal kits."
+      },
+      {
+        "id": "problem_11",
+        "text": "Health trends change rapidly, hard to keep up."
+      },
+      {
+        "id": "problem_12",
+        "text": "Elderly need tailored meal options."
+      },
+      {
+        "id": "problem_13",
+        "text": "Food allergies complicate dining out."
+      },
+      {
+        "id": "problem_14",
+        "text": "Catering services often lack customization."
+      },
+      {
+        "id": "problem_15",
+        "text": "Limited options for ethnic cuisines."
+      }
+    ],
+    "solutions": [
+      {
+        "id": "solution_1",
+        "text": "AI-driven meal planning."
+      },
+      {
+        "id": "solution_2",
+        "text": "Subscription-based meal kits."
+      },
+      {
+        "id": "solution_3",
+        "text": "Mobile app for meal customization."
+      },
+      {
+        "id": "solution_4",
+        "text": "Local sourcing partnerships."
+      },
+      {
+        "id": "solution_5",
+        "text": "Automated inventory management."
+      },
+      {
+        "id": "solution_6",
+        "text": "Personalized nutrition coaching."
+      },
+      {
+        "id": "solution_7",
+        "text": "On-demand food delivery service."
+      },
+      {
+        "id": "solution_8",
+        "text": "Waste reduction programs."
+      },
+      {
+        "id": "solution_9",
+        "text": "Meal prep workshops."
+      },
+      {
+        "id": "solution_10",
+        "text": "Ethnic food subscription boxes."
+      },
+      {
+        "id": "solution_11",
+        "text": "Health-focused catering services."
+      },
+      {
+        "id": "solution_12",
+        "text": "Food allergy awareness training."
+      },
+      {
+        "id": "solution_13",
+        "text": "Sustainable packaging solutions."
+      },
+      {
+        "id": "solution_14",
+        "text": "Nutrition-focused cooking classes."
+      },
+      {
+        "id": "solution_15",
+        "text": "Remote cooking assistance."
+      }
+    ],
+    "delivery_modes": [
+      {
+        "id": "delivery_1",
+        "text": "Mobile app delivery."
+      },
+      {
+        "id": "delivery_2",
+        "text": "Subscription box service."
+      },
+      {
+        "id": "delivery_3",
+        "text": "Direct-to-consumer shipping."
+      },
+      {
+        "id": "delivery_4",
+        "text": "In-store pickup."
+      },
+      {
+        "id": "delivery_5",
+        "text": "Curbside delivery."
+      },
+      {
+        "id": "delivery_6",
+        "text": "Food truck services."
+      },
+      {
+        "id": "delivery_7",
+        "text": "Meal kit delivery."
+      },
+      {
+        "id": "delivery_8",
+        "text": "Online grocery shopping."
+      },
+      {
+        "id": "delivery_9",
+        "text": "Home chef services."
+      },
+      {
+        "id": "delivery_10",
+        "text": "Pop-up restaurant events."
+      },
+      {
+        "id": "delivery_11",
+        "text": "Virtual cooking classes."
+      },
+      {
+        "id": "delivery_12",
+        "text": "Corporate catering delivery."
+      },
+      {
+        "id": "delivery_13",
+        "text": "Meal swap platforms."
+      },
+      {
+        "id": "delivery_14",
+        "text": "Third-party delivery partnerships."
+      },
+      {
+        "id": "delivery_15",
+        "text": "Community-supported agriculture delivery."
+      }
+    ],
+    "revenue_patterns": [
+      {
+        "id": "revenue_1",
+        "text": "Monthly subscription fees."
+      },
+      {
+        "id": "revenue_2",
+        "text": "One-time product sales."
+      },
+      {
+        "id": "revenue_3",
+        "text": "Freemium model for apps."
+      },
+      {
+        "id": "revenue_4",
+        "text": "Event-based revenue."
+      },
+      {
+        "id": "revenue_5",
+        "text": "Affiliate marketing commissions."
+      },
+      {
+        "id": "revenue_6",
+        "text": "Advertising partnerships."
+      },
+      {
+        "id": "revenue_7",
+        "text": "Membership fees for exclusive content."
+      },
+      {
+        "id": "revenue_8",
+        "text": "Crowdfunding for new products."
+      },
+      {
+        "id": "revenue_9",
+        "text": "Sales of branded merchandise."
+      },
+      {
+        "id": "revenue_10",
+        "text": "Consulting services for businesses."
+      },
+      {
+        "id": "revenue_11",
+        "text": "Revenue from cooking classes."
+      },
+      {
+        "id": "revenue_12",
+        "text": "Sponsorship deals with brands."
+      },
+      {
+        "id": "revenue_13",
+        "text": "Licensing of recipes."
+      },
+      {
+        "id": "revenue_14",
+        "text": "Franchise fees."
+      },
+      {
+        "id": "revenue_15",
+        "text": "Grants for sustainable initiatives."
+      }
+    ],
+    "automation_patterns": [
+      {
+        "id": "auto_1",
+        "text": "Automated inventory tracking."
+      },
+      {
+        "id": "auto_2",
+        "text": "Customer feedback analysis."
+      },
+      {
+        "id": "auto_3",
+        "text": "Order processing automation."
+      },
+      {
+        "id": "auto_4",
+        "text": "Marketing campaign automation."
+      },
+      {
+        "id": "auto_5",
+        "text": "Sales forecasting tools."
+      },
+      {
+        "id": "auto_6",
+        "text": "Chatbots for customer service."
+      },
+      {
+        "id": "auto_7",
+        "text": "Automated meal planning."
+      },
+      {
+        "id": "auto_8",
+        "text": "Supply chain management software."
+      },
+      {
+        "id": "auto_9",
+        "text": "Recipe scaling tools."
+      },
+      {
+        "id": "auto_10",
+        "text": "Automated delivery scheduling."
+      },
+      {
+        "id": "auto_11",
+        "text": "Data analytics for sales."
+      },
+      {
+        "id": "auto_12",
+        "text": "Nutritional analysis software."
+      },
+      {
+        "id": "auto_13",
+        "text": "Social media posting automation."
+      },
+      {
+        "id": "auto_14",
+        "text": "Customer segmentation tools."
+      },
+      {
+        "id": "auto_15",
+        "text": "Automated reporting for sales."
+      }
+    ]
+  },
+  "parameter_mappings": {
+    "time_commitment": {
+      "<5": {
+        "problems": [
+          {
+            "id": "problem_2",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_4",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_7",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_1",
+            "weight": 4,
+            "priority": "high"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_3",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "archetypes": [
+          "service",
+          "platform"
+        ]
+      },
+      "10-20": {
+        "problems": [
+          {
+            "id": "problem_1",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_3",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_2",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "solution_6",
+            "weight": 3,
+            "priority": "medium"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_4",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "archetypes": [
+          "tool",
+          "marketplace"
+        ]
+      }
+    },
+    "budget_range": {
+      "$0-1k": {
+        "problems": [
+          {
+            "id": "problem_5",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_9",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_3",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_5",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "$1k-5k": {
+        "problems": [
+          {
+            "id": "problem_6",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_10",
+            "weight": 3,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_4",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "solution_8",
+            "weight": 3,
+            "priority": "medium"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_4",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_6",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "$5k-10k": {
+        "problems": [
+          {
+            "id": "problem_7",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_11",
+            "weight": 3,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_5",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_5",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_7",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "$10k+": {
+        "problems": [
+          {
+            "id": "problem_8",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_12",
+            "weight": 3,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_9",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_6",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_6",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_8",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      }
+    },
+    "risk_tolerance": {
+      "Very Low": {
+        "problems": [
+          {
+            "id": "problem_5",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_1",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_1",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_9",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Low": {
+        "problems": [
+          {
+            "id": "problem_3",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_6",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_2",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_10",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Medium": {
+        "problems": [
+          {
+            "id": "problem_7",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_8",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_3",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_11",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "High": {
+        "problems": [
+          {
+            "id": "problem_9",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_10",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_4",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_4",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_4",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_12",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      }
+    },
+    "skill_strength": {
+      "Beginner": {
+        "problems": [
+          {
+            "id": "problem_1",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_5",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_1",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_13",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Intermediate": {
+        "problems": [
+          {
+            "id": "problem_2",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_6",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_2",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_14",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Advanced": {
+        "problems": [
+          {
+            "id": "problem_3",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_7",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_3",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_15",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Expert": {
+        "problems": [
+          {
+            "id": "problem_8",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_9",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_4",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_4",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_4",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_15",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      }
+    },
+    "goal_type": {
+      "Extra Income": {
+        "problems": [
+          {
+            "id": "problem_5",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_1",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_1",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Side Business": {
+        "problems": [
+          {
+            "id": "problem_2",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_6",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_2",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_2",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Full Business": {
+        "problems": [
+          {
+            "id": "problem_3",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_7",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_3",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_3",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Scalable Startup": {
+        "problems": [
+          {
+            "id": "problem_8",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_9",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_4",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_4",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_4",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_4",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      }
+    },
+    "preferred_work_style": {
+      "Independent / Solo": {
+        "problems": [
+          {
+            "id": "problem_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_1",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_1",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Small collaborative team": {
+        "problems": [
+          {
+            "id": "problem_2",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_6",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_2",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_2",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Remote-friendly": {
+        "problems": [
+          {
+            "id": "problem_3",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_7",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_3",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_3",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Flexible / No preference": {
+        "problems": [
+          {
+            "id": "problem_4",
+            "weight": 5,
+            "priority": "high"
+          },
+          {
+            "id": "problem_8",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_4",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_4",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_4",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_4",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "People-facing / Service-oriented": {
+        "problems": [
+          {
+            "id": "problem_5",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_5",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_5",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_5",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_5",
+            "weight": 4,
+            "priority": "medium"
+          }
+        ]
+      },
+      "Hands-on / Active work": {
+        "problems": [
+          "problem_1"
+        ],
+        "solutions": [
+          "solution_1"
+        ],
+        "delivery_modes": [
+          "delivery_1"
+        ],
+        "revenue_patterns": [
+          "revenue_1"
+        ],
+        "automation_patterns": [
+          "auto_1"
+        ]
+      },
+      "Creative / Maker work": {
+        "problems": [
+          "problem_1"
+        ],
+        "solutions": [
+          "solution_1"
+        ],
+        "delivery_modes": [
+          "delivery_1"
+        ],
+        "revenue_patterns": [
+          "revenue_1"
+        ],
+        "automation_patterns": [
+          "auto_1"
+        ]
+      }
+    },
+    "startup_style": {
+      "Home-based business": {
+        "problems": [
+          "problem_1"
+        ],
+        "solutions": [
+          "solution_1"
+        ],
+        "delivery_modes": [
+          "delivery_1"
+        ],
+        "revenue_patterns": [
+          "revenue_1"
+        ],
+        "automation_patterns": [
+          "auto_1"
+        ]
+      },
+      "Local service business": {
+        "problems": [
+          "problem_2"
+        ],
+        "solutions": [
+          "solution_2"
+        ],
+        "delivery_modes": [
+          "delivery_2"
+        ],
+        "revenue_patterns": [
+          "revenue_2"
+        ],
+        "automation_patterns": [
+          "auto_2"
+        ]
+      },
+      "Online-only business": {
+        "problems": [
+          "problem_3"
+        ],
+        "solutions": [
+          "solution_3"
+        ],
+        "delivery_modes": [
+          "delivery_3"
+        ],
+        "revenue_patterns": [
+          "revenue_3"
+        ],
+        "automation_patterns": [
+          "auto_3"
+        ]
+      },
+      "Content / creator-led business": {
+        "problems": [
+          "problem_4"
+        ],
+        "solutions": [
+          "solution_4"
+        ],
+        "delivery_modes": [
+          "delivery_4"
+        ],
+        "revenue_patterns": [
+          "revenue_4"
+        ],
+        "automation_patterns": [
+          "auto_4"
+        ]
+      },
+      "Low-cost / bootstrapped": {
+        "problems": [
+          "problem_1"
+        ],
+        "solutions": [
+          "solution_1"
+        ],
+        "delivery_modes": [
+          "delivery_1"
+        ],
+        "revenue_patterns": [
+          "revenue_1"
+        ],
+        "automation_patterns": [
+          "auto_1"
+        ]
+      },
+      "Tech-assisted but not tech-intensive": {
+        "problems": [
+          "problem_2"
+        ],
+        "solutions": [
+          "solution_2"
+        ],
+        "delivery_modes": [
+          "delivery_2"
+        ],
+        "revenue_patterns": [
+          "revenue_2"
+        ],
+        "automation_patterns": [
+          "auto_2"
+        ]
+      },
+      "Community-driven / local engagement": {
+        "problems": [
+          "problem_5"
+        ],
+        "solutions": [
+          "solution_5"
+        ],
+        "delivery_modes": [
+          "delivery_5"
+        ],
+        "revenue_patterns": [
+          "revenue_5"
+        ],
+        "automation_patterns": [
+          "auto_5"
+        ]
+      }
+    },
+    "business_region": {
+      "United States / Canada": {
+        "problems": [
+          {
+            "id": "problem_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_15",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "archetypes": [
+          "marketplace",
+          "platform"
+        ]
+      },
+      "Europe": {
+        "problems": [
+          {
+            "id": "problem_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_15",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "archetypes": [
+          "marketplace",
+          "platform"
+        ]
+      },
+      "India": {
+        "problems": [
+          {
+            "id": "problem_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "archetypes": [
+          "platform",
+          "marketplace"
+        ]
+      },
+      "Middle East": {
+        "problems": [
+          {
+            "id": "problem_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_15",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "archetypes": [
+          "marketplace",
+          "platform"
+        ]
+      },
+      "Southeast Asia": {
+        "problems": [
+          {
+            "id": "problem_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "archetypes": [
+          "platform",
+          "marketplace"
+        ]
+      },
+      "Africa": {
+        "problems": [
+          {
+            "id": "problem_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "archetypes": [
+          "platform",
+          "marketplace"
+        ]
+      },
+      "Latin America": {
+        "problems": [
+          {
+            "id": "problem_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_3",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "archetypes": [
+          "platform",
+          "marketplace"
+        ]
+      },
+      "Global / Online": {
+        "problems": [
+          {
+            "id": "problem_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "solutions": [
+          {
+            "id": "solution_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "delivery_modes": [
+          {
+            "id": "delivery_1",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "revenue_patterns": [
+          {
+            "id": "revenue_15",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "automation_patterns": [
+          {
+            "id": "auto_2",
+            "weight": 5,
+            "priority": "high"
+          }
+        ],
+        "archetypes": [
+          "marketplace",
+          "platform"
+        ]
+      }
+    }
+  },
+  "archetypes": [
+    {
+      "id": "tool",
+      "label": "AI Tool"
+    },
+    {
+      "id": "service",
+      "label": "Done-for-you Service"
+    },
+    {
+      "id": "marketplace",
+      "label": "Two-sided Marketplace"
+    },
+    {
+      "id": "platform",
+      "label": "Online Platform"
+    },
+    {
+      "id": "community",
+      "label": "Community-driven Model"
+    }
+  ],
+  "difficulty_levels": [
+    "easy",
+    "medium",
+    "hard"
+  ],
+  "revenue_potential": [
+    "$200-1k/mo",
+    "$1k-10k/mo",
+    "Scalable Startup"
+  ],
+  "operational_models": [
+    "low-touch",
+    "high-touch",
+    "semi-automated",
+    "fully-automated"
+  ],
+  "business_region": {
+    "United States / Canada": {
+      "problems": [
+        {
+          "id": "problem_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "solutions": [
+        {
+          "id": "solution_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "delivery_modes": [
+        {
+          "id": "delivery_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "revenue_patterns": [
+        {
+          "id": "revenue_15",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "automation_patterns": [
+        {
+          "id": "auto_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "archetypes": [
+        "marketplace",
+        "platform"
+      ]
+    },
+    "Europe": {
+      "problems": [
+        {
+          "id": "problem_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "solutions": [
+        {
+          "id": "solution_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "delivery_modes": [
+        {
+          "id": "delivery_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "revenue_patterns": [
+        {
+          "id": "revenue_15",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "automation_patterns": [
+        {
+          "id": "auto_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "archetypes": [
+        "marketplace",
+        "platform"
+      ]
+    },
+    "India": {
+      "problems": [
+        {
+          "id": "problem_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "solutions": [
+        {
+          "id": "solution_3",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "delivery_modes": [
+        {
+          "id": "delivery_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "revenue_patterns": [
+        {
+          "id": "revenue_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "automation_patterns": [
+        {
+          "id": "auto_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "archetypes": [
+        "platform",
+        "marketplace"
+      ]
+    },
+    "Middle East": {
+      "problems": [
+        {
+          "id": "problem_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "solutions": [
+        {
+          "id": "solution_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "delivery_modes": [
+        {
+          "id": "delivery_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "revenue_patterns": [
+        {
+          "id": "revenue_15",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "automation_patterns": [
+        {
+          "id": "auto_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "archetypes": [
+        "marketplace",
+        "platform"
+      ]
+    },
+    "Southeast Asia": {
+      "problems": [
+        {
+          "id": "problem_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "solutions": [
+        {
+          "id": "solution_3",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "delivery_modes": [
+        {
+          "id": "delivery_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "revenue_patterns": [
+        {
+          "id": "revenue_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "automation_patterns": [
+        {
+          "id": "auto_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "archetypes": [
+        "platform",
+        "marketplace"
+      ]
+    },
+    "Africa": {
+      "problems": [
+        {
+          "id": "problem_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "solutions": [
+        {
+          "id": "solution_3",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "delivery_modes": [
+        {
+          "id": "delivery_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "revenue_patterns": [
+        {
+          "id": "revenue_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "automation_patterns": [
+        {
+          "id": "auto_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "archetypes": [
+        "platform",
+        "marketplace"
+      ]
+    },
+    "Latin America": {
+      "problems": [
+        {
+          "id": "problem_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "solutions": [
+        {
+          "id": "solution_3",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "delivery_modes": [
+        {
+          "id": "delivery_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "revenue_patterns": [
+        {
+          "id": "revenue_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "automation_patterns": [
+        {
+          "id": "auto_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "archetypes": [
+        "platform",
+        "marketplace"
+      ]
+    },
+    "Global / Online": {
+      "problems": [
+        {
+          "id": "problem_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "solutions": [
+        {
+          "id": "solution_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "delivery_modes": [
+        {
+          "id": "delivery_1",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "revenue_patterns": [
+        {
+          "id": "revenue_15",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "automation_patterns": [
+        {
+          "id": "auto_2",
+          "weight": 5,
+          "priority": "high"
+        }
+      ],
+      "archetypes": [
+        "marketplace",
+        "platform"
+      ]
+    }
+  }
+}

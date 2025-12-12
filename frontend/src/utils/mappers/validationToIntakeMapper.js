@@ -23,17 +23,17 @@ export function mapValidationToIntake(categoryAnswers) {
     mapped.sub_interest_area = mapping.sub;
   }
 
-  // Map target_audience to work_style (infer from audience type)
+  // Map target_audience to preferred_work_style (infer from audience type)
   if (categoryAnswers.target_audience) {
     const audienceMap = {
-      "Individual consumers (B2C)": "Solo",
-      "Small businesses (B2B SMB)": "Small Team",
-      "Enterprise companies (B2B Enterprise)": "Small Team",
-      "Non-profits / Organizations": "Community-Based",
-      "Students / Educational institutions": "Community-Based",
-      "Other": "Solo",
+      "Individual consumers (B2C)": "Independent / Solo",
+      "Small businesses (B2B SMB)": "Small collaborative team",
+      "Enterprise companies (B2B Enterprise)": "Small collaborative team",
+      "Non-profits / Organizations": "People-facing / Service-oriented",
+      "Students / Educational institutions": "People-facing / Service-oriented",
+      "Other": "Independent / Solo",
     };
-    mapped.work_style = audienceMap[categoryAnswers.target_audience] || "Solo";
+    mapped.preferred_work_style = audienceMap[categoryAnswers.target_audience] || "Independent / Solo";
   }
 
   // Map business_model - can't directly map, but we can add it to experience_summary

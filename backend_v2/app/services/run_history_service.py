@@ -65,8 +65,15 @@ class RunHistoryService(BaseService):
         offset = (page - 1) * page_size
         runs = query.offset(offset).limit(page_size).all()
         
-        # Convert to dictionaries
-        runs_list = [run.to_dict() for run in runs]
+        # Convert to dictionaries and normalize inputs for backward compatibility
+        runs_list = []
+        for run in runs:
+            run_dict = run.to_dict()
+            # Ensure startup_category exists for backward compatibility with old runs
+            if run_dict.get("inputs") and isinstance(run_dict["inputs"], dict):
+                if "startup_category" not in run_dict["inputs"] or not run_dict["inputs"].get("startup_category"):
+                    run_dict["inputs"]["startup_category"] = "both"
+            runs_list.append(run_dict)
         
         # Calculate pagination metadata
         total_pages = (total_count + page_size - 1) // page_size if total_count > 0 else 0
@@ -116,7 +123,18 @@ class RunHistoryService(BaseService):
                 detail=f"Run {run_id} not found"
             )
         
-        return run.to_dict()
+        # Normalize inputs to ensure backward compatibility with old runs
+        run_dict = run.to_dict()
+        if run_dict.get("inputs"):
+            # Ensure startup_category exists for backward compatibility
+            inputs = run_dict["inputs"]
+            if not isinstance(inputs, dict):
+                inputs = {}
+            if "startup_category" not in inputs or not inputs.get("startup_category"):
+                inputs["startup_category"] = "both"
+            run_dict["inputs"] = inputs
+        
+        return run_dict
     
     def soft_delete_run(self, run_id: str, user_id: Optional[str] = None) -> bool:
         """

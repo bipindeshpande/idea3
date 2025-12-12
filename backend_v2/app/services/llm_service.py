@@ -7,6 +7,7 @@ from anthropic import Anthropic, AsyncAnthropic
 from app.services.base_service import BaseService
 from app.core.config import settings
 from app.models.llm_usage import LLMUsage
+from app.utils.text_cleaner import extract_profile_json
 
 
 class LLMService(BaseService):
@@ -491,6 +492,20 @@ class LLMService(BaseService):
             "usage": usage,
             "cost_usd": cost_usd,
         }
+
+    def generate_profile_analysis(self, prompt: str) -> str:
+        """
+        Generate profile analysis and extract clean JSON.
+        
+        Args:
+            prompt: User prompt for profile analysis
+            
+        Returns:
+            Clean JSON string extracted from delimiters
+        """
+        raw = self.generate(prompt)
+        clean = extract_profile_json(raw["content"])
+        return clean
 
     def _calculate_cost(self, model: str, prompt_tokens: int, completion_tokens: int) -> float:
         """Approximate cost in USD based on hardcoded pricing."""

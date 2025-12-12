@@ -42,8 +42,8 @@ def clean_profile_analysis(text: str) -> str:
             # Ensure required keys exist
             required_keys = [
                 "core_motivations",
-                "constraints",
-                "strengths",
+                "operating_constraints",
+                "strengths_and_capabilities",
                 "strategic_considerations",
                 "viability_red_flags",
                 "pathway_recommendation"
@@ -64,8 +64,8 @@ def clean_profile_analysis(text: str) -> str:
                 parsed = json.loads(json_text)
                 required_keys = [
                     "core_motivations",
-                    "constraints",
-                    "strengths",
+                    "operating_constraints",
+                    "strengths_and_capabilities",
                     "strategic_considerations",
                     "viability_red_flags",
                     "pathway_recommendation"
@@ -79,8 +79,8 @@ def clean_profile_analysis(text: str) -> str:
                 # If still fails, return empty JSON structure with delimiters
                 empty_json = json.dumps({
                     "core_motivations": "",
-                    "constraints": "",
-                    "strengths": "",
+                    "operating_constraints": "",
+                    "strengths_and_capabilities": "",
                     "strategic_considerations": "",
                     "viability_red_flags": "",
                     "pathway_recommendation": ""
@@ -95,8 +95,8 @@ def clean_profile_analysis(text: str) -> str:
                 parsed = json.loads(json_match.group(0))
                 required_keys = [
                     "core_motivations",
-                    "constraints",
-                    "strengths",
+                    "operating_constraints",
+                    "strengths_and_capabilities",
                     "strategic_considerations",
                     "viability_red_flags",
                     "pathway_recommendation"
@@ -112,8 +112,8 @@ def clean_profile_analysis(text: str) -> str:
         # Fallback: return empty JSON structure with delimiters
         empty_json = json.dumps({
             "core_motivations": "",
-            "constraints": "",
-            "strengths": "",
+            "operating_constraints": "",
+            "strengths_and_capabilities": "",
             "strategic_considerations": "",
             "viability_red_flags": "",
             "pathway_recommendation": ""
@@ -162,9 +162,9 @@ Your ONLY task is to output valid JSON that follows EXACTLY this shape:
 
   "core_motivations": "string",
 
-  "constraints": "string",
+  "operating_constraints": "string",
 
-  "strengths": "string",
+  "strengths_and_capabilities": "string",
 
   "strategic_considerations": "string",
 
@@ -194,11 +194,11 @@ STRICT OUTPUT RULES:
 
 DEEP REASONING REQUIREMENTS:
 
-- Identify contradictions in the user's inputs (e.g., "remote-only work style" + "offline-only startup") and mention them explicitly under constraints or strategic_considerations.
+- Identify contradictions in the user's inputs (e.g., "remote-only work style" + "offline-only startup") and mention them explicitly under operating_constraints or strategic_considerations.
 
 - Evaluate the REAL practicality of the user's budget, time commitment, experience level, risk tolerance, earnings timeline, and startup style.
 
-- Consider the feasibility of the user's ambitions WITHIN their constraints.
+- Consider the feasibility of the user's ambitions WITHIN their operating_constraints.
 
 - Apply realistic startup patterns: time-to-market, capital requirements, skill-driven pathways, and business model implications.
 
@@ -212,9 +212,9 @@ QUALITY BAR:
 
 - core_motivations must precisely reflect why the user wants to start something now.
 
-- constraints must reflect BOTH explicit constraints and hidden constraints implied by the inputs.
+- operating_constraints must reflect BOTH explicit constraints and hidden constraints implied by the inputs.
 
-- strengths must be grounded in the user's skills, location, interests, and work/interaction preferences.
+- strengths_and_capabilities must be grounded in the user's skills, location, interests, and work/interaction preferences.
 
 - strategic_considerations must contain genuine, actionable reasoning using cause-and-effect logic, not generic advice.
 
@@ -283,8 +283,8 @@ Return NOTHING before or after these delimiters.
             # Ensure all required keys exist
             required_keys = [
                 "core_motivations",
-                "constraints",
-                "strengths",
+                "operating_constraints",
+                "strengths_and_capabilities",
                 "strategic_considerations",
                 "viability_red_flags",
                 "pathway_recommendation"
@@ -385,11 +385,13 @@ Return NOTHING before or after these delimiters.
         prompt_parts.append(
             "CRITICAL: Your response MUST be in this exact format:"
         )
+        prompt_parts.append("")
+        prompt_parts.append("Your response MUST be in this exact format:")
         prompt_parts.append("---PROFILE_ANALYSIS_START---")
         prompt_parts.append("{")
         prompt_parts.append('  "core_motivations": "...",')
-        prompt_parts.append('  "constraints": "...",')
-        prompt_parts.append('  "strengths": "...",')
+        prompt_parts.append('  "operating_constraints": "...",')
+        prompt_parts.append('  "strengths_and_capabilities": "...",')
         prompt_parts.append('  "strategic_considerations": "...",')
         prompt_parts.append('  "viability_red_flags": "...",')
         prompt_parts.append('  "pathway_recommendation": "..."')
@@ -455,9 +457,9 @@ Your ONLY task is to output valid JSON that follows EXACTLY this shape:
 
   "core_motivations": "string",
 
-  "constraints": "string",
+  "operating_constraints": "string",
 
-  "strengths": "string",
+  "strengths_and_capabilities": "string",
 
   "strategic_considerations": "string",
 
@@ -487,11 +489,11 @@ STRICT OUTPUT RULES:
 
 DEEP REASONING REQUIREMENTS:
 
-- Identify contradictions in the user's inputs (e.g., "remote-only work style" + "offline-only startup") and mention them explicitly under constraints or strategic_considerations.
+- Identify contradictions in the user's inputs (e.g., "remote-only work style" + "offline-only startup") and mention them explicitly under operating_constraints or strategic_considerations.
 
 - Evaluate the REAL practicality of the user's budget, time commitment, experience level, risk tolerance, earnings timeline, and startup style.
 
-- Consider the feasibility of the user's ambitions WITHIN their constraints.
+- Consider the feasibility of the user's ambitions WITHIN their operating_constraints.
 
 - Apply realistic startup patterns: time-to-market, capital requirements, skill-driven pathways, and business model implications.
 
@@ -505,9 +507,9 @@ QUALITY BAR:
 
 - core_motivations must precisely reflect why the user wants to start something now.
 
-- constraints must reflect BOTH explicit constraints and hidden constraints implied by the inputs.
+- operating_constraints must reflect BOTH explicit constraints and hidden constraints implied by the inputs.
 
-- strengths must be grounded in the user's skills, location, interests, and work/interaction preferences.
+- strengths_and_capabilities must be grounded in the user's skills, location, interests, and work/interaction preferences.
 
 - strategic_considerations must contain genuine, actionable reasoning using cause-and-effect logic, not generic advice.
 
@@ -576,8 +578,8 @@ Return NOTHING before or after these delimiters.
             # Ensure all required keys exist
             required_keys = [
                 "core_motivations",
-                "constraints",
-                "strengths",
+                "operating_constraints",
+                "strengths_and_capabilities",
                 "strategic_considerations",
                 "viability_red_flags",
                 "pathway_recommendation"

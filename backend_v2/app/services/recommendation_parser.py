@@ -160,6 +160,7 @@ class RecommendationParser:
         """
         Filter out duplicate ideas based on title and summary.
         Ensures each idea has a unique title and summary.
+        Fixes duplicate IDs by appending index suffix.
         
         Args:
             ideas: List of idea dictionaries
@@ -172,6 +173,7 @@ class RecommendationParser:
         
         seen_titles = set()
         seen_summaries = set()
+        seen_ids = {}  # Track ID occurrences: {id: count}
         unique_ideas = []
         
         for idea in ideas:
@@ -194,6 +196,17 @@ class RecommendationParser:
             if summary in seen_summaries:
                 logger.warning(f"Skipping duplicate summary: '{summary[:50]}...' (id={idea_copy.get('id')})")
                 continue
+            
+            # Handle duplicate IDs by appending suffix
+            original_id = idea_copy.get('id')
+            if original_id:
+                if original_id in seen_ids:
+                    count = seen_ids[original_id]
+                    seen_ids[original_id] = count + 1
+                    idea_copy['id'] = f"{original_id}-{count + 1}"
+                    logger.warning(f"Duplicate ID detected: {original_id}, renamed to {idea_copy['id']}")
+                else:
+                    seen_ids[original_id] = 1
             
             # Add to unique set
             seen_titles.add(title)

@@ -148,19 +148,6 @@
       }
     },
     {
-      "id": "work_style",
-      "label": "Preferred Work Style",
-      "type": "picklist",
-      "options": [
-        "Solo",
-        "Small Team",
-        "Community-Based",
-        "Remote Only",
-        "Requires Physical Presence"
-      ],
-      "required": false
-    },
-    {
       "id": "skill_strength",
       "label": "Primary Skill Strength",
       "type": "picklist",
@@ -186,3 +173,7 @@
     }
   ]
 }
+
+
+
+

@@ -7,6 +7,8 @@ from app.models.error_log import ErrorLog
 from app.models.rate_limit_log import RateLimitLog
 from app.models.llm_usage import LLMUsage
 from app.models.validation import Validation
+from app.models.action import Action
+from app.models.note import Note
 
-__all__ = ["Run", "User", "CacheEntry", "DiscoveryResult", "ErrorLog", "RateLimitLog", "Validation"]
+__all__ = ["Run", "User", "CacheEntry", "DiscoveryResult", "ErrorLog", "RateLimitLog", "Validation", "Action", "Note"]
 

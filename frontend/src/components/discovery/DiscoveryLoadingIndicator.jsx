@@ -7,13 +7,27 @@ const discoverySteps = [
   { step: 4, total: 4, text: "Preparing recommendations", description: "Creating personalized action plans and next steps" },
 ];
 
-export default function DiscoveryLoadingIndicator({ streamingOutput = "", isCached = false }) {
+export default function DiscoveryLoadingIndicator({ 
+  streamingOutput = "", 
+  isCached = false,
+  startTime = null,
+  duration = null // Duration in milliseconds when request completes
+}) {
   const [stepIndex, setStepIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [startTime] = useState(Date.now());
+  const [isComplete, setIsComplete] = useState(false);
   const outputRef = useRef(null);
+  // Use performance.now() if startTime is provided (from ReportsContext), otherwise fallback to Date.now()
+  const actualStartTime = startTime || performance.now();
 
   useEffect(() => {
+    // If duration is provided, request is complete - stop timer
+    if (duration !== null) {
+      setIsComplete(true);
+      setElapsedSeconds(Math.floor(duration / 1000));
+      return;
+    }
+
     // Progress through steps (don't cycle back)
     const stepInterval = setInterval(() => {
       setStepIndex((prev) => {
@@ -26,14 +40,18 @@ export default function DiscoveryLoadingIndicator({ streamingOutput = "", isCach
 
     // Update elapsed time every second
     const timeInterval = setInterval(() => {
-      setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
+      if (!isComplete) {
+        // Use performance.now() for consistency with ReportsContext
+        const now = performance.now();
+        setElapsedSeconds(Math.floor((now - actualStartTime) / 1000));
+      }
     }, 1000);
 
     return () => {
       clearInterval(stepInterval);
       clearInterval(timeInterval);
     };
-  }, [startTime]);
+  }, [actualStartTime, duration, isComplete]);
 
   // Auto-scroll streaming output
   useEffect(() => {
@@ -43,11 +61,10 @@ export default function DiscoveryLoadingIndicator({ streamingOutput = "", isCach
   }, [streamingOutput]);
 
   const currentStep = discoverySteps[stepIndex];
-  // Updated estimate: 60-70 seconds is more realistic after performance improvements
-  const estimatedTotalSeconds = 65;
-  const estimatedRemaining = Math.max(0, estimatedTotalSeconds - elapsedSeconds);
-  // Progress bar: cap at 100% but allow time to go beyond estimate
-  const progressPercent = Math.min(100, (elapsedSeconds / estimatedTotalSeconds) * 100);
+  // Progress bar: show 100% when complete, otherwise show based on elapsed time
+  // For static engine (fast), progress will jump to 100% quickly
+  // For LLM (slower), progress will gradually increase
+  const progressPercent = isComplete ? 100 : Math.min(95, (elapsedSeconds / 30) * 100); // Cap at 95% until complete
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
@@ -71,12 +88,9 @@ export default function DiscoveryLoadingIndicator({ streamingOutput = "", isCach
             </div>
           )}
           {!isCached && (
-            <>
-              <p className="mb-2 text-sm text-slate-600">
-                Step {currentStep.step} of {currentStep.total}
-              </p>
-              <p className="mb-4 text-xs text-slate-500">Crunching the numbers... 📊</p>
-            </>
+            <p className="mb-2 text-sm text-slate-600">
+              Step {currentStep.step} of {currentStep.total}
+            </p>
           )}
           
           <div className="mb-4 h-2 w-full overflow-hidden rounded-full bg-brand-100">
@@ -97,13 +111,13 @@ export default function DiscoveryLoadingIndicator({ streamingOutput = "", isCach
             <p className="text-xs text-slate-500">
               Time elapsed: {elapsedSeconds}s
             </p>
-            {estimatedRemaining > 0 ? (
-              <p className="text-xs font-medium text-brand-600">
-                Estimated time remaining: {estimatedRemaining}s
+            {isComplete ? (
+              <p className="text-xs font-medium text-green-600">
+                ✓ Complete
               </p>
             ) : (
-              <p className="text-xs font-medium text-amber-600">
-                Almost done... Finalizing results
+              <p className="text-xs font-medium text-brand-600">
+                Generating recommendations...
               </p>
             )}
           </div>

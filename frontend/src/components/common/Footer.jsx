@@ -4,7 +4,6 @@ const footerLinks = {
   "Get Started": [
     { label: "Validate Your Idea", to: "/validate-idea" },
     { label: "Discover Ideas", to: "/advisor" },
-    { label: "View Sample Report", to: "/results/recommendations/full?sample=true" },
   ],
   "Resources": [
     { label: "Startup Frameworks", to: "/frameworks" },

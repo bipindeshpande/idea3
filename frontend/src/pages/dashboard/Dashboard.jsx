@@ -10,7 +10,6 @@ import {
   parseRiskRows, 
   splitFullReportSections 
 } from "../../utils/formatters/recommendationFormatters.js";
-import { intakeScreen } from "../../config/intakeScreen.js";
 import DashboardActiveIdeasTab from "../../components/dashboard/DashboardActiveIdeasTab.jsx";
 import DashboardSessionsTab from "../../components/dashboard/DashboardSessionsTab.jsx";
 import DashboardSearchTab from "../../components/dashboard/DashboardSearchTab.jsx";
@@ -172,22 +171,61 @@ export default function DashboardPage() {
         localStorage.removeItem("revalidate_data");
       }
       
-      const response = await fetch("/api/user/dashboard", {
+      // Try /api/user/activity first (more reliable)
+      const activityResponse = await fetch("/api/user/activity?limit=100", {
         headers: getAuthHeaders(),
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setApiRuns(data.activity?.runs || []);
-          setApiValidations(data.activity?.validations || []);
-          setActions(data.actions || []);
-          setNotes(data.notes || []);
+      if (activityResponse.ok) {
+        const activityData = await activityResponse.json();
+        if (activityData.success) {
+          const runs = activityData.runs || activityData.activity?.runs || [];
+          const validations = activityData.validations || activityData.activity?.validations || [];
+          
+          if (process.env.NODE_ENV === 'development') {
+            console.log("[Dashboard] Loaded runs from /api/user/activity:", runs.length);
+            console.log("[Dashboard] Sample run:", runs[0] ? {
+              run_id: runs[0].run_id,
+              hasReports: !!runs[0].reports,
+              hasPersonalizedRecs: !!runs[0].reports?.personalized_recommendations,
+              inputs: runs[0].inputs ? Object.keys(runs[0].inputs) : null,
+            } : null);
+          }
+          
+          setApiRuns(runs);
+          setApiValidations(validations);
+        }
+      }
+      
+      // Also try /api/user/dashboard for additional data
+      const dashboardResponse = await fetch("/api/user/dashboard", {
+        headers: getAuthHeaders(),
+      });
+      
+      if (dashboardResponse.ok) {
+        const dashboardData = await dashboardResponse.json();
+        if (dashboardData.success) {
+          // Get current state to check if we need to update
+          setApiRuns(prev => {
+            // Only update if we didn't get runs from activity endpoint
+            if (prev.length === 0 && dashboardData.activity?.runs) {
+              return dashboardData.activity.runs;
+            }
+            return prev;
+          });
+          setApiValidations(prev => {
+            if (prev.length === 0 && dashboardData.activity?.validations) {
+              return dashboardData.activity.validations;
+            }
+            return prev;
+          });
+          setActions(dashboardData.actions || []);
+          setNotes(dashboardData.notes || []);
         }
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error("Failed to load dashboard data:", error);
+        console.error("[Dashboard] Failed to load dashboard data:", error);
       }
     } finally {
       setLoadingRuns(false);
@@ -218,35 +256,61 @@ export default function DashboardPage() {
       const ideasList = [];
       const seenIds = new Set();
       
+      // Normalize run IDs to strings for consistent comparison
+      const normalizeRunId = (id) => {
+        if (!id) return null;
+        return String(id).replace(/^run_/, '');
+      };
+      
       const runsNeedingReports = apiRuns.filter(
-        run => !run.reports?.personalized_recommendations && run.run_id
+        run => {
+          const runId = normalizeRunId(run.run_id);
+          const hasReports = run.reports?.personalized_recommendations || run.personalized_recommendations;
+          return !hasReports && runId;
+        }
       );
       
       const reportsMap = new Map();
       if (runsNeedingReports.length > 0) {
         const fetchPromises = runsNeedingReports.map(async (run) => {
+          const runId = normalizeRunId(run.run_id);
+          if (!runId) return;
+          
           try {
-            const response = await fetch(`/api/user/run/${run.run_id}`, {
+            const response = await fetch(`/api/user/run/${runId}`, {
               headers: getAuthHeaders(),
             });
             if (response.ok) {
               const data = await response.json();
-              if (data.success && data.run?.reports) {
+              if (data.success && data.run) {
                 try {
-                  const reports = typeof data.run.reports === 'string' 
-                    ? JSON.parse(data.run.reports) 
-                    : data.run.reports;
-                  reportsMap.set(run.run_id, reports);
+                  // Try multiple report locations
+                  let reports = data.run.reports;
+                  if (typeof reports === 'string') {
+                    reports = JSON.parse(reports);
+                  }
+                  
+                  // Also check personalized_recommendations directly on run
+                  if (!reports?.personalized_recommendations && data.run.personalized_recommendations) {
+                    reports = {
+                      ...reports,
+                      personalized_recommendations: data.run.personalized_recommendations
+                    };
+                  }
+                  
+                  if (reports?.personalized_recommendations) {
+                    reportsMap.set(runId, reports);
+                  }
                 } catch (e) {
                   if (process.env.NODE_ENV === 'development') {
-                    console.warn("Failed to parse reports for run:", run.run_id);
+                    console.warn("[Dashboard] Failed to parse reports for run:", runId, e);
                   }
                 }
               }
             }
           } catch (error) {
             if (process.env.NODE_ENV === 'development') {
-              console.warn("Failed to fetch reports for run:", run.run_id, error);
+              console.warn("[Dashboard] Failed to fetch reports for run:", runId, error);
             }
           }
         });
@@ -254,79 +318,129 @@ export default function DashboardPage() {
         await Promise.all(fetchPromises);
       }
       
+      // Process API runs
       for (const run of apiRuns) {
-        let reports = run.reports;
+        const runId = normalizeRunId(run.run_id);
+        if (!runId) continue;
         
-        if (!reports?.personalized_recommendations && run.run_id) {
-          reports = reportsMap.get(run.run_id);
+        // Try multiple locations for reports - API might return reports in different formats
+        let reports = run.reports;
+        let personalizedRecs = null;
+        
+        // Check if reports is a string that needs parsing
+        if (typeof reports === 'string') {
+          try {
+            reports = JSON.parse(reports);
+          } catch (e) {
+            if (process.env.NODE_ENV === 'development') {
+              console.warn("[Dashboard] Failed to parse reports string for run:", runId);
+            }
+          }
         }
         
-        if (reports?.personalized_recommendations) {
-          const topIdeas = parseTopIdeas(reports.personalized_recommendations, 3);
+        // Try to get personalized_recommendations from various locations
+        personalizedRecs = reports?.personalized_recommendations || 
+                          run.personalized_recommendations ||
+                          reportsMap.get(runId)?.personalized_recommendations;
+        
+        // If still not found, try fetching from API
+        if (!personalizedRecs && runId) {
+          const cachedReports = reportsMap.get(runId);
+          if (cachedReports?.personalized_recommendations) {
+            personalizedRecs = cachedReports.personalized_recommendations;
+            reports = cachedReports;
+          }
+        }
+        
+        if (personalizedRecs) {
+          const topIdeas = parseTopIdeas(personalizedRecs, 3);
           topIdeas.forEach((idea) => {
-            const ideaId = `${run.run_id}-${idea.index}`;
-            if (!seenIds.has(ideaId)) {
+            // Normalize idea index to string for consistent ID format
+            const ideaIndex = String(idea.index || idea.ideaIndex || '');
+            const ideaId = `${runId}-${ideaIndex}`;
+            
+            if (!seenIds.has(ideaId) && idea.title) {
               seenIds.add(ideaId);
               ideasList.push({
                 id: ideaId,
-                runId: run.run_id,
-                ideaIndex: idea.index,
-                title: idea.title,
-                summary: idea.summary,
-                runInputs: run.inputs,
-                runCreatedAt: run.created_at,
-                runReports: reports,
+                runId: runId,
+                ideaIndex: ideaIndex,
+                title: idea.title || '',
+                summary: idea.summary || '',
+                runInputs: run.inputs || {},
+                runCreatedAt: run.created_at || run.createdAt || null,
+                runReports: reports || { personalized_recommendations: personalizedRecs },
               });
             }
           });
         }
       }
       
-      if (!isAuthenticated || loadingRuns) {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            parsed.forEach((run) => {
-              const runId = run.run_id || run.id?.replace("run_", "") || run.id;
-              const alreadyProcessed = apiRuns.some(apiRun => 
-                apiRun.run_id === runId || 
-                apiRun.run_id === run.run_id ||
-                (run.id && apiRuns.some(ar => ar.id === run.id))
-              );
+      // Process localStorage runs (for non-authenticated users or as fallback)
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          parsed.forEach((run) => {
+            const runId = normalizeRunId(run.run_id || run.id);
+            if (!runId) return;
+            
+            // Check if already processed (normalize IDs for comparison)
+            const alreadyProcessed = apiRuns.some(apiRun => {
+              const apiRunId = normalizeRunId(apiRun.run_id);
+              return apiRunId === runId;
+            });
               
             if (!alreadyProcessed && run.outputs?.personalized_recommendations) {
               const topIdeas = parseTopIdeas(run.outputs.personalized_recommendations, 3);
-                topIdeas.forEach((idea) => {
-                  const ideaId = `${runId}-${idea.index}`;
-                  if (!seenIds.has(ideaId)) {
-                    seenIds.add(ideaId);
-                    ideasList.push({
-                      id: ideaId,
-                      runId: runId,
-                      ideaIndex: idea.index,
-                      title: idea.title,
-                      summary: idea.summary,
-                      runInputs: run.inputs || {},
-                      runCreatedAt: run.timestamp ? new Date(run.timestamp).toISOString() : null,
-                      runReports: run.outputs,
-                    });
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            if (process.env.NODE_ENV === 'development') {
-              console.warn("Failed to parse localStorage runs:", e);
+              topIdeas.forEach((idea) => {
+                const ideaIndex = String(idea.index || '');
+                const ideaId = `${runId}-${ideaIndex}`;
+                
+                if (!seenIds.has(ideaId)) {
+                  seenIds.add(ideaId);
+                  ideasList.push({
+                    id: ideaId,
+                    runId: runId,
+                    ideaIndex: ideaIndex,
+                    title: idea.title || '',
+                    summary: idea.summary || '',
+                    runInputs: run.inputs || {},
+                    runCreatedAt: run.timestamp ? new Date(run.timestamp).toISOString() : null,
+                    runReports: run.outputs,
+                  });
+                }
+              });
             }
+          });
+        } catch (e) {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn("[Dashboard] Failed to parse localStorage runs:", e);
           }
         }
+      }
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log("[Dashboard] Extracted ideas:", {
+          totalIdeas: ideasList.length,
+          fromApiRuns: apiRuns.length,
+          sampleIdea: ideasList[0] ? {
+            id: ideasList[0].id,
+            title: ideasList[0].title,
+            runId: ideasList[0].runId,
+            hasInputs: !!ideasList[0].runInputs,
+          } : null,
+        });
       }
       
       setAllIdeas(ideasList);
     };
     
-    if (apiRuns.length > 0 || isAuthenticated || !loadingRuns) {
+    // Always run extraction when:
+    // 1. We have API runs, OR
+    // 2. We're not authenticated (use localStorage), OR  
+    // 3. Loading is complete (even if no runs, to clear state)
+    if (apiRuns.length > 0 || !isAuthenticated || !loadingRuns) {
       extractIdeas();
     }
   }, [apiRuns, isAuthenticated, loadingRuns, getAuthHeaders]);
@@ -450,19 +564,39 @@ export default function DashboardPage() {
 
   // Reusable function to perform comparison
   const performComparison = useCallback(async (ideasToCompare) => {
-    if (!ideasToCompare || ideasToCompare.length === 0) {
+    if (!ideasToCompare || (ideasToCompare instanceof Set && ideasToCompare.size === 0) || (Array.isArray(ideasToCompare) && ideasToCompare.length === 0)) {
       return;
     }
 
-    if (ideasToCompare.length > 5) {
+    const compareSize = ideasToCompare instanceof Set ? ideasToCompare.size : ideasToCompare.length;
+    if (compareSize > 5) {
       alert("Maximum 5 ideas can be compared at once");
       return;
     }
 
     setComparing(true);
     try {
-      const selectedIdeasData = allIdeas.filter(idea => ideasToCompare.has(idea.id));
-      const runIds = [...new Set(selectedIdeasData.map(idea => idea.runId))];
+      // Normalize IDs for comparison - convert Set/Array to normalized string set
+      const normalizedCompareSet = new Set();
+      if (ideasToCompare instanceof Set) {
+        ideasToCompare.forEach(id => normalizedCompareSet.add(String(id)));
+      } else if (Array.isArray(ideasToCompare)) {
+        ideasToCompare.forEach(id => normalizedCompareSet.add(String(id)));
+      }
+      
+      // Filter ideas using normalized string comparison
+      const selectedIdeasData = allIdeas.filter(idea => {
+        const ideaId = String(idea.id || '');
+        return normalizedCompareSet.has(ideaId);
+      });
+      
+      if (selectedIdeasData.length === 0) {
+        alert("No matching ideas found. Please try selecting ideas again.");
+        setComparing(false);
+        return;
+      }
+      
+      const runIds = [...new Set(selectedIdeasData.map(idea => String(idea.runId || ''))).filter(Boolean)];
       
       const response = await fetch("/api/user/compare-sessions", {
         method: "POST",
@@ -477,24 +611,33 @@ export default function DashboardPage() {
         if (data.success) {
           const ideasComparison = {
             ideas: selectedIdeasData.map(idea => {
-              const run = data.comparison.runs?.find(r => r.run_id === idea.runId);
+              // Normalize run_id for comparison
+              const normalizedRunId = String(idea.runId || '');
+              const run = data.comparison.runs?.find(r => {
+                const rRunId = String(r.run_id || '');
+                return rRunId === normalizedRunId;
+              });
+              
               if (run && run.reports?.personalized_recommendations) {
                 const topIdeas = parseTopIdeas(run.reports.personalized_recommendations, 3);
-                const matchedIdea = topIdeas.find(i => 
-                  i.index === idea.ideaIndex && idea.runId === run.run_id
-                );
+                // Normalize ideaIndex for comparison
+                const normalizedIdeaIndex = String(idea.ideaIndex || '');
+                const matchedIdea = topIdeas.find(i => {
+                  const iIndex = String(i.index || '');
+                  return iIndex === normalizedIdeaIndex;
+                });
                 if (matchedIdea) {
-                  const metrics = extractComparisonMetrics(run, idea.ideaIndex);
+                  const metrics = extractComparisonMetrics(run, normalizedIdeaIndex);
                   return {
                     ...idea,
                     fullData: matchedIdea,
-                    runInputs: run.inputs,
-                    runCreatedAt: run.created_at,
+                    runInputs: run.inputs || idea.runInputs || {},
+                    runCreatedAt: run.created_at || idea.runCreatedAt,
                     metrics: metrics,
                   };
                 }
               }
-              const metrics = run ? extractComparisonMetrics(run, idea.ideaIndex) : {};
+              const metrics = run ? extractComparisonMetrics(run, String(idea.ideaIndex || '')) : {};
               return {
                 ...idea,
                 runInputs: idea.runInputs || {},
@@ -513,7 +656,7 @@ export default function DashboardPage() {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error("Failed to compare ideas:", error);
+        console.error("[Dashboard] Failed to compare ideas:", error);
       }
       alert("Network error. Please check your connection and try again.");
     } finally {
@@ -737,54 +880,62 @@ export default function DashboardPage() {
   const filteredIdeas = useMemo(() => {
     let filtered = [...allIdeas];
     
+    // Normalize string values for comparison
+    const normalizeString = (val) => {
+      if (val === null || val === undefined) return "";
+      return String(val).trim();
+    };
+    
     if (searchQuery && searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter(idea => {
-        const title = idea.title?.toLowerCase() || "";
-        const summary = idea.summary?.toLowerCase() || "";
-        const goalType = idea.runInputs?.goal_type?.toLowerCase() || "";
-        const interestArea = idea.runInputs?.interest_area?.toLowerCase() || "";
-        const subInterest = idea.runInputs?.sub_interest_area?.toLowerCase() || "";
-        const runId = idea.runId?.toLowerCase() || "";
+        const title = normalizeString(idea.title).toLowerCase();
+        const summary = normalizeString(idea.summary).toLowerCase();
+        const founderAmbition = normalizeString(idea.runInputs?.founder_ambition).toLowerCase();
+        const industryInterest = normalizeString(idea.runInputs?.industry_interest).toLowerCase();
+        const subInterest = normalizeString(idea.runInputs?.sub_interest_area).toLowerCase();
+        const runId = normalizeString(idea.runId).toLowerCase();
         
-        const queryParts = query.split(/\s+/).filter(p => p.length > 0);
-        return queryParts.some(part => 
-          title.includes(part) || 
-          summary.includes(part) ||
-          goalType.includes(part) || 
-          interestArea.includes(part) || 
-          subInterest.includes(part) || 
-          runId.includes(part)
-        );
+        // Allow partial matches - check if query appears anywhere in the fields
+        return title.includes(query) || 
+               summary.includes(query) ||
+               founderAmbition.includes(query) || 
+               industryInterest.includes(query) || 
+               subInterest.includes(query) || 
+               runId.includes(query);
       });
     }
     
     if (advancedSearch.goalType && advancedSearch.goalType !== "all") {
-      filtered = filtered.filter(idea => 
-        idea.runInputs?.goal_type === advancedSearch.goalType
-      );
+      filtered = filtered.filter(idea => {
+        const goal = normalizeString(idea.runInputs?.founder_ambition);
+        return goal === advancedSearch.goalType;
+      });
     }
     
     if (advancedSearch.interestArea && advancedSearch.interestArea !== "all") {
-      filtered = filtered.filter(idea => 
-        idea.runInputs?.interest_area === advancedSearch.interestArea ||
-        idea.runInputs?.sub_interest_area === advancedSearch.interestArea
-      );
+      filtered = filtered.filter(idea => {
+        const industry = normalizeString(idea.runInputs?.industry_interest);
+        const subIndustry = normalizeString(idea.runInputs?.sub_interest_area);
+        return industry === advancedSearch.interestArea || subIndustry === advancedSearch.interestArea;
+      });
     }
     
-    if (advancedSearch.budgetRange !== "all") {
-      filtered = filtered.filter(idea => 
-        idea.runInputs?.budget_range === advancedSearch.budgetRange
-      );
+    if (advancedSearch.budgetRange && advancedSearch.budgetRange !== "all") {
+      filtered = filtered.filter(idea => {
+        const budget = normalizeString(idea.runInputs?.budget_range);
+        return budget === advancedSearch.budgetRange;
+      });
     }
     
-    if (advancedSearch.timeCommitment !== "all") {
-      filtered = filtered.filter(idea => 
-        idea.runInputs?.time_commitment === advancedSearch.timeCommitment
-      );
+    if (advancedSearch.timeCommitment && advancedSearch.timeCommitment !== "all") {
+      filtered = filtered.filter(idea => {
+        const time = normalizeString(idea.runInputs?.time_commitment);
+        return time === advancedSearch.timeCommitment;
+      });
     }
     
-    if (dateFilter !== "all") {
+    if (dateFilter && dateFilter !== "all") {
       const now = Date.now();
       const filterMap = {
         week: 7 * 24 * 60 * 60 * 1000,
@@ -792,18 +943,19 @@ export default function DashboardPage() {
         "3months": 90 * 24 * 60 * 60 * 1000,
         year: 365 * 24 * 60 * 60 * 1000,
       };
-      const cutoff = now - filterMap[dateFilter];
+      const cutoff = now - (filterMap[dateFilter] || 0);
       filtered = filtered.filter(idea => {
-        const ideaDate = idea.runCreatedAt ? new Date(idea.runCreatedAt).getTime() : 0;
-        return ideaDate >= cutoff;
+        if (!idea.runCreatedAt) return false;
+        const ideaDate = new Date(idea.runCreatedAt).getTime();
+        return !isNaN(ideaDate) && ideaDate >= cutoff;
       });
     }
     
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "name":
-          const aName = a.title || "";
-          const bName = b.title || "";
+          const aName = normalizeString(a.title);
+          const bName = normalizeString(b.title);
           return aName.localeCompare(bName);
         case "date":
         default:
@@ -831,8 +983,8 @@ export default function DashboardPage() {
         case "score":
           return (b.timestamp || 0) - (a.timestamp || 0);
         case "name":
-          const aName = a.inputs?.goal_type || "";
-          const bName = b.inputs?.goal_type || "";
+          const aName = a.inputs?.founder_ambition || "";
+          const bName = b.inputs?.founder_ambition || "";
           return aName.localeCompare(bName);
         case "date":
         default:

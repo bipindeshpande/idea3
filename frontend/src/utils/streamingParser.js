@@ -34,12 +34,13 @@ function deepClone(obj) {
   return obj;
 }
 
-// Filter out duplicate ideas based on title and summary
+// Filter out duplicate ideas based on title and summary, and fix duplicate IDs
 function filterUniqueIdeas(ideas) {
   if (!ideas || ideas.length === 0) return [];
   
   const seenTitles = new Set();
   const seenSummaries = new Set();
+  const seenIds = new Map(); // Track ID occurrences
   const uniqueIdeas = [];
   
   for (const idea of ideas) {
@@ -64,6 +65,17 @@ function filterUniqueIdeas(ideas) {
     if (seenSummaries.has(summary)) {
       console.warn(`[parseStructuredIdeas] Skipping duplicate summary: '${summary.substring(0, 50)}...' (id=${ideaCopy.id})`);
       continue;
+    }
+    
+    // Handle duplicate IDs by appending suffix
+    const originalId = ideaCopy.id;
+    if (seenIds.has(originalId)) {
+      const count = seenIds.get(originalId);
+      seenIds.set(originalId, count + 1);
+      ideaCopy.id = `${originalId}-${count + 1}`;
+      console.warn(`[parseStructuredIdeas] Duplicate ID detected: ${originalId}, renamed to ${ideaCopy.id}`);
+    } else {
+      seenIds.set(originalId, 1);
     }
     
     // Add to unique set
