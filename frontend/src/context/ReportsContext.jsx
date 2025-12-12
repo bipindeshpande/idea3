@@ -9,7 +9,25 @@ const STORAGE_KEY = "sia_saved_runs";
 function loadSavedRuns() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    
+    const runs = JSON.parse(stored);
+    
+    // Filter out old schema runs and clean localStorage
+    const oldSchemaFields = ["goal_type", "interest_area", "work_style", "skill_strength"];
+    const newRuns = runs.filter(run => {
+      const inputs = run.inputs || {};
+      // Check if run has old schema fields
+      const hasOldFields = oldSchemaFields.some(field => inputs[field] !== undefined);
+      return !hasOldFields; // Keep runs that don't have old fields
+    });
+    
+    // If we filtered out any runs, update localStorage
+    if (newRuns.length !== runs.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newRuns));
+    }
+    
+    return newRuns;
   } catch (error) {
     console.error("Failed to load saved runs", error);
     return [];
@@ -53,119 +71,9 @@ function buildDefaultInputs() {
 
 const defaultInputs = buildDefaultInputs();
 
-/**
- * Map old intake fields to new universal intake schema
- */
-function mapOldToNewSchema(oldInputs) {
-  if (!oldInputs || typeof oldInputs !== "object") {
-    return {};
-  }
-
-  // Check if this is already new schema (has new fields)
-  const hasNewFields = oldInputs.risk_tolerance !== undefined || 
-                       oldInputs.preferred_work_style !== undefined ||
-                       oldInputs.industry_interest !== undefined;
-  
-  if (hasNewFields) {
-    return oldInputs; // Already new schema
-  }
-
-  // Map old fields to new schema
-  const mapped = { ...defaultInputs };
-
-  // Direct mappings
-  if (oldInputs.time_commitment) {
-    mapped.time_commitment = oldInputs.time_commitment;
-  }
-  if (oldInputs.budget_range) {
-    mapped.budget_range = oldInputs.budget_range;
-  }
-  if (oldInputs.experience_summary) {
-    mapped.experience_summary = oldInputs.experience_summary;
-  }
-
-  // Map interest_area to industry_interest
-  if (oldInputs.interest_area) {
-    // Try to map old interest areas to new industry_interest
-    const interestMapping = {
-      "AI / Automation": "AI & Automation",
-      "Consulting & Professional Services": "Freelancing / Consulting",
-      "Education / EdTech": "Education",
-      "Healthcare / Wellness": "Beauty & Wellness",
-      "Finance / Investment": "Finance / Accounting",
-      "E-commerce / Retail": "Retail & E-commerce",
-      "Content / Media / Creator Economy": "Other",
-      "Sustainability / Green Tech": "Social Impact",
-      "Lifestyle / Travel / Food": "Travel & Tourism",
-      "Other (Custom)": "Other"
-    };
-    mapped.industry_interest = interestMapping[oldInputs.interest_area] || oldInputs.interest_area;
-  }
-  if (oldInputs.sub_interest_area) {
-    mapped.sub_interest_area = oldInputs.sub_interest_area;
-  }
-
-  // Map work_style to preferred_work_style
-  if (oldInputs.work_style) {
-    const workStyleMapping = {
-      "Solo": "Solo",
-      "Small Team": "Small team",
-      "Community-Based": "Community-based",
-      "Remote Only": "Remote only",
-      "Requires Physical Presence": "On-site OK"
-    };
-    mapped.preferred_work_style = workStyleMapping[oldInputs.work_style] || oldInputs.work_style;
-  }
-
-  // Map skill_strength to skills
-  if (oldInputs.skill_strength) {
-    const skillMapping = {
-      "Technical / Automation": { technical: ["Coding", "Automation"] },
-      "Analytical / Strategic": { business: ["Strategy"] },
-      "Creative / Design": { creative: ["Design"] },
-      "Operational / Process": { business: ["Management"] },
-      "Communication / Community": { soft: ["Communication"] },
-      "Financial / Analytical": { business: ["Finance"] },
-      "Research / Insight-Driven": { business: ["Strategy"] },
-      "Other / Mixed": {}
-    };
-    const mappedSkills = skillMapping[oldInputs.skill_strength] || {};
-    mapped.skills = { ...mapped.skills, ...mappedSkills };
-  }
-
-  // Map goal_type to founder_ambition
-  if (oldInputs.goal_type) {
-    const goalMapping = {
-      "Extra Income": "Side income",
-      "Replace Full-Time Job": "Full-time business",
-      "Passive Income": "Scalable venture",
-      "Passion Project": "Turn hobby into business",
-      "Social Impact / Non-Profit": "Social Impact",
-      "Tech-Driven Venture": "Scalable venture",
-      "Consulting / Knowledge Business": "Part-time business",
-      "Experimental / Learning Project": "Side income"
-    };
-    mapped.founder_ambition = goalMapping[oldInputs.goal_type] || "Side income";
-  }
-
-  // Set defaults for missing required fields
-  if (!mapped.risk_tolerance) mapped.risk_tolerance = "Moderate";
-  if (!mapped.preferred_work_style) mapped.preferred_work_style = "No preference";
-  if (!mapped.startup_style) mapped.startup_style = "Online only";
-  if (!mapped.customer_interaction) mapped.customer_interaction = "Somewhat comfortable";
-  if (!mapped.location_context) mapped.location_context = "Urban";
-  if (!mapped.business_type) mapped.business_type = "No preference";
-  if (!mapped.earnings_timeline) mapped.earnings_timeline = "90 days";
-
-  return mapped;
-}
-
 function normalizeInputs(overrides = {}) {
-  // Map old schema to new if needed
-  const mappedOverrides = mapOldToNewSchema(overrides);
-  
   // Merge with defaults
-  const merged = { ...defaultInputs, ...mappedOverrides };
+  const merged = { ...defaultInputs, ...overrides };
 
   // Ensure skills is always an object
   if (!merged.skills || typeof merged.skills !== "object") {
@@ -200,6 +108,8 @@ export function ReportsProvider({ children }) {
   const [currentRunId, setCurrentRunId] = useState(null);
   const [streamingOutput, setStreamingOutput] = useState("");
   const [isCached, setIsCached] = useState(false);
+  const [requestStartTime, setRequestStartTime] = useState(null);
+  const [requestDuration, setRequestDuration] = useState(null);
   const { getAuthHeaders } = useAuth();
 
   const setInputs = useCallback((nextInputs) => {
@@ -221,6 +131,11 @@ export function ReportsProvider({ children }) {
     setReports(null);
     setStreamingOutput(""); // Clear previous streaming output
     setIsCached(false); // Reset cache indicator
+    setRequestDuration(null); // Reset duration
+    
+    // Start timer when request begins
+    const startTime = performance.now();
+    setRequestStartTime(startTime);
 
     let isCached = false;
     let actualRunId = null;
@@ -235,6 +150,11 @@ export function ReportsProvider({ children }) {
         },
         // onComplete - called when streaming finishes with metadata
         (result) => {
+          // Calculate duration when request completes
+          const endTime = performance.now();
+          const duration = endTime - startTime;
+          setRequestDuration(duration);
+          
           // result contains: { runId, cached, fullData, status }
           isCached = result.cached || false;
           actualRunId = result.runId || null;
@@ -293,6 +213,18 @@ export function ReportsProvider({ children }) {
           setCurrentRunId(run.id);
           setReports(run.outputs);
           
+          // Save to recentDiscovery cache for quick access without API calls
+          try {
+            localStorage.setItem("recentDiscovery", JSON.stringify({
+              reports: run.outputs,
+              inputs: payload,
+              runId: run.id,
+              timestamp: run.timestamp
+            }));
+          } catch (e) {
+            console.warn("Failed to save to recentDiscovery cache:", e);
+          }
+          
           // Debug: verify reports were set
           if (process.env.NODE_ENV === 'development') {
             console.log("ReportsContext - Reports set:", {
@@ -311,6 +243,11 @@ export function ReportsProvider({ children }) {
         },
         // onError
         (err) => {
+          // Calculate duration even on error
+          const endTime = performance.now();
+          const duration = endTime - startTime;
+          setRequestDuration(duration);
+          
           setError(err.message || "Unexpected error");
           setLoading(false);
           reject(err);
@@ -385,11 +322,23 @@ export function ReportsProvider({ children }) {
             from_api: true,
           };
         }
+      } else if (response.status === 401) {
+        // Auth failed - throw a specific error that won't trigger error state
+        // The ProtectedRoute will handle the redirect
+        setLoading(false);
+        const error = new Error("Authentication required");
+        error.status = 401;
+        throw error;
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("Failed to load run from API:", errorData.error || "Unknown error");
       }
     } catch (error) {
+      // Re-throw 401 errors so ProtectedRoute can handle them
+      if (error.status === 401) {
+        setLoading(false);
+        throw error;
+      }
       console.error("Failed to load run from API:", error);
     } finally {
       setLoading(false);
@@ -413,6 +362,39 @@ export function ReportsProvider({ children }) {
     return filtered;
   }, [currentRunId]);
 
+  const clearAllSavedRuns = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    // Clear current state if we're viewing a saved run
+    if (currentRunId) {
+      setCurrentRunId(null);
+      setReports(null);
+      setInputsState(defaultInputs);
+    }
+  }, [currentRunId]);
+
+  const loadFromRecentDiscoveryCache = useCallback(() => {
+    try {
+      const recentDiscovery = localStorage.getItem("recentDiscovery");
+      if (recentDiscovery) {
+        const parsed = JSON.parse(recentDiscovery);
+        if (parsed.reports && parsed.reports.personalized_recommendations) {
+          // Load cached data into context
+          if (parsed.runId) {
+            setCurrentRunId(parsed.runId);
+          }
+          if (parsed.inputs) {
+            setInputsState(normalizeInputs(parsed.inputs));
+          }
+          setReports(parsed.reports);
+          return parsed.reports;
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to load from recentDiscovery cache:", e);
+    }
+    return null;
+  }, []);
+
   const value = useMemo(
     () => ({ 
       inputs, 
@@ -424,10 +406,14 @@ export function ReportsProvider({ children }) {
       loadRunById, 
       currentRunId, 
       deleteRun,
+      clearAllSavedRuns,
+      loadFromRecentDiscoveryCache,
       streamingOutput,
-      isCached
+      isCached,
+      requestStartTime,
+      requestDuration
     }),
-    [inputs, reports, loading, error, runCrew, loadRunById, currentRunId, deleteRun, setInputs, streamingOutput, isCached]
+    [inputs, reports, loading, error, runCrew, loadRunById, currentRunId, deleteRun, clearAllSavedRuns, loadFromRecentDiscoveryCache, setInputs, streamingOutput, isCached, requestStartTime, requestDuration]
   );
 
   return (

@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { Link, Navigate, useLocation, useParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import Seo from "../../components/common/Seo.jsx";
 import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useValidation } from "../../context/ValidationContext.jsx";
 import OpenForCollaboratorsButton from "../../components/founder/OpenForCollaboratorsButton.jsx";
 import { parseTopIdeas, trimFromHeading } from "../../utils/markdown/markdown.js";
+import { parseStructuredIdeas } from "../../utils/streamingParser.js";
 import {
   splitIdeaSections,
   extractWhyFit,
@@ -172,41 +174,32 @@ function getSectionTheme(sectionTitle) {
 function CollapsibleSection({ title, description, theme, isOpen, onToggle, children }) {
   return (
     <article
-      className={`rounded-3xl border-2 ${theme.border} ${theme.bg} p-0 overflow-hidden shadow-md`}
-      style={{
-        borderColor: theme.borderColor,
-        backgroundColor: theme.bgColor,
-      }}
+      className="rounded-3xl bg-white dark:bg-[#161B22] p-0 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
     >
       <button
         onClick={onToggle}
-        className={`w-full flex items-center justify-between gap-3 px-6 py-4 ${theme.headerBg} border-b-2 hover:opacity-90 transition-opacity`}
-        style={{
-          backgroundColor: theme.headerBgColor,
-          borderBottomColor: theme.borderColor,
-        }}
+        className="w-full flex items-center justify-between gap-3 px-6 py-4 hover:bg-[#F1F5F9] dark:hover:bg-[#1F2937] transition-colors border-b border-[rgba(0,0,0,0.06)] dark:border-[rgba(255,255,255,0.08)]"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1">
           <span className="text-2xl">{theme.icon}</span>
-          <div className="text-left">
+          <div className="text-left flex-1">
             <h2
-              className={`text-xl font-semibold ${theme.text}`}
-              style={{ color: theme.textColor }}
+              className="text-lg font-semibold text-[#1A1A1A] dark:text-[#EDEDED] border-l-4 border-[#2563EB] dark:border-[#3B82F6] pl-3"
             >
               {title}
             </h2>
             {description && (
-              <p className="text-xs mt-1 text-slate-500">{description}</p>
+              <p className="text-xs mt-1 text-[#7A7A7A] dark:text-[#8B949E]">{description}</p>
             )}
           </div>
         </div>
-        <span className={`text-xl transition-transform flex-shrink-0 ${isOpen ? "rotate-180" : ""}`}>
+        <span className={`text-xl transition-transform flex-shrink-0 text-[#3A3A3A] dark:text-[#C4C4C4] ${isOpen ? "rotate-180" : ""}`}>
           ▼
         </span>
       </button>
       
       {isOpen && (
-        <div className="p-6 bg-white">
+        <div className="p-6 bg-white dark:bg-[#161B22] text-[#3A3A3A] dark:text-[#C4C4C4]">
           {children}
         </div>
       )}
@@ -216,10 +209,19 @@ function CollapsibleSection({ title, description, theme, isOpen, onToggle, child
 
 export default function RecommendationDetail() {
   const { ideaIndex } = useParams();
-  const { reports, loadRunById, currentRunId, inputs, loading } = useReports();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { reports: contextReports, loadRunById, currentRunId, inputs: contextInputs, loading } = useReports();
   const { getAuthHeaders, isAuthenticated } = useAuth();
+  const { validateRecommendationIdea, loading: validating } = useValidation();
   const query = useQuery();
   const runId = query.get("id");
+  
+  // Get data from navigation state (cached) or context
+  const stateData = location.state;
+  const reports = stateData?.recommendations || contextReports;
+  const inputs = stateData?.inputs || contextInputs;
+  const cachedAllIdeas = stateData?.allIdeas;
   const [openSections, setOpenSections] = useState(new Set());
   const [actions, setActions] = useState([]);
   const [notes, setNotes] = useState([]);
@@ -229,6 +231,11 @@ export default function RecommendationDetail() {
   const [newNoteContent, setNewNoteContent] = useState("");
 
   useEffect(() => {
+    // If we have cached data from navigation state, don't load from API
+    if (stateData?.recommendations) {
+      return; // Use cached data, no API call needed
+    }
+    
     // Only load if we don't already have the reports data and we're not currently loading
     if (runId && !loading && (!reports || Object.keys(reports).length === 0)) {
       loadRunById(runId);
@@ -236,7 +243,7 @@ export default function RecommendationDetail() {
       // If no runId in URL but we have a currentRunId, load it
       loadRunById(currentRunId);
     }
-  }, [runId, currentRunId, loading, reports, loadRunById]); // Include all dependencies to ensure proper loading
+  }, [runId, currentRunId, loading, reports, loadRunById, stateData]); // Include all dependencies to ensure proper loading
 
   const markdown = useMemo(
     () => trimFromHeading(reports?.personalized_recommendations ?? "", "### Comprehensive Recommendation Report"),
@@ -244,8 +251,20 @@ export default function RecommendationDetail() {
   );
 
   const ideas = useMemo(() => {
+    // Priority 1: Use cached ideas from navigation state
+    if (cachedAllIdeas && Array.isArray(cachedAllIdeas) && cachedAllIdeas.length > 0) {
+      return cachedAllIdeas;
+    }
+    
+    // Priority 2: Try structured parser from reports
+    const raw = reports?.personalized_recommendations || "";
+    const structuredParsed = parseStructuredIdeas(raw);
+    if (structuredParsed && structuredParsed.length > 0) {
+      return structuredParsed;
+    }
+    // Fallback: markdown parser
     return parseTopIdeas(markdown, 10);
-  }, [markdown]);
+  }, [markdown, reports, cachedAllIdeas]);
   
   const numericIndex = Number.parseInt(ideaIndex ?? "", 10);
   const activeIdea = ideas.find((idea) => idea.index === numericIndex);
@@ -395,6 +414,14 @@ export default function RecommendationDetail() {
 
   const runQuery = runId || currentRunId;
   const backPath = runQuery ? `/results/recommendations?id=${runQuery}` : "/results/recommendations";
+  
+  // Prepare state for back navigation - preserve cached data
+  const backState = stateData ? {
+    recommendations: stateData.recommendations || reports,
+    allIdeas: stateData.allIdeas || ideas,
+    runId: stateData.runId || runQuery,
+    inputs: stateData.inputs || inputs
+  } : undefined;
 
   const sections = useMemo(() => (activeIdea ? splitIdeaSections(activeIdea.body) : {}), [activeIdea]);
 
@@ -402,12 +429,12 @@ export default function RecommendationDetail() {
   const executionSteps = useMemo(
     () =>
       buildExecutionSteps(sections["execution path"], activeIdea?.title || "", {
-        goalType: inputs?.goal_type || "",
+        goalType: inputs?.founder_ambition || "",
         timeCommitment: inputs?.time_commitment || "",
         budgetRange: inputs?.budget_range || "",
-        workStyle: inputs?.work_style || "",
-        skillStrength: inputs?.skill_strength || "",
-        focus: inputs?.sub_interest_area || inputs?.interest_area || "",
+        workStyle: inputs?.preferred_work_style || "",
+        skillStrength: inputs?.skills ? Object.keys(inputs.skills).filter(k => k !== "other" && inputs.skills[k]?.length > 0).join(", ") : "",
+        focus: inputs?.sub_interest_area || inputs?.industry_interest || "",
       }),
     [sections, activeIdea?.title, inputs]
   );
@@ -425,8 +452,8 @@ export default function RecommendationDetail() {
       buildValidationQuestions(
         sections["validation questions"],
         activeIdea?.title || "",
-        inputs?.sub_interest_area || inputs?.interest_area || "",
-        inputs?.goal_type || ""
+        inputs?.sub_interest_area || inputs?.industry_interest || "",
+        inputs?.founder_ambition || ""
       ),
     [sections, activeIdea?.title, inputs]
   );
@@ -468,12 +495,12 @@ export default function RecommendationDetail() {
   const heroChips = useMemo(() => {
     if (!inputs) return [];
     const chips = [
-      inputs.goal_type && { label: "Goal Fit", value: inputs.goal_type },
+      inputs.founder_ambition && { label: "Goal Fit", value: inputs.founder_ambition },
       inputs.time_commitment && { label: "Time Fit", value: inputs.time_commitment },
       inputs.budget_range && { label: "Budget", value: inputs.budget_range },
-      (inputs.sub_interest_area || inputs.interest_area) && {
+      (inputs.sub_interest_area || inputs.industry_interest) && {
         label: "Focus",
-        value: inputs.sub_interest_area || inputs.interest_area,
+        value: inputs.sub_interest_area || inputs.industry_interest,
       },
     ].filter(Boolean);
     return chips;
@@ -535,10 +562,20 @@ export default function RecommendationDetail() {
     () => dedupeStrings(extractValidationQuestions(sections["immediate experiments"])),
     [sections]
   );
-  const immediateNextSteps = useMemo(
-    () => dedupeStrings(extractValidationQuestions(sections["immediate next steps"])),
-    [sections]
-  );
+  // Use lightweight next_steps from enrichment if available (Discovery-level)
+  // Otherwise fall back to markdown sections (from enriched playbook)
+  const discoveryNextSteps = activeIdea?.enrichment?.next_steps;
+  const immediateNextSteps = useMemo(() => {
+    // Prefer enrichment.next_steps from discovery (lightweight)
+    if (discoveryNextSteps) {
+      // Convert markdown bullets to array
+      return discoveryNextSteps.split("\n")
+        .filter(line => line.trim().startsWith("-"))
+        .map(line => line.trim().replace(/^-\s*/, ""));
+    }
+    // Fallback to markdown sections
+    return dedupeStrings(extractValidationQuestions(sections["immediate next steps"]));
+  }, [discoveryNextSteps, sections]);
   const decisionChecklist = useMemo(
     () => dedupeStrings(extractValidationQuestions(sections["decision checklist"])),
     [sections]
@@ -599,11 +636,11 @@ export default function RecommendationDetail() {
 
   // Redirect if we have markdown but the idea index doesn't match
   if (markdown && !activeIdea && ideas.length > 0) {
-    return <Navigate to={backPath} replace />;
+    return <Navigate to={backPath} replace state={backState} />;
   }
 
   return (
-    <section className="grid gap-6">
+    <section className="min-h-screen bg-[#FAFAFA] dark:bg-[#0D1117] grid gap-6 py-6">
       <Seo
         title={
           activeIdea
@@ -614,11 +651,14 @@ export default function RecommendationDetail() {
         path={`/results/recommendations/${ideaIndex}`}
       />
 
-      <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 text-sm">
-          <Link to={backPath} className="inline-flex items-center gap-2 text-brand-700 hover:text-brand-800">
+          <button
+            onClick={() => navigate(backPath, { state: backState })}
+            className="inline-flex items-center gap-2 text-[#2563EB] dark:text-[#3B82F6] hover:text-[#1D4ED8] dark:hover:text-[#1E40AF] transition-colors"
+          >
             <span aria-hidden="true">←</span> Back to recommendations
-          </Link>
+          </button>
         </div>
         {activeIdea && runQuery && (
           <OpenForCollaboratorsButton
@@ -633,43 +673,46 @@ export default function RecommendationDetail() {
       </div>
 
       {loading && (
-        <div className="rounded-3xl border border-blue-200 bg-blue-50/80 p-6 text-blue-800 shadow-soft">
-          <h2 className="text-lg font-semibold">Loading recommendation details...</h2>
-          <p className="mt-2 text-sm">Please wait while we load the data.</p>
+        <div className="rounded-3xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+          <h2 className="text-lg font-semibold text-[#1A1A1A] dark:text-[#EDEDED]">Loading recommendation details...</h2>
+          <p className="mt-2 text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">Please wait while we load the data.</p>
         </div>
       )}
 
       {!loading && !markdown && (
-        <div className="rounded-3xl border border-amber-200 bg-amber-50/80 p-6 text-amber-800 shadow-soft">
-          <h2 className="text-lg font-semibold">No report available</h2>
-          <p className="mt-2 text-sm">
+        <div className="rounded-3xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+          <h2 className="text-lg font-semibold text-[#1A1A1A] dark:text-[#EDEDED]">No report available</h2>
+          <p className="mt-2 text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">
             We couldn't find a saved recommendation report. Return to the home page to run a new session.
           </p>
         </div>
       )}
 
       {markdown && ideas.length > 0 && !activeIdea && (
-        <div className="rounded-3xl border border-amber-200 bg-amber-50/80 p-6 text-amber-800 shadow-soft">
-          <h2 className="text-lg font-semibold">Idea not found</h2>
-          <p className="mt-2 text-sm">
+        <div className="rounded-3xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+          <h2 className="text-lg font-semibold text-[#1A1A1A] dark:text-[#EDEDED]">Idea not found</h2>
+          <p className="mt-2 text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">
             Idea #{ideaIndex} not found in the recommendations. Available ideas: {ideas.map(i => i.index).join(", ")}
           </p>
-          <Link to={backPath} className="mt-4 inline-block text-sm font-semibold text-amber-900 underline">
+          <button
+            onClick={() => navigate(backPath, { state: backState })}
+            className="mt-4 inline-block text-sm font-semibold text-[#2563EB] dark:text-[#3B82F6] hover:underline"
+          >
             Back to recommendations
-          </Link>
+          </button>
         </div>
       )}
 
       {activeIdea && (
         <>
-          <article className="rounded-3xl bg-gradient-to-br from-brand-500 via-brand-600 to-brand-700 px-8 py-10 text-white shadow-soft shadow-brand-300/50">
-            <div className="flex items-center justify-between">
-              <p className="text-xs uppercase tracking-wide text-white/80">Idea #{activeIdea.index}</p>
+          <article className="rounded-3xl bg-white dark:bg-[#161B22] px-8 py-10 shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+            <div className="flex items-center justify-between mb-4 pb-4 border-b border-[rgba(0,0,0,0.06)] dark:border-[rgba(255,255,255,0.08)]">
+              <p className="text-xs uppercase tracking-wide text-[#7A7A7A] dark:text-[#8B949E]">Idea #{activeIdea.index}</p>
               {(actions.length > 0 || notes.length > 0) && (
                 <div className="flex items-center gap-2">
                   {actions.length > 0 && (
                     <span 
-                      className="inline-flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white"
+                      className="inline-flex items-center gap-1 rounded-2xl bg-[#EEF2FF] dark:bg-[rgba(99,102,241,0.15)] border dark:border-[rgba(99,102,241,0.35)] px-[10px] py-1 text-[13px] font-medium text-[#3730A3] dark:text-[#A5B4FC]"
                       title={`${actions.length} action item${actions.length !== 1 ? 's' : ''}`}
                     >
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -680,7 +723,7 @@ export default function RecommendationDetail() {
                   )}
                   {notes.length > 0 && (
                     <span 
-                      className="inline-flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white"
+                      className="inline-flex items-center gap-1 rounded-2xl bg-[#EEF2FF] dark:bg-[rgba(99,102,241,0.15)] border dark:border-[rgba(99,102,241,0.35)] px-[10px] py-1 text-[13px] font-medium text-[#3730A3] dark:text-[#A5B4FC]"
                       title={`${notes.length} note${notes.length !== 1 ? 's' : ''}`}
                     >
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -692,29 +735,70 @@ export default function RecommendationDetail() {
                 </div>
               )}
             </div>
-            <h1 className="mt-2 text-3xl font-semibold md:text-4xl">{activeIdea.title}</h1>
-            <p className="mt-4 max-w-3xl text-sm text-white/90 md:text-base">{heroStatement}</p>
+            <h1 className="text-[22px] font-semibold mb-2 text-[#1A1A1A] dark:text-[#EDEDED]">{activeIdea.title}</h1>
+            <p className="mt-4 max-w-3xl text-sm md:text-base text-[#3A3A3A] dark:text-[#C4C4C4]">{heroStatement}</p>
+            
+            {/* Idea Attributes */}
+            {activeIdea.timeline && (
+              <div className="mt-6">
+                <span className="text-xs font-medium text-[#7A7A7A] dark:text-[#8B949E] mb-2 block">Timeline</span>
+                <span className="inline-block rounded-full bg-[#FEE2E2] dark:bg-[rgba(239,68,68,0.20)] px-4 py-2 text-sm font-medium text-[#991B1B] dark:text-[#FCA5A5]">
+                  {activeIdea.timeline}
+                </span>
+              </div>
+            )}
+            
+            {activeIdea.validation_score && (
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-medium text-[#7A7A7A] dark:text-[#8B949E]">Validation Score</span>
+                  <span className="text-sm font-semibold text-[#16A34A] dark:text-[#22C55E]">{activeIdea.validation_score}/10</span>
+                </div>
+                <div className="h-[6px] rounded-[4px] bg-[rgba(22,163,74,0.15)] dark:bg-[rgba(34,197,94,0.15)] overflow-hidden">
+                  <div 
+                    className="h-full bg-[#16A34A] dark:bg-[#22C55E] rounded-[4px] transition-all"
+                    style={{ width: `${(parseInt(activeIdea.validation_score) / 10) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            
             {heroChips.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2">
                 {heroChips.map(({ label, value }) => (
                   <span
                     key={`${label}-${value}`}
-                    className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+                    className="rounded-2xl bg-[#EEF2FF] dark:bg-[rgba(99,102,241,0.15)] border dark:border-[rgba(99,102,241,0.35)] px-[10px] py-1 text-[13px] font-medium text-[#3730A3] dark:text-[#A5B4FC]"
                   >
                     {label}: {value}
                   </span>
                 ))}
               </div>
             )}
+            
+            {activeIdea.target_market && (
+              <div className="mt-4">
+                <span className="text-xs font-medium text-[#7A7A7A] dark:text-[#8B949E] mb-2 block">Target Market</span>
+                <p className="text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">{activeIdea.target_market}</p>
+              </div>
+            )}
+            
+            {activeIdea.revenue_model && (
+              <div className="mt-4">
+                <span className="text-xs font-medium text-[#7A7A7A] dark:text-[#8B949E] mb-2 block">Revenue Model</span>
+                <p className="text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">{activeIdea.revenue_model}</p>
+              </div>
+            )}
           </article>
 
           {fitNarrativeMarkdown && (
-            <CollapsibleSection
-              title="Why this Idea Fits You"
-              theme={getSectionTheme("Why this Idea Fits You")}
-              isOpen={openSections.has("why-fits")}
-              onToggle={() => toggleSection("why-fits")}
-            >
+            <div className="mt-6">
+              <CollapsibleSection
+                title="Why this Idea Fits You"
+                theme={getSectionTheme("Why this Idea Fits You")}
+                isOpen={openSections.has("why-fits")}
+                onToggle={() => toggleSection("why-fits")}
+              >
               {fitNarrativeMarkdown && (
                 <div className="mt-6 text-slate-700">
                   <style>{`
@@ -795,18 +879,20 @@ export default function RecommendationDetail() {
                 </div>
               )}
             </CollapsibleSection>
+            </div>
           )}
 
           {financialSnapshot.length > 0 && (
+            <div className="mt-6">
             <CollapsibleSection
               title="Financial snapshot"
               theme={getSectionTheme("Financial snapshot")}
               isOpen={openSections.has("financial")}
               onToggle={() => toggleSection("financial")}
             >
-              <div className="overflow-hidden rounded-2xl border border-amber-100 bg-white">
-                <table className="min-w-full divide-y divide-amber-100 text-sm">
-                  <thead className="bg-amber-100/60 text-left uppercase tracking-wide text-amber-700">
+              <div className="overflow-hidden rounded-2xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22]">
+                <table className="min-w-full divide-y divide-[#CBD5E1] dark:divide-[#2D3648] text-sm">
+                  <thead className="bg-[#F1F5F9] dark:bg-[#1F2937] text-left uppercase tracking-wide text-[#1A1A1A] dark:text-[#EDEDED]">
                     <tr>
                       <th className="px-4 py-3 w-10"></th>
                       <th className="px-4 py-3">Focus</th>
@@ -814,22 +900,24 @@ export default function RecommendationDetail() {
                       <th className="px-4 py-3 text-right">Benchmark</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-amber-100 text-slate-700">
+                  <tbody className="divide-y divide-[#CBD5E1] dark:divide-[#2D3648] text-[#3A3A3A] dark:text-[#C4C4C4]">
                     {financialSnapshot.map(({ focus, estimate, metric }, index) => (
                       <tr key={`${focus}-${index}`}>
-                        <td className="px-4 py-3 text-brand-500">✓</td>
-                        <td className="px-4 py-3 font-semibold text-amber-800">{focus}</td>
+                        <td className="px-4 py-3 text-[#16A34A] dark:text-[#22C55E]">✓</td>
+                        <td className="px-4 py-3 font-semibold text-[#1A1A1A] dark:text-[#EDEDED]">{focus}</td>
                         <td className="px-4 py-3">{estimate}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-amber-700">{metric}</td>
+                        <td className="px-4 py-3 text-right font-semibold text-[#1A1A1A] dark:text-[#EDEDED]">{metric}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </CollapsibleSection>
+            </div>
           )}
 
             {executionPhaseCards.length > 0 && (
+              <div className={financialSnapshot.length > 0 ? "mt-0" : "mt-6"}>
               <CollapsibleSection
                 title="Execution roadmap"
                 description="Move from validation to scale with focused sprints that match your capacity."
@@ -839,12 +927,12 @@ export default function RecommendationDetail() {
               >
               <div className="grid gap-4 md:grid-cols-2">
                 {executionPhaseCards.map((phase) => (
-                  <div key={phase.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-inner">
-                    <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">{phase.title}</h3>
-                    <ol className="mt-3 space-y-2 text-sm text-slate-700">
+                  <div key={phase.title} className="rounded-2xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+                    <h3 className="text-sm font-semibold uppercase tracking-wide text-[#7A7A7A] dark:text-[#8B949E]">{phase.title}</h3>
+                    <ol className="mt-3 space-y-2 text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">
                       {phase.items.map((item) => (
                         <li key={item.index} className="flex gap-3">
-                          <span className="min-w-[2.25rem] rounded-full bg-brand-100 px-2 py-1 text-center font-semibold text-brand-700">
+                          <span className="min-w-[2.25rem] rounded-full bg-[#EEF2FF] dark:bg-[rgba(99,102,241,0.15)] px-2 py-1 text-center font-semibold text-[#3730A3] dark:text-[#A5B4FC]">
                             {item.index}
                           </span>
                           <span>{item.text}</span>
@@ -855,39 +943,43 @@ export default function RecommendationDetail() {
                 ))}
               </div>
             </CollapsibleSection>
+            </div>
           )}
 
           {riskRows.length > 0 && (
+            <div className="mt-6">
             <CollapsibleSection
               title="Risk radar"
               theme={getSectionTheme("Risk radar")}
               isOpen={openSections.has("risk")}
               onToggle={() => toggleSection("risk")}
             >
-              <div className="overflow-hidden rounded-2xl border border-slate-200">
-                <table className="min-w-full divide-y divide-slate-200 text-sm">
-                  <thead className="bg-brand-500/10 text-left uppercase tracking-wide text-slate-500">
+              <div className="overflow-hidden rounded-2xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22]">
+                <table className="min-w-full divide-y divide-[#CBD5E1] dark:divide-[#2D3648] text-sm">
+                  <thead className="bg-[#F1F5F9] dark:bg-[#1F2937] text-left uppercase tracking-wide text-[#1A1A1A] dark:text-[#EDEDED]">
                     <tr>
                       <th className="px-4 py-3">Risk</th>
                       <th className="px-4 py-3 w-32">Severity</th>
                       <th className="px-4 py-3">Early mitigation</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
+                  <tbody className="divide-y divide-[#CBD5E1] dark:divide-[#2D3648]">
                     {riskRows.map((row, index) => (
                       <tr key={index}>
-                        <td className="px-4 py-3 text-slate-700">{row.risk}</td>
-                        <td className="px-4 py-3 font-semibold text-slate-600">{row.severity}</td>
-                        <td className="px-4 py-3 text-slate-700">{row.mitigation}</td>
+                        <td className="px-4 py-3 text-[#3A3A3A] dark:text-[#C4C4C4]">{row.risk}</td>
+                        <td className="px-4 py-3 font-semibold text-[#1A1A1A] dark:text-[#EDEDED]">{row.severity}</td>
+                        <td className="px-4 py-3 text-[#3A3A3A] dark:text-[#C4C4C4]">{row.mitigation}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </CollapsibleSection>
+            </div>
           )}
 
           {marketInsights.length > 0 && (
+            <div className="mt-6">
             <CollapsibleSection
               title="Market signals"
               description="Trends and proof points worth validating as you move forward."
@@ -895,21 +987,23 @@ export default function RecommendationDetail() {
               isOpen={openSections.has("market")}
               onToggle={() => toggleSection("market")}
             >
-              <ul className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+              <ul className="space-y-3 text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">
                 {marketInsights.map((insight, index) => (
                   <li
                     key={index}
-                    className="flex gap-3 rounded-2xl border border-teal-100 dark:border-teal-800 bg-white/90 dark:bg-slate-700/50 p-3 shadow-inner"
+                    className="flex gap-3 rounded-2xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
                   >
-                    <span className="mt-1 text-teal-500">📈</span>
+                    <span className="mt-1 text-[#2563EB] dark:text-[#3B82F6]">📈</span>
                     <span>{insight}</span>
                   </li>
                 ))}
               </ul>
             </CollapsibleSection>
+            </div>
           )}
 
           {(personaMarkdown || validationQuestions.length > 0) && (
+            <div className="mt-6">
             <CollapsibleSection
               title="Customer Persona & Validation Questions"
               description="Understand your ideal customer profile and use these validation questions to confirm demand and buying triggers."
@@ -919,22 +1013,22 @@ export default function RecommendationDetail() {
             >
               <div className="space-y-6">
                 {personaMarkdown && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Customer Persona</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                  <div className="mt-6 pb-6 border-b border-[rgba(0,0,0,0.06)] dark:border-[rgba(255,255,255,0.08)]">
+                    <h3 className="text-lg font-semibold text-[#1A1A1A] dark:text-[#EDEDED] mb-2 border-l-4 border-[#2563EB] dark:border-[#3B82F6] pl-3">Customer Persona</h3>
+                    <p className="text-sm text-[#7A7A7A] dark:text-[#8B949E] mb-3">
                       A detailed profile of your ideal customer—their demographics, pain points, goals, and buying behavior.
                     </p>
-                    <div className="rounded-2xl border border-violet-100 dark:border-violet-800 bg-white/90 dark:bg-slate-700/50 p-4 shadow-inner">
+                    <div className="rounded-2xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
                       <ReactMarkdown
                         components={{
                           p: ({ node, ...props }) => (
-                            <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-3" {...props} />
+                            <p className="text-[#3A3A3A] dark:text-[#C4C4C4] leading-relaxed mb-3" {...props} />
                           ),
                           strong: ({ node, ...props }) => (
-                            <strong className="font-semibold text-slate-900 dark:text-slate-100" {...props} />
+                            <strong className="font-semibold text-[#1A1A1A] dark:text-[#EDEDED]" {...props} />
                           ),
                           ul: ({ node, ...props }) => (
-                            <ul className="list-disc list-outside space-y-2 text-slate-700 dark:text-slate-300 mb-3 ml-5" {...props} />
+                            <ul className="list-disc list-outside space-y-2 text-[#3A3A3A] dark:text-[#C4C4C4] mb-3 ml-5" {...props} />
                           ),
                           li: ({ node, ...props }) => (
                             <li className="leading-relaxed" {...props} />
@@ -948,23 +1042,23 @@ export default function RecommendationDetail() {
                 )}
 
                 {validationQuestions.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Validation Questions</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold text-[#1A1A1A] dark:text-[#EDEDED] mb-2 border-l-4 border-[#2563EB] dark:border-[#3B82F6] pl-3">Validation Questions</h3>
+                    <p className="text-sm text-[#7A7A7A] dark:text-[#8B949E] mb-3">
                       Ask these during discovery interviews, quick surveys, or pilot onboarding to confirm demand, willingness to pay, and whether the idea solves the right pain.
                     </p>
                     <div className="grid gap-4 md:grid-cols-2">
                       {validationQuestions.map(({ question, listenFor, actOn }, index) => (
                         <div
                           key={index}
-                          className="rounded-2xl border border-brand-100 dark:border-brand-800 bg-brand-50/70 dark:bg-brand-900/30 p-4 text-sm text-slate-800 dark:text-slate-200 shadow-inner"
+                          className="rounded-2xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] p-4 text-sm shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
                         >
-                          <p className="font-semibold text-brand-700 dark:text-brand-400">Question {index + 1}</p>
-                          <p className="mt-2 text-sm">{question}</p>
-                          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                          <p className="font-semibold text-[#2563EB] dark:text-[#3B82F6]">Question {index + 1}</p>
+                          <p className="mt-2 text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">{question}</p>
+                          <p className="mt-3 text-xs text-[#7A7A7A] dark:text-[#8B949E]">
                             <strong>What to listen for:</strong> {listenFor}
                           </p>
-                          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                          <p className="mt-2 text-xs text-[#7A7A7A] dark:text-[#8B949E]">
                             <strong>Act on it:</strong> {actOn}
                           </p>
                         </div>
@@ -974,6 +1068,7 @@ export default function RecommendationDetail() {
                 )}
               </div>
             </CollapsibleSection>
+            </div>
           )}
 
           {(immediateExperimentsList.length > 0 ||
@@ -986,10 +1081,10 @@ export default function RecommendationDetail() {
                   isOpen={openSections.has("experiments")}
                   onToggle={() => toggleSection("experiments")}
                 >
-                  <ul className="space-y-2 text-sm text-slate-700">
+                  <ul className="space-y-2 text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">
                     {immediateExperimentsList.map((item, index) => (
                       <li key={index} className="flex gap-2">
-                        <span className="mt-1 text-brand-500">•</span>
+                        <span className="mt-1 text-[#2563EB] dark:text-[#3B82F6]">•</span>
                         <span>{item}</span>
                       </li>
                     ))}
@@ -998,43 +1093,63 @@ export default function RecommendationDetail() {
               )}
               {immediateNextSteps.length > 0 && (
                 <CollapsibleSection
-                  title="Immediate next moves"
+                  title={discoveryNextSteps ? "Early-stage next steps" : "Immediate next moves"}
                   theme={getSectionTheme("Next moves")}
                   isOpen={openSections.has("next-steps")}
                   onToggle={() => toggleSection("next-steps")}
                 >
-                  <ul className="space-y-2 text-sm text-slate-700">
-                    {immediateNextSteps.map((item, index) => (
-                      <li key={index} className="flex gap-2">
-                        <span className="mt-1 text-brand-500">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {discoveryNextSteps ? (
+                    <div className="prose prose-slate max-w-none">
+                      <ReactMarkdown
+                        components={{
+                          ul: ({ node, ...props }) => (
+                            <ul className="space-y-2 text-sm text-[#3A3A3A] dark:text-[#C4C4C4] list-disc list-inside" {...props} />
+                          ),
+                          li: ({ node, ...props }) => (
+                            <li className="leading-relaxed" {...props} />
+                          ),
+                        }}
+                      >
+                        {discoveryNextSteps}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <ul className="space-y-2 text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">
+                      {immediateNextSteps.map((item, index) => (
+                        <li key={index} className="flex gap-2">
+                          <span className="mt-1 text-[#2563EB] dark:text-[#3B82F6]">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </CollapsibleSection>
               )}
             </div>
           )}
 
             {decisionChecklist.length > 0 && (
+              <div className="mt-6">
               <CollapsibleSection
                 title="Decision checkpoint"
                 theme={getSectionTheme("Decision checkpoint")}
                 isOpen={openSections.has("decision")}
                 onToggle={() => toggleSection("decision")}
               >
-              <ul className="space-y-2 text-sm text-slate-700">
+              <ul className="space-y-2 text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">
                 {decisionChecklist.map((item, index) => (
                   <li key={index} className="flex gap-2">
-                    <span className="mt-1 text-brand-500">•</span>
+                    <span className="mt-1 text-[#2563EB] dark:text-[#3B82F6]">•</span>
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
             </CollapsibleSection>
+            </div>
           )}
 
             {roadmapMarkdown && (
+              <div className="mt-6">
               <CollapsibleSection
                 title="30/60/90 day outlook"
                 theme={getSectionTheme("30/60/90 day outlook")}
@@ -1043,9 +1158,9 @@ export default function RecommendationDetail() {
               >
               <div className="grid gap-4 md:grid-cols-3">
                 {["0-30 Days", "30-60 Days", "60-90 Days"].map((window, index) => (
-                  <div key={window} className="rounded-2xl border border-brand-100 bg-white/95 p-4 shadow-inner">
-                    <p className="text-xs uppercase tracking-wide text-brand-500">{window}</p>
-                    <div className="mt-2 text-sm text-slate-700">
+                  <div key={window} className="rounded-2xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+                    <p className="text-xs uppercase tracking-wide text-[#2563EB] dark:text-[#3B82F6]">{window}</p>
+                    <div className="mt-2 text-sm text-[#3A3A3A] dark:text-[#C4C4C4]">
                       <ReactMarkdown>
                         {extractTimelineSlice(roadmapMarkdown, index)}
                       </ReactMarkdown>
@@ -1054,9 +1169,11 @@ export default function RecommendationDetail() {
                 ))}
               </div>
             </CollapsibleSection>
+            </div>
           )}
 
             {additionalSections.length > 0 && (
+              <div className="mt-6">
               <CollapsibleSection
                 title="Additional insights"
                 theme={getSectionTheme("Additional insights")}
@@ -1065,21 +1182,23 @@ export default function RecommendationDetail() {
               >
               <div className="grid gap-4">
                 {additionalSections.map((section) => (
-                  <div key={section.heading} className="rounded-2xl border border-slate-100 bg-white/90 p-5">
-                    <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                  <div key={section.heading} className="rounded-2xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
+                    <h3 className="text-sm font-semibold uppercase tracking-wide text-[#7A7A7A] dark:text-[#8B949E] border-l-4 border-[#2563EB] dark:border-[#3B82F6] pl-3">
                       {formatSectionHeading(section.heading)}
                     </h3>
-                    <div className="mt-3 prose prose-slate">
+                    <div className="mt-3 prose prose-slate text-[#3A3A3A] dark:text-[#C4C4C4]">
                       <ReactMarkdown>{section.content}</ReactMarkdown>
                     </div>
                   </div>
                 ))}
               </div>
             </CollapsibleSection>
+            </div>
           )}
 
           {/* Action Items Section */}
           {isAuthenticated && (
+            <div className="mt-6">
             <CollapsibleSection
               title="Action Items"
               description="Track your progress on this idea. Mark items as completed as you work through them."
@@ -1096,12 +1215,12 @@ export default function RecommendationDetail() {
                     onChange={(e) => setNewActionText(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleCreateAction()}
                     placeholder="Add a new action item..."
-                    className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                    className="flex-1 rounded-lg border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] px-3 py-2 text-sm text-[#1A1A1A] dark:text-[#EDEDED] focus:border-[#2563EB] dark:focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 dark:focus:ring-[#3B82F6]/20"
                   />
                   <button
                     onClick={handleCreateAction}
                     disabled={!newActionText.trim()}
-                    className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:opacity-50"
+                    className="rounded-lg bg-[#2563EB] dark:bg-[#2563EB] hover:bg-[#1D4ED8] dark:hover:bg-[#1E40AF] px-4 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-50"
                   >
                     Add
                   </button>
@@ -1156,10 +1275,12 @@ export default function RecommendationDetail() {
                 )}
               </div>
             </CollapsibleSection>
+            </div>
           )}
 
           {/* Notes Section */}
           {isAuthenticated && (
+            <div className="mt-6">
             <CollapsibleSection
               title="Notes & Journal"
               description="Capture your thoughts, insights, customer feedback, and research findings for this idea."
@@ -1175,12 +1296,12 @@ export default function RecommendationDetail() {
                     onChange={(e) => setNewNoteContent(e.target.value)}
                     placeholder="Add a note... (e.g., customer interview insights, pivot ideas, market research)"
                     rows={4}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                    className="w-full rounded-lg border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] px-3 py-2 text-sm text-[#1A1A1A] dark:text-[#EDEDED] focus:border-[#2563EB] dark:focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 dark:focus:ring-[#3B82F6]/20"
                   />
                   <button
                     onClick={handleCreateNote}
                     disabled={!newNoteContent.trim()}
-                    className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600 disabled:opacity-50"
+                    className="rounded-lg bg-[#2563EB] dark:bg-[#2563EB] hover:bg-[#1D4ED8] dark:hover:bg-[#1E40AF] px-4 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-50"
                   >
                     Save Note
                   </button>
@@ -1188,18 +1309,18 @@ export default function RecommendationDetail() {
 
                 {/* Notes list */}
                 {loadingNotes ? (
-                  <p className="text-sm text-slate-500">Loading notes...</p>
+                  <p className="text-sm text-[#7A7A7A] dark:text-[#8B949E]">Loading notes...</p>
                 ) : notes.length === 0 ? (
-                  <p className="text-sm text-slate-500">No notes yet. Add one above to start tracking your insights!</p>
+                  <p className="text-sm text-[#7A7A7A] dark:text-[#8B949E]">No notes yet. Add one above to start tracking your insights!</p>
                 ) : (
                   <div className="space-y-3">
                     {notes.map((note) => (
                       <div
                         key={note.id}
-                        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+                        className="rounded-lg border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
                       >
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-[#7A7A7A] dark:text-[#8B949E]">
                             {note.created_at ? (() => {
                               try {
                                 const date = new Date(note.created_at);
@@ -1210,16 +1331,16 @@ export default function RecommendationDetail() {
                             })() : "Unknown date"}
                           </span>
                           {note.updated_at && note.created_at && note.updated_at !== note.created_at && (
-                            <span className="text-xs text-slate-400">(edited)</span>
+                            <span className="text-xs text-[#7A7A7A] dark:text-[#8B949E]">(edited)</span>
                           )}
                         </div>
-                        <p className="whitespace-pre-wrap text-sm text-slate-900">{note.content}</p>
+                        <p className="whitespace-pre-wrap text-sm text-[#1A1A1A] dark:text-[#EDEDED]">{note.content}</p>
                         {note.tags && note.tags.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1">
                             {note.tags.map((tag, idx) => (
                               <span
                                 key={idx}
-                                className="rounded-full bg-brand-100 px-2 py-0.5 text-xs text-brand-700"
+                                className="rounded-2xl bg-[#EEF2FF] dark:bg-[rgba(99,102,241,0.15)] border dark:border-[rgba(99,102,241,0.35)] px-[10px] py-1 text-[13px] font-medium text-[#3730A3] dark:text-[#A5B4FC]"
                               >
                                 {tag}
                               </span>
@@ -1232,21 +1353,35 @@ export default function RecommendationDetail() {
                 )}
               </div>
             </CollapsibleSection>
+            </div>
           )}
 
-          <div className="flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              onClick={async () => {
+                if (!activeIdea) return;
+                const result = await validateRecommendationIdea(activeIdea, inputs, reports?.profile_analysis);
+                if (result.success && result.validation?.id) {
+                  navigate(`/validate-result?id=${result.validation.id}`);
+                }
+              }}
+              disabled={validating || !activeIdea}
+              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-not-allowed px-4 py-[10px] text-sm font-semibold text-white transition-colors"
+            >
+              {validating ? "Validating..." : "Validate Idea"}
+            </button>
             <Link
               to={runQuery ? `/results/recommendations/full?id=${runQuery}` : "/results/recommendations/full"}
-              className="inline-flex items-center gap-2 rounded-xl border border-brand-300 bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:border-brand-400 hover:text-brand-800"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] dark:bg-[#2563EB] hover:bg-[#1D4ED8] dark:hover:bg-[#1E40AF] px-4 py-[10px] text-sm font-semibold text-white transition-colors"
             >
               View full recommendation report
             </Link>
-            <Link
-              to={backPath}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-brand-300 hover:text-brand-800"
+            <button
+              onClick={() => navigate(backPath, { state: backState })}
+              className="inline-flex items-center gap-2 rounded-lg border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] hover:bg-[#F1F5F9] dark:hover:bg-[#1F2937] px-4 py-[10px] text-sm font-semibold text-[#3A3A3A] dark:text-[#D1D5DB] transition-colors"
             >
               Back to top ideas
-            </Link>
+            </button>
           </div>
 
           {/* Explore other ideas section removed based on feedback */}
@@ -1314,13 +1449,26 @@ const PANEL_THEMES = [
 ];
 
 function buildProfilePanels(inputs = {}) {
+  // Extract skills as string from structured object
+  let skillsStr = "";
+  if (inputs?.skills && typeof inputs.skills === "object") {
+    const skillParts = [];
+    if (inputs.skills.technical?.length > 0) skillParts.push(`Technical: ${inputs.skills.technical.join(", ")}`);
+    if (inputs.skills.creative?.length > 0) skillParts.push(`Creative: ${inputs.skills.creative.join(", ")}`);
+    if (inputs.skills.business?.length > 0) skillParts.push(`Business: ${inputs.skills.business.join(", ")}`);
+    if (inputs.skills.soft?.length > 0) skillParts.push(`Soft: ${inputs.skills.soft.join(", ")}`);
+    if (inputs.skills.physical?.length > 0) skillParts.push(`Physical: ${inputs.skills.physical.join(", ")}`);
+    if (inputs.skills.other?.trim()) skillParts.push(inputs.skills.other);
+    skillsStr = skillParts.join("; ");
+  }
+  
   const cleaned = {
-    goal: personalizeCopy(inputs?.goal_type ?? ""),
-    focus: personalizeCopy(inputs?.sub_interest_area ?? inputs?.interest_area ?? ""),
+    goal: personalizeCopy(inputs?.founder_ambition ?? ""),
+    focus: personalizeCopy(inputs?.sub_interest_area ?? inputs?.industry_interest ?? ""),
     time: personalizeCopy(inputs?.time_commitment ?? ""),
     budget: personalizeCopy(inputs?.budget_range ?? ""),
-    workStyle: personalizeCopy(inputs?.work_style ?? ""),
-    skill: personalizeCopy(inputs?.skill_strength ?? ""),
+    workStyle: personalizeCopy(inputs?.preferred_work_style ?? ""),
+    skill: personalizeCopy(skillsStr),
     experience: personalizeCopy(inputs?.experience_summary ?? ""),
   };
 

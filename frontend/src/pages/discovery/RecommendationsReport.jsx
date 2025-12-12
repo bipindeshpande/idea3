@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 // Lazy load PDF dependencies - only load when needed
 // import html2canvas from "html2canvas";
 // import jsPDF from "jspdf";
 import Seo from "../../components/common/Seo.jsx";
 import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useValidation } from "../../context/ValidationContext.jsx";
 import { trimFromHeading, parseTopIdeas } from "../../utils/markdown/markdown.js";
 import { personalizeCopy, buildFinalConclusion, parseRecommendationMatrix, splitFullReportSections } from "../../utils/formatters/recommendationFormatters.js";
 import { parseStructuredIdeas } from "../../utils/streamingParser.js";
@@ -16,14 +17,20 @@ function useQuery() {
 }
 
 export default function RecommendationsReport() {
-  const { reports, loadRunById, currentRunId, inputs } = useReports();
+  const { reports, loadRunById, currentRunId, inputs, loadFromRecentDiscoveryCache } = useReports();
   const { subscription, getAuthHeaders, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const query = useQuery();
   const runId = query.get("id");
   const reportRef = useRef(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("ideas");
+  
+  // Check for cached recommendations from navigation state
+  const cachedRecommendations = location.state?.recommendations;
+  const cachedIdeas = location.state?.allIdeas;
   const [smartRecommendations, setSmartRecommendations] = useState(null);
   const [ideasWithActions, setIdeasWithActions] = useState(new Set());
   const [ideasWithNotes, setIdeasWithNotes] = useState(new Set());
@@ -31,12 +38,82 @@ export default function RecommendationsReport() {
   const [enhancementsLoading, setEnhancementsLoading] = useState(false);
   const [enhancementsStarted, setEnhancementsStarted] = useState(false);
   const abortControllerRef = useRef(null);
+  const hasLoadedFromCacheRef = useRef(false); // Track if we've loaded from cache to prevent re-triggers
   const isPro = subscription && (subscription.subscription_type === "pro" || subscription.subscription_type === "weekly");
 
+  // Use cached reports from state if available, otherwise use context reports
+  // Must be declared BEFORE useEffect that uses it
+  // Also check localStorage recentDiscovery if context reports are missing
+  const getCachedReportsFromLocalStorage = () => {
+    if (cachedRecommendations || reports) {
+      return null; // Already have reports, no need to check localStorage
+    }
+    try {
+      const recentDiscovery = localStorage.getItem("recentDiscovery");
+      if (recentDiscovery) {
+        const parsed = JSON.parse(recentDiscovery);
+        if (parsed.reports && parsed.reports.personalized_recommendations) {
+          return parsed.reports;
+        }
+      }
+    } catch (e) {
+      // Ignore errors
+    }
+    return null;
+  };
+  
+  const localStorageReports = getCachedReportsFromLocalStorage();
+  const effectiveReports = cachedRecommendations || reports || localStorageReports;
+  const effectiveInputs = location.state?.inputs || inputs;
+
   useEffect(() => {
+    // CRITICAL: If we already have effectiveReports (from any source), never call API
+    if (effectiveReports && effectiveReports.personalized_recommendations) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log("[RecommendationsReport] Already have reports, skipping API call", {
+          hasCachedRecommendations: !!cachedRecommendations,
+          hasReports: !!reports,
+          hasLocalStorageReports: !!localStorageReports
+        });
+      }
+      setIsLoading(false);
+      hasLoadedFromCacheRef.current = true;
+      return;
+    }
+    
+    // If we've already processed this runId, don't run again
+    if (hasLoadedFromCacheRef.current) {
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
-    if (runId) {
+    
+    // Priority 1: Use cached recommendations from navigation state
+    if (cachedRecommendations && cachedRecommendations.personalized_recommendations) {
+      hasLoadedFromCacheRef.current = true;
+      setIsLoading(false);
+      return;
+    }
+    
+    // Priority 2: Check localStorage for recent discovery
+    if (!runId) {
+      const cachedReports = loadFromRecentDiscoveryCache();
+      if (cachedReports && cachedReports.personalized_recommendations) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log("[RecommendationsReport] Loaded from localStorage cache");
+        }
+        hasLoadedFromCacheRef.current = true;
+        setIsLoading(false);
+        return;
+      }
+    }
+    
+    // Priority 3: Only call API if we have a runId AND no cached data exists
+    if (runId && !reports && !cachedRecommendations && !localStorageReports) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log("[RecommendationsReport] Loading from API with runId:", runId);
+      }
       const loadData = async () => {
         try {
           const result = await loadRunById(runId);
@@ -45,6 +122,8 @@ export default function RecommendationsReport() {
               console.warn("Run not found:", runId);
             }
             setError(`Report not found. The report ID "${runId}" may be invalid or may have been deleted.`);
+          } else {
+            hasLoadedFromCacheRef.current = true;
           }
         } catch (err) {
           if (process.env.NODE_ENV === 'development') {
@@ -57,13 +136,22 @@ export default function RecommendationsReport() {
       };
       loadData();
     } else {
-      // No runId provided - check if we have current reports
-      if (!reports || !reports.personalized_recommendations) {
+      // No runId and no cached data - show error but don't call API
+      if (process.env.NODE_ENV === 'development') {
+        console.log("[RecommendationsReport] No runId and no cached data available");
+      }
+      if (!effectiveReports || !effectiveReports.personalized_recommendations) {
         setError("No report ID provided. Please select a report from your dashboard.");
       }
+      hasLoadedFromCacheRef.current = true;
       setIsLoading(false);
     }
-  }, [runId, loadRunById]);
+  }, [runId, loadRunById, cachedRecommendations, loadFromRecentDiscoveryCache, effectiveReports, reports, localStorageReports]);
+  
+  // Reset the ref when runId changes (user views different report)
+  useEffect(() => {
+    hasLoadedFromCacheRef.current = false;
+  }, [runId]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -77,9 +165,15 @@ export default function RecommendationsReport() {
             if (data.success) {
               setSmartRecommendations(data.insights);
             }
+          } else if (response.status === 401) {
+            // Auth failed - don't log error, just skip loading
+            console.warn("Authentication failed for smart recommendations");
           }
         } catch (error) {
-          console.error("Failed to load smart recommendations:", error);
+          // Only log non-network errors
+          if (error.name !== 'TypeError' || !error.message.includes('fetch')) {
+            console.error("Failed to load smart recommendations:", error);
+          }
         }
       };
       
@@ -100,6 +194,9 @@ export default function RecommendationsReport() {
               });
               setIdeasWithActions(ideaIdsWithActions);
             }
+          } else if (actionsResponse.status === 401) {
+            // Auth failed - don't log error, just skip loading
+            console.warn("Authentication failed for actions");
           }
           
           // Load all notes
@@ -117,9 +214,15 @@ export default function RecommendationsReport() {
               });
               setIdeasWithNotes(ideaIdsWithNotes);
             }
+          } else if (notesResponse.status === 401) {
+            // Auth failed - don't log error, just skip loading
+            console.warn("Authentication failed for notes");
           }
         } catch (error) {
-          console.error("Failed to load actions/notes:", error);
+          // Only log non-network errors
+          if (error.name !== 'TypeError' || !error.message.includes('fetch')) {
+            console.error("Failed to load actions/notes:", error);
+          }
         }
       };
       
@@ -130,7 +233,7 @@ export default function RecommendationsReport() {
 
   // Smart detection for enhancements: Start if user scrolls or stays >30s
   useEffect(() => {
-    if (!isAuthenticated || !runId || enhancementsStarted || !reports?.personalized_recommendations) {
+    if (!isAuthenticated || !runId || enhancementsStarted || !effectiveReports?.personalized_recommendations) {
       return;
     }
 
@@ -192,19 +295,25 @@ export default function RecommendationsReport() {
         if (data.success) {
           setEnhancements(data.enhancements);
         }
+      } else if (response.status === 401) {
+        // Auth failed - don't log error, just skip loading
+        console.warn("Authentication failed for enhancements");
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
-        console.error("Failed to load enhancements:", error);
+        // Only log non-network errors
+        if (error.name !== 'TypeError' || !error.message.includes('fetch')) {
+          console.error("Failed to load enhancements:", error);
+        }
       }
     } finally {
       setEnhancementsLoading(false);
     }
   };
-
+  
   const markdown = useMemo(() => {
     try {
-      let raw = reports?.personalized_recommendations ?? "";
+      let raw = effectiveReports?.personalized_recommendations ?? "";
       
       // Fix concatenated text (add spaces between words)
       // Pattern: lowercase letter followed by uppercase = word boundary
@@ -222,22 +331,22 @@ export default function RecommendationsReport() {
       if (process.env.NODE_ENV === 'development') {
         console.error("Error trimming markdown:", err);
       }
-      return reports?.personalized_recommendations ?? "";
+      return effectiveReports?.personalized_recommendations ?? "";
     }
-  }, [reports]);
+  }, [effectiveReports]);
 
   // Check if structured recommendations are available from backend
   const structuredRecommendations = useMemo(() => {
     try {
       // Check if reports contain structured recommendations
-      if (reports && typeof reports === 'object') {
+      if (effectiveReports && typeof effectiveReports === 'object') {
         // Check if reports.recommendations_structured exists (from backend)
-        if (reports.recommendations_structured && Array.isArray(reports.recommendations_structured)) {
-          return reports.recommendations_structured;
+        if (effectiveReports.recommendations_structured && Array.isArray(effectiveReports.recommendations_structured)) {
+          return effectiveReports.recommendations_structured;
         }
         // Also check if reports is the run object with reports field
-        if (reports.reports && reports.reports.recommendations_structured) {
-          return reports.reports.recommendations_structured;
+        if (effectiveReports.reports && effectiveReports.reports.recommendations_structured) {
+          return effectiveReports.reports.recommendations_structured;
         }
       }
       return null;
@@ -247,11 +356,16 @@ export default function RecommendationsReport() {
       }
       return null;
     }
-  }, [reports]);
+  }, [effectiveReports]);
 
   const allIdeas = useMemo(() => {
     try {
-      // If structured recommendations available, use them directly
+      // Priority 1: Use cached ideas from navigation state
+      if (cachedIdeas && Array.isArray(cachedIdeas) && cachedIdeas.length > 0) {
+        return cachedIdeas;
+      }
+      
+      // Priority 2: If structured recommendations available, use them directly
       if (structuredRecommendations && Array.isArray(structuredRecommendations) && structuredRecommendations.length > 0) {
         return structuredRecommendations.map((rec) => ({
           index: rec.index || 0,
@@ -261,12 +375,13 @@ export default function RecommendationsReport() {
           revenue_model: rec.revenue_model || "",
           validation_score: rec.validation_score || "",
           timeline: rec.timeline || "",
-          why_this_fits: rec.why_this_fits || ""
+          why_this_fits: rec.why_this_fits || "",
+          enrichment: rec.enrichment || {} // Preserve enrichment.next_steps
         }));
       }
       
-      // Try parsing structured format from markdown text
-      const raw = reports?.personalized_recommendations || "";
+      // Priority 3: Try parsing structured format from markdown text
+      const raw = effectiveReports?.personalized_recommendations || "";
       const structuredParsed = parseStructuredIdeas(raw);
       if (structuredParsed && structuredParsed.length > 0) {
         return structuredParsed;
@@ -281,9 +396,14 @@ export default function RecommendationsReport() {
       }
       return [];
     }
-  }, [markdown, structuredRecommendations, reports]);
+  }, [markdown, structuredRecommendations, effectiveReports, cachedIdeas]);
   const topIdeas = allIdeas.slice(0, 3);
   const secondaryIdeas = allIdeas.slice(3);
+  
+  // Get lightweight next_steps from top idea's enrichment (generated during discovery)
+  const topIdeaNextSteps = topIdeas.length > 0 && topIdeas[0]?.enrichment?.next_steps 
+    ? topIdeas[0].enrichment.next_steps 
+    : null;
 
   // Extract matrix data for conclusion
   const sections = useMemo(() => {
@@ -310,7 +430,7 @@ export default function RecommendationsReport() {
   
   const finalConclusion = useMemo(() => {
     try {
-      return buildFinalConclusion(topIdeas, matrixRows, inputs || {});
+      return buildFinalConclusion(topIdeas, matrixRows, effectiveInputs || {});
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
         console.error("Error building conclusion:", err);
@@ -628,12 +748,23 @@ export default function RecommendationsReport() {
                             </td>
                             <td className="px-4 py-3 text-slate-600">{personalizeCopy(idea.summary)}</td>
                             <td className="px-4 py-3">
-                              <Link
-                                to={detailPath}
+                              <button
+                                onClick={() => {
+                                  // Pass all ideas via navigation state to avoid API calls
+                                  navigate(detailPath, {
+                                    state: {
+                                      idea: idea,
+                                      allIdeas: allIdeas, // Pass full list to preserve when navigating back
+                                      recommendations: effectiveReports,
+                                      runId: runId || currentRunId,
+                                      inputs: effectiveInputs
+                                    }
+                                  });
+                                }}
                                 className="mx-auto flex max-w-[8rem] justify-center rounded-full bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:brightness-105 whitespace-nowrap"
                               >
                                 View details
-                              </Link>
+                              </button>
                             </td>
                           </tr>
                         );
@@ -671,45 +802,81 @@ export default function RecommendationsReport() {
                   <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Start Here</span>
                 </div>
                 <p className="mb-6 text-slate-600">
-                  Follow these specific steps to move forward with your startup ideas.
+                  Follow these personalized, actionable steps to move your startup idea forward. Each step is tailored to your profile, constraints, and top recommendation.
                 </p>
-                <ol className="ml-6 space-y-4 text-slate-700">
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">1</span>
-                    <div>
-                      <strong className="font-semibold text-slate-900">Review all 3 recommendations</strong>
-                      <p className="mt-1 text-sm text-slate-600">Click "View details" on each idea to see the full analysis, financial outlook, and execution roadmap.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">2</span>
-                    <div>
-                      <strong className="font-semibold text-slate-900">Validate your top choice</strong>
-                      <p className="mt-1 text-sm text-slate-600">Use our validation tool to get detailed feedback on your selected idea across 10 key parameters.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">3</span>
-                    <div>
-                      <strong className="font-semibold text-slate-900">Talk to potential customers</strong>
-                      <p className="mt-1 text-sm text-slate-600">Reach out to 10 people in your target market this week. Use the customer validation questions from the detailed reports.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">4</span>
-                    <div>
-                      <strong className="font-semibold text-slate-900">Create a simple prototype or landing page</strong>
-                      <p className="mt-1 text-sm text-slate-600">Within 30 days, build a minimal version to test interest. Use tools like Carrd, Webflow, or no-code platforms.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">5</span>
-                    <div>
-                      <strong className="font-semibold text-slate-900">Download templates and resources</strong>
-                      <p className="mt-1 text-sm text-slate-600">Access our business plan template, pitch deck template, and email templates from the Resources section.</p>
-                    </div>
-                  </li>
-                </ol>
+                
+                {topIdeaNextSteps && (
+                  <div className="prose prose-slate max-w-none">
+                    <ReactMarkdown
+                      components={{
+                        ul: ({ node, ...props }) => (
+                          <ul className="list-disc list-outside space-y-3 text-slate-700 mb-4 ml-6" {...props} />
+                        ),
+                        li: ({ node, ...props }) => (
+                          <li className="leading-relaxed text-base text-slate-700" {...props} />
+                        ),
+                        p: ({ node, ...props }) => (
+                          <p className="text-slate-700 leading-relaxed mb-3" {...props} />
+                        ),
+                      }}
+                    >
+                      {topIdeaNextSteps}
+                    </ReactMarkdown>
+                  </div>
+                )}
+                
+                {!topIdeaNextSteps && (
+                  <div className="space-y-4 text-slate-700">
+                    <p className="text-slate-600 italic">Generating personalized next steps based on your top recommendation...</p>
+                    <ol className="ml-6 space-y-3 list-decimal">
+                      <li className="flex items-start gap-3">
+                        <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">1</span>
+                        <div>
+                          <strong className="font-semibold text-slate-900">Review your top 3 recommendations</strong>
+                          <p className="mt-1 text-sm text-slate-600">Click "View details" on each idea to see the full analysis, financial outlook, and execution roadmap.</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">2</span>
+                        <div>
+                          <strong className="font-semibold text-slate-900">Validate your top choice</strong>
+                          <p className="mt-1 text-sm text-slate-600">Use our validation tool to get detailed feedback on your selected idea across 10 key parameters.</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">3</span>
+                        <div>
+                          <strong className="font-semibold text-slate-900">Talk to potential customers</strong>
+                          <p className="mt-1 text-sm text-slate-600">Reach out to 10 people in your target market this week. Use the customer validation questions from the detailed reports.</p>
+                        </div>
+                      </li>
+                    </ol>
+                  </div>
+                )}
+                
+                {topIdeas.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-emerald-200">
+                    <p className="mb-3 text-sm text-slate-600">
+                      Want deeper validation and a comprehensive roadmap? Validate your top idea for detailed analysis across 10 key parameters.
+                    </p>
+                    <button
+                      onClick={() => {
+                        navigate(`/results/recommendations/${topIdeas[0].index}${runId || currentRunId ? `?id=${runId || currentRunId}` : ''}`, {
+                          state: {
+                            idea: topIdeas[0],
+                            allIdeas: allIdeas,
+                            recommendations: effectiveReports,
+                            runId: runId || currentRunId,
+                            inputs: effectiveInputs
+                          }
+                        });
+                      }}
+                      className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors"
+                    >
+                      Validate "{topIdeas[0].title || 'Your Top Idea'}"
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

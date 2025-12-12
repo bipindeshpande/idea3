@@ -38,6 +38,7 @@ class User(Base):
     
     # Relationships
     runs = relationship("Run", back_populates="user", cascade="all, delete-orphan")
+    validations = relationship("Validation", back_populates="user", cascade="all, delete-orphan")
     
     def to_dict(self):
         """Convert to dictionary"""

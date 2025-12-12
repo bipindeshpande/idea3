@@ -12,7 +12,12 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const from = location.state?.from?.pathname || "/dashboard";
+  // Always redirect to dashboard after login, unless coming from a specific protected route
+  // This ensures direct sign-ins go to dashboard, not profile analysis
+  const from = location.state?.from?.pathname;
+  // Only allow redirect to these specific routes, otherwise always go to dashboard
+  const allowedRedirectRoutes = ["/advisor", "/validate-idea", "/founder-connect", "/founder-psychology"];
+  const redirectTo = from && allowedRedirectRoutes.includes(from) ? from : "/dashboard";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,7 +33,8 @@ export default function Login() {
     setLoading(false);
 
     if (result.success) {
-      navigate(from);
+      // Always go to dashboard for direct sign-ins
+      navigate(redirectTo);
     } else {
       setError(result.error || "Login failed");
     }

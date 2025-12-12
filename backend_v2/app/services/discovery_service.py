@@ -2,7 +2,7 @@
 Discovery Service - Main orchestration service
 """
 
-from typing import Dict, Any, Optional, AsyncIterator
+from typing import Dict, Any, Optional, AsyncIterator, List
 from datetime import datetime, timezone
 import time
 import re
@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session
 
 from app.services.base_service import BaseService
 from app.services.profile_analysis_service import ProfileAnalysisService
-from app.services.tool_service import ToolService
 from app.services.prompt_builder import PromptBuilder
 from app.services.llm_service import LLMService
 from app.services.result_assembler import ResultAssembler
@@ -30,7 +29,6 @@ class DiscoveryService(BaseService):
     def __init__(self, db: Session, redis_client=None):
         super().__init__(db, redis_client)
         self.profile_service = ProfileAnalysisService(db, redis_client)
-        self.tool_service = ToolService(db, redis_client)
         self.prompt_builder = PromptBuilder()
         self.llm_service = LLMService(db, redis_client)
         self.result_assembler = ResultAssembler()
@@ -157,10 +155,14 @@ class DiscoveryService(BaseService):
             else:
                 results = self._run_sequential(inputs, run_id=run.run_id)
 
+            # Determine realism level for output
+            realism_level = self.determine_realism_level(inputs)
+            
             # Assemble structured outputs
             final_outputs = self.result_assembler.assemble(
                 profile_analysis=results["profile_analysis"],
-                stage2_output=results["recommendations"]
+                stage2_output=results["recommendations"],
+                realism_level=realism_level
             )
 
             # Save completed run
@@ -265,39 +267,19 @@ class DiscoveryService(BaseService):
     # PARALLEL PIPELINE
     # ----------------------------------------------------------------------
     def _run_parallel(self, inputs: Dict[str, Any], run_id: Optional[str] = None) -> Dict[str, Any]:
-
-        interest_area = inputs.get("interest_area", "")
-        sub_interest = inputs.get("sub_interest_area", "")
-
+        """
+        Run profile analysis and idea generation in parallel.
+        Note: Tool calls are no longer used in idea generation phase.
+        """
         profile_result = None
-        tool_results = None
 
-        with ThreadPoolExecutor(max_workers=2) as executor:
-
+        with ThreadPoolExecutor(max_workers=1) as executor:
             future_profile = executor.submit(self.profile_service.run, inputs, run_id)
-            future_tools = executor.submit(
-                self.tool_service.load_or_execute,
-                interest_area,
-                sub_interest
-            )
-
-            futures = {
-                future_profile: "profile",
-                future_tools: "tools"
-            }
-
-            for future in as_completed(futures, timeout=settings.STAGE1_TIMEOUT):
-                task_name = futures[future]
-                try:
-                    result = future.result()
-                    if task_name == "profile":
-                        profile_result = result
-                    else:
-                        tool_results = result
-                except Exception as e:
-                    if task_name == "profile":
-                        raise  # MUST succeed
-                    tool_results = {}
+            
+            try:
+                profile_result = future_profile.result(timeout=settings.STAGE1_TIMEOUT)
+            except Exception as e:
+                raise ValueError(f"Profile analysis failed: {e}")
 
         if not profile_result or "profile_analysis" not in profile_result:
             raise ValueError("Profile analysis returned invalid output.")
@@ -310,7 +292,6 @@ class DiscoveryService(BaseService):
         stage2_output = self._run_stage2(
             profile_analysis=formatted_profile,
             inputs=inputs,
-            tool_results=tool_results,
             run_id=run_id,
         )
 
@@ -323,25 +304,19 @@ class DiscoveryService(BaseService):
     # SEQUENTIAL PIPELINE
     # ----------------------------------------------------------------------
     def _run_sequential(self, inputs: Dict[str, Any], run_id: Optional[str] = None) -> Dict[str, Any]:
-
-        interest_area = inputs.get("interest_area", "")
-        sub_interest = inputs.get("sub_interest_area", "")
-
+        """
+        Run profile analysis and idea generation sequentially.
+        Note: Tool calls are no longer used in idea generation phase.
+        """
         profile_result = self.profile_service.run(inputs, run_id=run_id)
         profile_text = profile_result["profile_analysis"]
         
         # Extract and format profile analysis for recommendations prompt
         formatted_profile = self._format_profile_for_recommendations(profile_text)
 
-        try:
-            tool_results = self.tool_service.load_or_execute(interest_area, sub_interest)
-        except Exception:
-            tool_results = {}
-
         stage2_output = self._run_stage2(
             profile_analysis=formatted_profile,
             inputs=inputs,
-            tool_results=tool_results,
             run_id=run_id,
         )
 
@@ -351,20 +326,338 @@ class DiscoveryService(BaseService):
         }
 
     # ----------------------------------------------------------------------
+    # HELPER METHODS
+    # ----------------------------------------------------------------------
+    @staticmethod
+    def normalize_industry_name(name: str) -> str:
+        """
+        Normalize industry name to match static engine JSON file names.
+        
+        Maps common variations to the correct file names.
+        """
+        if not name:
+            return ""
+        
+        mapping = {
+            # Food & Beverage (has JSON: food_and_beverage.json, restaurant.json, food_delivery.json)
+            "food & beverage": "food_and_beverage",
+            "food and beverage": "food_and_beverage",
+            "food and beverages": "food_and_beverage",
+            "food_and_beverage": "food_and_beverage",
+            "meal prep": "food_and_beverage",
+            "meal preparation": "food_and_beverage",
+            "restaurant": "restaurant",
+            "restaurants": "restaurant",
+            "food delivery": "food_delivery",
+            "fooddelivery": "food_delivery",
+            "food_delivery": "food_delivery",
+            
+            # AI & Automation (has JSON: ai.json)
+            "ai": "ai",
+            "artificial intelligence": "ai",
+            "ai & automation": "ai",
+            "ai and automation": "ai",
+            "automation": "ai",
+            
+            # Finance / Accounting (has JSON: fintech.json)
+            "finance": "fintech",
+            "fintech": "fintech",
+            "financial technology": "fintech",
+            "finance / accounting": "fintech",
+            "finance/accounting": "fintech",
+            "accounting": "fintech",
+            
+            # Healthcare / Wellness / Beauty (has JSON: healthcare.json, healthtech.json)
+            "healthcare": "healthcare",
+            "health care": "healthcare",
+            "health & wellness": "healthcare",
+            "health and wellness": "healthcare",
+            "healthcare / wellness": "healthcare",
+            "beauty & wellness": "healthcare",
+            "beauty and wellness": "healthcare",
+            "beauty / wellness": "healthcare",
+            "health tech": "healthtech",
+            "healthtech": "healthtech",
+            "health technology": "healthtech",
+            
+            # Retail & E-commerce (no JSON - will use LLM fallback)
+            "retail & e-commerce": "retail_ecommerce",
+            "retail and e-commerce": "retail_ecommerce",
+            "retail / e-commerce": "retail_ecommerce",
+            "retail/ecommerce": "retail_ecommerce",
+            "e-commerce": "retail_ecommerce",
+            "ecommerce": "retail_ecommerce",
+            "retail": "retail_ecommerce",
+            
+            # Education (no JSON - will use LLM fallback)
+            "education": "education",
+            "edtech": "education",
+            "education / edtech": "education",
+            
+            # Fitness & Sports (no JSON - will use LLM fallback)
+            "fitness & sports": "fitness_sports",
+            "fitness and sports": "fitness_sports",
+            "fitness / sports": "fitness_sports",
+            "fitness": "fitness_sports",
+            "sports": "fitness_sports",
+            
+            # Kids & Parenting (no JSON - will use LLM fallback)
+            "kids & parenting": "kids_parenting",
+            "kids and parenting": "kids_parenting",
+            "kids / parenting": "kids_parenting",
+            "parenting": "kids_parenting",
+            
+            # Home Services (no JSON - will use LLM fallback)
+            "home services": "home_services",
+            "home service": "home_services",
+            
+            # Travel & Tourism (no JSON - will use LLM fallback)
+            "travel & tourism": "travel_tourism",
+            "travel and tourism": "travel_tourism",
+            "travel / tourism": "travel_tourism",
+            "travel": "travel_tourism",
+            "tourism": "travel_tourism",
+            
+            # Manufacturing / Crafts (no JSON - will use LLM fallback)
+            "manufacturing / crafts": "manufacturing_crafts",
+            "manufacturing/crafts": "manufacturing_crafts",
+            "manufacturing": "manufacturing_crafts",
+            "crafts": "manufacturing_crafts",
+            
+            # Software / SaaS (no JSON - will use LLM fallback)
+            "software / saas": "software_saas",
+            "software/saas": "software_saas",
+            "software": "software_saas",
+            "saas": "software_saas",
+            
+            # Freelancing / Consulting (no JSON - will use LLM fallback)
+            "freelancing / consulting": "freelancing_consulting",
+            "freelancing/consulting": "freelancing_consulting",
+            "freelancing": "freelancing_consulting",
+            "consulting": "freelancing_consulting",
+            
+            # Agriculture / Gardening (no JSON - will use LLM fallback)
+            "agriculture / gardening": "agriculture_gardening",
+            "agriculture/gardening": "agriculture_gardening",
+            "agriculture": "agriculture_gardening",
+            "gardening": "agriculture_gardening",
+            
+            # Social Impact (no JSON - will use LLM fallback)
+            "social impact": "social_impact",
+            "social impact / non-profit": "social_impact",
+            "non-profit": "social_impact",
+            "nonprofit": "social_impact",
+            
+            # Local Services (no JSON - will use LLM fallback)
+            "local services": "local_services",
+            "local service": "local_services",
+            
+            # Other (no JSON - will use LLM fallback)
+            "other": "other",
+        }
+        
+        normalized = name.lower().strip()
+        return mapping.get(normalized, normalized.replace(" ", "_"))
+    
+    @staticmethod
+    def determine_realism_level(inputs: Dict[str, Any]) -> int:
+        """
+        Determine realism level (1-5) based on user intent inputs.
+        
+        Realism is calculated from:
+        - founder_ambition (goal_type equivalent): 40% weight
+        - time_commitment: 25% weight
+        - budget_range: 20% weight
+        - risk_tolerance: 15% weight
+        
+        Does NOT use skill_strength for realism calculation.
+        
+        Returns:
+            Integer between 1 and 5:
+            - 1: Teen-friendly, simple, encouraging, no regulations, minimal risks
+            - 3: Practical, balanced, approachable details, light risks
+            - 5: Founder-grade realism, include risks, economics, market realities
+        """
+        # Map founder_ambition (goal_type) to score (40% weight)
+        founder_ambition = inputs.get("founder_ambition", "").lower()
+        goal_scores = {
+            "side income": 1,
+            "turn hobby into business": 1,
+            "part-time business": 2,
+            "full-time business": 4,
+            "scalable venture": 5,
+        }
+        goal_score = goal_scores.get(founder_ambition, 3)  # Default to 3 if not found
+        
+        # Map time_commitment to score (25% weight)
+        time_commitment = inputs.get("time_commitment", "").lower()
+        time_scores = {
+            "<5 hrs/week": 1,
+            "< 5 hrs/week": 1,
+            "5–10 hrs/week": 2,
+            "5-10 hrs/week": 2,
+            "10–20 hrs/week": 3,
+            "10-20 hrs/week": 3,
+            "full-time": 5,
+            "full time": 5,
+        }
+        time_score = time_scores.get(time_commitment, 3)  # Default to 3
+        
+        # Map budget_range to score (20% weight)
+        budget_range = inputs.get("budget_range", "").lower()
+        budget_scores = {
+            "free / sweat-equity only": 1,
+            "$0–100": 1,
+            "$0-100": 1,
+            "$100–1,000": 2,
+            "$100-1,000": 2,
+            "$1,000–5,000": 3,
+            "$1,000-5,000": 3,
+            "$1k-5k": 3,
+            "$5,000–20,000": 4,
+            "$5,000-20,000": 4,
+            "$5k-20k": 4,
+            "$20,000+": 5,
+            "$20k+": 5,
+            "$20 k and above": 5,
+        }
+        budget_score = budget_scores.get(budget_range, 3)  # Default to 3
+        
+        # Map risk_tolerance to score (15% weight)
+        risk_tolerance = inputs.get("risk_tolerance", "").lower()
+        risk_scores = {
+            "low": 1,
+            "very low": 1,
+            "moderate": 3,
+            "medium": 3,
+            "high": 5,
+        }
+        risk_score = risk_scores.get(risk_tolerance, 3)  # Default to 3
+        
+        # Calculate weighted score
+        weighted_score = (
+            goal_score * 0.40 +
+            time_score * 0.25 +
+            budget_score * 0.20 +
+            risk_score * 0.15
+        )
+        
+        # Round to integer and clamp between 1 and 5
+        realism_level = max(1, min(5, round(weighted_score)))
+        
+        return realism_level
+
+    # ----------------------------------------------------------------------
     # STAGE 2 EXECUTION
     # ----------------------------------------------------------------------
     def _run_stage2(
         self,
         profile_analysis: str,
         inputs: Dict[str, Any],
-        tool_results: Dict[str, Any],
         run_id: Optional[str] = None
     ) -> str:
-
-        # Build prompt for Stage 2
+        """
+        Run Stage 2: Generate recommendations (seed ideas only).
+        
+        Tries static engine first, falls back to LLM if static data not available.
+        No tool calls or enrichment - only generates seed ideas.
+        """
+        # Determine realism level based on user intent
+        realism_level = self.determine_realism_level(inputs)
+        
+        # Try static engine path first
+        industry_interest = self.normalize_industry_name(inputs.get("industry_interest", ""))
+        if industry_interest:
+            try:
+                from app.static_engine.loader import load_industry_data
+                from app.static_engine.synthesizer import synthesize_ideas
+                from app.static_engine.report_builder import build_markdown_report
+                
+                self._log(f"Attempting to load static engine data for industry: '{industry_interest}'", "INFO")
+                
+                # Load industry data
+                industry_data = load_industry_data(industry_interest)
+                
+                if industry_data:
+                    self._log(f"Successfully loaded industry data for '{industry_interest}'", "INFO")
+                    # Parse profile analysis JSON
+                    import json
+                    profile_data = {}
+                    if profile_analysis:
+                        try:
+                            # Try to extract JSON from delimiters
+                            start_marker = "---PROFILE_ANALYSIS_START---"
+                            end_marker = "---PROFILE_ANALYSIS_END---"
+                            start_idx = profile_analysis.find(start_marker)
+                            end_idx = profile_analysis.find(end_marker)
+                            
+                            if start_idx != -1 and end_idx != -1:
+                                json_text = profile_analysis[start_idx + len(start_marker):end_idx].strip()
+                                profile_data = json.loads(json_text)
+                            else:
+                                # Try parsing entire profile_analysis as JSON
+                                profile_data = json.loads(profile_analysis)
+                        except (json.JSONDecodeError, ValueError):
+                            # If parsing fails, use as string
+                            profile_data = {"raw": profile_analysis}
+                    
+                    # Synthesize ideas (returns structured ideas)
+                    idea_seeds = synthesize_ideas(
+                        user_params=inputs,
+                        industry_data=industry_data,
+                        num_ideas=15,
+                        realism_level=realism_level
+                    )
+                    
+                    # Check if static engine generated ideas
+                    if not idea_seeds or len(idea_seeds) == 0:
+                        self._log(f"Static engine returned 0 ideas for '{industry_interest}', falling back to LLM", "WARNING")
+                        raise ValueError("Static engine returned no ideas")
+                    
+                    # Rank ideas based on profile match
+                    ranked_ideas = self._rank_ideas(idea_seeds, profile_data, inputs)
+                    
+                    # Add lightweight next_steps to each idea (Discovery-level, not Validation-level)
+                    ideas_with_next_steps = self._add_discovery_next_steps(ranked_ideas, profile_data, inputs)
+                    
+                    # Build report (uses details_markdown from structured ideas)
+                    report = build_markdown_report(
+                        profile=profile_data,
+                        idea_list=ideas_with_next_steps,
+                        industry_data=industry_data,
+                        realism_level=realism_level
+                    )
+                    
+                    # Store structured ideas for inclusion in reports
+                    # The report string will be returned, but structured ideas are stored
+                    # separately in the reports dict via result_assembler
+                    self._log(f"Static engine: Generated {len(idea_seeds)} structured ideas for '{industry_interest}'", "INFO")
+                    
+                    # Clean structured ideas to ensure only seed-level fields (but keep enrichment.next_steps)
+                    cleaned_ideas = self._clean_seed_ideas(ideas_with_next_steps)
+                    
+                    # Attach structured ideas to report for result_assembler to extract
+                    # We'll encode the structured ideas as JSON in a special marker
+                    import json
+                    structured_json = json.dumps(cleaned_ideas)
+                    # Embed in report with a special marker that result_assembler can extract
+                    report_with_structured = f"{report}\n\n---STRUCTURED_IDEAS_START---\n{structured_json}\n---STRUCTURED_IDEAS_END---"
+                    
+                    return report_with_structured
+                    
+            except Exception as e:
+                # Fall back to LLM if static engine fails
+                import traceback
+                error_details = traceback.format_exc()
+                self._log(f"Static engine failed for '{industry_interest}': {e}, falling back to LLM", "WARNING")
+                self._log(f"Error details: {error_details}", "DEBUG")
+        
+        # LLM fallback (original logic)
+        # Build prompt for Stage 2 with all user inputs
         prompt = self.prompt_builder.build_idea_research_prompt(
             profile_analysis=profile_analysis,
-            tool_results=tool_results
+            realism_level=realism_level,
+            user_inputs=inputs
         )
 
         system_prompt = """You are a startup advisor. You MUST output recommendations using the EXACT format specified in the prompt.
@@ -374,7 +667,18 @@ CRITICAL RULES:
 - Do NOT include any intro text, explanations, or disclaimers
 - Do NOT output markdown sections like ## SECTION or ### RECOMMENDATION
 - Each IDEA block must have exactly these fields: title, summary, target_market, revenue_model, validation_score, timeline, why_this_fits
-- Follow the format EXACTLY as specified."""
+- Follow the format EXACTLY as specified.
+
+REALISM ENFORCEMENT:
+- Ideas MUST match user's actual skills (if user only has cooking skills, NO tech/AI/software ideas)
+- Ideas MUST fit user's time commitment, budget, preferred work style, and startup style
+- Preferred work style influences operational complexity and founder-fit (solo vs team, hands-on vs remote, etc.)
+- Startup style influences business model, delivery method, cost structure, and scalability (home-based vs local vs online, etc.)
+- Business region influences pricing assumptions, feasibility, cultural fit, delivery models, legal complexity, and startup costs
+- Ideas MUST be executable within user's earnings timeline
+- Ideas MUST be from user's selected industry and sub-interest ONLY
+- Ideas MUST be operationally simple and feasible for the user's skill level
+- NO hallucinations, NO irrelevant tech, NO ideas from different industries"""
 
         llm_response = self.llm_service.generate(
             prompt=prompt,
@@ -384,7 +688,47 @@ CRITICAL RULES:
             run_id=run_id,
         )
 
-        return llm_response["content"]
+        # Parse ideas from LLM response
+        from app.services.recommendation_parser import RecommendationParser
+        parsed_ideas = RecommendationParser.parse_recommendations(llm_response["content"])
+        
+        # Parse profile analysis for ranking
+        import json
+        profile_data = {}
+        if profile_analysis:
+            try:
+                start_marker = "---PROFILE_ANALYSIS_START---"
+                end_marker = "---PROFILE_ANALYSIS_END---"
+                start_idx = profile_analysis.find(start_marker)
+                end_idx = profile_analysis.find(end_marker)
+                
+                if start_idx != -1 and end_idx != -1:
+                    json_text = profile_analysis[start_idx + len(start_marker):end_idx].strip()
+                    profile_data = json.loads(json_text)
+                else:
+                    profile_data = json.loads(profile_analysis)
+            except (json.JSONDecodeError, ValueError):
+                profile_data = {"raw": profile_analysis}
+        
+        # Rank ideas based on profile match
+        ranked_ideas = self._rank_ideas(parsed_ideas, profile_data, inputs)
+        
+        # Add lightweight next_steps to each idea (Discovery-level, not Validation-level)
+        ideas_with_next_steps = self._add_discovery_next_steps(ranked_ideas, profile_data, inputs)
+        
+        # Clean ideas to ensure only seed-level fields (but keep enrichment.next_steps)
+        cleaned_ideas = self._clean_seed_ideas(ideas_with_next_steps)
+        
+        # Rebuild output with ranked ideas
+        from app.services.recommendation_parser import RecommendationParser
+        ranked_output = RecommendationParser.format_recommendations_for_frontend(cleaned_ideas)
+        
+        # Embed structured ideas in same format as static engine
+        import json
+        structured_json = json.dumps(cleaned_ideas)
+        output_with_structured = f"{ranked_output}\n\n---STRUCTURED_IDEAS_START---\n{structured_json}\n---STRUCTURED_IDEAS_END---"
+        
+        return output_with_structured
     
     # ----------------------------------------------------------------------
     # STREAMING WORKFLOW
@@ -399,18 +743,12 @@ CRITICAL RULES:
             if token_clean.isdigit():
                 # Normalize to "### IDEA_X" format (with space)
                 merged = f"### IDEA_{token_clean}"
-                print(f"[MERGE_IDEA_HEADER] buffer='{buffer}', next_token='{next_token}' -> merged='{merged}'")
                 return merged
             elif token_clean.startswith("_") and token_clean[1:].isdigit():
                 # Handle "_1" format - extract digit and merge
                 digit = token_clean[1:]
                 merged = f"### IDEA_{digit}"
-                print(f"[MERGE_IDEA_HEADER] buffer='{buffer}', next_token='{next_token}' -> merged='{merged}'")
                 return merged
-            else:
-                print(f"[MERGE_IDEA_HEADER] buffer='{buffer}' starts with '### IDEA' but next_token='{next_token}' is not a digit or '_digit'")
-        else:
-            print(f"[MERGE_IDEA_HEADER] buffer='{buffer}' does not start with '### IDEA' or '###IDEA'")
         return None
     
     async def workflow_stream(
@@ -422,7 +760,6 @@ CRITICAL RULES:
         """
         Stream workflow output in buffered chunks instead of token-by-token.
         """
-        print(">>> WORKFLOW_STREAM EXECUTED <<<")
         import asyncio
         
         # 1. Run Profile Analysis
@@ -438,26 +775,106 @@ CRITICAL RULES:
             yield profile_text
         yield "\n\n---PROFILE_END---\n\n"
 
-        # 2. Get tool results for prompt
-        interest_area = inputs.get("interest_area", "")
-        sub_interest = inputs.get("sub_interest_area", "")
-        try:
-            tool_results = await loop.run_in_executor(
-                None,
-                lambda: self.tool_service.load_or_execute(interest_area, sub_interest) if interest_area else {}
-            )
-        except Exception as e:
-            self._log(f"Tool research failed: {e}", "WARNING")
-            tool_results = {}
-        
-        # 3. Format profile for recommendations prompt
+        # 2. Format profile for recommendations prompt
         formatted_profile = self._format_profile_for_recommendations(profile_text)
         
-        # 4. Run Idea Generation (LLM Streaming) with buffering
-        prompt = self.prompt_builder.build_idea_research_prompt(
-            profile_analysis=formatted_profile,
-            tool_results=tool_results
-        )
+        # 3. Determine realism level based on user intent
+        realism_level = self.determine_realism_level(inputs)
+        
+        # 4. Try static engine first (fast path), fallback to LLM if needed
+        industry_interest = self.normalize_industry_name(inputs.get("industry_interest", ""))
+        static_engine_used = False
+        
+        if industry_interest:
+            try:
+                from app.static_engine.loader import load_industry_data
+                from app.static_engine.synthesizer import synthesize_ideas
+                from app.static_engine.report_builder import build_markdown_report
+                
+                self._log(f"[Stream] Attempting to load static engine data for industry: '{industry_interest}'", "INFO")
+                
+                # Load industry data
+                industry_data = load_industry_data(industry_interest)
+                
+                if industry_data:
+                    self._log(f"[Stream] Successfully loaded industry data for '{industry_interest}'", "INFO")
+                    # Parse profile analysis JSON
+                    import json
+                    profile_data = {}
+                    if profile_text:
+                        try:
+                            start_marker = "---PROFILE_ANALYSIS_START---"
+                            end_marker = "---PROFILE_ANALYSIS_END---"
+                            start_idx = profile_text.find(start_marker)
+                            end_idx = profile_text.find(end_marker)
+                            
+                            if start_idx != -1 and end_idx != -1:
+                                json_text = profile_text[start_idx + len(start_marker):end_idx].strip()
+                                profile_data = json.loads(json_text)
+                            else:
+                                profile_data = json.loads(profile_text)
+                        except (json.JSONDecodeError, ValueError):
+                            profile_data = {"raw": profile_text}
+                    
+                    # Synthesize ideas (returns structured ideas)
+                    idea_seeds = synthesize_ideas(
+                        user_params=inputs,
+                        industry_data=industry_data,
+                        num_ideas=15,
+                        realism_level=realism_level
+                    )
+                    
+                    # Check if static engine generated ideas
+                    if not idea_seeds or len(idea_seeds) == 0:
+                        self._log(f"Static engine returned 0 ideas for '{industry_interest}', falling back to LLM", "WARNING")
+                        raise ValueError("Static engine returned no ideas")
+                    
+                    # Rank ideas based on profile match
+                    ranked_ideas = self._rank_ideas(idea_seeds, profile_data, inputs)
+                    
+                    # Clean structured ideas to ensure only seed-level fields
+                    cleaned_ideas = self._clean_seed_ideas(ranked_ideas)
+                    
+                    # Build report
+                    report = build_markdown_report(
+                        profile=profile_data,
+                        idea_list=ranked_ideas,
+                        industry_data=industry_data,
+                        realism_level=realism_level
+                    )
+                    
+                    # Embed structured ideas
+                    structured_json = json.dumps(cleaned_ideas)
+                    report_with_structured = f"{report}\n\n---STRUCTURED_IDEAS_START---\n{structured_json}\n---STRUCTURED_IDEAS_END---"
+                    
+                    # Stream the report as chunks (simulate streaming for consistency)
+                    self._log(f"Static engine: Generated {len(cleaned_ideas)} ideas for '{industry_interest}'", "INFO")
+                    static_engine_used = True
+                    
+                    # Yield report in chunks to simulate streaming
+                    chunk_size = 100  # Characters per chunk
+                    for i in range(0, len(report_with_structured), chunk_size):
+                        chunk = report_with_structured[i:i + chunk_size]
+                        yield chunk
+                        # Small delay to simulate streaming (optional, can remove)
+                        await asyncio.sleep(0.01)
+                    
+                    return  # Exit early, static engine completed
+                    
+            except Exception as e:
+                # Fall back to LLM if static engine fails
+                import traceback
+                error_details = traceback.format_exc()
+                self._log(f"[Stream] Static engine failed for '{industry_interest}': {e}, falling back to LLM", "WARNING")
+                self._log(f"[Stream] Error details: {error_details}", "DEBUG")
+        
+        # 4. LLM fallback (only if static engine not used)
+        if not static_engine_used:
+            prompt = self.prompt_builder.build_idea_research_prompt(
+                profile_analysis=formatted_profile,
+                realism_level=realism_level,
+                user_inputs=inputs
+            )
         
         system_prompt = """You are a startup advisor. You MUST output recommendations using the EXACT format specified in the prompt.
 
@@ -466,7 +883,18 @@ CRITICAL RULES:
 - Do NOT include any intro text, explanations, or disclaimers
 - Do NOT output markdown sections like ## SECTION or ### RECOMMENDATION
 - Each IDEA block must have exactly these fields: title, summary, target_market, revenue_model, validation_score, timeline, why_this_fits
-- Follow the format EXACTLY as specified."""
+- Follow the format EXACTLY as specified.
+
+REALISM ENFORCEMENT:
+- Ideas MUST match user's actual skills (if user only has cooking skills, NO tech/AI/software ideas)
+- Ideas MUST fit user's time commitment, budget, preferred work style, and startup style
+- Preferred work style influences operational complexity and founder-fit (solo vs team, hands-on vs remote, etc.)
+- Startup style influences business model, delivery method, cost structure, and scalability (home-based vs local vs online, etc.)
+- Business region influences pricing assumptions, feasibility, cultural fit, delivery models, legal complexity, and startup costs
+- Ideas MUST be executable within user's earnings timeline
+- Ideas MUST be from user's selected industry and sub-interest ONLY
+- Ideas MUST be operationally simple and feasible for the user's skill level
+- NO hallucinations, NO irrelevant tech, NO ideas from different industries"""
 
         llm_stream = self.llm_service.generate_stream(
             prompt=prompt,
@@ -487,18 +915,13 @@ CRITICAL RULES:
             token_count += 1
             t = chunk
             
-            # Log RAW TOKEN and BUFFER BEFORE
-            print(f"\n[TOKEN #{token_count}] RAW TOKEN: {repr(t)}")
-            print(f"[TOKEN #{token_count}] STATE: {state}, in_profile: {in_profile}")
-            print(f"[TOKEN #{token_count}] BUFFER BEFORE: {repr(buffer)}")
+            
             
             # Handle profile markers - pass through immediately, never buffer
             if "---PROFILE_ANALYSIS_START---" in t:
                 if buffer.strip():
-                    print(f"[TOKEN #{token_count}] FLUSHED (before profile start): {repr(buffer.strip())}")
                     yield buffer.strip()
                     buffer = ""
-                print(f"[TOKEN #{token_count}] PASSING THROUGH (profile start): {repr(t)}")
                 yield t
                 in_profile = True
                 state = "NORMAL"
@@ -506,10 +929,8 @@ CRITICAL RULES:
                 
             if "---PROFILE_ANALYSIS_END---" in t:
                 if buffer.strip():
-                    print(f"[TOKEN #{token_count}] FLUSHED (before profile end): {repr(buffer.strip())}")
                     yield buffer.strip()
                     buffer = ""
-                print(f"[TOKEN #{token_count}] PASSING THROUGH (profile end): {repr(t)}")
                 yield t
                 in_profile = False
                 state = "NORMAL"
@@ -518,7 +939,6 @@ CRITICAL RULES:
             # Inside profile - accumulate everything, flush on end marker only
             if in_profile:
                 buffer += t
-                print(f"[TOKEN #{token_count}] BUFFER AFTER (profile): {repr(buffer)}")
                 prev_char = t
                 continue
             
@@ -527,8 +947,6 @@ CRITICAL RULES:
                 buffer += t
                 if "###" in buffer:
                     state = "IDEA_HEADER"
-                    print(f"[TOKEN #{token_count}] STATE -> IDEA_HEADER")
-                print(f"[TOKEN #{token_count}] BUFFER AFTER: {repr(buffer)}")
                 prev_char = t
                 continue
             
@@ -539,9 +957,7 @@ CRITICAL RULES:
                 # Try to merge with number token
                 merge_candidate = self.merge_idea_header(buffer, t)
                 if merge_candidate:
-                    print(f"[TOKEN #{token_count}] MERGE_IDEA: {repr(buffer)} + {repr(t)} -> {repr(merge_candidate)}")
                     buffer = merge_candidate
-                    print(f"[TOKEN #{token_count}] BUFFER AFTER MERGE: {repr(buffer)}")
                     prev_char = t
                     continue
                 
@@ -552,17 +968,14 @@ CRITICAL RULES:
                 
                 # If we have a partial header (e.g., "### IDEA_" without digit, or "### IDEA__1" with double underscore), keep buffering
                 if is_partial_header:
-                    print(f"[TOKEN #{token_count}] BUFFERING (partial header, waiting for complete pattern): {repr(buffer)}")
                     prev_char = t
                     continue
                 
                 # Header complete when we have "### IDEA_X" followed by newline/space
                 if is_complete_header and (t == "\n" or t == " " or (t.strip() == "" and len(buffer) > 8)):
-                    print(f"[TOKEN #{token_count}] FLUSHED (IDEA header complete): {repr(buffer)}")
                     yield buffer
                     buffer = ""
                     state = "NORMAL"
-                    print(f"[TOKEN #{token_count}] STATE -> NORMAL")
                     prev_char = t
                     continue
                 
@@ -572,15 +985,12 @@ CRITICAL RULES:
                     header_end = buffer.find("\n") if "\n" in buffer else len(buffer)
                     header = buffer[:header_end].rstrip()
                     remainder = buffer[header_end:] + t
-                    print(f"[TOKEN #{token_count}] FLUSHED (IDEA header, non-digit next): {repr(header)}")
                     yield header
                     buffer = remainder
                     state = "NORMAL"
-                    print(f"[TOKEN #{token_count}] STATE -> NORMAL")
                     prev_char = t
                     continue
                 
-                print(f"[TOKEN #{token_count}] BUFFER AFTER (IDEA_HEADER): {repr(buffer)}")
                 prev_char = t
                 continue
             
@@ -590,8 +1000,6 @@ CRITICAL RULES:
                 # Check if we just completed a field name (ends with ":")
                 if buffer.endswith(":"):
                     state = "FIELD_VALUE"
-                    print(f"[TOKEN #{token_count}] STATE -> FIELD_VALUE (found colon)")
-                print(f"[TOKEN #{token_count}] BUFFER AFTER: {repr(buffer)}")
                 prev_char = t
                 continue
             
@@ -599,21 +1007,17 @@ CRITICAL RULES:
             if state == "FIELD_VALUE" or (state == "NORMAL" and ":" in buffer):
                 if state == "NORMAL":
                     state = "FIELD_VALUE"
-                    print(f"[TOKEN #{token_count}] STATE -> FIELD_VALUE")
                 
                 buffer += t
                 
                 # Flush on sentence end: period followed by space/newline
                 if prev_char == "." and (t == " " or t == "\n"):
-                    print(f"[TOKEN #{token_count}] FLUSHED (field complete, sentence end): {repr(buffer.strip())}")
                     yield buffer.strip()
                     buffer = ""
                     state = "NORMAL"
-                    print(f"[TOKEN #{token_count}] STATE -> NORMAL")
                     prev_char = t
                     continue
                 
-                print(f"[TOKEN #{token_count}] BUFFER AFTER (FIELD_VALUE): {repr(buffer)}")
                 prev_char = t
                 continue
             
@@ -625,28 +1029,23 @@ CRITICAL RULES:
                 is_partial_idea_header = buffer_stripped.startswith("### IDEA_") and not bool(re.match(r"^###\s*IDEA_\d+$", buffer_stripped))
                 
                 if is_partial_idea_header:
-                    print(f"[TOKEN #{token_count}] SKIPPING FLUSH (partial IDEA header detected): {repr(buffer)}")
                     prev_char = t
                     continue
                 
                 if buffer.strip():
-                    print(f"[TOKEN #{token_count}] FLUSHED (double newline): {repr(buffer.strip())}")
                     yield buffer.strip()
                 buffer = ""
                 state = "NORMAL"
-                print(f"[TOKEN #{token_count}] STATE -> NORMAL")
                 prev_char = t
                 continue
             
             # Default: accumulate
             buffer += t
-            print(f"[TOKEN #{token_count}] BUFFER AFTER (accumulate): {repr(buffer)}")
             prev_char = t
 
         # Final flush
         if buffer.strip():
             flushed = buffer.strip()
-            print(f"[FINAL] FLUSHED (remaining buffer): {repr(flushed)}")
             yield flushed
     
     def _format_profile_for_recommendations(self, profile_text: str) -> str:
@@ -693,19 +1092,29 @@ CRITICAL RULES:
                         formatted.append(profile_data["core_motivations"])
                         formatted.append("")
                     
-                    if profile_data.get("constraints"):
+                    if profile_data.get("operating_constraints"):
                         formatted.append("### Operating Constraints")
-                        formatted.append(profile_data["constraints"])
+                        formatted.append(profile_data["operating_constraints"])
                         formatted.append("")
                     
-                    if profile_data.get("strengths"):
+                    if profile_data.get("strengths_and_capabilities"):
                         formatted.append("### Strengths and Capabilities")
-                        formatted.append(profile_data["strengths"])
+                        formatted.append(profile_data["strengths_and_capabilities"])
                         formatted.append("")
                     
                     if profile_data.get("strategic_considerations"):
                         formatted.append("### Strategic Considerations")
                         formatted.append(profile_data["strategic_considerations"])
+                        formatted.append("")
+                    
+                    if profile_data.get("viability_red_flags"):
+                        formatted.append("### Viability Red Flags")
+                        formatted.append(profile_data["viability_red_flags"])
+                        formatted.append("")
+                    
+                    if profile_data.get("pathway_recommendation"):
+                        formatted.append("### Pathway Recommendation")
+                        formatted.append(profile_data["pathway_recommendation"])
                         formatted.append("")
                     
                     return "\n".join(formatted)
@@ -715,6 +1124,438 @@ CRITICAL RULES:
         
         # If no delimiters found, return as-is (might be old format or already formatted)
         return profile_text
+    
+    def _rank_ideas(
+        self,
+        ideas: List[Dict[str, Any]],
+        profile_analysis: Dict[str, Any],
+        inputs: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """
+        Rank ideas based on profile match.
+        
+        Scoring factors:
+        - validation_score (numeric, highest first)
+        - constraints match (from profile_analysis.operating_constraints)
+        - skill_strength match (from inputs)
+        - time_commitment match (from inputs)
+        - budget_range match (from inputs)
+        - risk_tolerance match (from inputs)
+        """
+        if not ideas:
+            return ideas
+        
+        # Extract profile and input data
+        constraints_text = profile_analysis.get("operating_constraints", "").lower() if isinstance(profile_analysis, dict) else ""
+        strengths_text = profile_analysis.get("strengths_and_capabilities", "").lower() if isinstance(profile_analysis, dict) else ""
+        
+        time_commitment = inputs.get("time_commitment", "").lower()
+        budget_range = inputs.get("budget_range", "").lower()
+        risk_tolerance = inputs.get("risk_tolerance", "").lower()
+        skill_strength = inputs.get("skill_strength", "").lower()
+        preferred_work_style = inputs.get("preferred_work_style", "").lower()
+        startup_style = inputs.get("startup_style", "").lower()
+        business_region = inputs.get("business_region", "").lower()
+        
+        # Extract user skills
+        user_skills = inputs.get("skills", {})
+        selected_skills = []
+        if isinstance(user_skills, dict):
+            for category, skill_list in user_skills.items():
+                if category != "other" and isinstance(skill_list, list):
+                    selected_skills.extend(skill_list)
+        
+        # Score each idea
+        scored_ideas = []
+        for idea in ideas:
+            score = 0.0
+            
+            # Base score: validation_score (0-10, weight: 5.0)
+            validation_score_str = str(idea.get("validation_score", "0"))
+            try:
+                # Extract numeric value from string (e.g., "7" or "7/10")
+                match = re.search(r'\d+', validation_score_str)
+                if match:
+                    validation_num = float(match.group())
+                    score += validation_num * 5.0
+            except (ValueError, AttributeError):
+                pass
+            
+            # Constraints match (weight: 2.0)
+            why_fits = str(idea.get("why_this_fits", "")).lower()
+            timeline = str(idea.get("timeline", "")).lower()
+            combined_text = f"{why_fits} {timeline}"
+            
+            if constraints_text:
+                # Check if idea mentions constraints or addresses them
+                constraint_keywords = ["constraint", "limit", "budget", "time", "skill"]
+                if any(keyword in combined_text for keyword in constraint_keywords):
+                    score += 2.0
+            
+            # Time commitment match (weight: 1.5)
+            if time_commitment:
+                time_keywords = {
+                    "<5": ["part-time", "few hours", "minimal", "side"],
+                    "10-20": ["part-time", "10-20", "15 hours", "weekend"],
+                    "full-time": ["full-time", "dedicated", "full focus"]
+                }
+                for key, keywords in time_keywords.items():
+                    if key in time_commitment:
+                        if any(kw in combined_text for kw in keywords):
+                            score += 1.5
+                        break
+            
+            # Budget range match (weight: 1.5)
+            if budget_range:
+                budget_keywords = {
+                    "$0-1k": ["low cost", "free", "minimal", "bootstrap", "lean"],
+                    "$1k-5k": ["affordable", "modest", "small budget"],
+                    "$5k-10k": ["moderate", "reasonable"],
+                    "$10k+": ["investment", "capital", "funding"]
+                }
+                for key, keywords in budget_keywords.items():
+                    if key in budget_range:
+                        if any(kw in combined_text for kw in keywords):
+                            score += 1.5
+                        break
+            
+            # Risk tolerance match (weight: 1.0)
+            if risk_tolerance:
+                risk_keywords = {
+                    "very low": ["safe", "proven", "low risk", "stable"],
+                    "low": ["moderate risk", "tested"],
+                    "medium": ["balanced", "moderate"],
+                    "high": ["innovative", "disruptive", "high potential"]
+                }
+                for key, keywords in risk_keywords.items():
+                    if key in risk_tolerance.lower():
+                        if any(kw in combined_text for kw in keywords):
+                            score += 1.0
+                        break
+            
+            # Skill strength match (weight: 1.0)
+            if skill_strength and strengths_text:
+                skill_keywords = {
+                    "beginner": ["simple", "easy", "no-code", "template"],
+                    "intermediate": ["moderate", "some experience"],
+                    "advanced": ["technical", "complex", "expert"]
+                }
+                for key, keywords in skill_keywords.items():
+                    if key in skill_strength.lower():
+                        if any(kw in combined_text or kw in strengths_text for kw in keywords):
+                            score += 1.0
+                        break
+            
+            # Preferred work style match (weight: 1.5) - influences operational complexity and founder-fit
+            if preferred_work_style:
+                work_style_keywords = {
+                    "independent": ["solo", "independent", "one-person", "individual"],
+                    "solo": ["solo", "independent", "one-person", "individual"],
+                    "collaborative": ["team", "collaborative", "partnership", "co-founder"],
+                    "hands-on": ["hands-on", "active", "physical", "manual", "tactile"],
+                    "active": ["hands-on", "active", "physical", "manual", "tactile"],
+                    "creative": ["creative", "maker", "artistic", "design", "craft"],
+                    "maker": ["creative", "maker", "artistic", "design", "craft"],
+                    "people-facing": ["service", "people-facing", "customer-facing", "interaction", "client"],
+                    "service-oriented": ["service", "people-facing", "customer-facing", "interaction", "client"],
+                    "remote": ["remote", "online", "digital", "virtual", "distributed"],
+                    "flexible": ["flexible", "adaptable", "varied"]
+                }
+                for key, keywords in work_style_keywords.items():
+                    if key in preferred_work_style:
+                        if any(kw in combined_text for kw in keywords):
+                            score += 1.5
+                        break
+            
+            # Startup style match (weight: 1.5) - influences business model, delivery, cost, scalability
+            if startup_style:
+                startup_style_keywords = {
+                    "home-based": ["home-based", "home", "residential", "from home"],
+                    "local service": ["local", "neighborhood", "community", "in-person", "on-site"],
+                    "online-only": ["online", "digital", "web-based", "virtual", "remote"],
+                    "content": ["content", "creator", "media", "publishing", "blog", "video"],
+                    "creator-led": ["content", "creator", "media", "publishing", "blog", "video"],
+                    "low-cost": ["low-cost", "bootstrap", "lean", "minimal", "affordable", "budget"],
+                    "bootstrapped": ["low-cost", "bootstrap", "lean", "minimal", "affordable", "budget"],
+                    "tech-assisted": ["tech-assisted", "technology", "automated", "digital tools"],
+                    "community-driven": ["community", "local", "neighborhood", "engagement", "events"],
+                    "local engagement": ["community", "local", "neighborhood", "engagement", "events"]
+                }
+                for key, keywords in startup_style_keywords.items():
+                    if key in startup_style:
+                        if any(kw in combined_text for kw in keywords):
+                            score += 1.5
+                        break
+            
+            # Business region match (weight: 1.5) - influences pricing, feasibility, cultural fit, delivery model
+            if business_region:
+                region_keywords = {
+                    "united states": ["us", "usa", "canada", "north america", "dollar", "usd", "cad"],
+                    "canada": ["us", "usa", "canada", "north america", "dollar", "usd", "cad"],
+                    "europe": ["europe", "eu", "euro", "eur", "gdpr", "uk", "germany", "france"],
+                    "india": ["india", "indian", "rupee", "inr", "mobile-first", "price-sensitive"],
+                    "middle east": ["middle east", "uae", "saudi", "gulf", "arab", "dirham", "riyal"],
+                    "southeast asia": ["southeast asia", "sea", "singapore", "thailand", "philippines", "indonesia", "vietnam"],
+                    "africa": ["africa", "african", "mobile money", "m-pesa", "kenya", "nigeria", "south africa"],
+                    "latin america": ["latin america", "mexico", "brazil", "argentina", "colombia", "peso", "real"],
+                    "global": ["global", "online", "digital", "worldwide", "international", "remote"],
+                    "online": ["global", "online", "digital", "worldwide", "international", "remote"]
+                }
+                for key, keywords in region_keywords.items():
+                    if key in business_region:
+                        if any(kw in combined_text for kw in keywords):
+                            score += 1.5
+                        break
+            
+            # Skill match (weight: 2.0) - critical for founder fit
+            # Map skills to keywords that should appear in idea text
+            if selected_skills:
+                skill_keyword_map = {
+                    "Cooking / Food Prep": ["cooking", "food", "meal", "prep", "kitchen", "recipe", "tiffin", "diet", "nutrition", "catering"],
+                    "Crafting / Handmade": ["handmade", "craft", "etsy", "artisan", "product design", "custom", "personalized"],
+                    "Beauty Services": ["beauty", "salon", "spa", "skincare", "makeup", "wellness", "grooming"],
+                    "Fitness Coaching": ["fitness", "coaching", "training", "workout", "exercise", "health", "personal trainer"],
+                    "Photography / Videography": ["photography", "video", "videography", "content", "media", "visual"],
+                    "Writing / Content": ["writing", "content", "blog", "copywriting", "editorial", "publishing"],
+                    "Graphic Design": ["design", "graphic", "visual", "branding", "creative", "art"],
+                    "Coding": ["coding", "development", "software", "app", "tech", "programming"],
+                    "AI & Automation": ["ai", "automation", "machine learning", "artificial intelligence", "digital-first"],
+                    "Social Media": ["social media", "instagram", "facebook", "tiktok", "influencer", "community"],
+                    "Customer Interaction": ["customer", "client", "service", "interaction", "support", "consulting"],
+                    "Community Building": ["community", "network", "group", "membership", "engagement", "local"],
+                    "Marketing / Advertising": ["marketing", "advertising", "promotion", "brand", "campaign"],
+                    "SEO / Blogging": ["seo", "blog", "content", "writing", "online", "digital"],
+                    "Teaching / Coaching": ["teaching", "coaching", "education", "training", "mentor", "instructor", "course"],
+                    "Web Building": ["website", "web", "online", "digital", "storefront", "ecommerce"],
+                    "AI Tools": ["ai", "automation", "digital", "tech", "tools", "software"],
+                    "Low-code / No-code": ["low-code", "no-code", "website", "platform", "builder", "digital"],
+                    "Automation": ["automation", "automated", "efficient", "streamlined", "digital"]
+                }
+                
+                # Check if idea text matches any selected skill keywords
+                idea_text = f"{str(idea.get('title', '')).lower()} {str(idea.get('summary', '')).lower()} {str(idea.get('target_market', '')).lower()} {combined_text}"
+                
+                for skill in selected_skills:
+                    keywords = skill_keyword_map.get(skill, [])
+                    if keywords:
+                        if any(kw.lower() in idea_text for kw in keywords):
+                            score += 2.0
+                            break  # Only count once per idea
+            
+            scored_ideas.append((score, idea))
+        
+        # Sort by score (descending) and return ideas
+        scored_ideas.sort(key=lambda x: x[0], reverse=True)
+        ranked = [idea for _, idea in scored_ideas]
+        
+        # Update indices to reflect ranking
+        for idx, idea in enumerate(ranked, 1):
+            idea['index'] = idx
+            idea['rank_score'] = scored_ideas[idx - 1][0]
+        
+        self._log(f"Ranked {len(ranked)} ideas by profile match", "INFO")
+        return ranked
+    
+    def _add_discovery_next_steps(
+        self,
+        ideas: List[Dict[str, Any]],
+        profile_data: Dict[str, Any],
+        inputs: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """
+        Add lightweight, early-stage next steps to each idea for Discovery.
+        
+        These are 3-5 bullet points focusing on:
+        - Test basic demand
+        - Create a rough prototype
+        - Talk to 2-3 people
+        - Validate pricing
+        - Create a simple landing page
+        
+        These are NOT validation-level deep next steps.
+        """
+        enriched_ideas = []
+        
+        for idea in ideas:
+            enriched_idea = idea.copy()
+            
+            # Generate lightweight next_steps
+            next_steps = self._generate_lightweight_next_steps(idea, profile_data, inputs)
+            
+            # Store in enrichment.next_steps
+            enriched_idea["enrichment"] = {
+                "next_steps": next_steps
+            }
+            
+            enriched_ideas.append(enriched_idea)
+        
+        return enriched_ideas
+    
+    def _generate_lightweight_next_steps(
+        self,
+        idea: Dict[str, Any],
+        profile_data: Dict[str, Any],
+        inputs: Dict[str, Any]
+    ) -> str:
+        """
+        Generate lightweight, early-stage next steps (3-5 bullets).
+        
+        Uses short LLM prompt focused on early validation, not deep planning.
+        """
+        try:
+            idea_title = idea.get("title", "")
+            idea_summary = idea.get("summary", "")
+            target_market = idea.get("target_market", "")
+            
+            # Extract user constraints
+            budget = inputs.get("budget_range", "")
+            time_commitment = inputs.get("time_commitment", "")
+            skills = inputs.get("skills", {})
+            
+            # Build skills string
+            skill_list = []
+            if isinstance(skills, dict):
+                for category, skill_array in skills.items():
+                    if category != "other" and isinstance(skill_array, list):
+                        skill_list.extend(skill_array)
+                    elif category == "other" and skill_array:
+                        skill_list.append(str(skill_array))
+            
+            skills_str = ", ".join(skill_list) if skill_list else "general skills"
+            
+            # Extract operating constraints from profile
+            constraints = ""
+            if isinstance(profile_data, dict):
+                constraints = profile_data.get("operating_constraints", "")
+            elif isinstance(profile_data, str):
+                # Try to extract from string
+                if "operating_constraints" in profile_data.lower():
+                    constraints = "Based on user's constraints"
+            
+            # Build lightweight prompt
+            prompt = f"""Generate 3-5 lightweight, early-stage next steps for this startup idea.
+Focus on SIMPLE, QUICK validation actions that can be done in 1-2 weeks.
+
+**Idea:**
+Title: {idea_title}
+Summary: {idea_summary}
+Target Market: {target_market}
+
+**User Constraints:**
+- Budget: {budget}
+- Time Available: {time_commitment}
+- Skills: {skills_str}
+- Constraints: {constraints if constraints else "Standard startup constraints"}
+
+**Requirements:**
+- Return ONLY a bulleted list (3-5 items)
+- Each item should be 1 short sentence
+- Focus on early validation: testing demand, talking to people, simple prototypes
+- Keep it lightweight - no 90-day plans or deep strategy
+- Make it actionable and specific to this idea
+
+**Format:**
+- Test [specific validation method]
+- Create [simple artifact]
+- Talk to [target group]
+- Validate [specific assumption]
+- Build [minimal prototype]
+
+Generate the next steps now:"""
+
+            system_prompt = """You are a startup advisor helping founders with early-stage validation.
+Generate lightweight, actionable next steps focused on quick validation.
+Keep responses brief - 3-5 bullet points only. No long explanations."""
+
+            response = self.llm_service.generate(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                temperature=0.7,
+                max_tokens=300,  # Keep it short
+                run_id=None
+            )
+            
+            content = response.get("content", "").strip()
+            
+            # Clean up the response - ensure it's a bullet list
+            if not content:
+                # Fallback
+                return "- Test basic demand with a simple landing page\n- Talk to 3-5 potential customers\n- Create a rough prototype or mockup\n- Validate pricing assumptions\n- Get initial feedback and iterate"
+            
+            # Normalize to bullet points
+            lines = content.split("\n")
+            bullets = []
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                # Ensure it starts with a bullet
+                if not line.startswith("-") and not line.startswith("*") and not line[0].isdigit():
+                    line = "- " + line
+                elif line[0].isdigit() and ". " in line:
+                    # Convert numbered list to bullets
+                    line = "- " + line.split(". ", 1)[1]
+                bullets.append(line)
+            
+            result = "\n".join(bullets[:5])  # Max 5 bullets
+            return result if result else "- Test basic demand\n- Talk to potential customers\n- Create a simple prototype"
+            
+        except Exception as e:
+            self._log(f"Failed to generate lightweight next_steps: {e}", "WARNING")
+            # Return simple fallback
+            return "- Test basic demand with a simple landing page\n- Talk to 3-5 potential customers\n- Create a rough prototype\n- Validate pricing\n- Get feedback and iterate"
+    
+    def _clean_seed_ideas(self, ideas: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Remove any tool/enrichment fields from seed ideas.
+        
+        Seed ideas should ONLY contain:
+        - id, index, title, summary, target_market, revenue_model, 
+          validation_score, timeline, why_this_fits, details_markdown
+        
+        Removes any fields like:
+        - competitors, opportunity_space, market_trends, risks, 
+          market_size, idea_patterns, enrichment, etc.
+        """
+        # Allowed seed-level fields only
+        ALLOWED_SEED_FIELDS = {
+            "id", "index", "title", "summary", "target_market", 
+            "revenue_model", "validation_score", "timeline", 
+            "why_this_fits", "details_markdown", "rank_score",
+            "enrichment"  # Allow enrichment object with next_steps
+        }
+        
+        # Tool/enrichment fields to explicitly remove
+        FORBIDDEN_FIELDS = {
+            "competitors", "opportunity_space", "market_trends", 
+            "risks", "market_size", "idea_patterns", "enrichment",
+            "market_validation", "risks_and_mitigations", 
+            "go_to_market_plan", "execution_roadmap", "founder_fit",
+            "ninety_day_action_plan", "cost_and_tech_stack",
+            "revenue_models", "opportunity_landscape"
+        }
+        
+        cleaned = []
+        for idea in ideas:
+            cleaned_idea = {}
+            for key, value in idea.items():
+                # Only include allowed seed fields
+                if key in ALLOWED_SEED_FIELDS:
+                    # Special handling for enrichment - only keep next_steps
+                    if key == "enrichment" and isinstance(value, dict):
+                        cleaned_idea[key] = {
+                            "next_steps": value.get("next_steps", "")
+                        }
+                    else:
+                        cleaned_idea[key] = value
+                elif key in FORBIDDEN_FIELDS:
+                    # Explicitly skip tool/enrichment fields (but enrichment.next_steps is allowed)
+                    self._log(f"Removed tool field '{key}' from seed idea {idea.get('index', 'unknown')}", "DEBUG")
+                # Ignore any other unexpected fields
+        
+            cleaned.append(cleaned_idea)
+        
+        return cleaned
     
     def _clean_stream_chunk(self, chunk: str) -> str:
         """
@@ -741,16 +1582,3 @@ CRITICAL RULES:
         
         return cleaned
     
-    def _format_research_output(self, tool_results: Dict[str, Any]) -> str:
-        """Format tool results as readable text"""
-        if not tool_results:
-            return "No research data available.\n"
-        
-        lines = []
-        for key, value in tool_results.items():
-            if value:
-                # Convert key to readable format
-                readable_key = key.replace("_", " ").title()
-                lines.append(f"**{readable_key}:**\n{value}\n")
-        
-        return "\n".join(lines) if lines else "No research data available.\n"
