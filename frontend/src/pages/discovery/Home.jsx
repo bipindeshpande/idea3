@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import Seo from "../../components/common/Seo.jsx";
 import DiscoveryLoadingIndicator from "../../components/discovery/DiscoveryLoadingIndicator.jsx";
 import IntakeScreen from "./IntakeScreen.jsx";
+import ReviewScreen from "../../components/discovery/ReviewScreen.jsx";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -225,50 +226,7 @@ export default function HomePage() {
         />
       );
     } else {
-      // Review screen
-      return (
-        <div className="grid gap-4">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Review Your Information</h3>
-          <div className="grid gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4">
-            <div className="grid gap-2">
-              <h4 className="font-semibold text-slate-800 dark:text-slate-200">About You</h4>
-              <div className="grid gap-1 text-sm text-slate-600 dark:text-slate-400">
-                <p><strong>Time Commitment:</strong> {localInputs.time_commitment || "Not set"}</p>
-                <p><strong>Budget Range:</strong> {localInputs.budget_range || "Not set"}</p>
-                <p><strong>Risk Tolerance:</strong> {localInputs.risk_tolerance || "Not set"}</p>
-                <p><strong>Work Style:</strong> {localInputs.preferred_work_style || "Not set"}</p>
-                <p><strong>Startup Style:</strong> {localInputs.startup_style || "Not set"}</p>
-                <p><strong>Customer Interaction:</strong> {localInputs.customer_interaction || "Not set"}</p>
-                <p><strong>Location:</strong> {localInputs.location_context || "Not set"}</p>
-                <p><strong>Business Region:</strong> {localInputs.business_region || "Not set"}</p>
-                <p><strong>Skills:</strong> {
-                  localInputs.skills ? Object.entries(localInputs.skills)
-                    .filter(([cat, val]) => cat !== "other" && Array.isArray(val) && val.length > 0)
-                    .map(([cat, val]) => `${cat}: ${val.join(", ")}`)
-                    .join("; ") || "None selected"
-                    : "Not set"
-                }</p>
-                {localInputs.skills?.other && (
-                  <p><strong>Other Skills:</strong> {localInputs.skills.other}</p>
-                )}
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <h4 className="font-semibold text-slate-800 dark:text-slate-200">Interests & Goals</h4>
-              <div className="grid gap-1 text-sm text-slate-600 dark:text-slate-400">
-                <p><strong>Industry Interest:</strong> {localInputs.industry_interest || "Not set"}</p>
-                <p><strong>Sub-Interest:</strong> {localInputs.sub_interest_area || "Not set"}</p>
-                <p><strong>Business Type:</strong> {localInputs.business_type || "Not set"}</p>
-                <p><strong>Earnings Timeline:</strong> {localInputs.earnings_timeline || "Not set"}</p>
-                <p><strong>Founder Ambition:</strong> {localInputs.founder_ambition || "Not set"}</p>
-                {localInputs.experience_summary && (
-                  <p><strong>Experience:</strong> {localInputs.experience_summary}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
+      return <ReviewScreen inputs={localInputs} />;
     }
   };
 
@@ -276,22 +234,22 @@ export default function HomePage() {
   const conversationalHeaders = [
     {
       title: "Let's start with the basics.",
-      description: "This helps me narrow down ideas that actually fit your time, budget, and risk comfort."
+      description: "These answers reflect your current situation. You can change them anytime and re-run."
     },
     {
-      title: "Let's review what you've shared.",
-      description: "Make sure everything looks right, then I'll start working on ideas for you."
+      title: "Review what you've shared.",
+      description: "Take a moment to review, then I'll work on ideas for you."
     }
   ];
 
   const screenTitles = [
-    "Tell me a bit about you",
-    "Review Your Information"
+    "Share your current situation",
+    "Review what you've shared"
   ];
 
   const screenDescriptions = [
-    "Tell us about your availability, preferences, skills, and interests",
-    "Review your information before generating recommendations"
+    "Help me understand your availability, preferences, skills, and interests",
+    "Review your responses before we explore ideas together"
   ];
 
   const progressPercent = Math.round(((screen + 1) / 2) * 100);
@@ -331,20 +289,20 @@ export default function HomePage() {
       </Seo>
 
       <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-500/90 via-brand-600 to-brand-800 p-[1px] shadow-xl shadow-brand-500/25">
-        <div className="relative rounded-[calc(1rem-1px)] bg-white/95 dark:bg-slate-800/95 px-6 py-6 sm:px-8">
+        <div className="relative rounded-[calc(1rem-1px)] bg-white px-6 py-6 sm:px-8">
           {isAuthenticated && (
             <Link
               to="/dashboard"
-              className="mb-4 inline-flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+              className="mb-4 inline-block px-5 py-2.5 rounded-lg font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all shadow-sm hover:shadow-md"
             >
               ← Back to Dashboard
             </Link>
           )}
           <div className="max-w-3xl space-y-6">
-            <span className="inline-flex items-center rounded-full bg-gradient-to-r from-brand-50 to-brand-100/50 dark:from-brand-900/40 dark:to-brand-800/30 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300 shadow-sm border border-brand-200/50 dark:border-brand-700/30">
+            <span className="inline-flex items-center rounded-full bg-indigo-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-indigo-700 shadow-sm border border-indigo-200">
               AI co-pilot for side hustles & founders
             </span>
-            <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+            <p className="text-[15px] text-gray-700 leading-relaxed">
               Share your goals, time, and strengths. Our AI advisor researches markets, evaluates risks, and hands you advisor-grade recommendations within minutes.
             </p>
             {process.env.NODE_ENV === 'development' && (
@@ -374,31 +332,33 @@ export default function HomePage() {
       <form
         id="intake-form"
         onSubmit={handleSubmit}
-        className="grid gap-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 p-6 shadow-lg backdrop-blur"
+        className="grid gap-4 rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7"
       >
         {/* Persistent conversational header */}
-        <div className="mb-6 rounded-xl border border-brand-200/60 dark:border-brand-700/60 bg-brand-50/50 dark:bg-brand-900/20 p-4">
-          <p className="text-base font-semibold text-slate-900 dark:text-slate-50">
+        <div className="mb-6 rounded-xl border border-gray-200 shadow-sm bg-white p-5 md:p-6">
+          <p className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             {conversationalHeaders[screen].title}
           </p>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-1 text-[15px] text-gray-700 leading-relaxed">
             {conversationalHeaders[screen].description}
           </p>
         </div>
 
-        <header className="space-y-3">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            {screenTitles[screen]}
-          </h2>
-          <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300">
-            {screenDescriptions[screen]}
-          </p>
+        <header className="space-y-3 relative">
+          <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+          <div className="relative z-10">
+            <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">
+              {screenTitles[screen]}
+            </h1>
+            <p className="text-[15px] text-gray-700 leading-relaxed mb-8">
+              {screenDescriptions[screen]}
+            </p>
+          </div>
         </header>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
             <span>Step {screen + 1} of 2</span>
-            <span>{screen === 0 ? "About 2 minutes left" : "Almost done"}</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
             <div
@@ -412,9 +372,9 @@ export default function HomePage() {
 
         {/* End-of-step conversational transition */}
         {screen === 0 && (
-          <div className="mt-6 rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/30 p-4">
-            <p className="text-sm text-slate-700 dark:text-slate-300">
-              So far so good. One more step and I'll start working on ideas for you.
+          <div className="mt-6 rounded-xl border border-gray-200 shadow-sm bg-white p-5 md:p-6">
+            <p className="text-[15px] text-gray-700 leading-relaxed">
+              One more step and I'll start exploring ideas for you.
             </p>
           </div>
         )}
@@ -424,7 +384,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={handleBack}
-              className="rounded-xl border border-slate-300 dark:border-slate-600 px-5 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:border-brand-300 dark:hover:border-brand-500 whitespace-nowrap"
+              className="px-5 py-2.5 rounded-lg font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             >
               Back
             </button>
@@ -433,7 +393,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={handleNext}
-              className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-2 text-sm font-medium text-white shadow-md transition hover:from-brand-600 hover:to-brand-700 whitespace-nowrap"
+              className="px-5 py-2.5 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             >
               Continue
             </button>
@@ -442,9 +402,9 @@ export default function HomePage() {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-3 text-white shadow-md transition hover:from-brand-600 hover:to-brand-700 disabled:cursor-not-allowed disabled:from-brand-300 disabled:to-brand-300 whitespace-nowrap"
+              className="px-5 py-2.5 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap"
             >
-              {loading ? "Generating recommendations..." : "Generate recommendations"}
+              {loading ? "Exploring ideas..." : "Explore ideas"}
             </button>
           )}
           {error && <p className="text-sm text-red-600">{error}</p>}
@@ -456,16 +416,16 @@ export default function HomePage() {
           <p className="text-xs text-slate-500 mt-2">
             Want more personalized recommendations?{" "}
             <Link to="/founder-psychology" className="text-brand-600 underline hover:text-brand-700">
-              Complete your Founder Profile
+              Share your Founder Profile
             </Link>
           </p>
         )}
       </form>
 
       {reports && (
-        <section className="rounded-3xl border border-brand-200 dark:border-brand-700 bg-brand-50/80 dark:bg-brand-900/30 p-6 text-brand-900 dark:text-brand-300 shadow-inner">
-          <h2 className="text-lg font-semibold">Latest report saved</h2>
-          <p className="mt-1 text-sm text-brand-700 dark:text-brand-400">
+        <section className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">Latest report saved</h2>
+          <p className="mt-1 text-[15px] text-gray-700 leading-relaxed">
             Visit the dashboard or the tabs above to review your profile summary and recommendations anytime.
           </p>
         </section>

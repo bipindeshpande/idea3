@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { filterInterestAreas, filterSubcategories, filterSkillCategories } from "../../utils/startupCategoryConfig.js";
 
 const fieldClasses =
-  "w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-slate-800/70 px-4 py-3 text-slate-800 dark:text-slate-200 shadow-sm transition focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 text-sm";
+  "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 text-sm";
 
 const STORAGE_KEY = "dev_intake_form";
 
@@ -280,10 +280,17 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
 
   return (
     <div className="grid gap-4 sm:gap-5">
+      {/* Reassurance text at the top */}
+      <div className="rounded-lg border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/30 p-3 mb-2">
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          These answers reflect your current situation. You can change them anytime and re-run.
+        </p>
+      </div>
+      
       {/* Startup Category - FIRST FIELD */}
       <div className="grid gap-1.5">
         <label htmlFor="startup_category" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
-          Startup Category <span className="text-brand-500">*</span>
+          What type of business are you interested in? <span className="text-brand-500">*</span>
         </label>
         <select
           id="startup_category"

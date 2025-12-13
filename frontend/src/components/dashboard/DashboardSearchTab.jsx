@@ -1,4 +1,5 @@
 import { useState, memo } from "react";
+import { Link } from "react-router-dom";
 import { formFieldsConfig } from "../../config/formFieldsConfig.js";
 
 function DashboardSearchTab({
@@ -12,6 +13,7 @@ function DashboardSearchTab({
   filteredValidations,
   allIdeas,
   allValidations,
+  allRuns,
   dateFilter,
   setDateFilter,
   scoreFilter,
@@ -22,12 +24,14 @@ function DashboardSearchTab({
   setSearchQuery,
   searchInput,
   setSearchInput,
-  setMainTab,
+  setActiveTab,
   setSelectedIdeas,
   setComparisonData,
   setAutoCompareTrigger,
   performComparison,
 }) {
+  // Check if user has any runs
+  const hasRuns = allRuns && allRuns.length > 0;
   // Debug logging for search
   if (process.env.NODE_ENV === 'development' && searchPerformed) {
     console.log("[DashboardSearchTab] Search state:", {
@@ -48,6 +52,36 @@ function DashboardSearchTab({
         runInputs: allIdeas[0].runInputs ? Object.keys(allIdeas[0].runInputs) : null,
       } : null,
     });
+  }
+
+  // Show placeholder when user has no runs
+  if (!hasRuns) {
+    return (
+      <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/30 p-8 text-center">
+        <div className="mb-4 text-4xl">🔍</div>
+        <h3 className="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-50">
+          Search
+        </h3>
+        <p className="mb-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-md mx-auto">
+          No items yet. These appear as you explore or validate ideas.
+        </p>
+        <div className="flex gap-3 justify-center">
+          <Link
+            to="/advisor"
+            className="text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
+          >
+            Explore ideas
+          </Link>
+          <span className="text-slate-400">•</span>
+          <Link
+            to="/validate-idea"
+            className="text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
+          >
+            Validate an idea
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -290,7 +324,7 @@ function DashboardSearchTab({
                 setSelectedIdeas(selectedIds);
                 setComparisonData(null);
                 setAutoCompareTrigger(true);
-                setMainTab("compare");
+                setActiveTab("compare");
                 await performComparison(selectedIds);
               }}
               className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30"
@@ -311,7 +345,7 @@ function DashboardSearchTab({
       )}
 
       {/* Search Results */}
-      {searchPerformed ? (
+      {searchPerformed && (
         <div className="space-y-4">
           {/* Ideas Results */}
           {advancedSearch.searchType === "ideas" && filteredIdeas.length > 0 && (
@@ -439,24 +473,6 @@ function DashboardSearchTab({
               </button>
             </div>
           )}
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/80 dark:bg-slate-800/50 p-12 text-center">
-          <svg
-            className="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500 mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-2">Start Your Search</h4>
-          <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
-            Enter a search term above to find your ideas and validations.
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Use the filters below to find specific ideas that match your criteria.
-          </p>
         </div>
       )}
     </div>

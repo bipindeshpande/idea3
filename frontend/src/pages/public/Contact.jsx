@@ -1,5 +1,11 @@
 import { useState } from "react";
 import Seo from "../../components/common/Seo.jsx";
+import PageHeader from "../../components/layout/PageHeader.jsx";
+import PageContainer from "../../components/layout/PageContainer.jsx";
+import Card from "../../components/ui/Card.jsx";
+import Button from "../../components/ui/Button.jsx";
+import FormInput from "../../components/ui/FormInput.jsx";
+import FormTextarea from "../../components/ui/FormTextarea.jsx";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -58,89 +64,88 @@ export default function ContactPage() {
   };
 
   return (
-    <section className="mx-auto max-w-2xl px-6 py-12">
+    <PageContainer maxWidth="2xl">
       <Seo
         title="Contact | Idea Bunch"
         description="Reach the Startup Idea Advisor team for pilots, partnerships, or support."
         path="/contact"
       />
-      <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 p-8 shadow-lg">
-        <h1 className="mb-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Contact</h1>
-        <p className="mb-8 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-          Interested in pilots, partnerships, or press? Drop us a note and we'll get back within one business day.
-        </p>
+      <Card className="relative">
+        <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+        <div className="relative z-10">
+        <PageHeader
+          title="Contact"
+          description="Interested in pilots, partnerships, or press? Drop us a note and we'll get back within one business day."
+        />
         
         {success && (
-          <div className="mb-6 rounded-xl border border-emerald-300/60 dark:border-emerald-700/60 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/20 p-4 shadow-sm">
-            <p className="text-emerald-700 dark:text-emerald-300 font-semibold">
+          <Card className="mb-6">
+            <p className="text-[15px] text-gray-700 leading-relaxed font-semibold">
               ✓ Thank you for your message! We'll get back to you soon.
             </p>
-          </div>
+          </Card>
         )}
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-300/60 dark:border-red-700/60 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/30 dark:to-red-800/20 p-4 shadow-sm">
-            <p className="text-red-700 dark:text-red-300 font-semibold">{error}</p>
-          </div>
+          <Card className="mb-6 border-red-200 bg-red-50">
+            <p className="text-[15px] text-red-800 leading-relaxed font-semibold">{error}</p>
+          </Card>
         )}
 
         <form onSubmit={handleSubmit} className="grid gap-5 md:grid-cols-2">
-          <input
+          <FormInput
             type="text"
             name="name"
             placeholder="Name"
             value={formData.name}
             onChange={handleChange}
             required
-            className="rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 p-3.5 text-sm text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
           />
-          <input
+          <FormInput
             type="email"
             name="email"
             placeholder="Work Email"
             value={formData.email}
             onChange={handleChange}
             required
-            className="rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 p-3.5 text-sm text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
           />
-          <input
+          <FormInput
             type="text"
             name="company"
             placeholder="Company / Organization"
             value={formData.company}
             onChange={handleChange}
-            className="rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 p-3.5 text-sm text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
           />
-          <input
+          <FormInput
             type="text"
             name="topic"
             placeholder="Topic"
             value={formData.topic}
             onChange={handleChange}
-            className="rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 p-3.5 text-sm text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
           />
-          <textarea
+          <FormTextarea
             name="message"
             placeholder="How can we help?"
             rows={4}
             value={formData.message}
             onChange={handleChange}
             required
-            className="md:col-span-2 rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 p-3.5 text-sm text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
+            className="md:col-span-2"
           />
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="md:col-span-2 w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="md:col-span-2 w-full"
           >
             {loading ? "Sending..." : "Send Message"}
-          </button>
+          </Button>
         </form>
-        <div className="mt-6 text-sm text-slate-500 dark:text-slate-400">
-          Prefer email? Reach us at <span className="font-semibold text-brand-600 dark:text-brand-400">hello@ideabunch.com</span>
+        <div className="mt-6 text-sm text-gray-600">
+          Prefer email? Reach us at <span className="font-semibold text-indigo-600">hello@ideabunch.com</span>
         </div>
-      </div>
-    </section>
+        </div>
+      </Card>
+    </PageContainer>
   );
 }
 

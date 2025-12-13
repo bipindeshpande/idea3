@@ -25,7 +25,7 @@ export default function ValidationResult() {
   const navigate = useNavigate();
   const { currentValidation, loadValidationById, categoryAnswers, ideaExplanation } = useValidation();
   const { setInputs } = useReports();
-  const { subscription, user } = useAuth();
+  const { subscription, user, isAuthenticated } = useAuth();
   const isPro = subscription?.subscription_type === "pro" || subscription?.subscription_type === "annual";
   const isFree = !subscription || subscription?.subscription_type === "free";
   const isStarter = subscription?.subscription_type === "starter";
@@ -539,6 +539,14 @@ export default function ValidationResult() {
   if (!validation) {
     return (
       <section className="mx-auto max-w-6xl px-6 py-6">
+        {isAuthenticated && (
+          <Link
+            to="/dashboard"
+            className="mb-4 inline-block px-5 py-2.5 rounded-lg font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all shadow-sm hover:shadow-md"
+          >
+            ← Back to Dashboard
+          </Link>
+        )}
         <Seo
           title="Idea Validation Results | Startup Idea Advisor"
           description="Review your startup idea validation results with comprehensive analysis across 10 key parameters and actionable recommendations."
@@ -584,12 +592,23 @@ export default function ValidationResult() {
         path="/validate-result"
       />
 
+      {isAuthenticated && (
+        <Link
+          to="/dashboard"
+          className="mb-6 inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          ← Back to Dashboard
+        </Link>
+      )}
+
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between no-print">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Idea Validation Results</h1>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">Your idea has been evaluated across 10 key parameters</p>
-        </div>
+      <div className="mb-8 relative no-print">
+        <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+        <div className="relative flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">Idea Validation Results</h1>
+            <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">Your idea has been evaluated across 10 key parameters</p>
+          </div>
         <div className="flex gap-3">
           <button
             ref={downloadButtonRef}
@@ -639,13 +658,13 @@ export default function ValidationResult() {
               }
             }}
             disabled={downloadingPDF}
-            className="rounded-xl border border-brand-300 dark:border-brand-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-brand-400 shadow-sm transition hover:border-brand-400 dark:hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-lg font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {downloadingPDF ? "Generating PDF..." : "Download PDF"}
           </button>
           <Link
             to="/validate-idea"
-            className="rounded-xl border border-brand-300 dark:border-brand-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-brand-400 shadow-sm transition hover:border-brand-400 dark:hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 whitespace-nowrap"
+            className="px-5 py-2.5 rounded-lg font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
           >
             Validate Another Idea
           </Link>
@@ -663,7 +682,7 @@ export default function ValidationResult() {
 
       {/* Tabbed Interface */}
       <div className="mb-8 no-print">
-        <nav className="flex flex-wrap gap-2 rounded-full bg-slate-100/80 dark:bg-slate-800/80 p-1">
+        <nav className="flex flex-wrap gap-2 rounded-full bg-gray-100/80 p-1">
           {[
             { id: "input", label: "Your Input", hidden: false },
             { id: "results", label: "Validation Results", hidden: false },
@@ -678,8 +697,8 @@ export default function ValidationResult() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                   activeTab === tab.id
-                    ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-sm shadow-slate-300 dark:shadow-slate-700"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                    ? "bg-white text-gray-900 shadow-sm shadow-gray-300"
+                    : "text-gray-500 hover:text-gray-800"
                 }`}
               >
                 {tab.label}
@@ -691,19 +710,19 @@ export default function ValidationResult() {
       {/* Tab Content: Your Input */}
       {activeTab === "input" && (
         <div className="space-y-6">
-          <p className="text-sm text-slate-600 dark:text-slate-400">These are the inputs you provided during validation.</p>
+          <p className="text-sm text-gray-600 mb-6">These are the inputs you provided during validation.</p>
           {/* Category Questions */}
           {validationQuestions.category_questions && validationQuestions.category_questions.length > 0 && (
-            <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 p-6 shadow-soft">
-              <h2 className="mb-6 text-2xl font-semibold text-slate-900 dark:text-slate-100">Category Information</h2>
-              <div className="space-y-6">
+            <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-6">Category Information</h2>
+              <div className="space-y-4">
                 {validationQuestions.category_questions.map((question) => {
                   const answer = categoryAnswers[question.id];
                   if (!answer) return null;
                   return (
-                    <div key={question.id} className="rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/50 p-4">
-                      <h3 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">{question.question}</h3>
-                      <p className="text-base text-slate-900 dark:text-slate-100">{answer}</p>
+                    <div key={question.id} className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                      <h3 className="mb-2 text-sm font-medium text-gray-700 dark:text-slate-300">{question.question}</h3>
+                      <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">{answer}</p>
                     </div>
                   );
                 })}
@@ -713,16 +732,16 @@ export default function ValidationResult() {
 
           {/* Idea Explanation Questions */}
           {validationQuestions.idea_explanation_questions && validationQuestions.idea_explanation_questions.length > 0 && (
-            <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 p-6 shadow-soft">
-              <h2 className="mb-6 text-2xl font-semibold text-slate-900 dark:text-slate-100">Idea Details</h2>
-              <div className="space-y-6">
+            <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-6">Idea Details</h2>
+              <div className="space-y-4">
                 {validationQuestions.idea_explanation_questions.map((question) => {
                   const answer = categoryAnswers[question.id];
                   if (!answer) return null;
                   return (
-                    <div key={question.id} className="rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/50 p-4">
-                      <h3 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">{question.question}</h3>
-                      <p className="text-base text-slate-900 dark:text-slate-100">{answer}</p>
+                    <div key={question.id} className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                      <h3 className="mb-2 text-sm font-medium text-gray-700 dark:text-slate-300">{question.question}</h3>
+                      <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">{answer}</p>
                     </div>
                   );
                 })}
@@ -732,18 +751,18 @@ export default function ValidationResult() {
 
           {/* Optional Fields (Business Archetype, Delivery Channel, etc.) */}
           {validationQuestions.optional_fields && validationQuestions.optional_fields.length > 0 && (
-            <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 p-6 shadow-soft">
-              <h2 className="mb-6 text-2xl font-semibold text-slate-900 dark:text-slate-100">Additional Information</h2>
-              <div className="space-y-6">
+            <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-6">Additional Information</h2>
+              <div className="space-y-4">
                 {validationQuestions.optional_fields.map((question) => {
                   const answer = categoryAnswers[question.id];
                   if (!answer) return null;
                   // Handle multi-select fields (like constraints)
                   const displayAnswer = Array.isArray(answer) ? answer.join(", ") : answer;
                   return (
-                    <div key={question.id} className="rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/50 p-4">
-                      <h3 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">{question.question}</h3>
-                      <p className="text-base text-slate-900 dark:text-slate-100">{displayAnswer}</p>
+                    <div key={question.id} className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                      <h3 className="mb-2 text-sm font-medium text-gray-700 dark:text-slate-300">{question.question}</h3>
+                      <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">{displayAnswer}</p>
                     </div>
                   );
                 })}
@@ -753,10 +772,10 @@ export default function ValidationResult() {
 
           {/* Detailed Idea Explanation */}
           {ideaExplanation && (
-            <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 p-6 shadow-soft">
-              <h2 className="mb-4 text-2xl font-semibold text-slate-900 dark:text-slate-100">Detailed Idea Explanation</h2>
-              <div className="rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/50 p-4">
-                <p className="whitespace-pre-wrap text-base leading-relaxed text-slate-900 dark:text-slate-100">{ideaExplanation}</p>
+            <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">Detailed Idea Explanation</h2>
+              <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                <p className="whitespace-pre-wrap text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">{ideaExplanation}</p>
               </div>
             </div>
           )}
@@ -764,15 +783,15 @@ export default function ValidationResult() {
           {/* Fallback: Show raw category answers if questions not available */}
           {(!validationQuestions.category_questions || validationQuestions.category_questions.length === 0) &&
             Object.keys(categoryAnswers).length > 0 && (
-              <div className="rounded-3xl border border-sand-200 bg-sand-50/80 p-6 shadow-soft">
-                <h2 className="mb-4 text-xl font-semibold text-slate-900 dark:text-slate-100">Your Idea Summary</h2>
-                <div className="space-y-4 text-sm">
+              <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">Your Idea Summary</h2>
+                <div className="space-y-4 text-sm text-gray-600">
                   {Object.entries(categoryAnswers).map(([key, value]) => (
                     <div key={key}>
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      <span className="font-medium text-gray-700 dark:text-slate-300">
                         {key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}:
                       </span>{" "}
-                      <span className="text-slate-600 dark:text-slate-400">{value}</span>
+                      <span className="text-gray-600">{value}</span>
                     </div>
                   ))}
                 </div>
@@ -786,15 +805,17 @@ export default function ValidationResult() {
         <div className="space-y-6">
           {/* Celebration Banner for High Scores */}
           {overallScore >= 8 && (
-            <div className="relative overflow-hidden rounded-3xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 via-emerald-100/50 to-emerald-50 p-6 shadow-lg">
+            <div className="relative overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
               <Celebration score={overallScore} show={showCelebration} />
               <div className="relative z-10 flex items-center gap-4">
-                <div className="text-4xl">{getCelebrationMessage(overallScore).emoji}</div>
+                <div className="w-12 h-12 rounded-full bg-[#f3f5ff] flex items-center justify-center text-2xl">
+                  {getCelebrationMessage(overallScore).emoji}
+                </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-emerald-900">
+                  <h3 className="text-lg font-semibold text-gray-900">
                     {getCelebrationMessage(overallScore).message}
                   </h3>
-                  <p className="mt-1 text-sm text-emerald-700">
+                  <p className="mt-1 text-sm text-gray-600">
                     Your idea scored {overallScore.toFixed(1)}/10 - That's impressive! 🎉
                   </p>
                 </div>
@@ -804,32 +825,35 @@ export default function ValidationResult() {
           
           {/* Re-Validation Comparison Banner */}
           {previousScore !== null && previousScore !== undefined && (
-            <div className="rounded-3xl border-2 border-emerald-300 dark:border-emerald-600 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-900/20 dark:to-slate-800 p-6 shadow-soft">
-              <h2 className="mb-3 text-xl font-bold text-slate-900 dark:text-slate-100">📈 Improvement Comparison</h2>
+            <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <div className="w-12 h-12 rounded-full bg-[#f3f5ff] flex items-center justify-center text-xl">📈</div>
+                Improvement Comparison
+              </h2>
               <div className="flex items-center gap-4">
-                <div className="flex-1 rounded-xl border-2 border-slate-200 bg-slate-50 p-4">
-                  <div className="text-xs font-semibold text-slate-600 mb-1">Previous Score</div>
-                  <div className="text-3xl font-bold text-slate-700">{previousScore.toFixed(1)}</div>
-                  <div className="text-xs text-slate-500">/ 10</div>
+                <div className="flex-1 rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <div className="text-xs text-gray-500 mb-1">Previous Score</div>
+                  <div className="text-3xl font-bold text-gray-900">{previousScore.toFixed(1)}</div>
+                  <div className="text-xs text-gray-500">/ 10</div>
                 </div>
-                <div className="text-2xl font-bold text-emerald-600">→</div>
-                <div className="flex-1 rounded-xl border-2 border-emerald-200 bg-emerald-50 p-4">
-                  <div className="text-xs font-semibold text-emerald-700 mb-1">New Score</div>
-                  <div className="text-3xl font-bold text-emerald-700">{overallScore.toFixed(1)}</div>
-                  <div className="text-xs text-emerald-600">/ 10</div>
+                <div className="text-2xl font-bold text-gray-400">→</div>
+                <div className="flex-1 rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <div className="text-xs text-gray-500 mb-1">New Score</div>
+                  <div className="text-3xl font-bold text-gray-900">{overallScore.toFixed(1)}</div>
+                  <div className="text-xs text-gray-500">/ 10</div>
                 </div>
-                <div className="flex-1 rounded-xl border-2 border-brand-200 bg-brand-50 p-4">
-                  <div className="text-xs font-semibold text-brand-700 mb-1">Change</div>
-                  <div className={`text-3xl font-bold ${overallScore > previousScore ? 'text-emerald-600' : overallScore < previousScore ? 'text-coral-600' : 'text-slate-600'}`}>
+                <div className="flex-1 rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <div className="text-xs text-gray-500 mb-1">Change</div>
+                  <div className={`text-3xl font-bold ${overallScore > previousScore ? 'text-gray-900' : overallScore < previousScore ? 'text-gray-900' : 'text-gray-900'}`}>
                     {overallScore > previousScore ? '+' : ''}{(overallScore - previousScore).toFixed(1)}
                   </div>
-                  <div className="text-xs text-brand-600">
+                  <div className="text-xs text-gray-500">
                     {overallScore > previousScore ? 'Improved!' : overallScore < previousScore ? 'Decreased' : 'No change'}
                   </div>
                 </div>
               </div>
               {overallScore > previousScore && (
-                <p className="mt-4 text-sm font-semibold text-emerald-700">
+                <p className="mt-4 text-sm text-gray-600">
                   🎉 Great job! Your idea improved by {((overallScore - previousScore) / previousScore * 100).toFixed(0)}%. Keep refining!
                 </p>
               )}
@@ -842,16 +866,16 @@ export default function ValidationResult() {
           <div className="flex flex-col lg:flex-row lg:justify-between gap-4 mb-1.5">
             {/* Small Score Card - Left Side */}
             <div className="lg:w-48 flex-shrink-0">
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-soft">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
+              <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                <p className="text-xs text-gray-500 mb-2">
                   Overall Score
                 </p>
                 <div className="text-center">
                   <div className="flex items-baseline justify-center gap-1">
-                    <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{overallScore.toFixed(1)}</p>
-                    <p className="text-lg text-slate-500 dark:text-slate-400">/10</p>
+                    <p className="text-4xl font-bold text-gray-900">{overallScore.toFixed(1)}</p>
+                    <p className="text-lg text-gray-500">/10</p>
                   </div>
-                  <div className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${overallStatus.badge}`}>
+                  <div className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-medium ${overallStatus.badge}`}>
                     {overallStatus.label}
                   </div>
                 </div>
@@ -865,8 +889,8 @@ export default function ValidationResult() {
           </div>
 
             {/* Diagnostic Overview - Unified Analytics Block */}
-            <p className="text-lg font-semibold text-slate-600 dark:text-slate-400 mb-2">Diagnostic Overview Across 10 Validation Pillars</p>
-            <div className="mb-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 md:p-6 shadow-[0_2px_10px_rgba(0,0,0,0.06)]">
+            <p className="text-lg font-semibold text-gray-900 mb-2">Diagnostic Overview Across 10 Validation Pillars</p>
+            <div className="mb-3 rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
               {/* Desktop ≥1024px: 2 columns (50% / 50%), Tablet/Mobile: Stacked */}
               <div className="flex flex-col lg:flex-row gap-6 items-stretch lg:items-stretch min-h-[340px]">
                 {/* Column 1: Radar Chart (50%) */}
@@ -875,7 +899,7 @@ export default function ValidationResult() {
                 </div>
                 
                 {/* Column 2: Parameter Scores (50%) */}
-                <div className="lg:w-[50%] flex flex-col lg:justify-center lg:border-l lg:border-slate-200 dark:lg:border-slate-700 lg:pl-4">
+                <div className="lg:w-[50%] flex flex-col lg:justify-center lg:border-l lg:border-gray-200 lg:pl-4">
                   <ParameterScores 
                     parameterCards={parameterGroups.flatMap(g => g.cards)} 
                     parameterLookup={parameterLookup} 
@@ -885,18 +909,18 @@ export default function ValidationResult() {
             </div>
 
             {/* Filter / Sort Row */}
-            <p className="mb-2 text-sm text-slate-600 dark:text-slate-400">View parameter-by-parameter breakdown and insights.</p>
-            <div className="flex flex-col gap-4 rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-soft md:flex-row md:items-center md:justify-between mb-4">
+            <p className="mb-2 text-sm text-gray-600">View parameter-by-parameter breakdown and insights.</p>
+            <div className="flex flex-col gap-4 rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 md:flex-row md:items-center md:justify-between mb-4">
                     <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">View</p>
-                <div className="mt-2 inline-flex overflow-hidden rounded-full border border-slate-200 dark:border-slate-700">
+                <p className="text-xs text-gray-500">View</p>
+                <div className="mt-2 inline-flex overflow-hidden rounded-full border border-gray-200">
                   <button
                     type="button"
                     onClick={() => setViewFilter("all")}
-                    className={`px-4 py-2 text-sm font-semibold transition ${
+                    className={`px-4 py-2 text-sm font-medium transition ${
                       viewFilter === "all"
-                        ? "bg-slate-900 dark:bg-slate-700 text-white"
-                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                        ? "bg-gray-900 text-white"
+                        : "text-gray-500 hover:text-gray-900"
                     }`}
                   >
                     All Parameters
@@ -904,10 +928,10 @@ export default function ValidationResult() {
                   <button
                     type="button"
                     onClick={() => setViewFilter("red")}
-                    className={`px-4 py-2 text-sm font-semibold transition ${
+                    className={`px-4 py-2 text-sm font-medium transition ${
                       viewFilter === "red"
-                        ? "bg-slate-900 dark:bg-slate-700 text-white"
-                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                        ? "bg-gray-900 text-white"
+                        : "text-gray-500 hover:text-gray-900"
                     }`}
                   >
                     Red Flags Only
@@ -915,13 +939,13 @@ export default function ValidationResult() {
                       </div>
                       </div>
               <div className="w-full md:w-auto">
-                <label className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                <label className="text-xs text-gray-500">
                   Sort by
                 </label>
                 <select
                   value={sortOption}
                   onChange={(event) => setSortOption(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 md:w-56"
+                  className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:text-slate-300 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 md:w-56"
                 >
                   <option value="category">Category Order</option>
                   <option value="score-asc">Score: Low → High</option>
@@ -931,13 +955,13 @@ export default function ValidationResult() {
             </div>
 
             {/* Parameter Groups */}
-            <div className="space-y-12">
+            <div className="space-y-10 md:space-y-12">
               {parameterGroups.length > 0 ? (
                 parameterGroups.map((group) => (
                   <div key={group.id}>
                     <div className="mb-6">
-                      <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{group.title}</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{group.description}</p>
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">{group.title}</h3>
+                      <p className="text-sm text-gray-600">{group.description}</p>
                       </div>
                     <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                       {group.cards.map((card) => (
@@ -952,67 +976,68 @@ export default function ValidationResult() {
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 text-center text-sm text-slate-600 dark:text-slate-400">
-                  No parameters match the selected filter.
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 text-center">
+                  <p className="text-lg font-semibold text-gray-900 mb-1">No parameters match the selected filter.</p>
+                  <p className="text-[15px] text-gray-600 leading-relaxed max-w-md mx-auto">Try adjusting your filter to see more results.</p>
                     </div>
                   )}
             </div>
+          </div>
 
-            {/* Footer Nav */}
-            <div className="flex flex-col gap-4 rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-soft lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">This page shows your diagnostic scores only.</p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  To explore next steps and recommendations, go to the relevant sections.
-                </p>
-                      </div>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("analysis")}
-                  className="rounded-full border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:border-brand-300 hover:text-brand-600"
-                >
-                  Recommendations
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("nextsteps")}
-                  className="rounded-full border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:border-brand-300 hover:text-brand-600"
-                >
-                  Action Plan
-                </button>
-                <button
-                  type="button"
-                  onClick={() => downloadButtonRef.current?.click()}
-                  className="rounded-full border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:border-brand-300 hover:text-brand-600"
-                >
-                  Download Full Report
-                </button>
-                      </div>
-                    </div>
-              </div>
+          {/* Footer Nav */}
+          <div className="flex flex-col gap-4 rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-900">This page shows your diagnostic scores only.</p>
+              <p className="text-sm text-gray-600">
+                To explore next steps and recommendations, go to the relevant sections.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => setActiveTab("analysis")}
+                className="px-5 py-2.5 rounded-lg font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all shadow-sm hover:shadow-md"
+              >
+                Recommendations
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("nextsteps")}
+                className="px-5 py-2.5 rounded-lg font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all shadow-sm hover:shadow-md"
+              >
+                Action Plan
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadButtonRef.current?.click()}
+                className="px-5 py-2.5 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
+              >
+                Download Full Report
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Tab Content: Detailed Analysis & Recommendations */}
       {activeTab === "analysis" && recommendations && (
-        <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 p-6 shadow-soft">
-          <h2 className="mb-4 text-2xl font-semibold text-slate-900 dark:text-slate-100">Detailed Analysis & Recommendations</h2>
-          <div className="prose prose-slate dark:prose-invert max-w-none">
+        <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">Detailed Analysis & Recommendations</h2>
+          <div className="prose prose-slate max-w-none">
             <ReactMarkdown
               components={{
                 p: ({ node, ...props }) => {
                   const text = node.children?.[0]?.value || "";
                   if (text && text.length > 50 && !text.includes("\n")) {
-                    return <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-4" {...props} />;
+                    return <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed mb-4" {...props} />;
                   }
-                  return <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-4" {...props} />;
+                  return <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed mb-4" {...props} />;
                 },
                 ul: ({ node, ...props }) => (
-                  <ul className="list-disc list-outside space-y-2 text-slate-700 dark:text-slate-300 mb-4 ml-6" style={{ listStyleType: 'disc', paddingLeft: '1.5rem' }} {...props} />
+                  <ul className="list-disc list-outside space-y-2 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed mb-4 ml-6" style={{ listStyleType: 'disc', paddingLeft: '1.5rem' }} {...props} />
                 ),
                 ol: ({ node, ...props }) => (
-                  <ol className="list-decimal list-outside space-y-2 text-slate-700 dark:text-slate-300 mb-4 ml-6" style={{ listStyleType: 'decimal', paddingLeft: '1.5rem' }} {...props} />
+                  <ol className="list-decimal list-outside space-y-2 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed mb-4 ml-6" style={{ listStyleType: 'decimal', paddingLeft: '1.5rem' }} {...props} />
                 ),
                 li: ({ node, ...props }) => {
                   // Check if this is a nested list item (has ul/ol as children)
@@ -1021,20 +1046,20 @@ export default function ValidationResult() {
                   );
                   return (
                     <li 
-                      className={`leading-relaxed text-base text-slate-700 dark:text-slate-300 ${hasNestedList ? 'mb-2' : 'mb-3'}`} 
+                      className={`leading-relaxed text-[15px] text-gray-700 dark:text-slate-300 ${hasNestedList ? 'mb-2' : 'mb-3'}`} 
                       style={{ display: 'list-item', listStylePosition: 'outside' }} 
                       {...props} 
                     />
                   );
                 },
                 strong: ({ node, ...props }) => (
-                  <strong className="font-semibold text-slate-900 dark:text-slate-100" {...props} />
+                  <strong className="font-semibold text-gray-900 dark:text-slate-100" {...props} />
                 ),
                 h2: ({ node, ...props }) => (
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-6 mb-4" {...props} />
+                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mt-6 mb-4" {...props} />
                 ),
                 h3: ({ node, ...props }) => (
-                  <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mt-5 mb-3" {...props} />
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mt-5 mb-3" {...props} />
                 ),
               }}
             >
@@ -1046,27 +1071,27 @@ export default function ValidationResult() {
 
       {/* Tab Content: Final Validation Conclusion & Decision */}
       {activeTab === "conclusion" && finalConclusion && (
-        <div className="rounded-3xl border-2 border-brand-300 dark:border-brand-600 bg-gradient-to-br from-brand-50 to-white dark:from-brand-900/20 dark:to-slate-800 p-6 shadow-soft">
-          <div className="prose prose-slate dark:prose-invert max-w-none">
+        <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+          <div className="prose prose-slate max-w-none">
             <ReactMarkdown
               components={{
                 h2: ({ node, ...props }) => (
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 mt-6" {...props} />
+                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4 mt-6" {...props} />
                 ),
                 h3: ({ node, ...props }) => (
-                  <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-3 mt-4" {...props} />
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-3 mt-4" {...props} />
                 ),
                 p: ({ node, ...props }) => (
-                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-3" {...props} />
+                  <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed mb-3" {...props} />
                 ),
                 ul: ({ node, ...props }) => (
-                  <ul className="list-disc list-outside space-y-2 text-slate-700 dark:text-slate-300 mb-4 ml-6" {...props} />
+                  <ul className="list-disc list-outside space-y-2 text-gray-700 dark:text-slate-300 mb-4 ml-6" {...props} />
                 ),
                 li: ({ node, ...props }) => (
-                  <li className="leading-relaxed text-slate-700 dark:text-slate-300" {...props} />
+                  <li className="leading-relaxed text-gray-700 dark:text-slate-300" {...props} />
                 ),
                 strong: ({ node, ...props }) => (
-                  <strong className="font-semibold text-slate-900 dark:text-slate-100" {...props} />
+                  <strong className="font-semibold text-gray-900 dark:text-slate-100" {...props} />
                 ),
               }}
             >
@@ -1080,16 +1105,19 @@ export default function ValidationResult() {
       {activeTab === "nextsteps" && (
         <div className="space-y-6">
           {/* What's Next Section - Score-based recommendations */}
-          <div className="rounded-3xl border-2 border-brand-300 dark:border-brand-600 bg-gradient-to-br from-brand-50 to-white dark:from-brand-900/20 dark:to-slate-800 p-6 shadow-soft">
-            <h2 className="mb-4 text-2xl font-bold text-slate-900 dark:text-slate-100">📋 What's Next?</h2>
+          <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+              <div className="w-12 h-12 rounded-full bg-[#f3f5ff] flex items-center justify-center text-xl">📋</div>
+              What's Next?
+            </h2>
             {overallScore >= 7 ? (
               <div className="space-y-4">
-                <div className="rounded-xl border-2 border-emerald-200 bg-emerald-50/50 p-4">
-                  <h3 className="mb-2 text-lg font-semibold text-emerald-900">🎉 Strong Potential Detected!</h3>
-                  <p className="mb-3 text-sm text-emerald-800">
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <h3 className="mb-2 text-lg font-semibold text-gray-900">🎉 Strong Potential Detected!</h3>
+                  <p className="mb-3 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     Your idea shows strong potential with a score of {overallScore.toFixed(1)}/10. Here's your recommended path forward:
                   </p>
-                  <ul className="ml-4 list-disc space-y-2 text-sm text-emerald-800">
+                  <ul className="ml-4 list-disc space-y-2 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     <li>Create an MVP roadmap - Break down your idea into minimum viable features</li>
                     <li>Validate with real customers - Conduct user interviews and gather feedback</li>
                     <li>Build a landing page - Test demand before full development</li>
@@ -1100,12 +1128,12 @@ export default function ValidationResult() {
               </div>
             ) : overallScore >= 5 ? (
               <div className="space-y-4">
-                <div className="rounded-xl border-2 border-amber-200 bg-amber-50/50 p-4">
-                  <h3 className="mb-2 text-lg font-semibold text-amber-900">⚡ Good Potential, Needs Work</h3>
-                  <p className="mb-3 text-sm text-amber-800">
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <h3 className="mb-2 text-lg font-semibold text-gray-900">⚡ Good Potential, Needs Work</h3>
+                  <p className="mb-3 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     Your idea has potential with a score of {overallScore.toFixed(1)}/10, but there are areas to strengthen:
                   </p>
-                  <ul className="ml-4 list-disc space-y-2 text-sm text-amber-800">
+                  <ul className="ml-4 list-disc space-y-2 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     <li>Address weak areas - Focus on parameters scoring below 6</li>
                     <li>Refine your value proposition - Make it clearer and more compelling</li>
                     <li>Conduct market research - Validate assumptions with real data</li>
@@ -1116,12 +1144,12 @@ export default function ValidationResult() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="rounded-xl border-2 border-coral-200 bg-coral-50/50 p-4">
-                  <h3 className="mb-2 text-lg font-semibold text-coral-900">🔍 Consider Pivoting or Addressing Key Issues</h3>
-                  <p className="mb-3 text-sm text-coral-800">
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <h3 className="mb-2 text-lg font-semibold text-gray-900">🔍 Consider Pivoting or Addressing Key Issues</h3>
+                  <p className="mb-3 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     Your idea scored {overallScore.toFixed(1)}/10. Consider these actions:
                   </p>
-                  <ul className="ml-4 list-disc space-y-2 text-sm text-coral-800">
+                  <ul className="ml-4 list-disc space-y-2 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     <li>Identify critical gaps - Review parameters scoring below 5</li>
                     <li>Pivot or refine - Consider adjusting your idea based on feedback</li>
                     <li>Address fundamental issues - Market fit, problem clarity, or business model</li>
@@ -1135,19 +1163,22 @@ export default function ValidationResult() {
 
           {/* Progress-Based Upgrade Prompts */}
           {(isFree || isStarter) && (
-            <div className="rounded-3xl border-2 border-brand-200 dark:border-brand-700 bg-gradient-to-br from-brand-50 to-white dark:from-brand-900/20 dark:to-slate-800 p-6 shadow-soft">
-              <h2 className="mb-4 text-xl font-bold text-slate-900 dark:text-slate-100">🚀 Unlock More Features</h2>
+            <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <div className="w-12 h-12 rounded-full bg-[#f3f5ff] flex items-center justify-center text-xl">🚀</div>
+                Unlock More Features
+              </h2>
               {isFree && (
                 <div className="space-y-3">
-                  <p className="text-sm text-slate-700 dark:text-slate-300">
+                  <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     You've used <strong>{subscription?.validations_used || 0} of 2</strong> free validations.
                   </p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-gray-600 mb-4">
                     Upgrade to <strong>Starter ($9/month)</strong> to get 20 validations/month and compare your ideas side-by-side.
                   </p>
                   <Link
                     to="/pricing"
-                    className="inline-block rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:from-brand-600 hover:to-brand-700"
+                    className="inline-block px-5 py-2.5 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
                   >
                     View Plans →
                   </Link>
@@ -1155,15 +1186,15 @@ export default function ValidationResult() {
               )}
               {isStarter && (
                 <div className="space-y-3">
-                  <p className="text-sm text-slate-700 dark:text-slate-300">
+                  <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     You've used <strong>{subscription?.validations_used || 0} of 20</strong> validations this month.
                   </p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-sm text-gray-600 mb-4">
                     Upgrade to <strong>Pro ($29/month)</strong> for unlimited validations, advanced analytics, and priority support.
                   </p>
                   <Link
                     to="/pricing"
-                    className="inline-block rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:from-brand-600 hover:to-brand-700"
+                    className="inline-block px-5 py-2.5 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
                   >
                     Upgrade to Pro →
                   </Link>
@@ -1173,31 +1204,34 @@ export default function ValidationResult() {
           )}
 
           {nextSteps && (
-            <div className="rounded-3xl border-2 border-emerald-200 dark:border-emerald-700 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-900/20 dark:to-slate-800 p-6 shadow-soft">
+            <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
               <div className="mb-4 flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">🚀 Your Next Steps</h2>
-                <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">Start Here</span>
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <div className="w-12 h-12 rounded-full bg-[#f3f5ff] flex items-center justify-center text-xl">🚀</div>
+                  Your Next Steps
+                </h2>
+                <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700">Start Here</span>
               </div>
-              <p className="mb-6 text-slate-600 dark:text-slate-400">
+              <p className="mb-6 text-sm text-gray-600">
                 Follow these specific, actionable steps to move your idea forward. Each step includes resources and timelines.
               </p>
-              <div className="prose prose-slate dark:prose-invert max-w-none">
+              <div className="prose prose-slate max-w-none">
                 <ReactMarkdown
                   components={{
                     ol: ({ node, ...props }) => (
-                      <ol className="list-decimal list-outside space-y-4 text-slate-700 dark:text-slate-300 mb-4 ml-6" {...props} />
+                      <ol className="list-decimal list-outside space-y-4 text-gray-700 dark:text-slate-300 mb-4 ml-6" {...props} />
                     ),
                     li: ({ node, ...props }) => (
-                      <li className="leading-relaxed text-base text-slate-700 dark:text-slate-300" {...props} />
+                      <li className="leading-relaxed text-base text-gray-700 dark:text-slate-300" {...props} />
                     ),
                     strong: ({ node, ...props }) => (
-                      <strong className="font-semibold text-slate-900 dark:text-slate-100" {...props} />
+                      <strong className="font-semibold text-gray-900 dark:text-slate-100" {...props} />
                     ),
                     p: ({ node, ...props }) => (
-                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-2" {...props} />
+                      <p className="text-gray-700 dark:text-slate-300 leading-relaxed mb-2" {...props} />
                     ),
                     a: ({ node, ...props }) => (
-                      <a className="text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 underline" target="_blank" rel="noopener noreferrer" {...props} />
+                      <a className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 underline" target="_blank" rel="noopener noreferrer" {...props} />
                     ),
                   }}
                 >
@@ -1208,9 +1242,9 @@ export default function ValidationResult() {
           )}
 
           {/* Additional Actions */}
-          <div className="rounded-3xl border border-brand-200 bg-brand-50/80 p-6 shadow-soft">
-            <h2 className="mb-4 text-xl font-semibold text-slate-900">Additional Actions</h2>
-        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">Additional Actions</h2>
+            <div className="grid gap-4 md:grid-cols-2">
           <button
             onClick={() => {
               // Map validation answers to intake form fields
@@ -1226,11 +1260,11 @@ export default function ValidationResult() {
               // Navigate to advisor page and scroll to form
               navigate("/advisor#intake-form");
             }}
-            className="rounded-2xl border border-brand-300 bg-white p-6 text-center transition hover:border-brand-400 hover:bg-brand-50"
+            className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 text-center transition hover:shadow-md"
           >
-            <div className="mb-2 text-2xl">💡</div>
-            <h3 className="mb-2 font-semibold text-slate-900">Discover Related Ideas</h3>
-            <p className="text-sm text-slate-600">
+            <div className="mb-2 w-12 h-12 rounded-full bg-[#f3f5ff] flex items-center justify-center text-2xl mx-auto">💡</div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900">Discover Related Ideas</h3>
+            <p className="text-sm text-gray-600">
               Get personalized startup ideas based on your profile and interests
             </p>
           </button>
@@ -1250,11 +1284,11 @@ export default function ValidationResult() {
               // Navigate to validation form
               navigate("/validate-idea?revalidate=true");
             }}
-            className="rounded-2xl border border-coral-300 bg-white p-6 text-center transition hover:border-coral-400 hover:bg-coral-50"
+            className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 text-center transition hover:shadow-md"
           >
-            <div className="mb-2 text-2xl">🔄</div>
-            <h3 className="mb-2 font-semibold text-slate-900">Improve This Idea</h3>
-            <p className="text-sm text-slate-600">
+            <div className="mb-2 w-12 h-12 rounded-full bg-[#f3f5ff] flex items-center justify-center text-2xl mx-auto">🔄</div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900">Improve This Idea</h3>
+            <p className="text-sm text-gray-600">
               Update your idea based on feedback and re-validate to see improvements
             </p>
           </button>
@@ -1262,47 +1296,51 @@ export default function ValidationResult() {
       </div>
 
           {/* Benchmarking Section - Last card in Next Steps */}
-          <div className="rounded-3xl border-2 border-slate-200 bg-gradient-to-br from-slate-50 to-white p-6 shadow-soft">
-            <h2 className="mb-4 text-2xl font-bold text-slate-900">📊 How Your Idea Compares</h2>
+          <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+              <div className="w-12 h-12 rounded-full bg-[#f3f5ff] flex items-center justify-center text-xl">📊</div>
+              How Your Idea Compares
+            </h2>
             <div className="space-y-4">
               {overallScore >= 8 ? (
-                <div className="rounded-xl border-2 border-emerald-200 bg-emerald-50/50 p-4">
-                  <p className="text-sm text-emerald-800">
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     <strong>Top 15%</strong> - Your idea scores higher than 85% of validated ideas. This indicates exceptional potential.
                   </p>
                 </div>
               ) : overallScore >= 7 ? (
-                <div className="rounded-xl border-2 border-emerald-200 bg-emerald-50/50 p-4">
-                  <p className="text-sm text-emerald-800">
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     <strong>Top 30%</strong> - Your idea scores higher than 70% of validated ideas. Strong potential with room for improvement.
                   </p>
                 </div>
               ) : overallScore >= 6 ? (
-                <div className="rounded-xl border-2 border-amber-200 bg-amber-50/50 p-4">
-                  <p className="text-sm text-amber-800">
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     <strong>Above Average</strong> - Your idea scores higher than 50% of validated ideas. Good foundation with clear improvement areas.
                   </p>
                 </div>
               ) : overallScore >= 5 ? (
-                <div className="rounded-xl border-2 border-amber-200 bg-amber-50/50 p-4">
-                  <p className="text-sm text-amber-800">
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     <strong>Average</strong> - Your idea is in the middle range. Average score for validated ideas is 5.5/10. Focus on strengthening weak areas.
                   </p>
                 </div>
               ) : (
-                <div className="rounded-xl border-2 border-coral-200 bg-coral-50/50 p-4">
-                  <p className="text-sm text-coral-800">
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                  <p className="text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                     <strong>Below Average</strong> - Your idea scores below 50% of validated ideas. Consider significant refinements or pivoting.
                   </p>
                 </div>
               )}
-              <p className="mt-3 text-xs text-slate-500">
+              <p className="mt-3 text-xs text-gray-500">
                 * Comparison based on anonymized aggregated data from all validated ideas on our platform.
               </p>
             </div>
           </div>
         </div>
       )}
+      </div>
     </section>
   );
 }

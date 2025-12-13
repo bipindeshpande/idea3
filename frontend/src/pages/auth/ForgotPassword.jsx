@@ -2,6 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import PageHeader from "../../components/layout/PageHeader.jsx";
+import PageContainer from "../../components/layout/PageContainer.jsx";
+import Card from "../../components/ui/Card.jsx";
+import Button from "../../components/ui/Button.jsx";
+import FormInput from "../../components/ui/FormInput.jsx";
 
 export default function ForgotPassword() {
   const { forgotPassword } = useAuth();
@@ -36,22 +41,26 @@ export default function ForgotPassword() {
   };
 
   return (
-    <section className="mx-auto max-w-md px-6 py-12">
+    <PageContainer maxWidth="md">
       <Seo
         title="Forgot Password | Startup Idea Advisor"
         description="Reset your password to regain access to your account."
         path="/forgot-password"
       />
 
-      <div className="rounded-3xl border border-slate-200 bg-white/95 p-8 shadow-soft">
-        <h1 className="mb-2 text-3xl font-bold text-slate-900">Forgot Password</h1>
-        <p className="mb-6 text-slate-600">Enter your email and we'll send you a reset link.</p>
+      <Card className="relative">
+        <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+        <div className="relative z-10">
+        <PageHeader
+          title="Forgot Password"
+          description="Enter your email and we'll send you a reset link."
+        />
 
         {success ? (
           <div className="space-y-4">
-            <div className="rounded-xl border border-semantic-success-200 dark:border-semantic-success-800 bg-semantic-success-50 dark:bg-semantic-success-900/30 p-4 text-sm text-semantic-success-800 dark:text-semantic-success-300">
-              <p className="font-semibold">Reset link sent!</p>
-              <p className="mt-2">
+            <Card className="border-emerald-200 bg-emerald-50">
+              <p className="text-[15px] text-emerald-800 leading-relaxed font-semibold">Reset link sent!</p>
+              <p className="mt-2 text-[15px] text-emerald-700 leading-relaxed">
                 If an account exists with that email, we've sent a password reset link. Check your inbox.
               </p>
               {resetLink && (
@@ -67,55 +76,48 @@ export default function ForgotPassword() {
                   </a>
                 </div>
               )}
-            </div>
-            <Link
-              to="/login"
-              className="block w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-3 text-center text-sm font-semibold text-white shadow-md transition hover:from-brand-600 hover:to-brand-700"
-            >
+            </Card>
+            <Button as={Link} to="/login" className="w-full">
               Back to Sign In
-            </Link>
+            </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-800 shadow-sm transition focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                placeholder="your@email.com"
-              />
-            </div>
+            <FormInput
+              type="email"
+              id="email"
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="your@email.com"
+            />
 
             {error && (
-              <div className="rounded-xl border border-semantic-error-200 dark:border-semantic-error-800 bg-semantic-error-50 dark:bg-semantic-error-900/30 p-3 text-sm text-semantic-error-800 dark:text-semantic-error-300">
-                {error}
-              </div>
+              <Card className="border-red-200 bg-red-50">
+                <p className="text-[15px] text-red-800 leading-relaxed font-semibold">{error}</p>
+              </Card>
             )}
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:from-brand-600 hover:to-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full"
             >
               {loading ? "Sending..." : "Send Reset Link"}
-            </button>
+            </Button>
           </form>
         )}
 
-        <div className="mt-6 text-center text-sm text-slate-600">
+        <div className="mt-6 text-center text-sm text-gray-600">
           Remember your password?{" "}
-          <Link to="/login" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-700">
             Sign in
           </Link>
         </div>
-      </div>
-    </section>
+        </div>
+      </Card>
+    </PageContainer>
   );
 }
 

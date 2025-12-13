@@ -1,15 +1,23 @@
 import Seo from "../../components/common/Seo.jsx";
+import PageHeader from "../../components/layout/PageHeader.jsx";
+import PageContainer from "../../components/layout/PageContainer.jsx";
+import Card from "../../components/ui/Card.jsx";
 
 export default function TermsPage() {
   return (
-    <section className="grid gap-6 rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-soft">
+    <PageContainer maxWidth="4xl">
       <Seo
         title="Terms of Service | Startup Idea Advisor"
         description="Review the terms and conditions of using Startup Idea Advisor."
         path="/terms"
       />
-      <h1 className="text-3xl font-semibold text-slate-900">Terms of Service</h1>
-      <p className="text-sm text-slate-500">Last updated: November 2025</p>
+      <Card className="relative">
+        <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+        <div className="relative z-10">
+      <PageHeader
+        title="Terms of Service"
+        description="Last updated: November 2025"
+      />
       <div className="prose prose-slate">
         <h2>1. Agreement</h2>
         <p>
@@ -62,6 +70,8 @@ export default function TermsPage() {
           Questions? Email <a href="mailto:hello@startupideaadvisor.com">hello@startupideaadvisor.com</a>.
         </p>
       </div>
-    </section>
+      </div>
+      </Card>
+    </PageContainer>
   );
 }

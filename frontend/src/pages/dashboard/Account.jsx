@@ -3,6 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import LoadingIndicator from "../../components/common/LoadingIndicator.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import PageHeader from "../../components/layout/PageHeader.jsx";
+import PageContainer from "../../components/layout/PageContainer.jsx";
+import Card from "../../components/ui/Card.jsx";
+import Button from "../../components/ui/Button.jsx";
+import FormInput from "../../components/ui/FormInput.jsx";
+import FormSelect from "../../components/ui/FormSelect.jsx";
+import SectionHeader from "../../components/layout/SectionHeader.jsx";
 
 export default function AccountPage() {
   const { user, isAuthenticated, subscription, getAuthHeaders, refreshSubscription, changePassword } = useAuth();
@@ -296,9 +303,9 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <section className="mx-auto max-w-4xl px-6 py-12">
+      <PageContainer>
         <LoadingIndicator simple={true} message="Loading account details..." />
-      </section>
+      </PageContainer>
     );
   }
   
@@ -309,56 +316,61 @@ export default function AccountPage() {
   const canChange = subscriptionData?.type && subscriptionData?.type !== "free" && subscriptionData?.type !== "free_trial" && subscriptionData?.status === "active";
 
   return (
-    <section className="mx-auto max-w-4xl px-6 py-12">
+    <PageContainer>
       <Seo
         title="Account Settings | Startup Idea Advisor"
         description="Manage your account settings, subscription, and password."
         path="/account"
       />
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-50">Account Settings</h1>
-        <p className="mt-2 text-slate-600 dark:text-slate-300">Manage your account information and subscription</p>
+      <div className="mb-8 relative">
+        <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+        <div className="relative z-10">
+          <PageHeader
+            title="Account Settings"
+            description="Manage your account information and subscription"
+          />
+        </div>
       </div>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-semantic-error-200 dark:border-semantic-error-800 bg-semantic-error-50 dark:bg-semantic-error-900/30 p-4">
-          <p className="text-sm text-semantic-error-800 dark:text-semantic-error-300">{error}</p>
-        </div>
+        <Card className="mb-6 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30">
+          <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+        </Card>
       )}
 
       {success && (
-        <div className="mb-6 rounded-xl border border-semantic-success-200 dark:border-semantic-success-800 bg-semantic-success-50 dark:bg-semantic-success-900/30 p-4">
-          <p className="text-sm text-semantic-success-800 dark:text-semantic-success-300">{success}</p>
-        </div>
+        <Card className="mb-6 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30">
+          <p className="text-sm text-emerald-800 dark:text-emerald-300">{success}</p>
+        </Card>
       )}
 
       {/* User Information */}
-      <div className="mb-8 rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-soft">
-        <h2 className="mb-6 text-2xl font-semibold text-slate-900 dark:text-slate-50">Account Information</h2>
+      <Card className="mt-10 md:mt-12">
+        <SectionHeader title="Account Information" className="mb-6" />
         <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Email</p>
-            <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-50">{user?.email || "—"}</p>
+            <p className="text-sm text-gray-600 dark:text-slate-400 uppercase tracking-wide">Email</p>
+            <p className="mt-2 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">{user?.email || "—"}</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Account Status</p>
-            <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-50">
+            <p className="text-sm text-gray-600 dark:text-slate-400 uppercase tracking-wide">Account Status</p>
+            <p className="mt-2 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
               {user?.is_active ? "Active" : "Inactive"}
             </p>
           </div>
           {user?.subscription_type && (
             <div>
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Subscription Type</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-50 capitalize">
+              <p className="text-sm text-gray-600 dark:text-slate-400 uppercase tracking-wide">Subscription Type</p>
+              <p className="mt-2 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed capitalize">
                 {getPlanInfo(user.subscription_type).name}
               </p>
             </div>
           )}
           {user?.subscription_expires_at && (
             <div>
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Subscription Expires</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-50">
+              <p className="text-sm text-gray-600 dark:text-slate-400 uppercase tracking-wide">Subscription Expires</p>
+              <p className="mt-2 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">
                 {new Date(user.subscription_expires_at).toLocaleDateString()}
               </p>
             </div>
@@ -367,138 +379,116 @@ export default function AccountPage() {
       </div>
 
       {/* About You */}
-      <div className="mb-8 rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-soft">
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">About You</h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Complete assessments to personalize your experience</p>
-        </div>
+      <Card className="mt-10 md:mt-12">
+        <SectionHeader
+          title="About You"
+          description="Complete assessments to personalize your experience"
+          className="mb-6"
+        />
         
         {/* Decision & Work Style Card */}
-        <div className="mb-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-6">
+        <Card className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Decision & Work Style</h3>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Used by the system to personalize and explain startup recommendations.</p>
+              <SectionHeader title="Decision & Work Style" className="text-lg" />
+              <p className="mt-1 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">Used by the system to personalize and explain startup recommendations.</p>
             </div>
-            <Link
-              to="/psyche/questionnaire"
-              className="rounded-xl border border-purple-300/60 dark:border-purple-700/60 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-purple-700 dark:text-purple-300 shadow-sm transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:-translate-y-0.5 whitespace-nowrap"
-            >
+            <Button as={Link} to="/psyche/questionnaire" variant="secondary" className="whitespace-nowrap">
               Complete Assessment
-            </Link>
+            </Button>
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-500 dark:text-slate-400">Takes about 3–4 minutes</p>
+            <p className="text-xs text-gray-600 dark:text-slate-400">Takes about 3–4 minutes</p>
             <Link
               to="/psyche/profile?details=true"
-              className="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400 transition"
+              className="text-xs text-gray-500 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-400 transition"
             >
               View Details (Advanced)
             </Link>
           </div>
-        </div>
+        </Card>
 
         {/* Founder Profile Card */}
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-6">
+        <Card>
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Founder Profile</h3>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Helps other founders understand your background, interests, and goals.</p>
+              <SectionHeader title="Founder Profile" className="text-lg" />
+              <p className="mt-1 text-[15px] text-gray-700 dark:text-slate-300 leading-relaxed">Helps other founders understand your background, interests, and goals.</p>
             </div>
-            <Link
-              to="/founder-psychology"
-              className="rounded-xl border border-brand-300 dark:border-brand-700 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-brand-700 dark:text-brand-300 shadow-sm transition-all duration-200 hover:bg-brand-50 dark:hover:bg-brand-900/20"
-            >
-              {psychologyData?.archetype ? "Edit Profile" : "Complete Profile"}
-            </Link>
+            <Button as={Link} to="/founder-psychology" variant="secondary">
+              {psychologyData?.archetype ? "Edit Profile" : "Add Profile"}
+            </Button>
           </div>
-        </div>
-      </div>
+        </Card>
+      </Card>
 
       {/* Change Password */}
-      <div className="mb-8 rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-soft">
-        <h2 className="mb-6 text-2xl font-semibold text-slate-900 dark:text-slate-50">Change Password</h2>
+      <Card className="mt-10 md:mt-12">
+        <SectionHeader title="Change Password" className="mb-6" />
         
         {passwordError && (
-          <div className="mb-4 rounded-xl border border-semantic-error-200 dark:border-semantic-error-800 bg-semantic-error-50 dark:bg-semantic-error-900/30 p-4">
-            <p className="text-sm text-semantic-error-800 dark:text-semantic-error-300">{passwordError}</p>
-          </div>
+          <Card className="mb-4 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30">
+            <p className="text-sm text-red-800 dark:text-red-300">{passwordError}</p>
+          </Card>
         )}
 
         {passwordSuccess && (
-          <div className="mb-4 rounded-xl border border-semantic-success-200 dark:border-semantic-success-800 bg-semantic-success-50 dark:bg-semantic-success-900/30 p-4">
-            <p className="text-sm text-semantic-success-800 dark:text-semantic-success-300">{passwordSuccess}</p>
-          </div>
+          <Card className="mb-4 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30">
+            <p className="text-sm text-emerald-800 dark:text-emerald-300">{passwordSuccess}</p>
+          </Card>
         )}
 
         <form onSubmit={handlePasswordChange} className="space-y-4">
-          <div>
-            <label htmlFor="currentPassword" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-              Current Password
-            </label>
-            <input
-              type="password"
-              id="currentPassword"
-              value={passwordForm.currentPassword}
-              onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-              autoComplete="current-password"
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-slate-800 dark:text-slate-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="newPassword" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-              New Password
-            </label>
-            <input
-              type="password"
-              id="newPassword"
-              value={passwordForm.newPassword}
-              onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-              autoComplete="new-password"
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-slate-800 dark:text-slate-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
-              required
-              minLength={8}
-            />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Must be at least 8 characters</p>
-          </div>
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-              Confirm New Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={passwordForm.confirmPassword}
-              onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-              autoComplete="new-password"
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-slate-800 dark:text-slate-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
-              required
-              minLength={8}
-            />
-          </div>
-          <button
+          <FormInput
+            type="password"
+            id="currentPassword"
+            label="Current Password"
+            value={passwordForm.currentPassword}
+            onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+            autoComplete="current-password"
+            required
+          />
+          <FormInput
+            type="password"
+            id="newPassword"
+            label="New Password"
+            value={passwordForm.newPassword}
+            onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+            autoComplete="new-password"
+            required
+            minLength={8}
+            helperText="Must be at least 8 characters"
+          />
+          <FormInput
+            type="password"
+            id="confirmPassword"
+            label="Confirm New Password"
+            value={passwordForm.confirmPassword}
+            onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+            autoComplete="new-password"
+            required
+            minLength={8}
+          />
+          <Button
             type="submit"
             disabled={changingPassword}
-            className="rounded-xl bg-brand-500 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {changingPassword ? "Changing Password..." : "Change Password"}
-          </button>
+          </Button>
         </form>
-      </div>
+      </Card>
 
       {/* Subscription Management */}
       {subscriptionData ? (
-        <div className="mb-8 rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-soft">
+        <Card className="mt-10 md:mt-12">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">Subscription</h2>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Manage your subscription plan</p>
+              <SectionHeader title="Subscription" description="Manage your subscription plan" />
             </div>
             <div className={`rounded-full px-4 py-2 text-sm font-semibold ${
               subscriptionData.is_active
                 ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"
-                : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300"
             }`}>
               {subscriptionData.is_active ? "Active" : subscriptionData.status}
             </div>
@@ -506,31 +496,31 @@ export default function AccountPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Plan</p>
-              <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">{planName}</p>
-              <p className="mt-1 text-slate-600 dark:text-slate-300">{planPrice}</p>
+              <p className="text-sm font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wide">Plan</p>
+              <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-slate-50">{planName}</p>
+              <p className="mt-1 text-gray-700 dark:text-slate-300">{planPrice}</p>
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Status</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-50 capitalize">{subscriptionData.status}</p>
+              <p className="text-sm font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wide">Status</p>
+              <p className="mt-2 text-lg font-semibold text-gray-900 dark:text-slate-50 capitalize">{subscriptionData.status}</p>
               {subscriptionData.is_active && subscriptionData.days_remaining !== null && (
-                <p className="mt-1 text-slate-600 dark:text-slate-300">
+                <p className="mt-1 text-gray-700 dark:text-slate-300">
                   {subscriptionData.days_remaining} {subscriptionData.days_remaining === 1 ? "day" : "days"} remaining
                 </p>
               )}
             </div>
             {subscriptionData.expires_at && (
               <div>
-                <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Expires</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-50">
+                <p className="text-sm font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wide">Expires</p>
+                <p className="mt-2 text-lg font-semibold text-gray-900 dark:text-slate-50">
                   {new Date(subscriptionData.expires_at).toLocaleDateString()}
                 </p>
               </div>
             )}
             {subscriptionData.started_at && (
               <div>
-                <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Started</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-50">
+                <p className="text-sm font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wide">Started</p>
+                <p className="mt-2 text-lg font-semibold text-gray-900 dark:text-slate-50">
                   {new Date(subscriptionData.started_at).toLocaleDateString()}
                 </p>
               </div>
@@ -539,121 +529,116 @@ export default function AccountPage() {
 
           {/* Actions */}
           {canChange && (
-            <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
-              <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-50">Change Plan</h3>
-              <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
+            <div className="mt-8 border-t border-gray-200 dark:border-slate-700 pt-6">
+              <SectionHeader title="Change Plan" className="mb-4" />
+              <p className="mb-4 text-sm text-gray-700 dark:text-slate-300">
                 Switch to a different plan. Your current plan will remain active until the end of the billing period.
               </p>
               <div className="flex flex-wrap gap-4">
                 {subscriptionData.type !== "starter" && (
-                  <button
+                  <Button
                     onClick={() => handleChangePlan("starter")}
                     disabled={changing}
-                    className="rounded-xl border border-brand-300 dark:border-brand-700 bg-white dark:bg-slate-800 px-6 py-2 text-sm font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/30 disabled:opacity-50"
+                    variant="secondary"
                   >
                     {changing ? "Processing..." : "Switch to Starter ($7/month)"}
-                  </button>
+                  </Button>
                 )}
                 {subscriptionData.type !== "pro" && subscriptionData.type !== "monthly" && (
-                  <button
+                  <Button
                     onClick={() => handleChangePlan("pro")}
                     disabled={changing}
-                    className="rounded-xl border border-brand-300 dark:border-brand-700 bg-white dark:bg-slate-800 px-6 py-2 text-sm font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/30 disabled:opacity-50"
+                    variant="secondary"
                   >
                     {changing ? "Processing..." : "Switch to Pro ($15/month)"}
-                  </button>
+                  </Button>
                 )}
                 {subscriptionData.type !== "weekly" && (
-                  <button
+                  <Button
                     onClick={() => handleChangePlan("weekly")}
                     disabled={changing}
-                    className="rounded-xl border border-brand-300 dark:border-brand-700 bg-white dark:bg-slate-800 px-6 py-2 text-sm font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/30 disabled:opacity-50"
+                    variant="secondary"
                   >
                     {changing ? "Processing..." : "Switch to Weekly ($5/week)"}
-                  </button>
+                  </Button>
                 )}
                 {/* Legacy monthly plan - allow switching to pro */}
                 {subscriptionData.type === "monthly" && (
-                  <button
+                  <Button
                     onClick={() => handleChangePlan("pro")}
                     disabled={changing}
-                    className="rounded-xl border border-brand-300 dark:border-brand-700 bg-white dark:bg-slate-800 px-6 py-2 text-sm font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/30 disabled:opacity-50"
+                    variant="secondary"
                   >
                     {changing ? "Processing..." : "Switch to Pro ($15/month)"}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
           )}
 
           {canCancel && (
-            <div className="mt-6 border-t border-slate-200 dark:border-slate-700 pt-6">
-              <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-50">Cancel Subscription</h3>
-              <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
+            <div className="mt-6 border-t border-gray-200 dark:border-slate-700 pt-6">
+              <SectionHeader title="Cancel Subscription" className="mb-4" />
+              <p className="mb-4 text-sm text-gray-700 dark:text-slate-300">
                 You'll continue to have access to all features until your subscription expires on{" "}
                 {subscriptionData.expires_at ? new Date(subscriptionData.expires_at).toLocaleDateString() : "the expiration date"}.
               </p>
-              <button
+              <Button
                 onClick={handleCancelClick}
                 disabled={cancelling}
-                className="rounded-xl border border-red-300 dark:border-red-700 bg-white dark:bg-slate-800 px-6 py-2 text-sm font-semibold text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 disabled:opacity-50"
+                variant="secondary"
+                className="border-red-300 text-red-700 hover:bg-red-50"
               >
                 Cancel Subscription
-              </button>
+              </Button>
             </div>
           )}
 
           {!subscriptionData.is_active && (
             <div className="mt-6">
-              <Link
-                to="/pricing"
-                className="inline-block rounded-xl bg-brand-500 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-600"
-              >
+              <Button as={Link} to="/pricing">
                 Resubscribe
-              </Link>
+              </Button>
             </div>
           )}
-        </div>
+        </Card>
       ) : (
-        <div className="mb-8 rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-center">
-          <p className="text-slate-600 dark:text-slate-300">No active subscription found.</p>
-          <Link
-            to="/pricing"
-            className="mt-4 inline-block rounded-xl bg-brand-500 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-600"
-          >
+        <Card className="mb-8 text-center">
+          <p className="text-gray-700 dark:text-slate-300">No active subscription found.</p>
+          <Button as={Link} to="/pricing" className="mt-4">
             View Pricing Plans
-          </Link>
-        </div>
+          </Button>
+        </Card>
       )}
 
       {/* Payment History */}
       {paymentHistory.length > 0 && (
-        <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-soft">
-          <h2 className="mb-6 text-2xl font-semibold text-slate-900 dark:text-slate-50">Payment History</h2>
+        <Card className="mt-10 md:mt-12">
+          <SectionHeader title="Payment History" className="mb-6 text-2xl" />
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700">
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-300">Date</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-300">Amount</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-300">Plan</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-300">Status</th>
+                <tr className="border-b border-gray-200 dark:border-slate-700">
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-slate-300">Date</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-slate-300">Amount</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-slate-300">Plan</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-slate-300">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {paymentHistory.map((payment) => (
-                  <tr key={payment.id} className="border-b border-slate-100 dark:border-slate-700">
-                    <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
+                  <tr key={payment.id} className="border-b border-gray-100 dark:border-slate-700">
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-300">
                       {payment.created_at ? new Date(payment.created_at).toLocaleDateString() : "—"}
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-slate-900 dark:text-slate-50">
+                    <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-slate-50">
                       {payment.amount != null && typeof payment.amount === 'number' 
                         ? `$${payment.amount.toFixed(2)}` 
                         : payment.amount != null 
                           ? `$${Number(payment.amount).toFixed(2)}` 
                           : "—"}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 capitalize">{payment.subscription_type}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-300 capitalize">{payment.subscription_type}</td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                         Completed
@@ -670,23 +655,22 @@ export default function AccountPage() {
       {/* Cancellation Reason Modal */}
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-xl">
-            <h3 className="mb-4 text-2xl font-semibold text-slate-900 dark:text-slate-50">Cancel Subscription</h3>
-            <p className="mb-6 text-sm text-slate-600 dark:text-slate-300">
+          <Card className="w-full max-w-md shadow-xl">
+            <SectionHeader title="Cancel Subscription" className="mb-4 text-2xl" />
+            <p className="mb-6 text-sm text-gray-700 dark:text-slate-300">
               We're sorry to see you go. Your subscription will remain active until{" "}
               {subscriptionData?.expires_at ? new Date(subscriptionData.expires_at).toLocaleDateString() : "the expiration date"}.
               Please let us know why you're canceling so we can improve.
             </p>
             
             <div className="mb-6">
-              <label htmlFor="cancellation-reason" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              <label htmlFor="cancellation-reason" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
                 Reason for Cancellation <span className="text-red-500">*</span>
               </label>
-              <select
+              <FormSelect
                 id="cancellation-reason"
                 value={selectedReason}
                 onChange={(e) => setSelectedReason(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-slate-800 dark:text-slate-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
                 required
               >
                 <option value="">Select a reason...</option>
@@ -695,13 +679,13 @@ export default function AccountPage() {
                     {reason.label}
                   </option>
                 ))}
-              </select>
+              </FormSelect>
             </div>
 
             <div className="mb-6">
-              <label htmlFor="additional-comments" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              <label htmlFor="additional-comments" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
                 Additional Comments {selectedReason === "other" && <span className="text-red-500">*</span>}
-                {selectedReason && selectedReason !== "other" && <span className="text-slate-400 dark:text-slate-500 text-xs font-normal">(Optional)</span>}
+                {selectedReason && selectedReason !== "other" && <span className="text-gray-500 dark:text-slate-500 text-xs font-normal">(Optional)</span>}
               </label>
               <textarea
                 id="additional-comments"
@@ -709,23 +693,23 @@ export default function AccountPage() {
                 onChange={handleCommentsChange}
                 placeholder={selectedReason === "other" ? "Please provide details..." : "Any additional feedback (optional)"}
                 rows={4}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-slate-800 dark:text-slate-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
+                className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-gray-900 dark:text-slate-200 focus:border-indigo-400 dark:focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900"
                 required={selectedReason === "other"}
                 maxLength={500}
               />
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-2 text-xs text-gray-600 dark:text-slate-400">
                 {additionalComments.length}/500 characters
               </p>
             </div>
 
             {error && (
-              <div className="mb-4 rounded-xl border border-semantic-error-200 dark:border-semantic-error-800 bg-semantic-error-50 dark:bg-semantic-error-900/30 p-3">
-                <p className="text-sm text-semantic-error-800 dark:text-semantic-error-300">{error}</p>
-              </div>
+              <Card className="mb-4 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30">
+                <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+              </Card>
             )}
 
             <div className="flex gap-3">
-              <button
+              <Button
                 onClick={() => {
                   setShowCancelModal(false);
                   setSelectedReason("");
@@ -733,22 +717,24 @@ export default function AccountPage() {
                   setError("");
                 }}
                 disabled={cancelling}
-                className="flex-1 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-6 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+                variant="secondary"
+                className="flex-1"
               >
                 Keep Subscription
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleCancelConfirm}
                 disabled={cancelling || !selectedReason || (selectedReason === "other" && !additionalComments.trim())}
-                className="flex-1 rounded-xl border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/30 px-6 py-3 text-sm font-semibold text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                variant="secondary"
+                className="flex-1 border-red-300 text-red-700 hover:bg-red-50"
               >
                 {cancelling ? "Cancelling..." : "Confirm Cancellation"}
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         </div>
       )}
-    </section>
+    </PageContainer>
   );
 }
 

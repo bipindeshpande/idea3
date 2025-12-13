@@ -77,10 +77,10 @@ const ARCHETYPE_OPTIONS = [
 ];
 
 const fieldClasses =
-  "w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-slate-800/70 p-3 text-slate-800 dark:text-slate-200 shadow-sm transition focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900";
+  "w-full rounded-xl border border-gray-200 bg-white p-3 text-gray-900 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100";
 
 const textInputClasses =
-  "w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-slate-800/70 p-3 text-slate-800 dark:text-slate-200 shadow-sm transition focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900";
+  "w-full rounded-xl border border-gray-200 bg-white p-3 text-gray-900 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100";
 
 export default function FounderPsychology() {
   const navigate = useNavigate();
@@ -253,7 +253,7 @@ export default function FounderPsychology() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-slate-600 dark:text-slate-400">Loading...</div>
+        <div className="text-gray-600">Loading...</div>
       </div>
     );
   }
@@ -264,20 +264,22 @@ export default function FounderPsychology() {
         title="Founder Profile"
         description="Complete your founder profile to help other founders understand your background, interests, and goals"
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+          <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 relative">
+            <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+            <div className="relative z-10">
+            <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">
               Founder Profile
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 mb-8">
+            <p className="text-[15px] text-gray-700 leading-relaxed mb-8">
               Help other founders understand your background, interests, and goals.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* 1. Motivation */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm text-gray-600 mb-2">
                   1. What is your primary motivation for starting a business?
                 </label>
                 <select
@@ -304,7 +306,7 @@ export default function FounderPsychology() {
 
               {/* 2. Biggest Fear / Psychological Barrier */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm text-gray-600 mb-2">
                   2. What is your biggest fear or psychological barrier?
                 </label>
                 <select
@@ -331,7 +333,7 @@ export default function FounderPsychology() {
 
               {/* 3. Decision-Making Style */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm text-gray-600 mb-2">
                   3. What is your decision-making style?
                 </label>
                 <select
@@ -348,7 +350,7 @@ export default function FounderPsychology() {
 
               {/* 4. Energy Pattern */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm text-gray-600 mb-2">
                   4. What is your energy pattern?
                 </label>
                 <select
@@ -365,7 +367,7 @@ export default function FounderPsychology() {
 
               {/* 5. Consistency Pattern */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm text-gray-600 mb-2">
                   5. What is your consistency pattern?
                 </label>
                 <select
@@ -382,7 +384,7 @@ export default function FounderPsychology() {
 
               {/* 6. Risk Approach */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm text-gray-600 mb-2">
                   6. What is your risk approach?
                 </label>
                 <select
@@ -399,7 +401,7 @@ export default function FounderPsychology() {
 
               {/* 7. Success Definition */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm text-gray-600 mb-2">
                   7. How do you define success?
                 </label>
                 <select
@@ -426,7 +428,7 @@ export default function FounderPsychology() {
 
               {/* 8. Founder Archetype */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm text-gray-600 mb-2">
                   8. Which founder archetype best describes you? <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -447,19 +449,20 @@ export default function FounderPsychology() {
                 <button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="flex-1 px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                  className="px-5 py-2.5 rounded-lg font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all shadow-sm hover:shadow-md"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving || !formData.archetype}
-                  className="flex-1 px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? "Saving..." : "Save Psychology Profile"}
                 </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       </div>

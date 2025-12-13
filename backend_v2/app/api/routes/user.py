@@ -71,11 +71,15 @@ async def get_user_activity(
     Returns:
         List of user activities including runs and validations
     """
+    import traceback
     try:
         user_service = UserService(db)
         result = user_service.get_user_activity(current_user.user_id, limit=limit)
         return result
     except Exception as e:
+        # Log full traceback for debugging
+        error_traceback = traceback.format_exc()
+        print(f"Error in get_user_activity: {str(e)}\n{error_traceback}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch user activity: {str(e)}"
@@ -306,5 +310,104 @@ async def compare_sessions(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to compare sessions: {str(e)}"
+        )
+
+
+@router.get("/usage", response_model=Dict[str, Any], status_code=status.HTTP_200_OK)
+async def get_user_usage(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get user usage statistics including credits for connections, validations, and discoveries
+    
+    Returns:
+        Usage data with limits and remaining credits for different features
+    """
+    try:
+        user_service = UserService(db)
+        
+        # Get connection usage from founder connections
+        from app.models.founder_connection import FounderConnection
+        from app.models.founder_profile import FounderProfile
+        from datetime import datetime, timedelta, timezone
+        
+        # Get user's profile to count connections
+        profile = db.query(FounderProfile).filter(
+            FounderProfile.user_id == current_user.user_id
+        ).first()
+        
+        connection_count = 0
+        if profile:
+            # Count connections sent this month
+            month_start = datetime.now(timezone.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            connection_count = db.query(FounderConnection).filter(
+                and_(
+                    FounderConnection.sender_id == profile.id,
+                    FounderConnection.created_at >= month_start
+                )
+            ).count()
+        
+        # Determine limits based on subscription type
+        subscription_type = current_user.subscription_type or "free"
+        
+        if subscription_type in ["pro", "annual"]:
+            connection_limit = 999  # Unlimited
+            validation_limit = 999
+            discovery_limit = 999
+        elif subscription_type == "starter":
+            connection_limit = 15
+            validation_limit = 10
+            discovery_limit = 20
+        else:  # free
+            connection_limit = 3
+            validation_limit = 2
+            discovery_limit = 4
+        
+        # Get validation and discovery counts (can be enhanced later with proper tracking)
+        from app.models.validation import Validation
+        from app.models.run import Run
+        
+        month_start = datetime.now(timezone.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        
+        validation_count = db.query(Validation).filter(
+            and_(
+                Validation.user_id == current_user.user_id,
+                Validation.created_at >= month_start
+            )
+        ).count()
+        
+        discovery_count = db.query(Run).filter(
+            and_(
+                Run.user_id == current_user.user_id,
+                Run.created_at >= month_start,
+                Run.deleted_at.is_(None)
+            )
+        ).count()
+        
+        return {
+            "success": True,
+            "usage": {
+                "connections": {
+                    "used": connection_count,
+                    "limit": connection_limit,
+                    "remaining": max(0, connection_limit - connection_count)
+                },
+                "validations": {
+                    "used": validation_count,
+                    "limit": validation_limit,
+                    "remaining": max(0, validation_limit - validation_count)
+                },
+                "discoveries": {
+                    "used": discovery_count,
+                    "limit": discovery_limit,
+                    "remaining": max(0, discovery_limit - discovery_count)
+                }
+            }
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get usage: {str(e)}"
         )
 

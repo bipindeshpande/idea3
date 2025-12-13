@@ -1,9 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import LoadingIndicator from "../../components/common/LoadingIndicator.jsx";
 import { ToastContainer } from "../../components/common/Toast.jsx";
+import CreditCounter from "../../components/founder/CreditCounter.jsx";
+import ProfileTab from "../../components/founder/ProfileTab.jsx";
+import Button from "../../components/ui/Button.jsx";
 
 export default function FounderConnectPage() {
   const { user, isAuthenticated, getAuthHeaders } = useAuth();
@@ -148,13 +151,25 @@ export default function FounderConnectPage() {
         description="Connect with other founders, find co-founders, and collaborate on startup ideas."
       />
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Founder Connect
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            Connect with other founders, find co-founders, and collaborate on startup ideas.
-          </p>
+        <div className="mb-8 relative">
+          <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+          <div className="relative z-10">
+            <div className="mb-4">
+              <Button 
+                onClick={() => navigate("/dashboard")} 
+                variant="secondary" 
+                className="mb-4"
+              >
+                ← Back to Dashboard
+              </Button>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">
+              Founder Connect
+            </h1>
+            <p className="text-[15px] text-gray-700 leading-relaxed mb-8">
+              Connect with other founders, find co-founders, and collaborate on startup ideas.
+            </p>
+          </div>
         </div>
 
         {/* Credits Display - Updated with subscription tier messaging */}
@@ -165,7 +180,7 @@ export default function FounderConnectPage() {
         />
 
         {/* Tabs */}
-        <div className="mb-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="mb-6 border-b border-gray-200">
           <nav className="flex space-x-8">
             {[
               { id: "profile", label: "My Profile" },
@@ -179,13 +194,13 @@ export default function FounderConnectPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition ${
                   activeTab === tab.id
-                    ? "border-brand-500 text-brand-600 dark:text-brand-400"
-                    : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300"
+                    ? "border-indigo-600 text-gray-900"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 {tab.label}
                 {tab.id === "connections" && (connections.sent?.length > 0 || connections.received?.length > 0) && (
-                  <span className="ml-2 px-2 py-0.5 text-xs bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 rounded-full">
+                  <span className="ml-2 px-2 py-0.5 text-xs bg-indigo-100 text-indigo-700 rounded-full">
                     {(connections.sent?.length || 0) + (connections.received?.length || 0)}
                   </span>
                 )}
@@ -232,8 +247,8 @@ export default function FounderConnectPage() {
         </div>
 
         {error && (
-          <div className="mt-4 p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-700 dark:text-rose-400">
-            {error}
+          <div className="mt-4 p-4 rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+            <p className="text-[15px] text-gray-700 leading-relaxed font-semibold">{error}</p>
           </div>
         )}
 
@@ -243,472 +258,7 @@ export default function FounderConnectPage() {
   );
 }
 
-// Credit Counter Component - Updated with subscription tier messaging
-function CreditCounter({ credits, subscriptionType, onUpgrade }) {
-  const getTierInfo = () => {
-    const tier = subscriptionType?.toLowerCase() || "free";
-    
-    if (tier === "free") {
-      return {
-        limit: 3,
-        label: "Free plan · 3 connections/month. Upgrade for more.",
-        showUpgrade: credits.used >= 3
-      };
-    } else if (tier === "starter") {
-      return {
-        limit: 15,
-        label: "Starter plan · 15 connections/month.",
-        showUpgrade: credits.used >= 15
-      };
-    } else if (tier === "pro" || tier === "annual") {
-      return {
-        limit: 999,
-        label: "Unlimited on Pro",
-        showUpgrade: false
-      };
-    }
-    return {
-      limit: 3,
-      label: "Free plan · 3 connections/month. Upgrade for more.",
-      showUpgrade: credits.used >= 3
-    };
-  };
 
-  const tierInfo = getTierInfo();
-  const displayLimit = tierInfo.limit === 999 ? "∞" : tierInfo.limit;
-  const isAtLimit = credits.used >= tierInfo.limit && tierInfo.limit !== 999;
-
-  return (
-    <div className={`mb-6 p-4 rounded-xl border ${
-      isAtLimit 
-        ? "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800" 
-        : "bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800"
-    }`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Connections this month
-          </p>
-          <p className="text-2xl font-bold text-brand-700 dark:text-brand-400">
-            {credits.used} / {displayLimit}
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-            {tierInfo.label}
-          </p>
-          {isAtLimit && (
-            <p className="text-sm text-amber-700 dark:text-amber-400 mt-2 font-medium">
-              You've reached your connection limit this month.
-            </p>
-          )}
-        </div>
-        {tierInfo.showUpgrade && (
-          <button
-            onClick={onUpgrade}
-            className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition whitespace-nowrap"
-          >
-            Upgrade Plan
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// Profile Tab Component - Updated with sections and required fields
-function ProfileTab({ profile, onUpdate, getAuthHeaders, addToast }) {
-  const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    full_name: "",
-    bio: "",
-    skills: [],
-    experience_summary: "",
-    location: "",
-    linkedin_url: "",
-    website_url: "",
-    primary_skills: [],
-    industries_of_interest: [],
-    looking_for: "",
-    commitment_level: "",
-    is_public: true,
-  });
-  const [errors, setErrors] = useState({});
-  const formDataRef = useRef(formData);
-
-  // Keep ref in sync with state
-  useEffect(() => {
-    formDataRef.current = formData;
-  }, [formData]);
-
-  useEffect(() => {
-    if (profile) {
-      // Ensure primary_skills and industries_of_interest are arrays
-      const primarySkills = Array.isArray(profile.primary_skills) 
-        ? profile.primary_skills 
-        : (profile.primary_skills ? [profile.primary_skills] : []);
-      const industries = Array.isArray(profile.industries_of_interest)
-        ? profile.industries_of_interest
-        : (profile.industries_of_interest ? [profile.industries_of_interest] : []);
-      
-      setFormData({
-        full_name: profile.full_name || "",
-        bio: profile.bio || "",
-        skills: Array.isArray(profile.skills) ? profile.skills : [],
-        experience_summary: profile.experience_summary || "",
-        location: profile.location || "",
-        linkedin_url: profile.linkedin_url || "",
-        website_url: profile.website_url || "",
-        primary_skills: primarySkills,
-        industries_of_interest: industries,
-        looking_for: profile.looking_for || "",
-        commitment_level: profile.commitment_level || "",
-        is_public: profile.is_public !== false,
-      });
-    }
-  }, [profile]);
-
-  const validateForm = () => {
-    // Use ref to get the latest formData value
-    const currentFormData = formDataRef.current;
-    const newErrors = {};
-    if (!currentFormData.full_name?.trim()) {
-      newErrors.full_name = "Full name is required";
-    }
-    if (!currentFormData.bio?.trim() || currentFormData.bio.trim().length < 20) {
-      newErrors.bio = "Bio is required (minimum 20 characters)";
-    }
-    // Check if primary_skills is an array and has at least one item
-    const skills = Array.isArray(currentFormData.primary_skills) ? currentFormData.primary_skills : [];
-    if (skills.length === 0) {
-      newErrors.primary_skills = "At least one primary skill is required";
-    }
-    if (!currentFormData.looking_for?.trim()) {
-      newErrors.looking_for = "What you're looking for is required";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSave = async () => {
-    // Validate using the latest formData from ref
-    if (!validateForm()) {
-      addToast("Please fill in all required fields", "error");
-      return;
-    }
-
-    // Use the latest formData from ref for the API call
-    const currentFormData = formDataRef.current;
-    try {
-      const res = await fetch("/api/founder/profile", {
-        method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify(currentFormData),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          setEditing(false);
-          onUpdate();
-          addToast("Profile saved successfully", "success");
-        } else {
-          addToast(data.error || "Failed to save profile", "error");
-        }
-      } else {
-        const errorData = await res.json().catch(() => ({}));
-        addToast(errorData.error || "Failed to save profile", "error");
-      }
-    } catch (err) {
-      console.error("Error saving profile:", err);
-      addToast("Failed to save profile. Please try again.", "error");
-    }
-  };
-
-  const addSkill = (skill) => {
-    if (skill && skill.trim()) {
-      const currentSkills = Array.isArray(formData.primary_skills) ? formData.primary_skills : [];
-      const trimmedSkill = skill.trim();
-      if (!currentSkills.includes(trimmedSkill)) {
-        const updatedSkills = [...currentSkills, trimmedSkill];
-        setFormData({ ...formData, primary_skills: updatedSkills });
-        // Update ref immediately
-        formDataRef.current = { ...formDataRef.current, primary_skills: updatedSkills };
-        // Clear error if skill is added
-        if (errors.primary_skills) {
-          setErrors({ ...errors, primary_skills: undefined });
-        }
-      }
-    }
-  };
-
-  const removeSkill = (skill) => {
-    const currentSkills = Array.isArray(formData.primary_skills) ? formData.primary_skills : [];
-    const updatedSkills = currentSkills.filter(s => s !== skill);
-    setFormData({ ...formData, primary_skills: updatedSkills });
-    // Show error if removing last skill
-    if (updatedSkills.length === 0) {
-      setErrors({ ...errors, primary_skills: "At least one primary skill is required" });
-    } else if (errors.primary_skills) {
-      // Clear error if skills remain
-      setErrors({ ...errors, primary_skills: undefined });
-    }
-  };
-
-  if (!profile && !editing) {
-    return (
-      <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-        <p className="text-slate-600 dark:text-slate-400 mb-4">Create your Founder Profile</p>
-        <p className="text-sm text-slate-500 dark:text-slate-500 mb-6">Set up your profile to start connecting with other founders.</p>
-        <button
-          onClick={() => setEditing(true)}
-          className="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition"
-        >
-          Create Profile
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-      {editing ? (
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
-          
-          {/* Section 1: About You */}
-          <div className="border-b border-slate-200 dark:border-slate-700 pb-6">
-            <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">About You</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Full Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    errors.full_name ? "border-rose-500" : "border-slate-300 dark:border-slate-600"
-                  }`}
-                  placeholder="Your full name"
-                />
-                {errors.full_name && <p className="text-xs text-rose-500 mt-1">{errors.full_name}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Short Bio <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    errors.bio ? "border-rose-500" : "border-slate-300 dark:border-slate-600"
-                  }`}
-                  rows={4}
-                  placeholder="Tell us about yourself (minimum 20 characters)"
-                />
-                {errors.bio && <p className="text-xs text-rose-500 mt-1">{errors.bio}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Location</label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg"
-                  placeholder="City, Country"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Experience Summary</label>
-                <textarea
-                  value={formData.experience_summary}
-                  onChange={(e) => setFormData({ ...formData, experience_summary: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg"
-                  rows={3}
-                  placeholder="Your background and experience"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 2: What You Bring / What You're Looking For */}
-          <div className="border-b border-slate-200 dark:border-slate-700 pb-6">
-            <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">What You Bring / What You're Looking For</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Primary Skills <span className="text-rose-500">*</span>
-                </label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {Array.isArray(formData.primary_skills) && formData.primary_skills.length > 0 ? (
-                    formData.primary_skills.map((skill, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 rounded-full text-sm flex items-center gap-2">
-                        {skill}
-                        <button
-                          type="button"
-                          onClick={() => removeSkill(skill)}
-                          className="text-brand-600 hover:text-brand-800"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-xs text-slate-400 dark:text-slate-500 italic">No skills added yet</span>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    id="primary-skills-input"
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const value = e.target.value.trim();
-                        if (value) {
-                          addSkill(value);
-                          e.target.value = "";
-                        }
-                      }
-                    }}
-                    onChange={(e) => {
-                      // Clear validation error when user starts typing
-                      if (errors.primary_skills) {
-                        setErrors({ ...errors, primary_skills: undefined });
-                      }
-                    }}
-                    className={`flex-1 px-3 py-2 border rounded-lg ${
-                      errors.primary_skills && (!Array.isArray(formData.primary_skills) || formData.primary_skills.length === 0) 
-                        ? "border-rose-500" 
-                        : "border-slate-300 dark:border-slate-600"
-                    }`}
-                    placeholder="Add a skill and press Enter"
-                  />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      const input = e.target.previousElementSibling;
-                      const value = input.value.trim();
-                      if (value) {
-                        addSkill(value);
-                        input.value = "";
-                      }
-                    }}
-                    className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition whitespace-nowrap"
-                  >
-                    Add
-                  </button>
-                </div>
-                {errors.primary_skills && (!Array.isArray(formData.primary_skills) || formData.primary_skills.length === 0) && (
-                  <p className="text-xs text-rose-500 mt-1">
-                    {errors.primary_skills}
-                    <span className="ml-2 text-slate-500 dark:text-slate-400">(Type a skill and press Enter or click Add)</span>
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  What You're Looking For <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  value={formData.looking_for}
-                  onChange={(e) => setFormData({ ...formData, looking_for: e.target.value })}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    errors.looking_for ? "border-rose-500" : "border-slate-300 dark:border-slate-600"
-                  }`}
-                  rows={3}
-                  placeholder="What kind of collaborators or opportunities are you looking for?"
-                />
-                {errors.looking_for && <p className="text-xs text-rose-500 mt-1">{errors.looking_for}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Industries of Interest</label>
-                <input
-                  type="text"
-                  value={formData.industries_of_interest?.join(", ") || ""}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    industries_of_interest: e.target.value.split(",").map(s => s.trim()).filter(s => s) 
-                  })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg"
-                  placeholder="SaaS, E-commerce, Healthcare (comma-separated)"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Commitment Level</label>
-                <select
-                  value={formData.commitment_level}
-                  onChange={(e) => setFormData({ ...formData, commitment_level: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg"
-                >
-                  <option value="">Select commitment level</option>
-                  <option value="part-time">Part-time</option>
-                  <option value="full-time">Full-time</option>
-                  <option value="flexible">Flexible</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Privacy Notice */}
-          <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              <strong>Privacy:</strong> Your name and email stay hidden. Others only see this profile after you both accept a connection.
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => {
-                setEditing(false);
-                setErrors({});
-              }}
-              className="px-4 py-2 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="text-xl font-bold">My Profile</h2>
-            <button
-              onClick={() => setEditing(true)}
-              className="px-4 py-2 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700"
-            >
-              Edit
-            </button>
-          </div>
-          <div className="space-y-2">
-            <p><strong>Name:</strong> {profile?.full_name || "Not set"}</p>
-            <p><strong>Bio:</strong> {profile?.bio || "Not set"}</p>
-            <p><strong>Location:</strong> {profile?.location || "Not set"}</p>
-            {profile?.primary_skills && profile.primary_skills.length > 0 && (
-              <p><strong>Skills:</strong> {profile.primary_skills.join(", ")}</p>
-            )}
-            {profile?.looking_for && (
-              <p><strong>Looking for:</strong> {profile.looking_for}</p>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // Listings Tab Component - Updated with validation data and Active/Paused toggle
 function ListingsTab({ listings, onUpdate, getAuthHeaders, addToast }) {

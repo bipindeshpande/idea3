@@ -130,3 +130,12 @@ textarea {
 .animate-progress {
   animation: progress 2.5s ease-in-out infinite;
 }
+
+.icon-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

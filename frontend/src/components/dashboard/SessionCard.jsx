@@ -10,11 +10,11 @@ function SessionCard({
   isValidation = false 
 }) {
   return (
-    <article className="group relative overflow-hidden rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 p-5 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+    <article className="group relative overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 transition-all duration-300 hover:shadow-md">
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-gray-500 dark:text-slate-400">
               {new Date(session.timestamp).toLocaleString()}
               {session.from_api && (
                 <span className="ml-2 text-xs text-brand-600 dark:text-brand-400 font-medium">
@@ -52,12 +52,12 @@ function SessionCard({
           
           {isValidation ? (
             <>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mt-1">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-50 mt-1">
                 {session.idea_explanation || "Validation"}
               </h3>
               {session.overall_score !== undefined && (
-                <div className="mt-1.5">
-                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                <div className="mt-2">
+                  <p className="text-[15px] text-gray-700 dark:text-slate-300">
                     <span className="font-medium">Score:</span> {session.overall_score.toFixed(1)}/10
                   </p>
                 </div>
@@ -65,14 +65,14 @@ function SessionCard({
             </>
           ) : (
             <>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mt-1">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-50 mt-1">
                 {session.inputs?.goal_type 
                   ? `${session.inputs.goal_type}${session.inputs.interest_area || session.inputs.sub_interest_area ? ` - ${session.inputs.interest_area || session.inputs.sub_interest_area}` : ""}`
                   : "Idea Discovery Session"}
               </h3>
               {session.inputs && Object.keys(session.inputs).length > 0 ? (
-                <div className="mt-1.5">
-                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
                     <span className="font-medium">Time:</span> {session.inputs.time_commitment || "Not set"} • 
                     <span className="font-medium"> Budget:</span> {session.inputs.budget_range || "Not set"} • 
                     <span className="font-medium"> Focus:</span>{" "}
@@ -82,8 +82,8 @@ function SessionCard({
                   </p>
                 </div>
               ) : session.run_id ? (
-                <div className="mt-1.5">
-                  <p className="text-sm text-slate-500 dark:text-slate-400 italic">
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500 dark:text-slate-400 italic">
                     Run ID: {session.run_id}
                   </p>
                 </div>

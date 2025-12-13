@@ -6,6 +6,7 @@ import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useValidation } from "../../context/ValidationContext.jsx";
 import OpenForCollaboratorsButton from "../../components/founder/OpenForCollaboratorsButton.jsx";
+import CollapsibleSection from "../../components/ui/CollapsibleSection.jsx";
 import { parseTopIdeas, trimFromHeading } from "../../utils/markdown/markdown.js";
 import { parseStructuredIdeas } from "../../utils/streamingParser.js";
 import {
@@ -221,40 +222,6 @@ function getSectionTheme(sectionTitle) {
   };
 }
 
-function CollapsibleSection({ title, description, theme, isOpen, onToggle, children }) {
-  return (
-    <div className="rounded-3xl border border-[#CBD5E1] dark:border-[#2D3648] bg-white dark:bg-[#161B22] shadow-[0_1px_3px_rgba(0,0,0,0.07)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] min-h-[80px]">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between gap-3 px-6 py-4 hover:bg-[#F1F5F9] dark:hover:bg-[#1F2937] transition-colors border-b border-[rgba(0,0,0,0.06)] dark:border-[rgba(255,255,255,0.08)]"
-      >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <span className="text-2xl flex-shrink-0">{theme.icon}</span>
-          <div className="text-left flex-1 min-w-0">
-            <h2
-              className="text-lg font-semibold text-[#1A1A1A] dark:text-[#EDEDED] border-l-4 border-[#2563EB] dark:border-[#3B82F6] pl-3"
-            >
-              {title}
-            </h2>
-            {description && (
-              <p className="text-xs mt-1 text-[#7A7A7A] dark:text-[#8B949E]">{description}</p>
-            )}
-          </div>
-        </div>
-        <span className={`text-xl transition-transform flex-shrink-0 text-[#3A3A3A] dark:text-[#C4C4C4] ${isOpen ? "rotate-180" : ""}`}>
-          ▼
-        </span>
-      </button>
-      
-      {isOpen && (
-        <div className="px-6 pb-6 pt-4 text-[#3A3A3A] dark:text-[#C4C4C4] min-h-[60px]">
-          {/* FIX #4: Always render children, don't cache empty state */}
-          {children}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function RecommendationDetail() {
   const { ideaIndex } = useParams();
@@ -1648,7 +1615,7 @@ export default function RecommendationDetail() {
           {isAuthenticated && (
             <Link
               to="/dashboard"
-              className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+              className="inline-block px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition text-sm font-medium"
             >
               ← Back to Dashboard
             </Link>
@@ -2016,132 +1983,4 @@ export default function RecommendationDetail() {
   );
 }
 
-function ProfilePanels({ inputs }) {
-  const panels = useMemo(() => buildProfilePanels(inputs), [inputs]);
-  if (!panels.length) return null;
-
-  const columnClass =
-    panels.length === 1 ? "md:grid-cols-1" : panels.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3";
-
-  return (
-    <div className={`mt-5 grid gap-4 ${columnClass}`}>
-      {panels.map(({ title, icon, items, theme }, index) => (
-        <div
-          key={`${title}-${index}`}
-          className={`rounded-3xl border ${theme.border} ${theme.background} p-5 shadow-[0_18px_40px_-32px_rgba(34,79,175,0.25)] transition`}
-        >
-          <div className="flex items-start justify-between">
-            <span className={`flex h-10 w-10 items-center justify-center rounded-full text-xl ${theme.icon}`}>
-              {icon}
-            </span>
-            <p className={`text-xs font-semibold uppercase tracking-wide ${theme.title}`}>{title}</p>
-          </div>
-          <ul className="mt-4 space-y-2 text-sm text-cloud-800">
-            {items.map(({ label, value }) => (
-              <li key={label} className="leading-relaxed">
-                <span className={`font-semibold ${theme.label}`}>{label}:</span> {value}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const PANEL_THEMES = [
-  {
-    background: "bg-gradient-to-br from-brand-50 via-white to-aqua-50",
-    border: "border-brand-100",
-    icon: "bg-brand-100 text-brand-700",
-    title: "text-brand-700",
-    label: "text-brand-700",
-  },
-  {
-    background: "bg-gradient-to-br from-coral-50 via-white to-sand-50",
-    border: "border-coral-100",
-    icon: "bg-coral-100 text-coral-600",
-    title: "text-coral-600",
-    label: "text-coral-600",
-  },
-  {
-    background: "bg-gradient-to-br from-aqua-50 via-white to-brand-50",
-    border: "border-aqua-100",
-    icon: "bg-aqua-100 text-aqua-600",
-    title: "text-aqua-600",
-    label: "text-aqua-600",
-  },
-];
-
-function buildProfilePanels(inputs = {}) {
-  // Extract skills as string from structured object
-  let skillsStr = "";
-  if (inputs?.skills && typeof inputs.skills === "object") {
-    const skillParts = [];
-    if (inputs.skills.technical?.length > 0) skillParts.push(`Technical: ${inputs.skills.technical.join(", ")}`);
-    if (inputs.skills.creative?.length > 0) skillParts.push(`Creative: ${inputs.skills.creative.join(", ")}`);
-    if (inputs.skills.business?.length > 0) skillParts.push(`Business: ${inputs.skills.business.join(", ")}`);
-    if (inputs.skills.soft?.length > 0) skillParts.push(`Soft: ${inputs.skills.soft.join(", ")}`);
-    if (inputs.skills.physical?.length > 0) skillParts.push(`Physical: ${inputs.skills.physical.join(", ")}`);
-    if (inputs.skills.other?.trim()) skillParts.push(inputs.skills.other);
-    skillsStr = skillParts.join("; ");
-  }
-  
-  const cleaned = {
-    goal: personalizeCopy(inputs?.founder_ambition ?? ""),
-    focus: personalizeCopy(inputs?.sub_interest_area ?? inputs?.industry_interest ?? ""),
-    time: personalizeCopy(inputs?.time_commitment ?? ""),
-    budget: personalizeCopy(inputs?.budget_range ?? ""),
-    workStyle: personalizeCopy(inputs?.preferred_work_style ?? ""),
-    skill: personalizeCopy(skillsStr),
-    experience: personalizeCopy(inputs?.experience_summary ?? ""),
-  };
-
-  const panels = [];
-
-  if (cleaned.goal || cleaned.focus) {
-    panels.push({
-      title: "Direction",
-      icon: "🎯",
-      theme: PANEL_THEMES[0],
-      items: [
-        cleaned.goal && { label: "Goal", value: cleaned.goal },
-        cleaned.focus && { label: "Focus", value: cleaned.focus },
-      ].filter(Boolean),
-    });
-  }
-
-  if (cleaned.time || cleaned.budget) {
-    panels.push({
-      title: "Capacity",
-      icon: "⏳",
-      theme: PANEL_THEMES[1],
-      items: [
-        cleaned.time && { label: "Time commitment", value: cleaned.time },
-        cleaned.budget && { label: "Budget", value: cleaned.budget },
-      ].filter(Boolean),
-    });
-  }
-
-  if (cleaned.workStyle || cleaned.skill || cleaned.experience) {
-    panels.push({
-      title: "Strengths",
-      icon: "💪",
-      theme: PANEL_THEMES[2],
-      items: [
-        cleaned.workStyle && { label: "Work style", value: cleaned.workStyle },
-        cleaned.skill && { label: "Skill", value: cleaned.skill },
-        cleaned.experience && { label: "Experience", value: truncateNarrative(cleaned.experience) },
-      ].filter(Boolean),
-    });
-  }
-
-  return panels.slice(0, 3);
-}
-
-function truncateNarrative(text = "", limit = 140) {
-  const normalized = text.replace(/\s+/g, " ").trim();
-  if (normalized.length <= limit) return normalized;
-  return `${normalized.slice(0, limit).trimEnd()}...`;
-}
 

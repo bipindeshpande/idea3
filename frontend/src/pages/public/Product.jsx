@@ -2,6 +2,11 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import Seo from "../../components/common/Seo.jsx";
 import ExpandableDetails from "../../components/common/ExpandableDetails.jsx";
+import PageHeader from "../../components/layout/PageHeader.jsx";
+import PageContainer from "../../components/layout/PageContainer.jsx";
+import Card from "../../components/ui/Card.jsx";
+import Button from "../../components/ui/Button.jsx";
+import SectionHeader from "../../components/layout/SectionHeader.jsx";
 
 const valuePanels = [
   {
@@ -116,7 +121,7 @@ const deliverables = [
 
 export default function ProductPage() {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-6">
+    <PageContainer maxWidth="lg">
       <Seo
         title="Product Overview | Startup Idea Advisor"
         description="Transform your profile into validated startup ideas with AI-powered analysis, financial outlook, and actionable roadmaps."
@@ -124,86 +129,75 @@ export default function ProductPage() {
       />
 
       {/* Hero Section */}
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50 md:text-4xl">
-          Validate your idea or discover new opportunities
-        </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
-          Choose your path: validate an existing startup idea across 10 key parameters, or let our AI discover personalized opportunities tailored to your profile, goals, and constraints.
-        </p>
-        <div className="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link
-            to="/validate-idea"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-gradient-to-r from-coral-500 to-coral-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-coral-500/25 transition-all duration-200 hover:from-coral-600 hover:to-coral-700 hover:shadow-xl hover:shadow-coral-500/30 hover:-translate-y-0.5"
-          >
-            Validate Idea 🚀
-          </Link>
-          <Link
-            to="/advisor"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5"
-          >
-            Discover Ideas 💡
-          </Link>
+      <header className="relative mb-10 md:mb-12">
+        <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+        <div className="relative z-10">
+          <PageHeader
+            title="Validate your idea or discover new opportunities"
+            description="Choose your path: validate an existing startup idea across 10 key parameters, or let our AI discover personalized opportunities tailored to your profile, goals, and constraints."
+          />
+          <div className="flex flex-col items-start gap-4 sm:flex-row mt-6">
+            <Button as={Link} to="/validate-idea">
+              Validate Idea 🚀
+            </Button>
+            <Button as={Link} to="/advisor">
+              Discover Ideas 💡
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Value Panels */}
-      <section className="mb-8">
-        <h2 className="mb-6 text-center text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 md:text-3xl">What You Get</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <section>
+        <SectionHeader title="What You Get" className="text-3xl md:text-4xl mb-4" />
+        <div className="mt-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {valuePanels.map((panel) => {
-            const colorClasses = {
-              brand: "border-brand-200/60 dark:border-brand-700/60 bg-gradient-to-br from-brand-50/80 via-brand-50/40 to-white dark:from-brand-900/20 dark:via-brand-900/10 dark:to-slate-800/50",
-              aqua: "border-aqua-200/60 dark:border-aqua-700/60 bg-gradient-to-br from-aqua-50/80 via-aqua-50/40 to-white dark:from-aqua-900/20 dark:via-aqua-900/10 dark:to-slate-800/50",
-              coral: "border-coral-200/60 dark:border-coral-700/60 bg-gradient-to-br from-coral-50/80 via-coral-50/40 to-white dark:from-coral-900/20 dark:via-coral-900/10 dark:to-slate-800/50",
-              sand: "border-sand-200/60 dark:border-sand-700/60 bg-gradient-to-br from-sand-50/80 via-sand-50/40 to-white dark:from-sand-900/20 dark:via-sand-900/10 dark:to-slate-800/50",
-            };
             return (
-              <article
+              <Card
                 key={panel.title}
-                className={`group relative overflow-hidden rounded-2xl border ${colorClasses[panel.color]} p-5 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1`}
+                className="group relative overflow-hidden transition-all duration-300 hover:shadow-md"
               >
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/60 dark:bg-slate-800/60 text-xl shadow-sm">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="icon-circle bg-[#f3f5ff] text-indigo-600 text-xl">
                     {panel.icon}
                   </div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">{panel.title}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{panel.title}</h3>
                 </div>
-                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{panel.summary}</p>
+                <p className="text-[15px] leading-relaxed text-gray-700 dark:text-slate-300">{panel.summary}</p>
                 {panel.details && (
                   <ExpandableDetails triggerText="What's included" icon="→">
                     <ul className="space-y-1.5">
                       {panel.details.map((detail, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <span className="mt-0.5 text-brand-600 dark:text-brand-400">•</span>
+                          <span className="mt-0.5 text-indigo-600">•</span>
                           <span>{detail}</span>
                         </li>
                       ))}
                     </ul>
                   </ExpandableDetails>
                 )}
-              </article>
+              </Card>
             );
           })}
         </div>
       </section>
 
       {/* 10 Validation Parameters - Expandable Section */}
-      <section className="mb-8">
-        <details className="group rounded-2xl border border-brand-200/60 dark:border-brand-700/60 bg-gradient-to-br from-brand-50/50 via-brand-50/30 to-white dark:from-brand-900/10 dark:via-brand-900/5 dark:to-slate-800/50 p-5 shadow-md transition-all duration-300 hover:shadow-lg">
+      <section className="mt-16">
+        <details className="group rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 md:p-7 shadow-sm transition-all duration-300 hover:shadow-md">
           <summary className="cursor-pointer list-none">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50">10-Parameter Validation Framework</h2>
-                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-50">10-Parameter Validation Framework</h2>
+                <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">
                   See all parameters we analyze when validating your startup idea
                 </p>
               </div>
-              <span className="flex-shrink-0 text-xl text-brand-600 dark:text-brand-400 transition-transform group-open:rotate-180">▼</span>
+              <span className="flex-shrink-0 text-xl text-brand-600  transition-transform group-open:rotate-180">▼</span>
             </div>
           </summary>
-          <div className="mt-4 space-y-3 pt-4 border-t border-brand-200/60 dark:border-brand-700/60">
-            <div className="grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 space-y-3 pt-4 border-t border-gray-200 dark:border-slate-700">
+            <div className="grid gap-6 sm:grid-cols-2">
               {[
                 { name: "Market Opportunity", desc: "Market size, growth trends, addressable market (TAM, SAM, SOM)" },
                 { name: "Problem-Solution Fit", desc: "Customer pain point validation, solution relevance, willingness to pay" },
@@ -216,14 +210,14 @@ export default function ProductPage() {
                 { name: "Risk Assessment", desc: "Key risks identified, severity ratings, mitigation strategies" },
                 { name: "Go-to-Market Strategy", desc: "Launch plan, distribution channels, marketing & sales approach" },
               ].map((param, idx) => (
-                <div key={idx} className="rounded-lg border border-brand-200/40 dark:border-brand-700/40 bg-white/60 dark:bg-slate-800/40 p-3">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">{param.name}</h3>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{param.desc}</p>
+                <div key={idx} className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 md:p-7 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{param.name}</h3>
+                  <p className="mt-2 text-[15px] text-gray-700 dark:text-slate-300">{param.desc}</p>
                 </div>
               ))}
             </div>
             <p className="mt-4 text-center">
-              <Link to="/validate-idea" className="text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300">
+              <Link to="/validate-idea" className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300">
                 Start validating your idea →
               </Link>
             </p>
@@ -232,53 +226,55 @@ export default function ProductPage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="mb-8 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 p-6 shadow-lg">
-        <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 md:text-3xl">How It Works</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            Three simple steps from profile to actionable recommendations
-          </p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {howItWorks.map((item) => (
-            <article key={item.step} className="group relative overflow-hidden rounded-2xl border border-brand-200/60 dark:border-brand-700/60 bg-gradient-to-br from-brand-50/80 via-brand-50/40 to-white dark:from-brand-900/20 dark:via-brand-900/10 dark:to-slate-800/50 p-5 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 text-sm font-bold text-white shadow-lg shadow-brand-500/25">
-                  {item.step}
+      <section id="how-it-works" className="mt-16 relative">
+        <div className="absolute top-[-60px] left-[-60px] w-[260px] h-[260px] rounded-full bg-indigo-200 opacity-[0.08] blur-2xl"></div>
+        <div className="relative rounded-xl border border-gray-200  bg-white  p-6 md:p-7 shadow-sm">
+          <div className="text-center">
+            <h2 className="text-3xl font-semibold tracking-tight text-gray-900 ">How It Works</h2>
+            <p className="mt-2 text-sm text-gray-500 ">
+              Three simple steps from profile to actionable recommendations
+            </p>
+          </div>
+          <div className="mt-4 grid gap-6 md:grid-cols-3">
+            {howItWorks.map((item) => (
+              <article key={item.step} className="group relative overflow-hidden rounded-xl border border-gray-200  bg-white  p-6 md:p-7 shadow-sm transition-all duration-300 hover:shadow-md">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-[#f3f5ff]  flex items-center justify-center">
+                    <span className="text-sm font-bold text-brand-600 ">{item.step}</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 ">{item.title}</h3>
                 </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">{item.title}</h3>
-              </div>
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.detail}</p>
-            </article>
-          ))}
+                <p className="text-[15px] leading-relaxed text-gray-700 ">{item.detail}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
-
       {/* Deliverables */}
-      <section className="mb-8 rounded-2xl border border-sand-200/60 dark:border-sand-800/60 bg-gradient-to-br from-sand-50/80 via-sand-50/40 to-white dark:from-sand-900/20 dark:via-sand-900/10 dark:to-slate-800/50 p-6 shadow-md">
-        <h2 className="mb-6 text-center text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 md:text-3xl">Your Deliverables</h2>
-        <div className="grid gap-4 md:grid-cols-3">
+      <section className="mt-16">
+        <h2 className="text-center text-3xl font-semibold tracking-tight text-gray-900 dark:text-slate-50">Your Deliverables</h2>
+        <div className="mt-4 grid gap-6 md:grid-cols-3">
           {deliverables.map((item) => (
-            <article key={item.title} className="group relative overflow-hidden rounded-2xl border border-sand-200/60 dark:border-sand-800/60 bg-white/95 dark:bg-slate-800/95 p-5 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-              <h3 className="mb-2 text-base font-bold text-slate-900 dark:text-slate-50">{item.title}</h3>
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.description}</p>
+            <article key={item.title} className="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 md:p-7 shadow-sm transition-all duration-300 hover:shadow-md">
+              <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-slate-100">{item.title}</h3>
+              <p className="text-[15px] leading-relaxed text-gray-700 dark:text-slate-300">{item.description}</p>
             </article>
           ))}
         </div>
       </section>
 
       {/* Founder Connect Section */}
-      <section className="mb-8 rounded-3xl border-2 border-brand-300/80 dark:border-brand-700/80 bg-gradient-to-br from-brand-50 via-white to-brand-50/30 dark:from-brand-900/30 dark:via-slate-800/50 dark:to-brand-900/20 p-6 shadow-xl shadow-brand-500/10 dark:shadow-brand-500/5">
+      <section className="mt-16 rounded-xl border border-gray-200  bg-white  p-6 md:p-7 shadow-sm">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-100 to-brand-200 dark:from-brand-900/50 dark:to-brand-800/50 text-2xl shadow-sm">
+          <div className="w-12 h-12 rounded-full bg-[#f3f5ff]  flex items-center justify-center text-2xl">
             🤝
           </div>
           <div className="flex-1">
-            <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-50">Founder Connect - Find Your Co-Founder</h2>
-            <p className="mb-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            <h2 className="mb-2 text-xl font-semibold text-gray-900 ">Founder Connect - Find Your Co-Founder</h2>
+            <p className="mb-3 text-[15px] leading-relaxed text-gray-700 ">
               After validating your idea or discovering new opportunities, connect with other founders to find co-founders, collaborators, and build your startup team. Browse anonymized profiles and listings, send connection requests, and reveal identities when both sides accept.
             </p>
-            <ul className="mb-4 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+            <ul className="mb-4 space-y-1.5 text-sm text-gray-500 ">
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-900/50 text-[10px] font-semibold text-brand-700 dark:text-brand-300">✓</span>
                 <span>Create your founder profile and list validated ideas for collaboration</span>
@@ -307,10 +303,10 @@ export default function ProductPage() {
       </section>
 
       {/* CTA Section */}
-      <div className="rounded-2xl border border-coral-200/60 dark:border-coral-800/60 bg-gradient-to-br from-coral-50/80 via-aqua-50/40 to-white dark:from-coral-900/20 dark:via-aqua-900/10 dark:to-slate-800/50 p-6 shadow-lg">
+      <div className="mt-16 rounded-xl border border-gray-200  bg-white  p-6 md:p-7 shadow-sm">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-50 md:text-2xl">Ready to get started?</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <h2 className="text-xl font-semibold text-gray-900 ">Ready to get started?</h2>
+          <p className="mt-2 text-sm text-gray-500 ">
             Validate your existing idea or discover new opportunities tailored to your profile. No credit card required.
           </p>
           <div className="mt-4 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -328,14 +324,14 @@ export default function ProductPage() {
             </Link>
             <Link
               to="/pricing"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-slate-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-6 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-slate-300/60 dark:border-slate-600/60 bg-white  px-6 py-3 text-sm font-semibold text-slate-700  shadow-sm transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:-translate-y-0.5"
             >
               View Pricing
             </Link>
           </div>
         </div>
       </div>
-    </section>
+    </PageContainer>
   );
 }
 

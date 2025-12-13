@@ -1,15 +1,23 @@
 import Seo from "../../components/common/Seo.jsx";
+import PageHeader from "../../components/layout/PageHeader.jsx";
+import PageContainer from "../../components/layout/PageContainer.jsx";
+import Card from "../../components/ui/Card.jsx";
 
 export default function PrivacyPage() {
   return (
-    <section className="grid gap-6 rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-soft">
+    <PageContainer maxWidth="4xl">
       <Seo
         title="Privacy Policy | Startup Idea Advisor"
         description="Learn how Startup Idea Advisor handles your data, privacy, and security."
         path="/privacy"
       />
-      <h1 className="text-3xl font-semibold text-slate-900">Privacy Policy</h1>
-      <p className="text-sm text-slate-500">Last updated: November 2025</p>
+      <Card className="relative">
+        <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+        <div className="relative z-10">
+      <PageHeader
+        title="Privacy Policy"
+        description="Last updated: November 2025"
+      />
       <div className="prose prose-slate">
         <p>
           Startup Idea Advisor (“we”, “us”) is committed to protecting your privacy. This policy describes what
@@ -62,6 +70,8 @@ export default function PrivacyPage() {
           Questions? Email <a href="mailto:hello@startupideaadvisor.com">hello@startupideaadvisor.com</a>.
         </p>
       </div>
-    </section>
+      </div>
+      </Card>
+    </PageContainer>
   );
 }

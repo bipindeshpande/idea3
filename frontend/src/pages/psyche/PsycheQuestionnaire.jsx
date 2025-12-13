@@ -136,10 +136,10 @@ export default function PsycheQuestionnaire() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading questionnaire...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading questionnaire...</p>
         </div>
       </div>
     );
@@ -147,14 +147,14 @@ export default function PsycheQuestionnaire() {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center px-6">
+      <div className="min-h-screen flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center">
-          <p className="text-slate-600 dark:text-slate-400 mb-4">
+          <p className="text-gray-600 mb-4">
             {error || "No questions available"}
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600"
+            className="px-5 py-2.5 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
           >
             Retry
           </button>
@@ -174,31 +174,34 @@ export default function PsycheQuestionnaire() {
         title="Decision & Work Style Assessment"
         description="Complete a short assessment to personalize your startup recommendations"
       />
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-6">
+      <div className="min-h-screen py-12 px-6">
         <div className="max-w-3xl mx-auto">
           {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-2">
-              Decision & Work Style Assessment
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400">
-              Answer 12 questions to help personalize your startup recommendations (takes about 3–4 minutes)
-            </p>
+          <div className="mb-8 text-center relative">
+            <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+            <div className="relative z-10">
+              <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">
+                Decision & Work Style Assessment
+              </h1>
+              <p className="text-[15px] text-gray-700 leading-relaxed mb-8">
+                Answer 12 questions to help personalize your startup recommendations (takes about 3–4 minutes)
+              </p>
+            </div>
           </div>
 
           {/* Progress Bar */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <span className="text-sm text-gray-600">
                 Step {currentStep + 1} of {totalSteps}
               </span>
-              <span className="text-sm text-slate-600 dark:text-slate-400">
+              <span className="text-sm text-gray-600">
                 {progress.current} / {progress.total} answered
               </span>
             </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+            <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="bg-brand-500 h-2 rounded-full transition-all duration-300"
+                className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${progress.percentage}%` }}
               ></div>
             </div>
@@ -206,8 +209,8 @@ export default function PsycheQuestionnaire() {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+            <div className="mb-6 p-4 rounded-xl border border-gray-200 shadow-sm bg-white">
+              <p className="text-[15px] text-gray-700 leading-relaxed font-semibold">{error}</p>
             </div>
           )}
 
@@ -216,9 +219,9 @@ export default function PsycheQuestionnaire() {
             {currentQuestions.map((question) => (
               <div
                 key={question.question_id}
-                className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm"
+                className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7"
               >
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
                   {question.text}
                 </h3>
                 <div className="space-y-3">
@@ -229,8 +232,8 @@ export default function PsycheQuestionnaire() {
                         key={option.id}
                         className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
                           isSelected
-                            ? "border-brand-500 bg-brand-50 dark:bg-brand-900/20"
-                            : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                            ? "border-indigo-600 bg-indigo-50"
+                            : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
                         <input
@@ -239,9 +242,9 @@ export default function PsycheQuestionnaire() {
                           value={option.id}
                           checked={isSelected}
                           onChange={() => handleAnswer(question.question_id, option.id)}
-                          className="mt-1 mr-3 h-4 w-4 text-brand-500 focus:ring-brand-500"
+                          className="mt-1 mr-3 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
                         />
-                        <span className="text-slate-700 dark:text-slate-300 flex-1">
+                        <span className="text-[15px] text-gray-700 leading-relaxed flex-1">
                           {option.label}
                         </span>
                       </label>
@@ -253,8 +256,8 @@ export default function PsycheQuestionnaire() {
 
             {/* Optional Text Field (only on last step) */}
             {isLastStep && (
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                <label className="block text-sm text-gray-600 mb-2">
                   Additional context (optional)
                 </label>
                 <textarea
@@ -262,7 +265,7 @@ export default function PsycheQuestionnaire() {
                   onChange={(e) => setOptionalText(e.target.value)}
                   placeholder="Share any additional context about your preferences, goals, or motivations..."
                   rows={4}
-                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-slate-800 dark:text-slate-200 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
+                  className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                 />
               </div>
             )}
@@ -273,10 +276,10 @@ export default function PsycheQuestionnaire() {
                 type="button"
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className={`px-6 py-3 rounded-lg font-medium transition ${
+                className={`px-5 py-2.5 rounded-lg font-medium transition-all ${
                   currentStep === 0
-                    ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
-                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "px-5 py-2.5 rounded-lg font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all shadow-sm hover:shadow-md"
                 }`}
               >
                 Previous
@@ -287,10 +290,10 @@ export default function PsycheQuestionnaire() {
                   type="button"
                   onClick={handleNext}
                   disabled={!canProceed}
-                  className={`px-6 py-3 rounded-lg font-medium transition ${
+                  className={`px-5 py-2.5 rounded-lg font-medium transition-all ${
                     canProceed
-                      ? "bg-brand-500 text-white hover:bg-brand-600"
-                      : "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed"
+                      ? "text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm hover:shadow-md"
+                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
                   }`}
                 >
                   Next
@@ -299,10 +302,10 @@ export default function PsycheQuestionnaire() {
                 <button
                   type="submit"
                   disabled={!canProceed || submitting}
-                  className={`px-6 py-3 rounded-lg font-medium transition ${
+                  className={`px-5 py-2.5 rounded-lg font-medium transition-all ${
                     canProceed && !submitting
-                      ? "bg-brand-500 text-white hover:bg-brand-600"
-                      : "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed"
+                      ? "text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm hover:shadow-md"
+                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
                   }`}
                 >
                   {submitting ? "Saving..." : "Complete Questionnaire"}

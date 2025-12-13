@@ -64,6 +64,33 @@ class UserService(BaseService):
         Returns runs and validations from database
         """
         from app.models.validation import Validation
+        import json
+        from datetime import datetime
+        
+        def serialize_for_json(obj):
+            """Recursively serialize objects for JSON, handling datetime and other types"""
+            if obj is None:
+                return None
+            elif isinstance(obj, (str, int, float, bool)):
+                # Already JSON-serializable primitives
+                return obj
+            elif isinstance(obj, datetime):
+                return obj.isoformat() if obj else None
+            elif isinstance(obj, dict):
+                return {k: serialize_for_json(v) for k, v in obj.items()}
+            elif isinstance(obj, (list, tuple)):
+                return [serialize_for_json(item) for item in obj]
+            elif hasattr(obj, 'isoformat'):  # Handle other datetime-like objects
+                try:
+                    return obj.isoformat()
+                except (AttributeError, TypeError):
+                    return str(obj)
+            else:
+                # Fallback: try to convert to string
+                try:
+                    return str(obj)
+                except Exception:
+                    return None
         
         # Get user's runs
         runs = self.db.query(Run).filter(
@@ -73,17 +100,51 @@ class UserService(BaseService):
             )
         ).order_by(desc(Run.created_at)).limit(limit).all()
         
-        runs_list = [run.to_dict() for run in runs]
+        runs_list = []
+        for run in runs:
+            try:
+                run_dict = run.to_dict()
+                # Recursively serialize any nested datetime objects in JSONB fields
+                run_dict = serialize_for_json(run_dict)
+                # Ensure JSON serialization works
+                json.dumps(run_dict, default=str)
+                runs_list.append(run_dict)
+            except Exception as e:
+                self._log(f"Error serializing run {run.run_id}: {str(e)}", "ERROR")
+                # Skip this run if serialization fails
+                continue
         
         # Get user's validations
-        validations = self.db.query(Validation).filter(
-            and_(
-                Validation.user_id == user_id,
-                Validation.deleted_at.is_(None)
-            )
-        ).order_by(desc(Validation.created_at)).limit(limit).all()
-        
-        validations_list = [validation.to_dict() for validation in validations]
+        validations_list = []
+        try:
+            validations = self.db.query(Validation).filter(
+                and_(
+                    Validation.user_id == user_id,
+                    Validation.deleted_at.is_(None)
+                )
+            ).order_by(desc(Validation.created_at)).limit(limit).all()
+            
+            for validation in validations:
+                try:
+                    validation_dict = validation.to_dict()
+                    # Recursively serialize any nested datetime objects in JSONB fields
+                    validation_dict = serialize_for_json(validation_dict)
+                    # Ensure JSON serialization works
+                    json.dumps(validation_dict, default=str)
+                    validations_list.append(validation_dict)
+                except Exception as e:
+                    self._log(f"Error serializing validation {validation.validation_id}: {str(e)}", "ERROR")
+                    # Skip this validation if serialization fails
+                    continue
+        except Exception as e:
+            # Handle case where validations table doesn't exist yet (e.g., migration not run)
+            error_msg = str(e)
+            if "does not exist" in error_msg or "UndefinedTable" in error_msg:
+                self._log("Validations table does not exist yet. Run migration: alembic upgrade head", "WARNING")
+            else:
+                self._log(f"Error querying validations: {str(e)}", "ERROR")
+            # Return empty list if table doesn't exist
+            validations_list = []
         
         # Ensure activity format matches frontend expectations
         activity = {

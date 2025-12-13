@@ -92,4 +92,8 @@ class AuthService(BaseService):
     def get_user_by_id(self, user_id: str) -> Optional[User]:
         """Get user by ID"""
         return self.db.query(User).filter(User.user_id == user_id).first()
+    
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        """Get user by email"""
+        return self.db.query(User).filter(User.email == email).first()
 

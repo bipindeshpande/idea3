@@ -175,9 +175,9 @@ export default function CompareSessionsPage() {
           </div>
           <Link
             to="/dashboard"
-            className="rounded-xl border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-800"
+            className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition text-sm font-medium"
           >
-            Back to Dashboard
+            ← Back to Dashboard
           </Link>
         </div>
       </div>

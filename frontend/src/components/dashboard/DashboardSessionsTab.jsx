@@ -17,30 +17,30 @@ function DashboardSessionsTab({
   return (
     <>
       <div className="mb-6">
-        <p className="text-sm text-slate-600 dark:text-slate-300">
+        <p className="text-[15px] text-gray-700 leading-relaxed">
           Manage your idea discovery runs and validations - revisit previous recommendations or generate new ones.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 border-b border-slate-200/60 dark:border-slate-700/60">
+      <div className="mb-6 border-b border-gray-200">
         <nav className="flex gap-2" aria-label="Session tabs">
           <button
             onClick={() => setActiveTab("ideas")}
-            className={`px-4 py-2 text-sm font-semibold transition-all duration-200 border-b-2 ${
+            className={`px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
               activeTab === "ideas"
-                ? "border-brand-500 text-brand-700 dark:text-brand-400"
-                : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"
+                ? "border-indigo-600 text-gray-900"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
             Ideas Search ({filteredRuns.length})
           </button>
           <button
             onClick={() => setActiveTab("validations")}
-            className={`px-4 py-2 text-sm font-semibold transition-all duration-200 border-b-2 ${
+            className={`px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
               activeTab === "validations"
-                ? "border-brand-500 text-brand-700 dark:text-brand-400"
-                : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"
+                ? "border-indigo-600 text-gray-900"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
             Validations ({filteredValidations.length})
@@ -49,8 +49,8 @@ function DashboardSessionsTab({
       </div>
       
       {loadingRuns ? (
-        <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/80 dark:bg-slate-800/50 p-6 text-center">
-          <p className="text-sm text-slate-600 dark:text-slate-300">Loading sessions...</p>
+        <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 text-center">
+          <p className="text-[15px] text-gray-700 leading-relaxed">Loading sessions...</p>
         </div>
       ) : (
         <>
@@ -58,17 +58,16 @@ function DashboardSessionsTab({
           {activeTab === "ideas" && (
             <>
               {filteredRuns.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/80 dark:bg-slate-800/50 p-6 text-center">
-                  <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">No idea discovery sessions yet.</p>
-                  <Link
-                    to="/advisor#intake-form"
-                    className="inline-block rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5"
-                  >
-                    Discover Ideas
-                  </Link>
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 text-center">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    No past sessions yet
+                  </h3>
+                  <p className="text-[15px] text-gray-600 leading-relaxed max-w-md mx-auto">
+                    Ideas you explored earlier will appear here.
+                  </p>
                 </div>
               ) : (
-                <div className="grid gap-4">
+                <div className="grid gap-6 md:gap-8">
                   {filteredRuns.map((session) => {
                     const hasOpenActions = sessionHasOpenActions(session);
                     const hasNotes = sessionHasNotes(session);
@@ -94,14 +93,13 @@ function DashboardSessionsTab({
           {activeTab === "validations" && (
             <>
               {filteredValidations.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/80 dark:bg-slate-800/50 p-6 text-center">
-                  <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">No validations yet.</p>
-                  <Link
-                    to="/validate-idea"
-                    className="inline-block rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5"
-                  >
-                    Validate Idea
-                  </Link>
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 text-center">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    No validations yet
+                  </h3>
+                  <p className="text-[15px] text-gray-600 leading-relaxed max-w-md mx-auto">
+                    Results from checking ideas will appear here.
+                  </p>
                 </div>
               ) : (
                 <div className="grid gap-4">

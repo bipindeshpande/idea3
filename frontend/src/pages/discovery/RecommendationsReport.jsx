@@ -454,9 +454,9 @@ export default function RecommendationsReport() {
           <div className="mt-4 flex gap-3">
             <Link
               to="/dashboard"
-              className="inline-block rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700"
+              className="inline-block px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition text-sm font-medium"
             >
-              Back to Dashboard
+              ← Back to Dashboard
             </Link>
             <Link
               to="/advisor"
@@ -512,9 +512,9 @@ export default function RecommendationsReport() {
           description="No recommendation report available"
           path="/results/recommendations"
         />
-        <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-6 text-center">
-          <h2 className="text-lg font-semibold text-slate-900">No Report Available</h2>
-          <p className="mt-2 text-sm text-slate-600">
+        <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 text-center">
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">No Report Available</h3>
+          <p className="text-[15px] text-gray-600 leading-relaxed max-w-md mx-auto">
             {runId ? "Report not found. It may have been deleted or the ID is invalid." : "No report data available. Please generate recommendations first."}
           </p>
           {process.env.NODE_ENV === 'development' && reports && (
@@ -540,9 +540,9 @@ export default function RecommendationsReport() {
             </Link>
             <Link
               to="/dashboard"
-              className="inline-block rounded-xl border border-brand-300 bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50"
+              className="inline-block px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition text-sm font-medium"
             >
-              Back to Dashboard
+              ← Back to Dashboard
             </Link>
           </div>
         </div>
@@ -558,7 +558,19 @@ export default function RecommendationsReport() {
         path="/results/recommendations"
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-slate-900">Recommendation Report</h1>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            aria-label="Back to Dashboard"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back
+          </button>
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Recommendation Report</h1>
+        </div>
       </div>
 
       <div ref={reportRef} className="grid gap-6">
@@ -616,9 +628,9 @@ export default function RecommendationsReport() {
         )}
 
         {topIdeas.length === 0 && (!markdown || markdown.length === 0) && (
-          <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-6 text-center">
-            <h2 className="text-lg font-semibold text-slate-900">No Recommendations Available</h2>
-            <p className="mt-2 text-sm text-slate-600">
+          <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">No Recommendations Available</h3>
+            <p className="text-[15px] text-gray-600 leading-relaxed max-w-md mx-auto">
               The recommendation report is empty or could not be loaded.
             </p>
             <div className="mt-4 flex gap-3 justify-center">

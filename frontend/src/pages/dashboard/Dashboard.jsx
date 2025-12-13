@@ -1,10 +1,10 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useValidation } from "../../context/ValidationContext.jsx";
-import { parseTopIdeas, trimFromHeading } from "../../utils/markdown/markdown.js";
+import { parseTopIdeas } from "../../utils/markdown/markdown.js";
 import { 
   buildFinancialSnapshots, 
   parseRiskRows, 
@@ -12,9 +12,7 @@ import {
 } from "../../utils/formatters/recommendationFormatters.js";
 import DashboardActiveIdeasTab from "../../components/dashboard/DashboardActiveIdeasTab.jsx";
 import DashboardSessionsTab from "../../components/dashboard/DashboardSessionsTab.jsx";
-import DashboardSearchTab from "../../components/dashboard/DashboardSearchTab.jsx";
 import DashboardCompareTab from "../../components/dashboard/DashboardCompareTab.jsx";
-import GettingStarted from "../../components/common/GettingStarted.jsx";
 
 const STORAGE_KEY = "sia_saved_runs";
 
@@ -23,10 +21,9 @@ export default function DashboardPage() {
   const [apiRuns, setApiRuns] = useState([]);
   const [apiValidations, setApiValidations] = useState([]);
   const [loadingRuns, setLoadingRuns] = useState(true);
-  const [activeTab, setActiveTab] = useState("ideas"); // "ideas" or "validations" (for My Workspace sub-tabs)
-  const [mainTab, setMainTab] = useState("workspace"); // "workspace" or "explore" (for main dashboard tabs)
+  const [activeTab, setActiveTab] = useState("ideas"); // Workspace tab state
   const { deleteRun, setInputs } = useReports();
-  const { user, isAuthenticated, subscription, getAuthHeaders } = useAuth();
+  const { isAuthenticated, getAuthHeaders } = useAuth();
   const { getSavedValidations } = useValidation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,13 +31,11 @@ export default function DashboardPage() {
   const [loadingActions, setLoadingActions] = useState(false);
   const [notes, setNotes] = useState([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
-  const [searchInput, setSearchInput] = useState(""); // What user is typing
-  const [searchQuery, setSearchQuery] = useState(""); // Active search query used for filtering
   const [sortBy, setSortBy] = useState("date"); // "date", "score", "name"
   const [dateFilter, setDateFilter] = useState("all"); // "all", "week", "month", "3months", "year"
   const [scoreFilter, setScoreFilter] = useState("all"); // "all", "high" (>=7), "medium" (5-7), "low" (<5)
   // Advanced search fields
-  const [advancedSearch, setAdvancedSearch] = useState({
+  const [advancedSearch] = useState({
     goalType: "all",
     interestArea: "all",
     ideaDescription: "",
@@ -50,23 +45,15 @@ export default function DashboardPage() {
     skillStrength: "all",
     searchType: "ideas", // "ideas" or "validations"
   });
-  const [searchPerformed, setSearchPerformed] = useState(false); // Track if search has been performed
-  const [selectedSearchIdeas, setSelectedSearchIdeas] = useState(new Set()); // Selected ideas from search results for comparison
   // Compare tab state - now for ideas
   const [allIdeas, setAllIdeas] = useState([]); // All ideas extracted from runs
   const [selectedIdeas, setSelectedIdeas] = useState(new Set()); // Selected idea IDs (format: "runId-ideaIndex")
-  const [selectedValidations, setSelectedValidations] = useState(new Set());
   const [comparisonData, setComparisonData] = useState(null);
   const [comparing, setComparing] = useState(false);
   const [autoCompareTrigger, setAutoCompareTrigger] = useState(false); // Flag to trigger auto-comparison
-  const [psychologyEmpty, setPsychologyEmpty] = useState(false); // Track if psychology profile is empty
-  const [showGettingStarted, setShowGettingStarted] = useState(false); // Show orientation
-
-  // ... existing loadRuns, useEffect, loadDashboardData, and other functions remain the same ...
-  
-  // Keep all the existing helper functions and data processing logic
-  // (loadRuns, loadDashboardData, extractIdeas, extractComparisonMetrics, performComparison, etc.)
-  // ... (keeping all existing logic from lines 63-1023)
+  const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState(""); // Workspace search for recall
+  const [workspaceSearchResults, setWorkspaceSearchResults] = useState([]); // Unified search results
+  const [workspaceSearchDebounceTimer, setWorkspaceSearchDebounceTimer] = useState(null); // Debounce timer
 
   const loadRuns = () => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -83,83 +70,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Load psychology data to check if empty
-  const checkPsychology = useCallback(async () => {
-    if (!isAuthenticated) {
-      setPsychologyEmpty(false);
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/founder/psychology", {
-        headers: {
-          ...getAuthHeaders(),
-          "Content-Type": "application/json"
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Response structure: {success: true, data: {...psychology fields...}}
-        const psychology = (data.success && data.data) ? data.data : {};
-        
-        // Check if psychology is actually empty
-        // Profile is considered complete if archetype exists and is not empty
-        const archetype = psychology.archetype;
-        const hasArchetype = archetype && String(archetype).trim() !== "";
-        
-        const isEmpty = !hasArchetype;
-        setPsychologyEmpty(isEmpty);
-        
-        // Debug logging (can be removed in production)
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Psychology check:', { 
-            hasArchetype, 
-            isEmpty, 
-            archetype: archetype,
-            psychology: psychology,
-            keys: Object.keys(psychology),
-            fullResponse: data
-          });
-        }
-      } else if (response.status === 401) {
-        // Auth failed - don't show banner
-        setPsychologyEmpty(false);
-      } else {
-        // Other error - assume empty to show banner
-        setPsychologyEmpty(true);
-      }
-    } catch (error) {
-      console.error("Error checking psychology:", error);
-      setPsychologyEmpty(false);
-    }
-  }, [isAuthenticated, getAuthHeaders]);
-
-  useEffect(() => {
-    checkPsychology();
-    
-    // Re-check when component gains focus (user navigates back)
-    const handleFocus = () => {
-      if (isAuthenticated) {
-        // Small delay to ensure backend has processed the save
-        setTimeout(() => checkPsychology(), 100);
-      }
-    };
-    
-    // Re-check when location changes (user navigates back from psychology page)
-    const handleLocationChange = () => {
-      if (isAuthenticated && location.pathname === '/dashboard') {
-        // Small delay to ensure backend has processed the save
-        setTimeout(() => checkPsychology(), 200);
-      }
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    handleLocationChange(); // Check immediately when location changes
-    
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [isAuthenticated, checkPsychology, location.pathname]);
 
   // Consolidated dashboard data loader
   const loadDashboardData = useCallback(async () => {
@@ -252,27 +162,49 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated, loadDashboardData]);
 
-  // Check URL for getting started parameter
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get("show") === "getting-started") {
-      setShowGettingStarted(true);
-    }
-  }, [location.search]);
-
-  // Auto-show orientation on first run (when run_count == 0)
-  useEffect(() => {
+  // Merge localStorage runs with API runs (must be defined before useEffects that use it)
+  const allRuns = useMemo(() => {
     if (isAuthenticated && !loadingRuns) {
-      const totalRuns = apiRuns.length + allRuns.length;
-      if (totalRuns === 0) {
-        // Check if user has dismissed orientation before
-        const hasSeenOrientation = localStorage.getItem("sia_has_seen_orientation");
-        if (!hasSeenOrientation && !showGettingStarted) {
-          setShowGettingStarted(true);
+      const apiRunsList = apiRuns.map(apiRun => ({
+        id: `run_${apiRun.run_id}`,
+        timestamp: apiRun.created_at ? new Date(apiRun.created_at).getTime() : Date.now(),
+        inputs: apiRun.inputs || {},
+        outputs: {},
+        run_id: apiRun.run_id,
+        from_api: true,
+        is_validation: false,
+      }));
+      
+      apiRunsList.forEach(run => {
+        if (run.is_validation === undefined) {
+          run.is_validation = false;
         }
-      }
+      });
+
+      const localRuns = runs.map(run => ({
+        ...run,
+        from_api: false,
+        is_validation: false,
+      }));
+
+      const combined = [...apiRunsList];
+      const apiIds = new Set(apiRunsList.map(r => r.run_id || r.id));
+      localRuns.forEach(localRun => {
+        const localId = localRun.run_id || localRun.id;
+        if (!apiIds.has(localId)) {
+          combined.push(localRun);
+        }
+      });
+
+      return combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     }
-  }, [isAuthenticated, loadingRuns, apiRuns.length, allRuns.length, showGettingStarted]);
+    return runs.map(run => ({
+      ...run,
+      from_api: false,
+      is_validation: false,
+    }));
+  }, [apiRuns, runs, isAuthenticated, loadingRuns]);
+
 
   // Extract all ideas from runs when apiRuns changes
   useEffect(() => {
@@ -688,13 +620,6 @@ export default function DashboardPage() {
     }
   }, [allIdeas, getAuthHeaders]);
 
-  // Auto-trigger comparison when navigating to compare tab with pre-selected ideas
-  useEffect(() => {
-    if (mainTab === "workspace" && activeTab === "compare" && selectedIdeas.size > 0 && !comparisonData && !comparing && autoCompareTrigger) {
-      performComparison(selectedIdeas);
-      setAutoCompareTrigger(false);
-    }
-  }, [mainTab, activeTab, selectedIdeas, comparisonData, comparing, autoCompareTrigger, performComparison]);
 
   const handleDelete = async (session) => {
     if (window.confirm("Are you sure you want to delete this session? This action cannot be undone.")) {
@@ -752,6 +677,107 @@ export default function DashboardPage() {
     }
   };
 
+  // Delete all active ideas, sessions, and validations
+  const handleDeleteAll = async () => {
+    const confirmMessage = "⚠️ WARNING: This will permanently delete ALL:\n" +
+      "• All discovery sessions (runs)\n" +
+      "• All validations\n" +
+      "• All local storage data\n\n" +
+      "This action CANNOT be undone. Are you absolutely sure?";
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+    
+    // Double confirmation
+    if (!window.confirm("Last chance! This will delete EVERYTHING. Continue?")) {
+      return;
+    }
+    
+    try {
+      const errors = [];
+      let deletedRuns = 0;
+      let deletedValidations = 0;
+      
+      // Delete all runs from API
+      if (isAuthenticated && apiRuns.length > 0) {
+        for (const run of apiRuns) {
+          if (run.run_id) {
+            try {
+              const response = await fetch(`/api/user/run/${run.run_id}`, {
+                method: "DELETE",
+                headers: getAuthHeaders(),
+              });
+              if (response.ok) {
+                deletedRuns++;
+              } else {
+                const data = await response.json().catch(() => ({}));
+                errors.push(`Failed to delete run ${run.run_id}: ${data.error || response.status}`);
+              }
+            } catch (error) {
+              errors.push(`Error deleting run ${run.run_id}: ${error.message}`);
+            }
+          }
+        }
+      }
+      
+      // Delete all validations from API
+      if (isAuthenticated && apiValidations.length > 0) {
+        for (const validation of apiValidations) {
+          const validationId = validation.validation_id || validation.id;
+          if (validationId) {
+            const cleanId = validationId.toString().replace(/^val_/, '');
+            try {
+              const response = await fetch(`/api/validate-idea/${cleanId}`, {
+                method: "DELETE",
+                headers: getAuthHeaders(),
+              });
+              if (response.ok) {
+                deletedValidations++;
+              } else {
+                const data = await response.json().catch(() => ({}));
+                errors.push(`Failed to delete validation ${cleanId}: ${data.error || response.status}`);
+              }
+            } catch (error) {
+              errors.push(`Error deleting validation ${cleanId}: ${error.message}`);
+            }
+          }
+        }
+      }
+      
+      // Clear all local storage
+      localStorage.removeItem(STORAGE_KEY); // sia_saved_runs
+      localStorage.removeItem("sia_validations");
+      localStorage.removeItem("revalidate_data");
+      localStorage.removeItem("recentDiscovery");
+      
+      // Clear local runs
+      setRuns([]);
+      setApiRuns([]);
+      setApiValidations([]);
+      
+      // Reload dashboard data
+      await loadDashboardData();
+      loadRuns();
+      
+      // Show results
+      const successMessage = `✅ Deletion complete!\n\n` +
+        `• Deleted ${deletedRuns} run(s) from database\n` +
+        `• Deleted ${deletedValidations} validation(s) from database\n` +
+        `• Cleared all local storage\n` +
+        (errors.length > 0 ? `\n⚠️ ${errors.length} error(s) occurred:\n${errors.slice(0, 5).join('\n')}` : '');
+      
+      alert(successMessage);
+      
+      if (errors.length > 0 && process.env.NODE_ENV === 'development') {
+        console.error("Deletion errors:", errors);
+      }
+    } catch (error) {
+      console.error("Failed to delete all data:", error);
+      alert(`Failed to delete all data: ${error.message}`);
+    }
+  };
+
   const handleNewRequest = async (run) => {
     if (run.from_api && run.run_id && (!run.inputs || Object.keys(run.inputs).length === 0)) {
       try {
@@ -799,55 +825,6 @@ export default function DashboardPage() {
     navigate(`/validate-idea?edit=${cleanId}`);
   };
 
-  // Merge localStorage runs with API runs
-  const allRuns = useMemo(() => {
-    if (isAuthenticated && !loadingRuns) {
-      const apiRunsList = apiRuns.map(apiRun => ({
-        id: `run_${apiRun.run_id}`,
-        timestamp: apiRun.created_at ? new Date(apiRun.created_at).getTime() : Date.now(),
-        inputs: apiRun.inputs || {},
-        outputs: {},
-        run_id: apiRun.run_id,
-        from_api: true,
-        is_validation: false,
-      }));
-      
-      apiRunsList.forEach(run => {
-        if (run.is_validation === undefined) {
-          run.is_validation = false;
-        }
-      });
-      
-      return apiRunsList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    }
-    
-    const merged = [...runs];
-    const existingIds = new Set(runs.map(r => r.id));
-    
-    apiRuns.forEach(apiRun => {
-      const apiRunId = `run_${apiRun.run_id}`;
-      if (!existingIds.has(apiRunId)) {
-        merged.push({
-          id: apiRunId,
-          timestamp: apiRun.created_at ? new Date(apiRun.created_at).getTime() : Date.now(),
-          inputs: apiRun.inputs || {},
-          outputs: {},
-          run_id: apiRun.run_id,
-          from_api: true,
-          is_validation: false,
-        });
-      }
-    });
-    
-    merged.forEach(run => {
-      if (run.is_validation === undefined) {
-        run.is_validation = false;
-      }
-    });
-    
-    return merged.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-  }, [runs, apiRuns, isAuthenticated, loadingRuns]);
-
   // Format validations for display
   const allValidations = useMemo(() => {
     const apiVals = apiValidations.map(v => {
@@ -891,107 +868,6 @@ export default function DashboardPage() {
     return combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   }, [apiValidations, getSavedValidations, isAuthenticated, loadingRuns]);
 
-  // Combine runs and validations
-  const allSessions = useMemo(() => {
-    const combined = [
-      ...allRuns.map(r => ({ ...r, is_validation: false })),
-      ...allValidations,
-    ];
-    return combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-  }, [allRuns, allValidations]);
-
-  // Filter and sort ideas (for search)
-  const filteredIdeas = useMemo(() => {
-    let filtered = [...allIdeas];
-    
-    // Normalize string values for comparison
-    const normalizeString = (val) => {
-      if (val === null || val === undefined) return "";
-      return String(val).trim();
-    };
-    
-    if (searchQuery && searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(idea => {
-        const title = normalizeString(idea.title).toLowerCase();
-        const summary = normalizeString(idea.summary).toLowerCase();
-        const founderAmbition = normalizeString(idea.runInputs?.founder_ambition).toLowerCase();
-        const industryInterest = normalizeString(idea.runInputs?.industry_interest).toLowerCase();
-        const subInterest = normalizeString(idea.runInputs?.sub_interest_area).toLowerCase();
-        const runId = normalizeString(idea.runId).toLowerCase();
-        
-        // Allow partial matches - check if query appears anywhere in the fields
-        return title.includes(query) || 
-               summary.includes(query) ||
-               founderAmbition.includes(query) || 
-               industryInterest.includes(query) || 
-               subInterest.includes(query) || 
-               runId.includes(query);
-      });
-    }
-    
-    if (advancedSearch.goalType && advancedSearch.goalType !== "all") {
-      filtered = filtered.filter(idea => {
-        const goal = normalizeString(idea.runInputs?.founder_ambition);
-        return goal === advancedSearch.goalType;
-      });
-    }
-    
-    if (advancedSearch.interestArea && advancedSearch.interestArea !== "all") {
-      filtered = filtered.filter(idea => {
-        const industry = normalizeString(idea.runInputs?.industry_interest);
-        const subIndustry = normalizeString(idea.runInputs?.sub_interest_area);
-        return industry === advancedSearch.interestArea || subIndustry === advancedSearch.interestArea;
-      });
-    }
-    
-    if (advancedSearch.budgetRange && advancedSearch.budgetRange !== "all") {
-      filtered = filtered.filter(idea => {
-        const budget = normalizeString(idea.runInputs?.budget_range);
-        return budget === advancedSearch.budgetRange;
-      });
-    }
-    
-    if (advancedSearch.timeCommitment && advancedSearch.timeCommitment !== "all") {
-      filtered = filtered.filter(idea => {
-        const time = normalizeString(idea.runInputs?.time_commitment);
-        return time === advancedSearch.timeCommitment;
-      });
-    }
-    
-    if (dateFilter && dateFilter !== "all") {
-      const now = Date.now();
-      const filterMap = {
-        week: 7 * 24 * 60 * 60 * 1000,
-        month: 30 * 24 * 60 * 60 * 1000,
-        "3months": 90 * 24 * 60 * 60 * 1000,
-        year: 365 * 24 * 60 * 60 * 1000,
-      };
-      const cutoff = now - (filterMap[dateFilter] || 0);
-      filtered = filtered.filter(idea => {
-        if (!idea.runCreatedAt) return false;
-        const ideaDate = new Date(idea.runCreatedAt).getTime();
-        return !isNaN(ideaDate) && ideaDate >= cutoff;
-      });
-    }
-    
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "name":
-          const aName = normalizeString(a.title);
-          const bName = normalizeString(b.title);
-          return aName.localeCompare(bName);
-        case "date":
-        default:
-          const aDate = a.runCreatedAt ? new Date(a.runCreatedAt).getTime() : 0;
-          const bDate = b.runCreatedAt ? new Date(b.runCreatedAt).getTime() : 0;
-          return bDate - aDate;
-      }
-    });
-    
-    return filtered;
-  }, [allIdeas, searchQuery, dateFilter, sortBy, advancedSearch]);
-
   // Filter and sort sessions
   const filteredRuns = useMemo(() => {
     let filtered = allRuns.filter(s => {
@@ -1022,8 +898,8 @@ export default function DashboardPage() {
   const filteredValidations = useMemo(() => {
     let filtered = [...allValidations];
     
-    if (searchQuery && searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+    if (workspaceSearchQuery && workspaceSearchQuery.trim()) {
+      const query = workspaceSearchQuery.toLowerCase();
       const queryParts = query.split(/\s+/).filter(p => p.length > 0);
       filtered = filtered.filter(session => {
         const idea = session.idea_explanation?.toLowerCase() || "";
@@ -1085,7 +961,7 @@ export default function DashboardPage() {
     });
     
     return filtered;
-  }, [allValidations, searchQuery, dateFilter, scoreFilter, sortBy, advancedSearch]);
+  }, [allValidations, workspaceSearchQuery, dateFilter, scoreFilter, sortBy, advancedSearch]);
 
   // Check if a session has open actions
   const sessionHasOpenActions = useCallback((session) => {
@@ -1135,151 +1011,510 @@ export default function DashboardPage() {
     return false;
   }, [notes]);
 
+
+
+  // Calculate summary statistics for Insights
+  const summaryStats = useMemo(() => {
+    const completedRuns = allRuns.filter(run => {
+      const reports = run.reports || {};
+      return reports.personalized_recommendations && 
+             (typeof reports.personalized_recommendations === 'string' ? 
+              reports.personalized_recommendations.trim().length > 0 : 
+              Object.keys(reports.personalized_recommendations || {}).length > 0);
+    });
+    const validationsWithScores = allValidations.filter(v => v.overall_score !== undefined && v.overall_score !== null);
+    const scores = validationsWithScores.map(v => v.overall_score);
+    const avgScore = scores.length > 0 
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length 
+      : 0;
+    const highScores = scores.filter(s => s >= 7).length;
+    
+    return {
+      totalDiscoveries: completedRuns.length,
+      totalIdeas: completedRuns.length * 3,
+      totalValidations: allValidations.length,
+      avgValidationScore: avgScore.toFixed(1),
+      highScoringIdeas: highScores,
+      activeIdeas: allIdeas.length,
+    };
+  }, [allRuns, allValidations, allIdeas]);
+
+  // Workspace search - unified search across ideas, sessions, validations (debounced, requires 3+ chars)
+  useEffect(() => {
+    // Clear existing timer
+    if (workspaceSearchDebounceTimer) {
+      clearTimeout(workspaceSearchDebounceTimer);
+    }
+
+    const query = workspaceSearchQuery.trim();
+    
+    // Don't search if less than 3 characters
+    if (query.length < 3) {
+      setWorkspaceSearchResults({ ideas: [], sessions: [], validations: [] });
+      return;
+    }
+
+    // Debounce: wait 300ms after user stops typing
+    const timer = setTimeout(() => {
+      const queryLower = query.toLowerCase();
+      const results = {
+        ideas: [],
+        sessions: [],
+        validations: [],
+      };
+
+      // Search Active Ideas (max 3)
+      allIdeas.forEach(idea => {
+        if (results.ideas.length >= 3) return;
+        const title = (idea.title || "").toLowerCase();
+        const summary = (idea.summary || "").toLowerCase();
+        if (title.includes(queryLower) || summary.includes(queryLower)) {
+          const run = allRuns.find(r => (r.run_id || r.id) === idea.runId);
+          const inputs = run?.inputs || {};
+          const industry = inputs.sub_interest_area || inputs.industry_interest || "";
+          results.ideas.push({
+            type: "idea",
+            id: idea.id,
+            title: idea.title || "Untitled Idea",
+            industry: industry,
+            runId: idea.runId,
+            ideaIndex: idea.ideaIndex,
+            tab: "ideas",
+            timestamp: idea.runCreatedAt ? new Date(idea.runCreatedAt).getTime() : 0,
+          });
+        }
+      });
+
+      // Search Past Sessions (max 3)
+      filteredRuns.forEach(run => {
+        if (results.sessions.length >= 3) return;
+        const inputs = run.inputs || {};
+        const founderAmbition = (inputs.founder_ambition || "").toLowerCase();
+        const industryInterest = (inputs.industry_interest || "").toLowerCase();
+        const subInterest = (inputs.sub_interest_area || "").toLowerCase();
+        const runId = (run.run_id || run.id || "").toLowerCase();
+        
+        if (founderAmbition.includes(queryLower) || 
+            industryInterest.includes(queryLower) || 
+            subInterest.includes(queryLower) ||
+            runId.includes(queryLower)) {
+          const industry = inputs.sub_interest_area || inputs.industry_interest || "";
+          results.sessions.push({
+            type: "session",
+            id: run.run_id || run.id,
+            title: inputs.founder_ambition || "Discovery session",
+            industry: industry,
+            tab: "searches",
+            timestamp: run.timestamp || (run.created_at ? new Date(run.created_at).getTime() : 0),
+          });
+        }
+      });
+
+      // Search Validations (max 3)
+      filteredValidations.forEach(validation => {
+        if (results.validations.length >= 3) return;
+        const ideaExplanation = (validation.idea_explanation || "").toLowerCase();
+        const valId = (validation.validation_id || validation.id || "").toLowerCase();
+        
+        if (ideaExplanation.includes(queryLower) || valId.includes(queryLower)) {
+          // Try to find industry from validation context if available
+          const industry = ""; // Validations don't always have industry context
+          results.validations.push({
+            type: "validation",
+            id: validation.validation_id || validation.id,
+            title: validation.idea_explanation || "Validated idea",
+            industry: industry,
+            tab: "validations",
+            timestamp: validation.timestamp || 0,
+          });
+        }
+      });
+
+      // Sort each group by timestamp (most recent first)
+      results.ideas.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      results.sessions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      results.validations.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+      setWorkspaceSearchResults(results);
+    }, 300);
+
+    setWorkspaceSearchDebounceTimer(timer);
+
+    // Cleanup
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [workspaceSearchQuery, allIdeas, filteredRuns, filteredValidations, allRuns]);
+
+  // Check URL params for initial tab
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get("tab");
+    if (tab && ["ideas", "searches", "validations", "compare", "insights"].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [location.search]);
+
+  // Auto-trigger comparison when navigating to compare tab with pre-selected ideas
+  useEffect(() => {
+    if (activeTab === "compare" && selectedIdeas.size > 0 && !comparisonData && !comparing && autoCompareTrigger) {
+      performComparison(selectedIdeas);
+      setAutoCompareTrigger(false);
+    }
+  }, [activeTab, selectedIdeas, comparisonData, comparing, autoCompareTrigger, performComparison]);
+
   return (
-    <div className="mx-auto max-w-7xl px-6 py-6">
+    <div className="max-w-screen-lg mx-auto px-4 md:px-6 py-6">
       <Seo
-        title="Dashboard | Startup Idea Advisor"
-        description="Access your saved AI-generated startup reports, compare runs, and revisit recommendations."
+        title="Idea Workspace | Startup Idea Advisor"
+        description="View, compare, and revisit startup ideas you're working on."
         path="/dashboard"
       />
 
-      {/* First-Run Orientation */}
-      {showGettingStarted && (
-        <div className="mb-6">
-          <GettingStarted
-            onDismiss={() => {
-              setShowGettingStarted(false);
-              localStorage.setItem("sia_has_seen_orientation", "true");
-              // Remove query parameter if present
-              const params = new URLSearchParams(location.search);
-              if (params.get("show") === "getting-started") {
-                navigate("/dashboard", { replace: true });
-              }
-            }}
-          />
-        </div>
-      )}
+      {/* Page Header */}
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-gray-900 dark:text-slate-50">
+          Idea Workspace
+        </h1>
+        <button
+          onClick={handleDeleteAll}
+          className="px-4 py-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/50 hover:border-red-300 dark:hover:border-red-700 transition-colors flex items-center gap-2"
+          title="Delete all sessions, validations, and local storage data"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Delete All Data
+        </button>
+      </div>
 
-      {/* Simplified Header with Only Primary CTAs */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 md:text-3xl">Dashboard</h1>
-            <p className="mt-2 text-base text-slate-600 dark:text-slate-300">
-              {isAuthenticated && user
-                ? `Welcome back, ${user.email.split("@")[0]}! Ready to validate your next big idea? 💡`
-                : "Manage your startup idea validations and discoveries."}
-            </p>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <p className="text-sm text-slate-500 dark:text-slate-400">What would you like to do?</p>
-            <div className="flex gap-3">
-              <Link
-                to="/validate-idea"
-                className="rounded-xl border border-brand-300/60 dark:border-brand-700/60 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-brand-700 dark:text-brand-300 shadow-sm transition-all duration-200 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:-translate-y-0.5 whitespace-nowrap"
-              >
-                Validate Idea
-              </Link>
-              <Link
-                to="/advisor#intake-form"
-                className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all duration-200 hover:from-brand-600 hover:to-brand-700 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5 whitespace-nowrap"
-              >
-                Discover Ideas
-              </Link>
-            </div>
-          </div>
+      {/* Action Bar - Lenses applied to workspace */}
+      <div className="mb-6 flex justify-center">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate("/advisor")}
+            className="px-4 py-2 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors flex items-center gap-2 action-button"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Discover Ideas
+          </button>
+          <button
+            onClick={() => navigate("/validate-idea")}
+            className="px-4 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-medium hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors flex items-center gap-2 action-button"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Validate an Idea
+          </button>
+          <button
+            onClick={() => setActiveTab("compare")}
+            className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors flex items-center gap-2 action-button ${
+              activeTab === "compare"
+                ? "border-purple-300 dark:border-purple-600 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300"
+                : "border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 hover:border-purple-300 dark:hover:border-purple-700"
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Compare Ideas
+          </button>
+          <button
+            onClick={() => setActiveTab("insights")}
+            className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors flex items-center gap-2 action-button ${
+              activeTab === "insights"
+                ? "border-blue-300 dark:border-blue-600 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
+                : "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-700"
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            View Insights
+          </button>
+          <button
+            onClick={() => navigate("/founder-connect")}
+            className="px-4 py-2 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors flex items-center gap-2 action-button"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Founder Network
+          </button>
         </div>
       </div>
 
-      {/* Main Tabbed Interface - My Workspace & Explore */}
-      <section className="mb-8 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 p-6 shadow-lg">
-        {/* Main Tabs */}
-        <div className="mb-6 border-b border-slate-200/60 dark:border-slate-700/60">
-          <nav className="flex gap-2" aria-label="Dashboard tabs">
-            <button
-              onClick={() => setMainTab("workspace")}
-              className={`px-4 py-2 text-sm font-semibold transition-all duration-200 border-b-2 ${
-                mainTab === "workspace"
-                  ? "border-brand-500 text-brand-700 dark:text-brand-400"
-                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"
-              }`}
-            >
-              My Workspace
-            </button>
-            <button
-              onClick={() => setMainTab("explore")}
-              className={`px-4 py-2 text-sm font-semibold transition-all duration-200 border-b-2 ${
-                mainTab === "explore"
-                  ? "border-brand-500 text-brand-700 dark:text-brand-400"
-                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"
-              }`}
-            >
-              Explore
-            </button>
-          </nav>
-        </div>
-
-        {/* Tab 1: My Workspace */}
-        {mainTab === "workspace" && (
-          <div className="space-y-6">
-            {/* Sub-tabs for My Workspace */}
-            <div className="border-b border-slate-200/60 dark:border-slate-700/60">
-              <nav className="flex gap-4 flex-wrap" aria-label="Workspace sub-tabs">
+      {/* Workspace - Dominant Surface */}
+      <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 md:p-7 shadow-sm min-h-[600px] relative overflow-hidden workspace-container">
+        <style>{`
+          .action-button:hover {
+            box-shadow: 0 0 12px rgba(120, 140, 255, 0.25);
+          }
+          .workspace-container {
+            background: linear-gradient(180deg, #fafaff 0%, #ffffff 60%);
+          }
+          .dark .workspace-container {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 60%);
+          }
+        `}</style>
+        {/* Accent circle behind tabs */}
+        <div className="absolute top-[-60px] left-[-60px] w-[260px] h-[260px] rounded-full bg-indigo-200 opacity-[0.08] blur-2xl"></div>
+        
+        {/* Workspace Header */}
+        <div className="mb-6 flex items-start justify-between gap-4 relative z-10">
+          <div className="flex-1">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-slate-50 mb-2">Idea Workspace</h2>
+            <p className="text-sm text-gray-600 dark:text-slate-400">
+              View, compare, and revisit startup ideas you're working on.
+            </p>
+          </div>
+          {/* Workspace Search */}
+          <div className="relative w-80">
+            <div className="relative">
+              <input
+                type="text"
+                value={workspaceSearchQuery}
+                onChange={(e) => setWorkspaceSearchQuery(e.target.value)}
+                placeholder="Find ideas you explored before"
+                className="w-full px-4 py-2 pl-10 pr-10 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              />
+              <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              {workspaceSearchQuery && (
                 <button
-                  onClick={() => setActiveTab("searches")}
-                  className={`px-3 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
-                    activeTab === "searches"
-                      ? "border-brand-500 text-brand-700 dark:text-brand-400"
-                      : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                  }`}
+                  onClick={() => setWorkspaceSearchQuery("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300"
                 >
-                  Your Idea Searches
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
-                <button
-                  onClick={() => setActiveTab("validations")}
-                  className={`px-3 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
-                    activeTab === "validations"
-                      ? "border-brand-500 text-brand-700 dark:text-brand-400"
-                      : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                  }`}
-                >
-                  Your Validations
-                </button>
-                <button
-                  onClick={() => setActiveTab("ideas")}
-                  className={`px-3 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
-                    activeTab === "ideas"
-                      ? "border-brand-500 text-brand-700 dark:text-brand-400"
-                      : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                  }`}
-                >
-                  Your Saved Ideas
-                </button>
-                <button
-                  onClick={() => setActiveTab("search")}
-                  className={`px-3 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
-                    activeTab === "search"
-                      ? "border-brand-500 text-brand-700 dark:text-brand-400"
-                      : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                  }`}
-                >
-                  Search
-                </button>
-                <button
-                  onClick={() => setActiveTab("compare")}
-                  className={`px-3 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
-                    activeTab === "compare"
-                      ? "border-brand-500 text-brand-700 dark:text-brand-400"
-                      : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                  }`}
-                >
-                  Compare
-                </button>
-              </nav>
+              )}
             </div>
+            {/* Search Results Dropdown */}
+            {workspaceSearchQuery.trim().length >= 3 && 
+             (workspaceSearchResults.ideas?.length > 0 || 
+              workspaceSearchResults.sessions?.length > 0 || 
+              workspaceSearchResults.validations?.length > 0) && (
+              <div className="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg max-h-[240px] overflow-y-auto">
+                {/* Ideas Group */}
+                {workspaceSearchResults.ideas && workspaceSearchResults.ideas.length > 0 && (
+                  <div>
+                    <div className="px-4 py-2 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wide border-b border-gray-100 dark:border-slate-700">
+                      Ideas
+                    </div>
+                    {workspaceSearchResults.ideas.map((result, index) => (
+                      <button
+                        key={`idea-${result.id}-${index}`}
+                        onClick={() => {
+                          setActiveTab(result.tab);
+                          setWorkspaceSearchQuery("");
+                          if (result.runId) {
+                            const runId = result.runId;
+                            const ideaIndex = result.ideaIndex || 0;
+                            navigate(`/advisor/${runId}?idea=${ideaIndex}`);
+                          }
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-100 dark:border-slate-700 last:border-b-0"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 mt-0.5">
+                            <svg className="w-4 h-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">
+                              {result.title}
+                            </div>
+                            {result.industry && (
+                              <div className="text-xs text-gray-600 dark:text-slate-400 mt-0.5">
+                                Discovery session · {result.industry}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-            {/* Your Idea Searches */}
-            {activeTab === "searches" && (
+                {/* Sessions Group */}
+                {workspaceSearchResults.sessions && workspaceSearchResults.sessions.length > 0 && (
+                  <div>
+                    <div className="px-4 py-2 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wide border-b border-gray-100 dark:border-slate-700">
+                      Sessions
+                    </div>
+                    {workspaceSearchResults.sessions.map((result, index) => (
+                      <button
+                        key={`session-${result.id}-${index}`}
+                        onClick={() => {
+                          setActiveTab(result.tab);
+                          setWorkspaceSearchQuery("");
+                          if (result.id) {
+                            navigate(`/advisor/${result.id}`);
+                          }
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-100 dark:border-slate-700 last:border-b-0"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 mt-0.5">
+                            <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">
+                              {result.title}
+                            </div>
+                            {result.industry && (
+                              <div className="text-xs text-gray-600 dark:text-slate-400 mt-0.5">
+                                Discovery session · {result.industry}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Validations Group */}
+                {workspaceSearchResults.validations && workspaceSearchResults.validations.length > 0 && (
+                  <div>
+                    <div className="px-4 py-2 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wide border-b border-gray-100 dark:border-slate-700">
+                      Validations
+                    </div>
+                    {workspaceSearchResults.validations.map((result, index) => (
+                      <button
+                        key={`validation-${result.id}-${index}`}
+                        onClick={() => {
+                          setActiveTab(result.tab);
+                          setWorkspaceSearchQuery("");
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-100 dark:border-slate-700 last:border-b-0"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 mt-0.5">
+                            <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">
+                              {result.title}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-0.5">
+                              Validated idea{result.industry ? ` · ${result.industry}` : ""}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {/* No Results */}
+            {workspaceSearchQuery.trim().length >= 3 && 
+             (!workspaceSearchResults.ideas || workspaceSearchResults.ideas.length === 0) &&
+             (!workspaceSearchResults.sessions || workspaceSearchResults.sessions.length === 0) &&
+             (!workspaceSearchResults.validations || workspaceSearchResults.validations.length === 0) && (
+              <div className="absolute z-50 w-full mt-2 bg-white  border border-slate-200  rounded-lg shadow-lg p-4">
+                <p className="text-sm text-gray-600 text-center">
+                  No matching ideas yet.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+          
+        {/* Workspace tabs */}
+        <div className="mb-8 relative z-10">
+          <nav className="flex gap-6 flex-wrap border-b border-gray-200 dark:border-slate-700" aria-label="Workspace tabs">
+              <button
+                onClick={() => setActiveTab("ideas")}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                  activeTab === "ideas"
+                  ? "border-indigo-600 dark:border-indigo-400 text-gray-900 dark:text-indigo-400"
+                    : "border-transparent text-gray-600 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
+                }`}
+              >
+                Active Ideas
+              </button>
+              <button
+                onClick={() => setActiveTab("searches")}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                  activeTab === "searches"
+                  ? "border-indigo-600 dark:border-indigo-400 text-gray-900 dark:text-indigo-400"
+                    : "border-transparent text-gray-600 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
+                }`}
+              >
+                Past Sessions
+              </button>
+              <button
+                onClick={() => setActiveTab("validations")}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                  activeTab === "validations"
+                  ? "border-indigo-600 dark:border-indigo-400 text-gray-900 dark:text-indigo-400"
+                    : "border-transparent text-gray-600 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
+                }`}
+              >
+                Validations
+              </button>
+              <button
+              onClick={() => setActiveTab("compare")}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                activeTab === "compare"
+                  ? "border-indigo-600 dark:border-indigo-400 text-gray-900 dark:text-indigo-400"
+                    : "border-transparent text-gray-600 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
+                }`}
+              >
+              Compare
+              </button>
+              <button
+              onClick={() => setActiveTab("insights")}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                activeTab === "insights"
+                  ? "border-indigo-600 dark:border-indigo-400 text-gray-900 dark:text-indigo-400"
+                    : "border-transparent text-gray-600 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
+                }`}
+              >
+              Insights
+              </button>
+            </nav>
+          </div>
+
+          <div className="space-y-6">
+          {/* Active Ideas */}
+            {activeTab === "ideas" && (
+              <>
+              <p className="text-[15px] text-gray-700 leading-relaxed mb-4">
+                Ideas you're actively considering or revisiting.
+              </p>
+                <DashboardActiveIdeasTab
+                  actions={actions}
+                  notes={notes}
+                  loadingActions={loadingActions}
+                  loadingNotes={loadingNotes}
+                  allRuns={allRuns}
+                  allValidations={allValidations}
+                  searchQuery={workspaceSearchQuery}
+                  allIdeas={allIdeas}
+                />
+              </>
+            )}
+
+          {/* Past Sessions */}
+          {activeTab === "searches" && (
+            <>
+              <p className="text-[15px] text-gray-700 leading-relaxed mb-4">
+                Ideas you explored earlier.
+              </p>
               <DashboardSessionsTab
                 activeTab="ideas"
                 setActiveTab={setActiveTab}
@@ -1292,10 +1527,15 @@ export default function DashboardPage() {
                 handleNewRequest={handleNewRequest}
                 handleEditValidation={handleEditValidation}
               />
+            </>
             )}
 
-            {/* Your Validations */}
-            {activeTab === "validations" && (
+          {/* Validations */}
+          {activeTab === "validations" && (
+            <>
+              <p className="text-[15px] text-gray-700 leading-relaxed mb-4">
+                Results from checking how strong an idea is.
+              </p>
               <DashboardSessionsTab
                 activeTab="validations"
                 setActiveTab={setActiveTab}
@@ -1308,80 +1548,18 @@ export default function DashboardPage() {
                 handleNewRequest={handleNewRequest}
                 handleEditValidation={handleEditValidation}
               />
-            )}
+            </>
+          )}
 
-            {/* Your Saved Ideas */}
-            {activeTab === "ideas" && (
-              <>
-                <DashboardActiveIdeasTab
-                  actions={actions}
-                  notes={notes}
-                  loadingActions={loadingActions}
-                  loadingNotes={loadingNotes}
-                  allRuns={allRuns}
-                  allValidations={allValidations}
-                />
-                {/* Subtle Founder Profile suggestion - only shown after completing discovery runs */}
-                {isAuthenticated && psychologyEmpty && allRuns.length > 0 && (
-                  <div className="mt-6 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 text-slate-400 dark:text-slate-500">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                          <span className="font-medium text-slate-700 dark:text-slate-300">Complete your Founder Profile</span> to get more personalized recommendations in future discovery runs.
-                        </p>
-                        <Link
-                          to="/founder-psychology"
-                          className="mt-2 inline-block text-sm font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition"
-                        >
-                          Complete Profile →
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Search */}
-            {activeTab === "search" && (
-              <DashboardSearchTab
-                advancedSearch={advancedSearch}
-                setAdvancedSearch={setAdvancedSearch}
-                searchPerformed={searchPerformed}
-                setSearchPerformed={setSearchPerformed}
-                selectedSearchIdeas={selectedSearchIdeas}
-                setSelectedSearchIdeas={setSelectedSearchIdeas}
-                filteredIdeas={filteredIdeas}
-                filteredValidations={filteredValidations}
-                allIdeas={allIdeas}
-                allValidations={allValidations}
-                dateFilter={dateFilter}
-                setDateFilter={setDateFilter}
-                scoreFilter={scoreFilter}
-                setScoreFilter={setScoreFilter}
-                sortBy={sortBy}
-                setSortBy={setSortBy}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                searchInput={searchInput}
-                setSearchInput={setSearchInput}
-                setMainTab={setMainTab}
-                setSelectedIdeas={setSelectedIdeas}
-                setComparisonData={setComparisonData}
-                setAutoCompareTrigger={setAutoCompareTrigger}
-                performComparison={performComparison}
-              />
-            )}
-
-            {/* Compare */}
-            {activeTab === "compare" && (
+          {/* Compare */}
+          {activeTab === "compare" && (
+            <>
+              <p className="text-[15px] text-gray-700 leading-relaxed mb-4">
+                See ideas next to each other.
+              </p>
               <DashboardCompareTab
                 allIdeas={allIdeas}
+                allRuns={allRuns}
                 selectedIdeas={selectedIdeas}
                 setSelectedIdeas={setSelectedIdeas}
                 comparisonData={comparisonData}
@@ -1389,98 +1567,78 @@ export default function DashboardPage() {
                 comparing={comparing}
                 performComparison={performComparison}
               />
+            </>
+          )}
+
+          {/* Insights */}
+          {activeTab === "insights" && (
+            <div className="py-6">
+              {allRuns.length < 2 && allValidations.length < 2 ? (
+                <div className="text-center py-12">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    No insights yet
+                  </h3>
+                  <p className="text-[15px] text-gray-600 leading-relaxed max-w-md mx-auto">
+                    Patterns and insights appear here as you explore or validate ideas.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <p className="text-[15px] text-gray-700 leading-relaxed mb-4">
+                    Patterns emerging from your exploration so far.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                    <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm text-gray-600">Exploration Momentum</h4>
+                        <div className="icon-circle bg-[#f3f5ff] text-indigo-600">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <p className="text-3xl font-bold text-gray-900">{summaryStats.totalDiscoveries}</p>
+                      <p className="text-sm text-gray-600 mt-1">sessions completed</p>
+                      <p className="text-sm text-gray-600 mt-2">{summaryStats.totalIdeas} ideas discovered</p>
+                    </div>
+
+                    <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm text-gray-600">Ideas Checked</h4>
+                        <div className="icon-circle bg-[#f3f5ff] text-indigo-600">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <p className="text-3xl font-bold text-gray-900">{summaryStats.totalValidations}</p>
+                      <p className="text-sm text-gray-600 mt-1">validations completed</p>
+                      {summaryStats.avgValidationScore > 0 && (
+                        <p className="text-sm text-gray-600 mt-2">Avg score: {summaryStats.avgValidationScore}/10</p>
+                      )}
+                    </div>
+
+                    <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm text-gray-600">Strong Ideas So Far</h4>
+                        <div className="icon-circle bg-[#f3f5ff] text-indigo-600">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <p className="text-3xl font-bold text-gray-900">{summaryStats.highScoringIdeas}</p>
+                      <p className="text-sm text-gray-600 mt-1">high-scoring ideas</p>
+                      <p className="text-sm text-gray-600 mt-2">Scoring ≥7.0</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             )}
           </div>
-        )}
-
-        {/* Tab 2: Explore */}
-        {mainTab === "explore" && (
-          <div className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {/* Discover Ideas */}
-              <Link
-                to="/advisor#intake-form"
-                className="group rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-brand-50 to-brand-100/50 dark:from-brand-900/30 dark:to-brand-700/40 p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-1"
-              >
-                <div className="mb-3 text-2xl">💡</div>
-                <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">Discover Ideas</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Get AI-powered startup recommendations tailored to your profile
-                </p>
-              </Link>
-
-              {/* Validate Idea */}
-              <Link
-                to="/validate-idea"
-                className="group rounded-xl border border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-900/30 dark:to-slate-700/40 p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-1"
-              >
-                <div className="mb-3 text-2xl">✅</div>
-                <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">Validate Idea</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Test your startup idea with comprehensive validation analysis
-                </p>
-              </Link>
-
-              {/* Founder Connect */}
-              <Link
-                to="/founder-connect"
-                className="group rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-900/30 dark:to-slate-700/40 p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-1"
-              >
-                <div className="mb-3 text-2xl">🤝</div>
-                <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">Founder Connect</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Connect with other founders and explore collaboration opportunities
-                </p>
-              </Link>
-
-              {/* Analytics */}
-              <Link
-                to="/dashboard/analytics"
-                className="group rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-900/30 dark:to-slate-700/40 p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-1"
-              >
-                <div className="mb-3 text-2xl">📊</div>
-                <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">Analytics</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  View insights and trends from your idea searches and validations
-                </p>
-              </Link>
-            </div>
-
-            {/* Additional Explore Features */}
-            <div className="mt-8 rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/50 p-6">
-              <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">Advanced Tools</h3>
-              <div className="grid gap-4 md:grid-cols-2">
-                <button
-                  onClick={() => {
-                    setMainTab("workspace");
-                    setActiveTab("search");
-                  }}
-                  className="text-left rounded-lg border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800 p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-                >
-                  <div className="mb-2 text-xl">🔍</div>
-                  <h4 className="mb-1 font-semibold text-slate-900 dark:text-slate-100">Search Ideas</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Search and filter through all your saved ideas
-                  </p>
-                </button>
-                <button
-                  onClick={() => {
-                    setMainTab("workspace");
-                    setActiveTab("compare");
-                  }}
-                  className="text-left rounded-lg border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800 p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-                >
-                  <div className="mb-2 text-xl">⚖️</div>
-                  <h4 className="mb-1 font-semibold text-slate-900 dark:text-slate-100">Compare Ideas</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Side-by-side comparison of multiple ideas
-                  </p>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </section>
+        </section>
     </div>
   );
 }
+

@@ -381,7 +381,7 @@ export default function IdeaValidator() {
       {isAuthenticated && (
         <Link
           to="/dashboard"
-          className="mb-6 inline-flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+          className="mb-6 inline-block px-4 py-2 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition text-sm font-medium"
         >
           ← Back to Dashboard
         </Link>
@@ -396,21 +396,21 @@ export default function IdeaValidator() {
       {loading && <ValidationLoadingIndicator />}
 
       {loadingValidationData && (
-        <div className="mb-6 rounded-2xl border border-amber-200/60 bg-amber-50/80 dark:bg-amber-900/20 p-6 text-center">
+        <div className="mb-6 rounded-2xl border border-amber-200/60 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-900/20 p-6 text-center">
           <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Loading validation data...</p>
         </div>
       )}
 
       {isEditMode && editValidationId && !loadingValidationData && (
-        <div className="mb-6 rounded-2xl border border-brand-200/60 bg-brand-50/80 dark:bg-brand-900/20 p-4">
-          <p className="text-sm font-semibold text-brand-800 dark:text-brand-200">
+        <div className="mb-6 rounded-2xl border border-indigo-200/60 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-900/20 p-4">
+          <p className="text-sm font-semibold text-indigo-800 dark:text-indigo-200">
             ✏️ Editing Validation: {editValidationId}
           </p>
         </div>
       )}
 
       {error && !loading && (
-        <div className="mb-6 rounded-2xl border border-red-200/60 bg-red-50/80 dark:bg-red-900/20 p-4">
+        <div className="mb-6 rounded-2xl border border-red-200/60 dark:border-red-800 bg-red-50/80 dark:bg-red-900/20 p-4">
           <p className="text-sm font-semibold text-red-800 dark:text-red-200">⚠️ {error}</p>
         </div>
       )}
@@ -418,18 +418,18 @@ export default function IdeaValidator() {
       {/* Progress Indicator */}
       <div className="mb-10">
         <div className="flex items-center justify-between">
-          <div className={`flex-1 ${step >= 0 ? "text-brand-600 dark:text-brand-400" : "text-slate-400"}`}>
-            <div className={`h-2.5 rounded-full transition-all duration-300 ${step >= 0 ? "bg-gradient-to-r from-brand-500 to-brand-600 shadow-sm shadow-brand-500/25" : "bg-slate-200 dark:bg-slate-700"}`}></div>
+          <div className={`flex-1 ${step >= 0 ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400"}`}>
+            <div className={`h-2.5 rounded-full transition-all duration-300 ${step >= 0 ? "bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-sm shadow-indigo-500/25" : "bg-gray-200 dark:bg-slate-700"}`}></div>
             <p className="mt-3 text-sm font-semibold">About Your Idea</p>
           </div>
-          <div className="mx-4 h-0.5 w-12 bg-slate-200 dark:bg-slate-700"></div>
-          <div className={`flex-1 ${step >= 1 ? "text-brand-600 dark:text-brand-400" : "text-slate-400"}`}>
-            <div className={`h-2.5 rounded-full transition-all duration-300 ${step >= 1 ? "bg-gradient-to-r from-brand-500 to-brand-600 shadow-sm shadow-brand-500/25" : "bg-slate-200 dark:bg-slate-700"}`}></div>
+          <div className="mx-4 h-0.5 w-12 bg-gray-200 dark:bg-slate-700"></div>
+          <div className={`flex-1 ${step >= 1 ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400"}`}>
+            <div className={`h-2.5 rounded-full transition-all duration-300 ${step >= 1 ? "bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-sm shadow-indigo-500/25" : "bg-gray-200 dark:bg-slate-700"}`}></div>
             <p className="mt-3 text-sm font-semibold">How It Works</p>
           </div>
-          <div className="mx-4 h-0.5 w-12 bg-slate-200 dark:bg-slate-700"></div>
-          <div className={`flex-1 ${step >= 2 ? "text-brand-600 dark:text-brand-400" : "text-slate-400"}`}>
-            <div className={`h-2.5 rounded-full transition-all duration-300 ${step >= 2 ? "bg-gradient-to-r from-brand-500 to-brand-600 shadow-sm shadow-brand-500/25" : "bg-slate-200 dark:bg-slate-700"}`}></div>
+          <div className="mx-4 h-0.5 w-12 bg-gray-200 dark:bg-slate-700"></div>
+          <div className={`flex-1 ${step >= 2 ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400"}`}>
+            <div className={`h-2.5 rounded-full transition-all duration-300 ${step >= 2 ? "bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-sm shadow-indigo-500/25" : "bg-gray-200 dark:bg-slate-700"}`}></div>
             <p className="mt-3 text-sm font-semibold">Tell Us More</p>
           </div>
         </div>
@@ -437,23 +437,23 @@ export default function IdeaValidator() {
 
       {/* SCREEN 1: About Your Idea */}
       {step === 0 && (
-        <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 p-8 shadow-lg">
-          <h1 className="mb-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">About Your Idea</h1>
-          <p className="mb-8 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+        <div className="rounded-2xl border border-gray-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 p-8 shadow-lg">
+          <h1 className="mb-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-slate-50">About Your Idea</h1>
+          <p className="mb-8 text-base leading-relaxed text-gray-700 dark:text-slate-300">
             Set context and market boundaries.
           </p>
 
           <div className="space-y-6">
             {SCREEN1_QUESTIONS.map((question, index) => (
               <div key={question.id} className="relative">
-                <label htmlFor={question.id} className="mb-2 block text-base font-semibold text-slate-900 dark:text-slate-100">
+                <label htmlFor={question.id} className="mb-2 block text-base font-semibold text-gray-900 dark:text-slate-100">
                   {question.question}
                 </label>
                 <select
                   id={question.id}
                   value={screen1Answers[question.id] || ""}
                   onChange={(e) => handleScreen1Answer(question.id, e.target.value)}
-                  className="w-full rounded-xl border border-slate-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
+                  className="w-full rounded-xl border border-gray-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-indigo-400 dark:focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900"
                 >
                   <option value="">Select an option...</option>
                   {question.options.map((option) => (
@@ -477,7 +477,7 @@ export default function IdeaValidator() {
               type="button"
               onClick={handleBack}
               disabled={loading}
-              className={`rounded-xl border border-slate-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-6 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:-translate-y-0.5 whitespace-nowrap ${loading ? "cursor-not-allowed opacity-50" : ""}`}
+              className={`rounded-xl border border-gray-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-6 py-3 text-sm font-semibold text-gray-700 dark:text-slate-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-slate-700 hover:-translate-y-0.5 whitespace-nowrap ${loading ? "cursor-not-allowed opacity-50" : ""}`}
             >
               ← Back
             </button>
@@ -495,23 +495,23 @@ export default function IdeaValidator() {
 
       {/* SCREEN 2: How Your Idea Works */}
       {step === 1 && (
-        <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 p-8 shadow-lg">
-          <h1 className="mb-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">How Your Idea Works</h1>
-          <p className="mb-8 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
+          <h1 className="mb-3 text-3xl font-bold tracking-tight text-gray-900">How Your Idea Works</h1>
+          <p className="mb-8 text-base leading-relaxed text-gray-700">
             Capture mechanics, value proposition, monetization.
           </p>
 
           <div className="space-y-6">
             {SCREEN2_QUESTIONS.map((question) => (
               <div key={question.id}>
-                <label htmlFor={question.id} className="mb-2 block text-base font-semibold text-slate-900 dark:text-slate-100">
+                <label htmlFor={question.id} className="mb-2 block text-base font-semibold text-gray-900">
                   {question.question}
                 </label>
                 <select
                   id={question.id}
                   value={screen2Answers[question.id] || ""}
                   onChange={(e) => handleScreen2Answer(question.id, e.target.value)}
-                  className="w-full rounded-xl border border-slate-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                 >
                   <option value="">Select an option...</option>
                   {question.options.map((option) => (
@@ -535,7 +535,7 @@ export default function IdeaValidator() {
               type="button"
               onClick={handleBack}
               disabled={loading}
-              className={`rounded-xl border border-slate-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-6 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:-translate-y-0.5 whitespace-nowrap ${loading ? "cursor-not-allowed opacity-50" : ""}`}
+              className={`rounded-xl border border-gray-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-6 py-3 text-sm font-semibold text-gray-700 dark:text-slate-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-slate-700 hover:-translate-y-0.5 whitespace-nowrap ${loading ? "cursor-not-allowed opacity-50" : ""}`}
             >
               ← Back
             </button>
@@ -553,16 +553,16 @@ export default function IdeaValidator() {
 
       {/* SCREEN 3: Tell Us More */}
       {step === 2 && (
-        <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 p-8 shadow-lg">
-          <h1 className="mb-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Tell Us More</h1>
-          <p className="mb-8 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
+          <h1 className="mb-3 text-3xl font-bold tracking-tight text-gray-900">Tell Us More</h1>
+          <p className="mb-8 text-base leading-relaxed text-gray-700">
             Capture the narrative + constraints that shape risk assessment.
           </p>
 
           <div className="space-y-6">
             {/* Structured Description (Required) */}
             <div className="relative">
-              <label htmlFor="structuredDescription" className="mb-2 block text-base font-semibold text-slate-900 dark:text-slate-100">
+              <label htmlFor="structuredDescription" className="mb-2 block text-base font-semibold text-gray-900">
                 Describe your idea using the structure below:
               </label>
               <textarea
@@ -570,7 +570,7 @@ export default function IdeaValidator() {
                 value={structuredDescription}
                 onChange={(e) => setStructuredDescription(e.target.value)}
                 rows={12}
-                className="w-full rounded-xl border border-slate-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 resize-y"
+                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 resize-y"
                 placeholder={`1. Problem: 
 2. Solution:
 3. User:
@@ -585,14 +585,14 @@ export default function IdeaValidator() {
               if (["initial_budget", "delivery_channel"].includes(field.id)) {
                 return (
                   <div key={field.id}>
-                    <label htmlFor={field.id} className="mb-2 block text-base font-semibold text-slate-900 dark:text-slate-100">
+                    <label htmlFor={field.id} className="mb-2 block text-base font-semibold text-gray-900">
                       {field.question}
                     </label>
                     <select
                       id={field.id}
                       value={optionalAnswers[field.id] || ""}
                       onChange={(e) => handleOptionalAnswer(field.id, e.target.value)}
-                      className="w-full rounded-xl border border-slate-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
+                      className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                     >
                       <option value="">Select an option...</option>
                       {field.options.map((option) => (
@@ -606,7 +606,7 @@ export default function IdeaValidator() {
               } else if (field.id === "constraints" && field.multiSelect) {
                 return (
                   <div key={field.id}>
-                    <label className="mb-2 block text-base font-semibold text-slate-900 dark:text-slate-100">
+                    <label className="mb-2 block text-base font-semibold text-gray-900">
                       {field.question}
                     </label>
                     <div className="space-y-2">
@@ -618,7 +618,7 @@ export default function IdeaValidator() {
                             onChange={() => handleConstraintToggle(option)}
                             className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                           />
-                          <span className="text-sm text-slate-700 dark:text-slate-300">{option}</span>
+                          <span className="text-sm text-gray-700">{option}</span>
                         </label>
                       ))}
                     </div>
@@ -630,7 +630,7 @@ export default function IdeaValidator() {
 
             {/* Competitors (Optional Textbox) */}
             <div>
-              <label htmlFor="competitors" className="mb-2 block text-base font-semibold text-slate-900 dark:text-slate-100">
+              <label htmlFor="competitors" className="mb-2 block text-base font-semibold text-gray-900">
                 Any competitors you already know? (Optional)
               </label>
               <input
@@ -639,7 +639,7 @@ export default function IdeaValidator() {
                 value={optionalAnswers.competitors || ""}
                 onChange={(e) => handleOptionalAnswer("competitors", e.target.value)}
                 placeholder="List websites, apps, or companies (optional)"
-                className="w-full rounded-xl border border-slate-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900"
+                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
               />
             </div>
           </div>
@@ -655,7 +655,7 @@ export default function IdeaValidator() {
               type="button"
               onClick={handleBack}
               disabled={loading}
-              className={`rounded-xl border border-slate-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-6 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:-translate-y-0.5 whitespace-nowrap ${loading ? "cursor-not-allowed opacity-50" : ""}`}
+              className={`rounded-xl border border-gray-300/60 dark:border-slate-600/60 bg-white dark:bg-slate-800 px-6 py-3 text-sm font-semibold text-gray-700 dark:text-slate-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-slate-700 hover:-translate-y-0.5 whitespace-nowrap ${loading ? "cursor-not-allowed opacity-50" : ""}`}
             >
               ← Back
             </button>

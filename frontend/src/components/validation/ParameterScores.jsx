@@ -25,22 +25,22 @@ export default function ParameterScores({ parameterCards, parameterLookup }) {
 
   return (
     <div className="h-full flex flex-col">
-      <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Parameter Scores</h3>
+      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-3">Parameter Scores</h3>
       <div className="flex-1 space-y-3">
         {parameters.map((param) => {
           const percentage = Math.max(0, Math.min(100, (param.score / 10) * 100));
           return (
             <div key={param.fullName} className="flex items-center gap-2">
-              <span className="text-xs font-medium text-slate-700 dark:text-slate-300 flex-shrink-0 text-left" style={{ width: 'auto', minWidth: '140px' }}>
+              <span className="text-sm text-gray-700 flex-shrink-0 text-left" style={{ width: 'auto', minWidth: '140px' }}>
                 {param.label}
               </span>
-              <div className="flex-1 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+              <div className="flex-1 h-2 overflow-hidden rounded-full bg-gray-100">
                 <div
                   className={`h-full ${getScoreColor(param.score)} transition-all`}
                   style={{ width: `${percentage}%` }}
                 />
               </div>
-              <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 flex-shrink-0 text-right" style={{ width: '32px' }}>
+              <span className="text-sm font-semibold text-gray-900 flex-shrink-0 text-right" style={{ width: '32px' }}>
                 {param.score.toFixed(1)}
               </span>
             </div>

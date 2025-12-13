@@ -159,7 +159,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
       border: isDark ? "#3A6BFF" : "#CAD8FF",
       headerBg: isDark ? "#1A3A66" : "#D5E0FF", // Slightly brighter for header in dark mode
       headerBgHover: isDark ? "#254A7A" : "#C2D1FF", // Brighter for hover in dark mode
-      text: "text-slate-800 dark:text-slate-200",
+      text: "text-gray-900",
     };
   }
   
@@ -171,7 +171,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
       border: isDark ? "#3F4B66" : "#DDE3EB",
       headerBg: isDark ? "#253344" : "#E8ECF2", // Slightly brighter for header in dark mode
       headerBgHover: isDark ? "#2F3F55" : "#DCE0E8", // Brighter for hover in dark mode
-      text: "text-slate-800 dark:text-slate-200",
+      text: "text-gray-900",
     };
   }
   
@@ -183,7 +183,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
       border: isDark ? "#4860A8" : "#D5DDF7",
       headerBg: isDark ? "#2A3555" : "#E0E8FF", // Slightly brighter for header in dark mode
       headerBgHover: isDark ? "#354266" : "#D2DBF5", // Brighter for hover in dark mode
-      text: "text-slate-800 dark:text-slate-200",
+      text: "text-gray-900",
     };
   }
   
@@ -195,7 +195,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
       border: isDark ? "#4860A8" : "#D5DDF7",
       headerBg: isDark ? "#2A3555" : "#E0E8FF", // Slightly brighter for header in dark mode
       headerBgHover: isDark ? "#354266" : "#D2DBF5", // Brighter for hover in dark mode
-      text: "text-slate-800 dark:text-slate-200",
+      text: "text-gray-900",
     };
   }
   
@@ -207,7 +207,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
       border: isDark ? "#FF7847" : "#F6C744",
       headerBg: isDark ? "#4A2E2E" : "#FFEBB8", // Slightly brighter for header in dark mode
       headerBgHover: isDark ? "#5A3E3E" : "#FFE29F", // Brighter for hover in dark mode
-      text: "text-slate-800 dark:text-slate-200",
+      text: "text-gray-900",
     };
   }
   
@@ -219,7 +219,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
       border: isDark ? "#33D1A0" : "#C3EED0",
       headerBg: isDark ? "#1A4A3F" : "#D5F2E0", // Slightly brighter for header in dark mode
       headerBgHover: isDark ? "#255A4F" : "#C1ECD0", // Brighter for hover in dark mode
-      text: "text-slate-800 dark:text-slate-200",
+      text: "text-gray-900",
     };
   }
   
@@ -289,7 +289,7 @@ function SuccessBanner({ runId }) {
 function Section({ section, theme, sectionNumber, isOpen, onToggle }) {
   return (
     <div
-      className="rounded-2xl border-2 p-0 overflow-hidden shadow-md dark:shadow-slate-900/50"
+      className="rounded-xl border border-gray-200 shadow-sm bg-white p-0 overflow-hidden"
       style={{
         backgroundColor: theme.bg,
         borderColor: theme.border,
@@ -320,17 +320,17 @@ function Section({ section, theme, sectionNumber, isOpen, onToggle }) {
             </h2>
           </div>
         </div>
-        <span className={`text-xl transition-transform flex-shrink-0 text-slate-600 dark:text-slate-400 ${isOpen ? "rotate-180" : ""}`}>
+        <span className={`w-5 h-5 text-gray-500 transition ${isOpen ? "rotate-180" : ""}`}>
           ▼
         </span>
       </button>
       
       {isOpen && (
-      <div className="p-6 space-y-5 bg-white dark:bg-slate-800/50">
+      <div className="p-6 md:p-7 space-y-5 bg-white">
         {section.content && section.content.length > 0 && (
-          <ul className="list-disc list-outside space-y-2.5 text-slate-700 dark:text-slate-300 ml-6">
+          <ul className="list-disc list-outside space-y-2.5 text-[15px] text-gray-700 leading-relaxed ml-6">
             {section.content.map((item, idx) => (
-              <li key={idx} className="leading-relaxed pl-1 text-base">
+              <li key={idx} className="leading-relaxed pl-1">
                 {item.replace(/^-\s+/, "")}
               </li>
             ))}
@@ -338,7 +338,7 @@ function Section({ section, theme, sectionNumber, isOpen, onToggle }) {
         )}
         
         {(!section.content || section.content.length === 0) && (
-          <p className="text-slate-500 dark:text-slate-400 text-sm italic">No content available for this section</p>
+          <p className="text-sm text-gray-600 italic">No content available for this section</p>
         )}
       </div>
       )}
@@ -406,25 +406,27 @@ export default function ProfileReport() {
       />
       
       {isSample && (
-        <div className="rounded-2xl border border-brand-200 dark:border-brand-700 bg-brand-50 dark:bg-brand-900/20 p-4 text-center">
-          <p className="text-sm font-semibold text-brand-700 dark:text-brand-300">
+        <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 text-center">
+          <p className="text-[15px] text-gray-700 leading-relaxed">
             📋 Sample Profile Analysis — This is a demonstration of what you'll receive
           </p>
         </div>
       )}
 
-      <article className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 p-6 shadow-soft">
+      <article className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 relative">
+        <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
+        <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-50 mb-2">Profile Analysis</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">Profile Analysis</h1>
+            <p className="text-[15px] text-gray-700 leading-relaxed mb-8">
               Comprehensive analysis of your entrepreneurial profile, strengths, and opportunities
             </p>
           </div>
           {isSample && (
             <Link 
               to="/product" 
-              className="inline-flex items-center gap-2 text-sm text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-400"
+              className="inline-flex items-center gap-2 text-sm text-indigo-700 hover:text-indigo-800"
             >
               <span aria-hidden="true">←</span> Back to product
             </Link>
@@ -436,13 +438,13 @@ export default function ProfileReport() {
         )}
         
         {!effectiveProfileAnalysis ? (
-          <div className="rounded-2xl border border-amber-200 dark:border-amber-700 bg-amber-50/80 dark:bg-amber-900/20 p-6 text-amber-800 dark:text-amber-300">
-            <p className="text-sm">No profile analysis available. Please run a new analysis first.</p>
+          <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+            <p className="text-[15px] text-gray-700 leading-relaxed">No profile analysis available. Please run a new analysis first.</p>
           </div>
         ) : sections.length === 0 ? (
-          <div className="rounded-2xl border border-amber-200 dark:border-amber-700 bg-amber-50/80 dark:bg-amber-900/20 p-6 text-amber-800 dark:text-amber-300">
-            <p className="text-sm mb-4">Could not parse profile analysis JSON. Expected format with delimiters:</p>
-            <pre className="text-xs bg-amber-100 dark:bg-amber-900/40 p-3 rounded overflow-auto max-h-64">
+          <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
+            <p className="text-[15px] text-gray-700 leading-relaxed mb-4">Could not parse profile analysis JSON. Expected format with delimiters:</p>
+            <pre className="text-sm text-gray-600 bg-gray-50 p-3 rounded overflow-auto max-h-64">
               ---PROFILE_ANALYSIS_START---{'\n'}
               {'{'}{'\n'}
               {'  "core_motivations": "...",'}{'\n'}
@@ -454,7 +456,7 @@ export default function ProfileReport() {
               {'}'}{'\n'}
               ---PROFILE_ANALYSIS_END---
             </pre>
-            <p className="text-xs mt-4 text-amber-700 dark:text-amber-400">
+            <p className="text-sm mt-4 text-gray-600">
               Raw content length: {effectiveProfileAnalysis?.length || 0} characters
             </p>
           </div>
@@ -478,6 +480,7 @@ export default function ProfileReport() {
             })}
           </div>
         )}
+        </div>
       </article>
     </section>
   );
