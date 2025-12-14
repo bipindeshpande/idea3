@@ -256,6 +256,12 @@ async def create_run(
     # Initialize service
     discovery_service = DiscoveryService(db)
     
+    # Log authentication status for debugging
+    if not current_user:
+        discovery_service._log(f"WARNING: Discovery run created without authentication (user_id will be NULL). Make sure to authenticate in Swagger!", "WARNING")
+    else:
+        discovery_service._log(f"Creating discovery run for authenticated user: {current_user.user_id} (email: {current_user.email})", "INFO")
+    
     # Check cache before streaming
     cache_key = discovery_service.cache_service.build_discovery_cache_key(inputs, user_id)
     cached_result = discovery_service.cache_service.get_json(cache_key, cache_type="discovery")
@@ -295,10 +301,10 @@ async def create_run(
     # Generate run_id
     run_id = str(uuid.uuid4())
     
-    # Create Run record
+    # Create Run record - ensure user_id is explicitly set
     run = Run(
         run_id=run_id,
-        user_id=user_id,
+        user_id=user_id,  # Will be None if not authenticated
         inputs=inputs,
         status="processing",
         created_at=datetime.now(timezone.utc)
@@ -306,6 +312,13 @@ async def create_run(
     db.add(run)
     db.commit()
     db.refresh(run)
+    
+    # Verify user_id was saved correctly
+    if run.user_id != user_id:
+        discovery_service._log(f"ERROR: Run {run_id} user_id mismatch! Expected {user_id}, got {run.user_id}", "ERROR")
+    
+    # Log run creation with user_id verification
+    discovery_service._log(f"Created discovery run {run_id} for user_id={user_id} (saved as {run.user_id}), status={run.status}", "INFO")
     
     # Stream the workflow
     if format == "sse":
@@ -425,6 +438,13 @@ async def create_run(
                         
                         db.commit()
                         
+                        # Verify the run was saved correctly
+                        db.refresh(run)
+                        if run.status != "completed":
+                            discovery_service._log(f"WARNING: Run {run_id} status is {run.status} after save, expected 'completed'", "WARNING")
+                        
+                        discovery_service._log(f"Successfully saved discovery run {run_id} for user {user_id} with status {run.status}", "INFO")
+                        
                         # Cache the result for future requests
                         try:
                             cache_key = discovery_service.cache_service.build_discovery_cache_key(inputs, user_id)
@@ -439,7 +459,9 @@ async def create_run(
                             
                     except Exception as e:
                         # Log error but don't fail (streaming already completed)
-                        discovery_service._log(f"Failed to save results after streaming: {e}", "ERROR")
+                        import traceback
+                        error_traceback = traceback.format_exc()
+                        discovery_service._log(f"Failed to save results after streaming: {e}\n{error_traceback}", "ERROR")
                         # Update run status to failed if save fails
                         try:
                             run.status = "failed"
@@ -553,8 +575,17 @@ async def create_run(
                         
                         db.commit()
                         
+                        # Verify the run was saved correctly
+                        db.refresh(run)
+                        if run.status != "completed":
+                            discovery_service._log(f"WARNING: Run {run_id} status is {run.status} after save, expected 'completed'", "WARNING")
+                        
+                        discovery_service._log(f"Successfully saved discovery run {run_id} for user {user_id} with status {run.status}", "INFO")
+                        
                     except Exception as save_error:
-                        discovery_service._log(f"Failed to save results after streaming: {save_error}", "ERROR")
+                        import traceback
+                        error_traceback = traceback.format_exc()
+                        discovery_service._log(f"Failed to save results after streaming: {save_error}\n{error_traceback}", "ERROR")
                         # Don't fail the request, just log the error
                         try:
                             run.status = "completed"

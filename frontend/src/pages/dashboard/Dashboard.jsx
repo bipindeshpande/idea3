@@ -13,6 +13,7 @@ import {
 import DashboardActiveIdeasTab from "../../components/dashboard/DashboardActiveIdeasTab.jsx";
 import DashboardSessionsTab from "../../components/dashboard/DashboardSessionsTab.jsx";
 import DashboardCompareTab from "../../components/dashboard/DashboardCompareTab.jsx";
+import DashboardInsightsTab from "../../components/dashboard/DashboardInsightsTab.jsx";
 
 const STORAGE_KEY = "sia_saved_runs";
 
@@ -54,6 +55,10 @@ export default function DashboardPage() {
   const [workspaceSearchQuery, setWorkspaceSearchQuery] = useState(""); // Workspace search for recall
   const [workspaceSearchResults, setWorkspaceSearchResults] = useState([]); // Unified search results
   const [workspaceSearchDebounceTimer, setWorkspaceSearchDebounceTimer] = useState(null); // Debounce timer
+  const [insights, setInsights] = useState(null); // Run statistics
+  const [searchTabQuery, setSearchTabQuery] = useState(""); // Search tab query
+  const [searchTabResults, setSearchTabResults] = useState([]); // Search tab results
+  const [searchCategory, setSearchCategory] = useState("all"); // Search category filter: "all", "title", "summary", "market", "revenue", "timeline", "why_fits"
 
   const loadRuns = () => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -98,6 +103,9 @@ export default function DashboardPage() {
             console.log("[Dashboard] Loaded runs from /api/user/activity:", runs.length);
             console.log("[Dashboard] Sample run:", runs[0] ? {
               run_id: runs[0].run_id,
+              idea_title: runs[0].idea_title,
+              summary: runs[0].summary,
+              run_type: runs[0].run_type,
               hasReports: !!runs[0].reports,
               hasPersonalizedRecs: !!runs[0].reports?.personalized_recommendations,
               inputs: runs[0].inputs ? Object.keys(runs[0].inputs) : null,
@@ -106,6 +114,7 @@ export default function DashboardPage() {
           
           setApiRuns(runs);
           setApiValidations(validations);
+          console.log("Loaded sessions:", runs);
         }
       }
       
@@ -133,6 +142,24 @@ export default function DashboardPage() {
           });
           setActions(dashboardData.actions || []);
           setNotes(dashboardData.notes || []);
+        }
+      }
+      
+      // Fetch run statistics (optional - endpoint may not exist)
+      try {
+        const insightsResponse = await fetch("/api/runs/stats", {
+          headers: getAuthHeaders(),
+        });
+        if (insightsResponse.ok) {
+          const insightsData = await insightsResponse.json();
+          if (insightsData.success) {
+            setInsights(insightsData);
+          }
+        }
+      } catch (error) {
+        // Silently fail if stats endpoint doesn't exist
+        if (process.env.NODE_ENV === 'development') {
+          console.warn("[Dashboard] Stats endpoint not available:", error);
         }
       }
     } catch (error) {
@@ -165,15 +192,32 @@ export default function DashboardPage() {
   // Merge localStorage runs with API runs (must be defined before useEffects that use it)
   const allRuns = useMemo(() => {
     if (isAuthenticated && !loadingRuns) {
-      const apiRunsList = apiRuns.map(apiRun => ({
-        id: `run_${apiRun.run_id}`,
-        timestamp: apiRun.created_at ? new Date(apiRun.created_at).getTime() : Date.now(),
-        inputs: apiRun.inputs || {},
-        outputs: {},
-        run_id: apiRun.run_id,
-        from_api: true,
-        is_validation: false,
-      }));
+      const apiRunsList = apiRuns.map(apiRun => {
+        // Parse reports if it's a string, otherwise use the object or empty object
+        let reports = {};
+        if (apiRun.reports) {
+          if (typeof apiRun.reports === 'string') {
+            try {
+              reports = JSON.parse(apiRun.reports);
+            } catch (e) {
+              console.warn("Failed to parse reports for run:", apiRun.run_id, e);
+            }
+          } else {
+            reports = apiRun.reports;
+          }
+        }
+        
+        return {
+          id: `run_${apiRun.run_id}`,
+          timestamp: apiRun.created_at ? new Date(apiRun.created_at).getTime() : Date.now(),
+          inputs: apiRun.inputs || {},
+          outputs: reports,
+          reports: reports,
+          run_id: apiRun.run_id,
+          from_api: true,
+          is_validation: false,
+        };
+      });
       
       apiRunsList.forEach(run => {
         if (run.is_validation === undefined) {
@@ -1016,11 +1060,20 @@ export default function DashboardPage() {
   // Calculate summary statistics for Insights
   const summaryStats = useMemo(() => {
     const completedRuns = allRuns.filter(run => {
-      const reports = run.reports || {};
-      return reports.personalized_recommendations && 
-             (typeof reports.personalized_recommendations === 'string' ? 
-              reports.personalized_recommendations.trim().length > 0 : 
-              Object.keys(reports.personalized_recommendations || {}).length > 0);
+      // Check multiple locations for personalized_recommendations
+      const reports = run.reports || run.outputs || {};
+      const recs = reports.personalized_recommendations || run.personalized_recommendations;
+      
+      if (!recs) return false;
+      
+      // Check if it's a non-empty string or non-empty object
+      if (typeof recs === 'string') {
+        return recs.trim().length > 0;
+      }
+      if (typeof recs === 'object') {
+        return Object.keys(recs).length > 0;
+      }
+      return false;
     });
     const validationsWithScores = allValidations.filter(v => v.overall_score !== undefined && v.overall_score !== null);
     const scores = validationsWithScores.map(v => v.overall_score);
@@ -1063,12 +1116,24 @@ export default function DashboardPage() {
         validations: [],
       };
 
-      // Search Active Ideas (max 3)
+      // Search Active Ideas (max 3) - Expanded to include more fields
       allIdeas.forEach(idea => {
         if (results.ideas.length >= 3) return;
         const title = (idea.title || "").toLowerCase();
         const summary = (idea.summary || "").toLowerCase();
-        if (title.includes(queryLower) || summary.includes(queryLower)) {
+        const targetMarket = (idea.target_market || "").toLowerCase();
+        const revenueModel = (idea.revenue_model || "").toLowerCase();
+        const whyThisFits = (idea.why_this_fits || "").toLowerCase();
+        const timeline = (idea.timeline || "").toLowerCase();
+        const detailsMarkdown = (idea.details_markdown || "").toLowerCase();
+        
+        if (title.includes(queryLower) || 
+            summary.includes(queryLower) ||
+            targetMarket.includes(queryLower) ||
+            revenueModel.includes(queryLower) ||
+            whyThisFits.includes(queryLower) ||
+            timeline.includes(queryLower) ||
+            detailsMarkdown.includes(queryLower)) {
           const run = allRuns.find(r => (r.run_id || r.id) === idea.runId);
           const inputs = run?.inputs || {};
           const industry = inputs.sub_interest_area || inputs.industry_interest || "";
@@ -1146,11 +1211,64 @@ export default function DashboardPage() {
     };
   }, [workspaceSearchQuery, allIdeas, filteredRuns, filteredValidations, allRuns]);
 
+  // Filtered ideas for search tab - searches across multiple fields with category filtering
+  const filteredSearchIdeas = useMemo(() => {
+    if (!searchTabQuery || searchTabQuery.trim().length < 2) {
+      return [];
+    }
+    
+    const query = searchTabQuery.toLowerCase().trim();
+    const queryParts = query.split(/\s+/).filter(p => p.length > 0);
+    
+    return allIdeas.filter(idea => {
+      const title = (idea.title || "").toLowerCase();
+      const summary = (idea.summary || "").toLowerCase();
+      const targetMarket = (idea.target_market || "").toLowerCase();
+      const revenueModel = (idea.revenue_model || "").toLowerCase();
+      const whyThisFits = (idea.why_this_fits || "").toLowerCase();
+      const timeline = (idea.timeline || "").toLowerCase();
+      const detailsMarkdown = (idea.details_markdown || "").toLowerCase();
+      
+      // If category is "all", search across all fields
+      if (searchCategory === "all") {
+        const searchableText = `${title} ${summary} ${targetMarket} ${revenueModel} ${whyThisFits} ${timeline} ${detailsMarkdown}`;
+        return queryParts.every(part => searchableText.includes(part));
+      }
+      
+      // Otherwise, search only in the selected category
+      let searchableText = "";
+      switch (searchCategory) {
+        case "title":
+          searchableText = title;
+          break;
+        case "summary":
+          searchableText = summary;
+          break;
+        case "market":
+          searchableText = targetMarket;
+          break;
+        case "revenue":
+          searchableText = revenueModel;
+          break;
+        case "timeline":
+          searchableText = timeline;
+          break;
+        case "why_fits":
+          searchableText = whyThisFits;
+          break;
+        default:
+          searchableText = `${title} ${summary} ${targetMarket} ${revenueModel} ${whyThisFits} ${timeline}`;
+      }
+      
+      return queryParts.every(part => searchableText.includes(part));
+    });
+  }, [allIdeas, searchTabQuery, searchCategory]);
+
   // Check URL params for initial tab
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get("tab");
-    if (tab && ["ideas", "searches", "validations", "compare", "insights"].includes(tab)) {
+    if (tab && ["ideas", "searches", "validations", "compare", "insights", "search"].includes(tab)) {
       setActiveTab(tab);
     }
   }, [location.search]);
@@ -1486,6 +1604,16 @@ export default function DashboardPage() {
               >
               Insights
               </button>
+              <button
+              onClick={() => setActiveTab("search")}
+              className={`px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
+                activeTab === "search"
+                  ? "border-indigo-600 dark:border-indigo-400 text-gray-900 dark:text-indigo-400"
+                    : "border-transparent text-gray-600 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
+                }`}
+              >
+              Search
+              </button>
             </nav>
           </div>
 
@@ -1570,72 +1698,220 @@ export default function DashboardPage() {
             </>
           )}
 
-          {/* Insights */}
-          {activeTab === "insights" && (
-            <div className="py-6">
-              {allRuns.length < 2 && allValidations.length < 2 ? (
-                <div className="text-center py-12">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                    No insights yet
-                  </h3>
-                  <p className="text-[15px] text-gray-600 leading-relaxed max-w-md mx-auto">
-                    Patterns and insights appear here as you explore or validate ideas.
-                  </p>
+          {/* Search Tab */}
+          {activeTab === "search" && (
+            <div className="space-y-6">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-slate-50 mb-2">Search Your Ideas</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">
+                  Find ideas by searching across different fields. Use categories to narrow your search.
+                </p>
+              </div>
+
+              {/* Search Categories */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">
+                  Search Category
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "all", label: "All Fields", icon: "🔍", description: "Search everywhere" },
+                    { id: "title", label: "Title", icon: "📝", description: "Idea titles" },
+                    { id: "summary", label: "Summary", icon: "📄", description: "Brief descriptions" },
+                    { id: "market", label: "Target Market", icon: "🎯", description: "Who it's for" },
+                    { id: "revenue", label: "Revenue Model", icon: "💰", description: "How it makes money" },
+                    { id: "timeline", label: "Timeline", icon: "⏱️", description: "Time to launch" },
+                    { id: "why_fits", label: "Why It Fits", icon: "✨", description: "Why it matches you" },
+                  ].map((category) => (
+                    <button
+                      key={category.id}
+                      onClick={() => {
+                        setSearchCategory(category.id);
+                        if (!searchTabQuery) {
+                          setSearchTabQuery("");
+                        }
+                      }}
+                      className={`px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
+                        searchCategory === category.id
+                          ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-md"
+                          : "border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700"
+                      }`}
+                      title={category.description}
+                    >
+                      <span className="mr-2">{category.icon}</span>
+                      {category.label}
+                    </button>
+                  ))}
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  <p className="text-[15px] text-gray-700 leading-relaxed mb-4">
-                    Patterns emerging from your exploration so far.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                    <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-sm text-gray-600">Exploration Momentum</h4>
-                        <div className="icon-circle bg-[#f3f5ff] text-indigo-600">
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <p className="text-3xl font-bold text-gray-900">{summaryStats.totalDiscoveries}</p>
-                      <p className="text-sm text-gray-600 mt-1">sessions completed</p>
-                      <p className="text-sm text-gray-600 mt-2">{summaryStats.totalIdeas} ideas discovered</p>
-                    </div>
+              </div>
 
-                    <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-sm text-gray-600">Ideas Checked</h4>
-                        <div className="icon-circle bg-[#f3f5ff] text-indigo-600">
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <p className="text-3xl font-bold text-gray-900">{summaryStats.totalValidations}</p>
-                      <p className="text-sm text-gray-600 mt-1">validations completed</p>
-                      {summaryStats.avgValidationScore > 0 && (
-                        <p className="text-sm text-gray-600 mt-2">Avg score: {summaryStats.avgValidationScore}/10</p>
-                      )}
-                    </div>
+              {/* Search Input with Better Placeholder */}
+              <div className="relative">
+                <textarea
+                  value={searchTabQuery}
+                  onChange={(e) => setSearchTabQuery(e.target.value)}
+                  placeholder={
+                    searchCategory === "all" 
+                      ? "Type keywords to search across all fields (e.g., 'subscription', 'SaaS', 'B2B')..."
+                      : searchCategory === "title"
+                      ? "Search idea titles (e.g., 'AI chatbot', 'e-commerce platform')..."
+                      : searchCategory === "summary"
+                      ? "Search summaries (e.g., 'helps small businesses', 'automates workflow')..."
+                      : searchCategory === "market"
+                      ? "Search target markets (e.g., 'small businesses', 'developers', 'students')..."
+                      : searchCategory === "revenue"
+                      ? "Search revenue models (e.g., 'subscription', 'one-time', 'commission')..."
+                      : searchCategory === "timeline"
+                      ? "Search timelines (e.g., '3 months', '6 months', '1 year')..."
+                      : "Search why ideas fit (e.g., 'matches your skills', 'low budget')..."
+                  }
+                  rows={3}
+                  className="w-full px-4 py-3 pl-10 pr-10 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                />
+                <svg className="absolute left-3 top-3 w-5 h-5 text-gray-400 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                {searchTabQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchTabQuery("");
+                      setSearchCategory("all");
+                    }}
+                    className="absolute right-3 top-3 text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
 
-                    <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-sm text-gray-600">Strong Ideas So Far</h4>
-                        <div className="icon-circle bg-[#f3f5ff] text-indigo-600">
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                          </svg>
-                        </div>
+              {/* Search Tips */}
+              {!searchTabQuery && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">💡 Search Tips:</p>
+                  <ul className="text-xs text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Select a category to search specific fields, or use "All Fields" to search everywhere</li>
+                    <li>You can search for multiple words - all words must match</li>
+                    <li>Try searching for: business types, industries, revenue models, or keywords from your ideas</li>
+                  </ul>
+                </div>
+              )}
+
+              {/* Search Results */}
+              {searchTabQuery.trim().length >= 2 ? (
+                filteredSearchIdeas.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-600 dark:text-slate-400">
+                        <span className="font-semibold">{filteredSearchIdeas.length}</span> idea{filteredSearchIdeas.length !== 1 ? "s" : ""} found
+                        {searchCategory !== "all" && (
+                          <span className="ml-2 text-xs">
+                            in <span className="font-medium">{searchCategory === "title" ? "Titles" : searchCategory === "summary" ? "Summaries" : searchCategory === "market" ? "Target Markets" : searchCategory === "revenue" ? "Revenue Models" : searchCategory === "timeline" ? "Timelines" : "Why It Fits"}</span>
+                          </span>
+                        )}
                       </div>
-                      <p className="text-3xl font-bold text-gray-900">{summaryStats.highScoringIdeas}</p>
-                      <p className="text-sm text-gray-600 mt-1">high-scoring ideas</p>
-                      <p className="text-sm text-gray-600 mt-2">Scoring ≥7.0</p>
+                      <button
+                        onClick={() => {
+                          setSearchTabQuery("");
+                          setSearchCategory("all");
+                        }}
+                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
+                      >
+                        Clear Search
+                      </button>
+                    </div>
+                    <div className="grid gap-4">
+                      {filteredSearchIdeas.map((idea) => {
+                        const run = allRuns.find(r => (r.run_id || r.id) === idea.runId);
+                        return (
+                          <div
+                            key={idea.id}
+                            className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <h4 className="text-lg font-bold text-gray-900 dark:text-slate-50 mb-2">
+                                  {idea.title || "Untitled Idea"}
+                                </h4>
+                                {idea.summary && (
+                                  <p className="text-sm text-gray-600 dark:text-slate-400 mb-3">
+                                    {idea.summary}
+                                  </p>
+                                )}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                  {idea.target_market && (
+                                    <div className={`p-2 rounded ${searchCategory === "market" ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800" : ""}`}>
+                                      <span className="font-semibold text-gray-700 dark:text-slate-300">🎯 Target Market: </span>
+                                      <span className="text-gray-600 dark:text-slate-400">{idea.target_market}</span>
+                                    </div>
+                                  )}
+                                  {idea.revenue_model && (
+                                    <div className={`p-2 rounded ${searchCategory === "revenue" ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800" : ""}`}>
+                                      <span className="font-semibold text-gray-700 dark:text-slate-300">💰 Revenue Model: </span>
+                                      <span className="text-gray-600 dark:text-slate-400">{idea.revenue_model}</span>
+                                    </div>
+                                  )}
+                                  {idea.timeline && (
+                                    <div className={`p-2 rounded ${searchCategory === "timeline" ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800" : ""}`}>
+                                      <span className="font-semibold text-gray-700 dark:text-slate-300">⏱️ Timeline: </span>
+                                      <span className="text-gray-600 dark:text-slate-400">{idea.timeline}</span>
+                                    </div>
+                                  )}
+                                  {idea.why_this_fits && (
+                                    <div className={`p-2 rounded ${searchCategory === "why_fits" ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800" : ""}`}>
+                                      <span className="font-semibold text-gray-700 dark:text-slate-300">✨ Why This Fits: </span>
+                                      <span className="text-gray-600 dark:text-slate-400">{idea.why_this_fits}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                {idea.runCreatedAt && (
+                                  <p className="text-xs text-gray-500 dark:text-slate-500 mt-3">
+                                    Created: {new Date(idea.runCreatedAt).toLocaleDateString()}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            {run && (
+                              <button
+                                onClick={() => {
+                                  const ideaIndex = idea.ideaIndex || 0;
+                                  navigate(`/advisor/${idea.runId}?idea=${ideaIndex}`);
+                                }}
+                                className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium"
+                              >
+                                View Full Details
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
+                ) : (
+                  <div className="text-center py-12 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700">
+                    <p className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                      No ideas found matching "{searchTabQuery}"
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400">
+                      Try different keywords or check your spelling.
+                    </p>
+                  </div>
+                )
+              ) : (
+                <div className="text-center py-12 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700">
+                  <p className="text-sm text-gray-600 dark:text-slate-400">
+                    Enter at least 2 characters to search
+                  </p>
                 </div>
               )}
             </div>
-            )}
+          )}
+
+          {/* Insights */}
+          {activeTab === "insights" && (
+            <DashboardInsightsTab insights={insights} />
+          )}
           </div>
         </section>
     </div>

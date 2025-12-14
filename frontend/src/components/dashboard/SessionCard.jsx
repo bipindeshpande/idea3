@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 
 function SessionCard({ 
@@ -9,13 +9,37 @@ function SessionCard({
   onEdit,
   isValidation = false 
 }) {
+  const navigate = useNavigate();
+  if (!session) return null;
+
+  // Handle normalized backend format (has idea_title, summary, run_type, created_at)
+  // or frontend format (has timestamp, inputs, run_id)
+  // Also check sections array for structured recommendations
+  const hasNormalizedFormat = session.idea_title !== undefined || session.run_type !== undefined;
+  
+  // Extract title from multiple possible sources
+  const idea_title = hasNormalizedFormat 
+    ? (session.idea_title || session.sections?.[0]?.title || "")
+    : (session.inputs?.goal_type || session.sections?.[0]?.title || "Idea Discovery Session");
+  
+  // Extract summary from multiple possible sources
+  const summary = hasNormalizedFormat 
+    ? (session.summary || session.sections?.[0]?.summary || "")
+    : (session.sections?.[0]?.summary || "");
+  
+  const created_at = hasNormalizedFormat 
+    ? session.created_at 
+    : (session.timestamp ? new Date(session.timestamp).toISOString() : null);
+  const run_type = hasNormalizedFormat ? session.run_type : (isValidation ? "validation" : "discovery");
+  const timestamp = session.timestamp || (created_at ? new Date(created_at).getTime() : Date.now());
+
   return (
-    <article className="group relative overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 transition-all duration-300 hover:shadow-md">
+    <article className="group relative overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 transition-all duration-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/50">
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <p className="text-xs text-gray-500 dark:text-slate-400">
-              {new Date(session.timestamp).toLocaleString()}
+              {new Date(timestamp).toLocaleString()}
               {session.from_api && (
                 <span className="ml-2 text-xs text-brand-600 dark:text-brand-400 font-medium">
                   (Synced)
@@ -66,11 +90,14 @@ function SessionCard({
           ) : (
             <>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-50 mt-1">
-                {session.inputs?.goal_type 
+                {idea_title || (session.inputs?.goal_type 
                   ? `${session.inputs.goal_type}${session.inputs.interest_area || session.inputs.sub_interest_area ? ` - ${session.inputs.interest_area || session.inputs.sub_interest_area}` : ""}`
-                  : "Idea Discovery Session"}
+                  : "Idea Discovery Session")}
               </h3>
-              {session.inputs && Object.keys(session.inputs).length > 0 ? (
+              {summary && (
+                <p className="text-sm text-gray-600 dark:text-slate-400 mt-2 line-clamp-3">{summary}</p>
+              )}
+              {session.inputs && Object.keys(session.inputs).length > 0 && !hasNormalizedFormat ? (
                 <div className="mt-2">
                   <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
                     <span className="font-medium">Time:</span> {session.inputs.time_commitment || "Not set"} • 
@@ -79,6 +106,12 @@ function SessionCard({
                     {session.inputs.sub_interest_area || session.inputs.interest_area || "Not captured"} • 
                     <span className="font-medium"> Skill:</span>{" "}
                     {session.inputs.skill_strength || "Not captured"}
+                  </p>
+                </div>
+              ) : hasNormalizedFormat ? (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500 dark:text-slate-400">
+                    Type: {run_type} • {session.run_id ? `Run ID: ${session.run_id}` : ""}
                   </p>
                 </div>
               ) : session.run_id ? (
@@ -117,12 +150,20 @@ function SessionCard({
               >
                 View profile
               </Link>
-              <Link
-                to={`/results/recommendations?id=${session.run_id || session.id}`}
+              <button
+                onClick={() => {
+                  // Pass full run data through navigation state to prevent re-computation
+                  navigate("/results/recommendations", { 
+                    state: { 
+                      run: session,
+                      runId: session.run_id || session.id
+                    } 
+                  });
+                }}
                 className="rounded-lg border border-brand-300/60 dark:border-brand-700/60 bg-brand-50/80 dark:bg-brand-900/20 px-3 py-1.5 text-xs font-semibold text-brand-700 dark:text-brand-300 transition-all duration-200 hover:border-brand-400 hover:bg-brand-100 dark:hover:bg-brand-900/30 hover:-translate-y-0.5 whitespace-nowrap"
               >
                 View recommendations
-              </Link>
+              </button>
             </>
           )}
           

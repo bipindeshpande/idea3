@@ -240,9 +240,11 @@ export default function RecommendationDetail() {
   
   // Get data from navigation state (cached) or context
   const stateData = location.state;
-  const reports = stateData?.recommendations || contextReports;
-  const inputs = stateData?.inputs || contextInputs;
-  const cachedAllIdeas = stateData?.allIdeas;
+  const cachedIdea = stateData?.idea; // Idea passed directly from parent
+  const cachedRun = stateData?.run; // Full run object from Past Sessions
+  const reports = cachedRun?.reports || cachedRun?.outputs || stateData?.recommendations || contextReports;
+  const inputs = cachedRun?.inputs || stateData?.inputs || contextInputs;
+  const cachedAllIdeas = cachedRun?.reports?.recommendations_structured || cachedRun?.outputs?.recommendations_structured || stateData?.allIdeas;
   
   // FIX #1: Industry extraction must be consistent
   const industry = inputs?.industry_interest || "";
@@ -265,6 +267,18 @@ export default function RecommendationDetail() {
   const lastEnrichmentIdeaRef = useRef(null);
 
   useEffect(() => {
+    // PRIORITY 0: If we have cached idea or cached run from navigation state, use it immediately
+    // This prevents ALL API calls and LLM computations
+    if (cachedIdea || cachedRun) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log("[RecommendationDetail] Using cached data from navigation state, skipping ALL API/LLM calls", {
+          hasCachedIdea: !!cachedIdea,
+          hasCachedRun: !!cachedRun
+        });
+      }
+      return; // Use cached data, no API call needed
+    }
+    
     // FIX #8: If we have cached data from navigation state, don't load from API
     if (stateData?.recommendations) {
       return; // Use cached data, no API call needed
@@ -278,7 +292,7 @@ export default function RecommendationDetail() {
       // If no runId in URL but we have a currentRunId, load it
       loadRunById(currentRunId);
     }
-  }, [runId, currentRunId, loading, stableReports, loadRunById, stateData]); // Use stableReports to prevent reloads
+  }, [runId, currentRunId, loading, stableReports, loadRunById, stateData, cachedIdea, cachedRun]); // Use stableReports to prevent reloads
 
   // Keep original markdown for ideas parsing (Stage 2 body)
   // FIX #8: Use stableReports to prevent re-parsing
@@ -288,12 +302,17 @@ export default function RecommendationDetail() {
   );
 
   const ideas = useMemo(() => {
-    // Priority 1: Use cached ideas from navigation state
+    // Priority 1: If we have cached idea directly, wrap it in array
+    if (cachedIdea) {
+      return [cachedIdea];
+    }
+    
+    // Priority 2: Use cached ideas from navigation state
     if (cachedAllIdeas && Array.isArray(cachedAllIdeas) && cachedAllIdeas.length > 0) {
       return cachedAllIdeas;
     }
     
-    // Priority 2: Try structured parser from reports
+    // Priority 3: Try structured parser from reports
     // FIX #8: Use stableReports to prevent re-parsing
     const raw = stableReports?.personalized_recommendations || "";
     const structuredParsed = parseStructuredIdeas(raw);
@@ -302,10 +321,11 @@ export default function RecommendationDetail() {
     }
     // Fallback: markdown parser
     return parseTopIdeas(stage2Markdown, 10);
-  }, [stage2Markdown, stableReports, cachedAllIdeas]);
+  }, [stage2Markdown, stableReports, cachedAllIdeas, cachedIdea]);
   
   const numericIndex = Number.parseInt(ideaIndex ?? "", 10);
-  const activeIdea = ideas.find((idea) => idea.index === numericIndex);
+  // If we have cached idea, use it directly (ignore index matching)
+  const activeIdea = cachedIdea || ideas.find((idea) => idea.index === numericIndex);
   
   // STEP 1: Log activeIdea creation
   console.log("=== STEP 1: activeIdea created ===");
@@ -409,6 +429,23 @@ export default function RecommendationDetail() {
   // Fetch enrichment when user clicks "View details"
   useEffect(() => {
     async function loadEnrichment() {
+      // CRITICAL: Disable enrichment if viewing cached idea or cached run (from Past Sessions)
+      if (cachedIdea || cachedRun) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log("[RecommendationDetail] Enrichment disabled - viewing cached data", {
+            hasCachedIdea: !!cachedIdea,
+            hasCachedRun: !!cachedRun
+          });
+        }
+        // If cached idea has body, use it
+        if (cachedIdea?.body) {
+          setEnrichedBody(cachedIdea.body);
+          setActiveIdeaState(cachedIdea);
+        }
+        enrichmentCalledRef.current = true; // Mark as "called" to prevent future calls
+        return; // No API call, no LLM computation
+      }
+      
       console.log("=== STEP 4: Enrichment useEffect triggered ===");
       console.log("currentActiveIdea:", !!currentActiveIdea);
       console.log("currentActiveIdea?.title:", currentActiveIdea?.title);
@@ -574,7 +611,7 @@ export default function RecommendationDetail() {
     }
 
     loadEnrichment();
-  }, [currentActiveIdea?.title, currentActiveIdea?.index, industry, stableReports?.profile_analysis]);
+  }, [currentActiveIdea?.title, currentActiveIdea?.index, industry, stableReports?.profile_analysis, cachedIdea, cachedRun, ideaId, getEnrichment, setEnrichment, getAuthHeaders]);
 
   // Load actions and notes for this idea
   useEffect(() => {

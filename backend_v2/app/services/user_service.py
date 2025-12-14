@@ -92,13 +92,16 @@ class UserService(BaseService):
                 except Exception:
                     return None
         
-        # Get user's runs
+        # Get user's runs - include both completed and processing runs (in case user refreshes page)
         runs = self.db.query(Run).filter(
             and_(
                 Run.user_id == user_id,
                 Run.deleted_at.is_(None)
             )
         ).order_by(desc(Run.created_at)).limit(limit).all()
+        
+        # Log for debugging
+        self._log(f"Found {len(runs)} runs for user {user_id}", "INFO")
         
         runs_list = []
         for run in runs:

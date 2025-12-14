@@ -65,15 +65,11 @@ class RunHistoryService(BaseService):
         offset = (page - 1) * page_size
         runs = query.offset(offset).limit(page_size).all()
         
-        # Convert to dictionaries and normalize inputs for backward compatibility
+        # Convert to dictionaries and normalize for frontend
         runs_list = []
         for run in runs:
-            run_dict = run.to_dict()
-            # Ensure startup_category exists for backward compatibility with old runs
-            if run_dict.get("inputs") and isinstance(run_dict["inputs"], dict):
-                if "startup_category" not in run_dict["inputs"] or not run_dict["inputs"].get("startup_category"):
-                    run_dict["inputs"]["startup_category"] = "both"
-            runs_list.append(run_dict)
+            normalized = self.normalize_run(run)
+            runs_list.append(normalized)
         
         # Calculate pagination metadata
         total_pages = (total_count + page_size - 1) // page_size if total_count > 0 else 0
@@ -123,18 +119,9 @@ class RunHistoryService(BaseService):
                 detail=f"Run {run_id} not found"
             )
         
-        # Normalize inputs to ensure backward compatibility with old runs
-        run_dict = run.to_dict()
-        if run_dict.get("inputs"):
-            # Ensure startup_category exists for backward compatibility
-            inputs = run_dict["inputs"]
-            if not isinstance(inputs, dict):
-                inputs = {}
-            if "startup_category" not in inputs or not inputs.get("startup_category"):
-                inputs["startup_category"] = "both"
-            run_dict["inputs"] = inputs
-        
-        return run_dict
+        # Normalize using the same function as get_runs
+        normalized = self.normalize_run(run)
+        return normalized
     
     def soft_delete_run(self, run_id: str, user_id: Optional[str] = None) -> bool:
         """
@@ -176,4 +163,76 @@ class RunHistoryService(BaseService):
         self.db.commit()
         
         return True
+    
+    def normalize_run(self, run: Run) -> Dict[str, Any]:
+        """
+        Convert DB Run object → frontend-friendly session object.
+        Handles field mapping and extracts useful data from reports.
+        """
+        import json
+        
+        run_dict = run.to_dict()
+        
+        # Ensure startup_category exists for backward compatibility
+        if run_dict.get("inputs") and isinstance(run_dict["inputs"], dict):
+            if "startup_category" not in run_dict["inputs"] or not run_dict["inputs"].get("startup_category"):
+                run_dict["inputs"]["startup_category"] = "both"
+        
+        # Extract data from reports for frontend
+        reports = run_dict.get("reports") or {}
+        parsed_output = reports if isinstance(reports, dict) else {}
+        
+        # Try to parse if reports is a string
+        if isinstance(reports, str):
+            try:
+                parsed_output = json.loads(reports) if reports else {}
+            except:
+                parsed_output = {}
+        
+        # Determine run_type - check if it's a validation or discovery
+        # Validations typically have validation_id or overall_score in reports
+        run_type = "discovery"  # Default
+        if parsed_output.get("validation_id") or parsed_output.get("overall_score") is not None:
+            run_type = "validation"
+        elif run_dict.get("inputs", {}).get("business_type"):
+            # Discovery runs have business_type in inputs
+            run_type = "discovery"
+        
+        # Extract idea title and summary from reports
+        idea_title = ""
+        summary = ""
+        
+        # Check structured recommendations
+        recommendations_structured = parsed_output.get("recommendations_structured", [])
+        if recommendations_structured and len(recommendations_structured) > 0:
+            top_idea = recommendations_structured[0]
+            idea_title = top_idea.get("title", "")
+            summary = top_idea.get("summary", "")
+        
+        # Fallback: check personalized_recommendations text
+        if not idea_title:
+            personalized_recs = parsed_output.get("personalized_recommendations") or run_dict.get("personalized_recommendations", "")
+            if personalized_recs:
+                # Try to extract first idea title from markdown
+                lines = personalized_recs.split("\n")
+                for line in lines:
+                    if line.strip().startswith("### IDEA_") or line.strip().startswith("## "):
+                        idea_title = line.replace("### IDEA_", "").replace("## ", "").strip()
+                        break
+        
+        return {
+            "id": run_dict.get("run_id"),  # Map run_id to id for frontend
+            "run_id": run_dict.get("run_id"),
+            "run_type": run_type,
+            "status": run_dict.get("status", "pending"),
+            "created_at": run_dict.get("created_at"),
+            "completed_at": run_dict.get("completed_at"),
+            "idea_title": idea_title,
+            "summary": summary,
+            "sections": recommendations_structured,  # Structured recommendations
+            "inputs": run_dict.get("inputs", {}),
+            "reports": parsed_output,
+            "profile_analysis": run_dict.get("profile_analysis"),
+            "personalized_recommendations": run_dict.get("personalized_recommendations"),
+        }
 

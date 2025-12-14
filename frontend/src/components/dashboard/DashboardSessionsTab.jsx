@@ -57,7 +57,7 @@ function DashboardSessionsTab({
           {/* Ideas Search Tab */}
           {activeTab === "ideas" && (
             <>
-              {filteredRuns.length === 0 ? (
+              {!filteredRuns ? null : filteredRuns.length === 0 ? (
                 <div className="rounded-xl border border-gray-200 shadow-sm bg-white p-6 md:p-7 text-center">
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">
                     No past sessions yet
@@ -68,7 +68,7 @@ function DashboardSessionsTab({
                 </div>
               ) : (
                 <div className="grid gap-6 md:gap-8">
-                  {filteredRuns.map((session) => {
+                  {(filteredRuns || []).map((session) => {
                     const hasOpenActions = sessionHasOpenActions(session);
                     const hasNotes = sessionHasNotes(session);
                     
@@ -103,7 +103,7 @@ function DashboardSessionsTab({
                 </div>
               ) : (
                 <div className="grid gap-4">
-                  {filteredValidations.map((session) => {
+                  {(filteredValidations || []).map((session) => {
                     const hasOpenActions = sessionHasOpenActions(session);
                     const hasNotes = sessionHasNotes(session);
                     

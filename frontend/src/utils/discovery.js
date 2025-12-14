@@ -4,6 +4,17 @@
 import { cleanStreamedText } from './streamingParser.js';
 
 /**
+ * Get authentication headers from localStorage
+ */
+function getAuthHeaders() {
+  const sessionToken = localStorage.getItem('session_token');
+  if (!sessionToken) return {};
+  return {
+    'Authorization': `Bearer ${sessionToken}`
+  };
+}
+
+/**
  * Run discovery with streaming support using EventSource (SSE)
  * @param {Object} payload - The discovery input payload
  * @param {Function} onChunk - Callback called for each text chunk received
@@ -48,10 +59,12 @@ async function runDiscoverySSE(payload, onChunk, onComplete, onError, timeout) {
       }, timeout);
     }
 
+    const authHeaders = getAuthHeaders();
     const response = await fetch("/api/discovery?format=sse", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...authHeaders
       },
       body: JSON.stringify(payload),
       signal: controller.signal
@@ -212,10 +225,12 @@ async function runDiscoveryPlain(payload, onChunk, onComplete, onError, timeout)
       }, timeout);
     }
 
+    const authHeaders = getAuthHeaders();
     const response = await fetch("/api/discovery?format=plain", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...authHeaders
       },
       body: JSON.stringify(payload),
       signal: controller.signal

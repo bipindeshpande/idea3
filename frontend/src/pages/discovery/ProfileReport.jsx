@@ -151,85 +151,92 @@ function parseProfileSections(text = "") {
 function getSectionTheme(title = "", index = 0, isDark = false) {
   const lowerTitle = title.toLowerCase();
   
-  // Core Motivations (Section 1)
+  // Core Motivations (Section 1) - bg-indigo-50
   if (lowerTitle.includes("motivation") || lowerTitle.includes("goal") || lowerTitle.includes("objective")) {
     return {
       icon: "🎯",
-      bg: isDark ? "#112244" : "#E8EEFF",
-      border: isDark ? "#3A6BFF" : "#CAD8FF",
-      headerBg: isDark ? "#1A3A66" : "#D5E0FF", // Slightly brighter for header in dark mode
-      headerBgHover: isDark ? "#254A7A" : "#C2D1FF", // Brighter for hover in dark mode
-      text: "text-gray-900",
+      bg: isDark ? "#1e1b4b" : "rgba(238, 242, 255, 0.1)", // indigo-50 with opacity-10
+      bgFull: isDark ? "#312e81" : "#EEF2FF", // Full opacity for header
+      border: isDark ? "#6366f1" : "#C7D2FE",
+      headerBg: isDark ? "#312e81" : "rgba(238, 242, 255, 0.2)", // indigo-50 opacity-20
+      headerBgHover: isDark ? "#4338ca" : "rgba(238, 242, 255, 0.3)", // opacity-30 on hover
+      text: "text-gray-900 dark:text-slate-50",
     };
   }
   
-  // Operating Constraints (Section 2)
+  // Operating Constraints (Section 2) - bg-blue-50
   if (lowerTitle.includes("constraint")) {
     return {
       icon: "📋",
-      bg: isDark ? "#1A2333" : "#F4F6FA",
-      border: isDark ? "#3F4B66" : "#DDE3EB",
-      headerBg: isDark ? "#253344" : "#E8ECF2", // Slightly brighter for header in dark mode
-      headerBgHover: isDark ? "#2F3F55" : "#DCE0E8", // Brighter for hover in dark mode
-      text: "text-gray-900",
+      bg: isDark ? "#1e3a5f" : "rgba(239, 246, 255, 0.1)", // blue-50 with opacity-10
+      bgFull: isDark ? "#1e40af" : "#EFF6FF", // Full opacity for header
+      border: isDark ? "#3b82f6" : "#BFDBFE",
+      headerBg: isDark ? "#1e40af" : "rgba(239, 246, 255, 0.2)", // blue-50 opacity-20
+      headerBgHover: isDark ? "#2563eb" : "rgba(239, 246, 255, 0.3)", // opacity-30 on hover
+      text: "text-gray-900 dark:text-slate-50",
     };
   }
   
-  // Strengths and Capabilities (Section 3)
+  // Strengths and Capabilities (Section 3) - bg-purple-50
   if (lowerTitle.includes("strength") || lowerTitle.includes("capabilit")) {
     return {
-      icon: "✨",
-      bg: isDark ? "#1D2840" : "#EEF3FF",
-      border: isDark ? "#4860A8" : "#D5DDF7",
-      headerBg: isDark ? "#2A3555" : "#E0E8FF", // Slightly brighter for header in dark mode
-      headerBgHover: isDark ? "#354266" : "#D2DBF5", // Brighter for hover in dark mode
-      text: "text-gray-900",
+      icon: "💪",
+      bg: isDark ? "#3e1b5f" : "rgba(250, 245, 255, 0.1)", // purple-50 with opacity-10
+      bgFull: isDark ? "#6b21a8" : "#FAF5FF", // Full opacity for header
+      border: isDark ? "#9333ea" : "#F3E8FF",
+      headerBg: isDark ? "#6b21a8" : "rgba(250, 245, 255, 0.2)", // purple-50 opacity-20
+      headerBgHover: isDark ? "#7c3aed" : "rgba(250, 245, 255, 0.3)", // opacity-30 on hover
+      text: "text-gray-900 dark:text-slate-50",
     };
   }
   
-  // Strategic Considerations (Section 4)
+  // Strategic Considerations (Section 4) - bg-sky-50
   if (lowerTitle.includes("strategic") || lowerTitle.includes("consideration")) {
     return {
-      icon: "💡",
-      bg: isDark ? "#1D2840" : "#EEF3FF",
-      border: isDark ? "#4860A8" : "#D5DDF7",
-      headerBg: isDark ? "#2A3555" : "#E0E8FF", // Slightly brighter for header in dark mode
-      headerBgHover: isDark ? "#354266" : "#D2DBF5", // Brighter for hover in dark mode
-      text: "text-gray-900",
+      icon: "🧭",
+      bg: isDark ? "#0c4a6e" : "rgba(240, 249, 255, 0.1)", // sky-50 with opacity-10
+      bgFull: isDark ? "#075985" : "#F0F9FF", // Full opacity for header
+      border: isDark ? "#0284c7" : "#BAE6FD",
+      headerBg: isDark ? "#075985" : "rgba(240, 249, 255, 0.2)", // sky-50 opacity-20
+      headerBgHover: isDark ? "#0369a1" : "rgba(240, 249, 255, 0.3)", // opacity-30 on hover
+      text: "text-gray-900 dark:text-slate-50",
     };
   }
   
-  // Viability Red Flags (Section 5)
+  // Viability Red Flags (Section 5) - bg-amber-50
   if (lowerTitle.includes("red flag") || lowerTitle.includes("viability")) {
     return {
       icon: "⚠️",
-      bg: isDark ? "#3A1E1E" : "#FFF4D6",
-      border: isDark ? "#FF7847" : "#F6C744",
-      headerBg: isDark ? "#4A2E2E" : "#FFEBB8", // Slightly brighter for header in dark mode
-      headerBgHover: isDark ? "#5A3E3E" : "#FFE29F", // Brighter for hover in dark mode
-      text: "text-gray-900",
+      bg: isDark ? "#451a03" : "rgba(255, 251, 235, 0.1)", // amber-50 with opacity-10
+      bgFull: isDark ? "#78350f" : "#FFFBEB", // Full opacity for header
+      border: isDark ? "#f59e0b" : "#FDE68A",
+      headerBg: isDark ? "#78350f" : "rgba(255, 251, 235, 0.2)", // amber-50 opacity-20
+      headerBgHover: isDark ? "#92400e" : "rgba(255, 251, 235, 0.3)", // opacity-30 on hover
+      text: "text-gray-900 dark:text-slate-50",
     };
   }
   
-  // Pathway Recommendation (Section 6)
+  // Pathway Recommendation (Section 6) - bg-green-50
   if (lowerTitle.includes("pathway") || lowerTitle.includes("recommendation")) {
     return {
-      icon: "🛤️",
-      bg: isDark ? "#0F3A2F" : "#E9F8EE",
-      border: isDark ? "#33D1A0" : "#C3EED0",
-      headerBg: isDark ? "#1A4A3F" : "#D5F2E0", // Slightly brighter for header in dark mode
-      headerBgHover: isDark ? "#255A4F" : "#C1ECD0", // Brighter for hover in dark mode
-      text: "text-gray-900",
+      icon: "🚀",
+      bg: isDark ? "#064e3b" : "rgba(240, 253, 244, 0.1)", // green-50 with opacity-10
+      bgFull: isDark ? "#065f46" : "#F0FDF4", // Full opacity for header
+      border: isDark ? "#10b981" : "#D1FAE5",
+      headerBg: isDark ? "#065f46" : "rgba(240, 253, 244, 0.2)", // green-50 opacity-20
+      headerBgHover: isDark ? "#047857" : "rgba(240, 253, 244, 0.3)", // opacity-30 on hover
+      text: "text-gray-900 dark:text-slate-50",
     };
   }
   
   // Fallback (should not be reached)
   return {
     icon: "📋",
-    bg: isDark ? "#1A2333" : "#F4F6FA",
-    border: isDark ? "#3F4B66" : "#DDE3EB",
-    headerBg: isDark ? "#253344" : "#E8ECF2",
-    headerBgHover: isDark ? "#2F3F55" : "#DCE0E8",
+    bg: isDark ? "#1A2333" : "rgba(239, 246, 255, 0.1)",
+    bgFull: isDark ? "#1e40af" : "#EFF6FF",
+    border: isDark ? "#3b82f6" : "#BFDBFE",
+    headerBg: isDark ? "#1e40af" : "rgba(239, 246, 255, 0.2)",
+    headerBgHover: isDark ? "#2563eb" : "rgba(239, 246, 255, 0.3)",
     text: "text-slate-800 dark:text-slate-200",
   };
 }
@@ -289,7 +296,7 @@ function SuccessBanner({ runId }) {
 function Section({ section, theme, sectionNumber, isOpen, onToggle }) {
   return (
     <div
-      className="rounded-xl border border-gray-200 shadow-sm bg-white p-0 overflow-hidden"
+      className="rounded-xl border shadow-sm overflow-hidden flex flex-col gap-2 w-full dark:border-slate-700"
       style={{
         backgroundColor: theme.bg,
         borderColor: theme.border,
@@ -309,36 +316,33 @@ function Section({ section, theme, sectionNumber, isOpen, onToggle }) {
           e.currentTarget.style.backgroundColor = theme.headerBg;
         }}
       >
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{theme.icon}</span>
-          <div className="flex items-baseline gap-2">
-            <span className={`text-sm font-bold ${theme.text} opacity-70`}>
-              {sectionNumber}.
-            </span>
-            <h2 className={`text-lg font-bold text-left ${theme.text}`}>
-              {section.title}
-            </h2>
-          </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xl">{theme.icon}</span>
+          <h2 className={`text-lg font-semibold text-gray-900 dark:text-slate-50 flex items-center gap-2 text-left`}>
+            {section.title}
+          </h2>
         </div>
-        <span className={`w-5 h-5 text-gray-500 transition ${isOpen ? "rotate-180" : ""}`}>
+        <span className={`w-5 h-5 text-gray-500 dark:text-slate-400 transition ${isOpen ? "rotate-180" : ""}`}>
           ▼
         </span>
       </button>
       
       {isOpen && (
-      <div className="p-6 md:p-7 space-y-5 bg-white">
+      <div className="p-6 md:p-7 space-y-5 bg-white dark:bg-slate-800/50">
         {section.content && section.content.length > 0 && (
-          <ul className="list-disc list-outside space-y-2.5 text-[15px] text-gray-700 leading-relaxed ml-6">
-            {section.content.map((item, idx) => (
-              <li key={idx} className="leading-relaxed pl-1">
-                {item.replace(/^-\s+/, "")}
-              </li>
-            ))}
-          </ul>
+          <div className="text-[15px] leading-relaxed text-gray-700 dark:text-slate-300">
+            <ul className="list-disc list-outside space-y-2.5 ml-6">
+              {section.content.map((item, idx) => (
+                <li key={idx} className="leading-relaxed pl-1">
+                  {item.replace(/^-\s+/, "")}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
         
         {(!section.content || section.content.length === 0) && (
-          <p className="text-sm text-gray-600 italic">No content available for this section</p>
+          <p className="text-sm text-gray-600 dark:text-slate-400 italic">No content available for this section</p>
         )}
       </div>
       )}

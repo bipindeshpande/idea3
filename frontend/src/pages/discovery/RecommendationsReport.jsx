@@ -28,9 +28,10 @@ export default function RecommendationsReport() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("ideas");
   
-  // Check for cached recommendations from navigation state
-  const cachedRecommendations = location.state?.recommendations;
-  const cachedIdeas = location.state?.allIdeas;
+  // Check for cached run data from navigation state (from Past Sessions)
+  const cachedRun = location.state?.run;
+  const cachedRecommendations = location.state?.recommendations || cachedRun?.reports || cachedRun?.outputs;
+  const cachedIdeas = location.state?.allIdeas || cachedRun?.reports?.recommendations_structured || cachedRun?.outputs?.recommendations_structured;
   const [smartRecommendations, setSmartRecommendations] = useState(null);
   const [ideasWithActions, setIdeasWithActions] = useState(new Set());
   const [ideasWithNotes, setIdeasWithNotes] = useState(new Set());
@@ -67,6 +68,33 @@ export default function RecommendationsReport() {
   const effectiveInputs = location.state?.inputs || inputs;
 
   useEffect(() => {
+    // PRIORITY 0: If we have cached run from navigation state (from Past Sessions), use it immediately
+    // This prevents ALL API calls and LLM computations
+    if (cachedRun) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log("[RecommendationsReport] Using cached run from navigation state, skipping ALL API/LLM calls", {
+          runId: cachedRun.run_id || cachedRun.id,
+          hasReports: !!cachedRun.reports,
+          hasOutputs: !!cachedRun.outputs
+        });
+      }
+      
+      // Extract reports from cached run
+      const runReports = cachedRun.reports || cachedRun.outputs || {};
+      
+      // Set reports in context if needed (but don't trigger API calls)
+      if (runReports && runReports.personalized_recommendations) {
+        // Update context silently without triggering API
+        if (cachedRun.run_id || cachedRun.id) {
+          // Don't call loadRunById - we already have the data
+        }
+      }
+      
+      setIsLoading(false);
+      hasLoadedFromCacheRef.current = true;
+      return; // CRITICAL: Exit early - do NOT trigger any API calls
+    }
+    
     // CRITICAL: If we already have effectiveReports (from any source), never call API
     if (effectiveReports && effectiveReports.personalized_recommendations) {
       if (process.env.NODE_ENV === 'development') {
@@ -146,7 +174,7 @@ export default function RecommendationsReport() {
       hasLoadedFromCacheRef.current = true;
       setIsLoading(false);
     }
-  }, [runId, loadRunById, cachedRecommendations, loadFromRecentDiscoveryCache, effectiveReports, reports, localStorageReports]);
+  }, [runId, loadRunById, cachedRun, cachedRecommendations, loadFromRecentDiscoveryCache, effectiveReports, reports, localStorageReports]);
   
   // Reset the ref when runId changes (user views different report)
   useEffect(() => {
@@ -232,7 +260,16 @@ export default function RecommendationsReport() {
   }, [isAuthenticated, getAuthHeaders]);
 
   // Smart detection for enhancements: Start if user scrolls or stays >30s
+  // DISABLED when viewing cached run (from Past Sessions) - no recomputation
   useEffect(() => {
+    // CRITICAL: Disable enhancements if viewing cached run
+    if (cachedRun) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log("[RecommendationsReport] Enhancements disabled - viewing cached run");
+      }
+      return;
+    }
+    
     if (!isAuthenticated || !runId || enhancementsStarted || !effectiveReports?.personalized_recommendations) {
       return;
     }
@@ -400,10 +437,24 @@ export default function RecommendationsReport() {
   const topIdeas = allIdeas.slice(0, 3);
   const secondaryIdeas = allIdeas.slice(3);
   
-  // Get lightweight next_steps from top idea's enrichment (generated during discovery)
-  const topIdeaNextSteps = topIdeas.length > 0 && topIdeas[0]?.enrichment?.next_steps 
-    ? topIdeas[0].enrichment.next_steps 
-    : null;
+  // Collect next_steps from ALL ideas that contain enrichment.next_steps
+  const allNextSteps = allIdeas
+    .filter(idea => idea?.enrichment?.next_steps)
+    .map((idea, index) => ({
+      title: idea.title || `Idea ${index + 1}`,
+      steps: idea.enrichment.next_steps
+    }));
+
+  // Unified action plan text
+  let unifiedNextSteps = null;
+  if (allNextSteps.length > 0) {
+    unifiedNextSteps =
+      allNextSteps
+        .map((idea, index) => {
+          return `## Next Steps for ${idea.title}\n\n${idea.steps}\n`;
+        })
+        .join("\n\n");
+  }
 
   // Extract matrix data for conclusion
   const sections = useMemo(() => {
@@ -428,7 +479,38 @@ export default function RecommendationsReport() {
     }
   }, [sections]);
   
+  // Extract structured Final Recommendation from backend
+  const finalRecommendation = useMemo(() => {
+    try {
+      // Priority 1: Use structured final_recommendation from backend if available (direct)
+      if (effectiveReports?.final_recommendation && typeof effectiveReports.final_recommendation === 'object') {
+        return effectiveReports.final_recommendation;
+      }
+      // Priority 2: Check in reports.final_recommendation (nested)
+      if (effectiveReports?.reports?.final_recommendation && typeof effectiveReports.reports.final_recommendation === 'object') {
+        return effectiveReports.reports.final_recommendation;
+      }
+      // Priority 3: Check if reports is the run object with reports field
+      if (effectiveReports?.reports && typeof effectiveReports.reports === 'object' && effectiveReports.reports.final_recommendation && typeof effectiveReports.reports.final_recommendation === 'object') {
+        return effectiveReports.reports.final_recommendation;
+      }
+      // Legacy fallback: Return null (will use buildFinalConclusion for markdown)
+      return null;
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error extracting final recommendation:", err);
+      }
+      return null;
+    }
+  }, [effectiveReports]);
+
+  // Legacy finalConclusion for backward compatibility (markdown string)
   const finalConclusion = useMemo(() => {
+    // If we have structured finalRecommendation, don't use legacy
+    if (finalRecommendation && typeof finalRecommendation === 'object' && finalRecommendation.decision) {
+      return null;
+    }
+    // Generate legacy conclusion from buildFinalConclusion if no structured version
     try {
       return buildFinalConclusion(topIdeas, matrixRows, effectiveInputs || {});
     } catch (err) {
@@ -437,7 +519,7 @@ export default function RecommendationsReport() {
       }
       return null;
     }
-  }, [topIdeas, matrixRows, inputs]);
+  }, [finalRecommendation, topIdeas, matrixRows, effectiveInputs]);
 
   // Show error state
   if (error) {
@@ -675,7 +757,7 @@ export default function RecommendationsReport() {
                 >
                   Next Steps
                 </button>
-                {finalConclusion && (
+                {(finalRecommendation || finalConclusion) && (
                   <button
                     onClick={() => setActiveTab("conclusion")}
                     className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-semibold transition ${
@@ -684,7 +766,7 @@ export default function RecommendationsReport() {
                         : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
                     }`}
                   >
-                    Final Conclusion
+                    Final Recommendation
                   </button>
                 )}
               </nav>
@@ -768,6 +850,7 @@ export default function RecommendationsReport() {
                                       idea: idea,
                                       allIdeas: allIdeas, // Pass full list to preserve when navigating back
                                       recommendations: effectiveReports,
+                                      run: cachedRun, // Pass full run object to prevent recomputation
                                       runId: runId || currentRunId,
                                       inputs: effectiveInputs
                                     }
@@ -805,7 +888,7 @@ export default function RecommendationsReport() {
                   Follow these personalized, actionable steps to move your startup idea forward. Each step is tailored to your profile, constraints, and top recommendation.
                 </p>
                 
-                {topIdeaNextSteps && (
+                {unifiedNextSteps ? (
                   <div className="prose prose-slate max-w-none">
                     <ReactMarkdown
                       components={{
@@ -818,40 +901,19 @@ export default function RecommendationsReport() {
                         p: ({ node, ...props }) => (
                           <p className="text-slate-700 leading-relaxed mb-3" {...props} />
                         ),
+                        h2: ({ node, ...props }) => (
+                          <h2 className="text-xl font-bold text-slate-900 mt-6 mb-3" {...props} />
+                        ),
                       }}
                     >
-                      {topIdeaNextSteps}
+                      {unifiedNextSteps}
                     </ReactMarkdown>
                   </div>
-                )}
-                
-                {!topIdeaNextSteps && (
-                  <div className="space-y-4 text-slate-700">
-                    <p className="text-slate-600 italic">Generating personalized next steps based on your top recommendation...</p>
-                    <ol className="ml-6 space-y-3 list-decimal">
-                      <li className="flex items-start gap-3">
-                        <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">1</span>
-                        <div>
-                          <strong className="font-semibold text-slate-900">Review your top 3 recommendations</strong>
-                          <p className="mt-1 text-sm text-slate-600">Click "View details" on each idea to see the full analysis, financial outlook, and execution roadmap.</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">2</span>
-                        <div>
-                          <strong className="font-semibold text-slate-900">Validate your top choice</strong>
-                          <p className="mt-1 text-sm text-slate-600">Use our validation tool to get detailed feedback on your selected idea across 10 key parameters.</p>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">3</span>
-                        <div>
-                          <strong className="font-semibold text-slate-900">Talk to potential customers</strong>
-                          <p className="mt-1 text-sm text-slate-600">Reach out to 10 people in your target market this week. Use the customer validation questions from the detailed reports.</p>
-                        </div>
-                      </li>
-                    </ol>
-                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600">
+                    No next steps were found for your recommendations.  
+                    This usually happens when the AI did not generate enrichment data for this run.
+                  </p>
                 )}
                 
                 {topIdeas.length > 0 && (
@@ -866,6 +928,7 @@ export default function RecommendationsReport() {
                             idea: topIdeas[0],
                             allIdeas: allIdeas,
                             recommendations: effectiveReports,
+                            run: cachedRun, // Pass full run object to prevent recomputation
                             runId: runId || currentRunId,
                             inputs: effectiveInputs
                           }
@@ -881,34 +944,94 @@ export default function RecommendationsReport() {
             )}
 
             {/* Tab Content: Final Conclusion */}
-            {activeTab === "conclusion" && finalConclusion && (
+            {activeTab === "conclusion" && (
               <div className="rounded-3xl border-2 border-brand-300 dark:border-brand-600 bg-gradient-to-br from-brand-50 to-white dark:from-brand-900/20 dark:to-slate-800 p-8 shadow-soft">
-                <div className="prose prose-slate max-w-none">
-                  <ReactMarkdown
-                    components={{
-                      h2: ({ node, ...props }) => (
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4" {...props} />
-                      ),
-                      h3: ({ node, ...props }) => (
-                        <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-3 mt-4" {...props} />
-                      ),
-                      p: ({ node, ...props }) => (
-                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-3" {...props} />
-                      ),
-                      ul: ({ node, ...props }) => (
-                        <ul className="list-disc list-outside space-y-2 text-slate-700 dark:text-slate-300 mb-4 ml-6" {...props} />
-                      ),
-                      li: ({ node, ...props }) => (
-                        <li className="leading-relaxed" {...props} />
-                      ),
-                      strong: ({ node, ...props }) => (
-                        <strong className="font-semibold text-slate-900 dark:text-slate-100" {...props} />
-                      ),
-                    }}
-                  >
-                    {finalConclusion}
-                  </ReactMarkdown>
-                </div>
+                {finalRecommendation && typeof finalRecommendation === 'object' && finalRecommendation.decision ? (
+                  // Premium structured Final Recommendation
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Final Recommendation</h2>
+                      {/* Decision Badge */}
+                      {(() => {
+                        const decision = finalRecommendation.decision || 'validate_further';
+                        const badgeConfig = {
+                          pursue: { label: 'Pursue', color: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700' },
+                          pursue_with_caution: { label: 'Pursue with Caution', color: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700' },
+                          validate_further: { label: 'Validate Further', color: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700' },
+                          consider_pivot: { label: 'Consider Pivot', color: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700' },
+                          do_not_pursue: { label: 'Do Not Pursue', color: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700' }
+                        };
+                        const config = badgeConfig[decision] || badgeConfig.validate_further;
+                        return (
+                          <span className={`px-4 py-2 rounded-lg border-2 font-semibold text-sm ${config.color}`}>
+                            {config.label}
+                          </span>
+                        );
+                      })()}
+                    </div>
+                    
+                    {/* Rationale */}
+                    {finalRecommendation.rationale && Array.isArray(finalRecommendation.rationale) && finalRecommendation.rationale.length > 0 && (
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Strategic Rationale</h3>
+                        <ul className="space-y-3">
+                          {finalRecommendation.rationale.map((item, index) => (
+                            <li key={index} className="flex items-start gap-3">
+                              <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">
+                                {index + 1}
+                              </span>
+                              <p className="text-slate-700 dark:text-slate-300 leading-relaxed flex-1">
+                                {item}
+                              </p>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Recommended Path */}
+                    {finalRecommendation.recommended_path && (
+                      <div className="rounded-xl border-2 border-brand-200 dark:border-brand-700 bg-brand-50 dark:bg-brand-900/20 p-6">
+                        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">Recommended Path</h3>
+                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-lg">
+                          {finalRecommendation.recommended_path}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : finalConclusion ? (
+                  // Legacy markdown format
+                  <div className="prose prose-slate max-w-none">
+                    <ReactMarkdown
+                      components={{
+                        h2: ({ node, ...props }) => (
+                          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4" {...props} />
+                        ),
+                        h3: ({ node, ...props }) => (
+                          <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-3 mt-4" {...props} />
+                        ),
+                        p: ({ node, ...props }) => (
+                          <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-3" {...props} />
+                        ),
+                        ul: ({ node, ...props }) => (
+                          <ul className="list-disc list-outside space-y-2 text-slate-700 dark:text-slate-300 mb-4 ml-6" {...props} />
+                        ),
+                        li: ({ node, ...props }) => (
+                          <li className="leading-relaxed" {...props} />
+                        ),
+                        strong: ({ node, ...props }) => (
+                          <strong className="font-semibold text-slate-900 dark:text-slate-100" {...props} />
+                        ),
+                      }}
+                    >
+                      {finalConclusion}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="text-slate-600 dark:text-slate-400 italic">
+                    Final recommendation is being generated. Please check back shortly.
+                  </p>
+                )}
               </div>
             )}
 

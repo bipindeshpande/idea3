@@ -43,8 +43,10 @@ export default function RunHistoryPage() {
     fetchRuns({ page: 1, pageSize: 200, sortBy: "created_at", sortOrder: "desc" })
       .then((data) => {
         if (!isMounted) return;
-        const list = data?.runs || data?.runs?.runs || data?.runs_list || data?.runs || data?.runs?.runs || data?.runs?.items || data?.runs || data?.runs;
-        setRuns(list || data?.runs || []);
+        // FIX: Extract runs from response - API returns { runs: [...], pagination: {...} }
+        const runsList = data.runs || [];
+        console.log("Loaded sessions:", runsList);
+        setRuns(runsList);
         setError(null);
       })
       .catch((err) => {
@@ -196,7 +198,7 @@ export default function RunHistoryPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredRuns.map((run) => (
+              {(filteredRuns || []).map((run) => (
                 <tr key={run.run_id} className="border-t hover:bg-slate-50">
                   <td className="px-3 py-2 font-mono text-xs">{run.run_id}</td>
                   <td className="px-3 py-2">{run.created_at ? new Date(run.created_at).toLocaleString() : "n/a"}</td>
