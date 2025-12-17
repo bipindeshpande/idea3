@@ -1,4 +1,5 @@
 import AccentGlow from "../ui/AccentGlow.jsx";
+import UIHeading from "../ui/ui-heading.jsx";
 
 /**
  * PageHeader - Standard page header with optional accent glow
@@ -9,25 +10,23 @@ import AccentGlow from "../ui/AccentGlow.jsx";
  * @param {string} className - Additional CSS classes
  */
 export default function PageHeader({ 
-  title, 
-  subtitle, 
-  showAccent = true,
-  className = "" 
+ title, 
+ subtitle, 
+ showAccent = true,
+ className = "" 
 }) {
-  return (
-    <header className={`space-y-3 relative ${className}`}>
-      {showAccent && <AccentGlow />}
-      <div className="relative z-10">
-        <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="text-[15px] text-gray-700 leading-relaxed mb-8">
-            {subtitle}
-          </p>
-        )}
-      </div>
-    </header>
-  );
+ return (
+ <header className={`space-y-3 relative ${className}`}>
+ {showAccent && <AccentGlow />}
+ <div className="relative z-10">
+ <UIHeading level="h1" className="text-primary mb-2">{title}</UIHeading>
+ {subtitle && (
+ <p className="text-base text-secondary leading-relaxed mb-8">
+ {subtitle}
+ </p>
+ )}
+ </div>
+ </header>
+ );
 }
 

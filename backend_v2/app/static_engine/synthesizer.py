@@ -424,8 +424,13 @@ def _generate_idea_id(problem_text: str, solution_text: str, idx: int) -> str:
     return f"{idx}_{content_hash}"
 
 
-def _build_idea_title(solution_text: str, problem_text: str, realism_level: int = 3) -> str:
-    """Build a title from solution and problem, adjusted for realism level."""
+def _build_idea_title(solution_text: str, problem_text: str, delivery_mode_text: str = "", realism_level: int = 3) -> str:
+    """Build a title from solution and problem, adjusted for realism level.
+    
+    CRITICAL: Title must be a concrete startup idea, NOT a framework term.
+    """
+    from app.utils.idea_validator import is_framework_term, regenerate_title_from_fragments
+    
     if solution_text:
         # Use solution text as base, clean it up
         title = solution_text.strip()
@@ -437,14 +442,19 @@ def _build_idea_title(solution_text: str, problem_text: str, realism_level: int 
             words = title.split()
             title = " ".join(words[:8])  # Roughly 60 chars with ~8 words
         
-        # Adjust tone based on realism level
-        if realism_level <= 2:
-            # Lower realism: simpler, more encouraging
-            title = title.replace("Enterprise", "Business").replace("Advanced", "Simple")
-        elif realism_level >= 4:
-            # Higher realism: more professional
-            if not any(word in title.lower() for word in ["platform", "system", "solution"]):
-                title = f"{title} Platform"
+        # CRITICAL: Check if title is a framework term
+        if is_framework_term(title):
+            # Regenerate from fragments to ensure it's concrete
+            title = regenerate_title_from_fragments(problem_text, solution_text, delivery_mode_text)
+        else:
+            # Adjust tone based on realism level
+            if realism_level <= 2:
+                # Lower realism: simpler, more encouraging
+                title = title.replace("Enterprise", "Business").replace("Advanced", "Simple")
+            elif realism_level >= 4:
+                # Higher realism: more professional
+                if not any(word in title.lower() for word in ["platform", "system", "solution"]):
+                    title = f"{title} Platform"
         
         return title
     elif problem_text:
@@ -453,8 +463,22 @@ def _build_idea_title(solution_text: str, problem_text: str, realism_level: int 
         if len(title) > 60:
             words = title.split()
             title = " ".join(words[:8])
+        
+        # CRITICAL: Check if title is a framework term
+        if is_framework_term(title):
+            # Regenerate from fragments
+            title = regenerate_title_from_fragments(problem_text, solution_text or "", delivery_mode_text)
+        
         return title
-    return "Business Idea"
+    
+    # Last resort: generate from available fragments
+    if delivery_mode_text:
+        title = delivery_mode_text.strip().title()
+        if is_framework_term(title):
+            title = "Concrete Startup Opportunity"
+        return title
+    
+    return "Concrete Startup Opportunity"
 
 
 def _build_idea_summary(solution_text: str, delivery_mode_text: str, realism_level: int = 3) -> str:
@@ -687,7 +711,12 @@ def _transform_to_structured_idea(
     industry_data: Dict[str, Any],
     realism_level: int = 3
 ) -> Dict[str, Any]:
-    """Transform fragment-based idea to structured format."""
+    """Transform fragment-based idea to structured format.
+    
+    CRITICAL: Ensures title is a concrete startup idea, not a framework term.
+    """
+    from app.utils.idea_validator import is_concrete_idea
+    
     problem_text = idea.get("problem", "")
     solution_text = idea.get("solution", "")
     delivery_mode_text = idea.get("delivery_mode", "")
@@ -697,7 +726,7 @@ def _transform_to_structured_idea(
     
     # Generate all required fields
     idea_id = _generate_idea_id(problem_text, solution_text, idx)
-    title = _build_idea_title(solution_text, problem_text, realism_level)
+    title = _build_idea_title(solution_text, problem_text, delivery_mode_text, realism_level)
     summary = _build_idea_summary(solution_text, delivery_mode_text, realism_level)
     target_market = _build_target_market(delivery_mode_text, user_params, realism_level)
     revenue_model = revenue_pattern_text if revenue_pattern_text else "Subscription or usage-based model"
@@ -706,7 +735,7 @@ def _transform_to_structured_idea(
     why_this_fits = _build_why_this_fits(problem_text, solution_text, user_params, realism_level)
     details_markdown = _build_details_markdown(idea, industry_data, realism_level)
     
-    return {
+    structured_idea = {
         "id": idea_id,
         "index": idx,
         "title": title,
@@ -718,6 +747,15 @@ def _transform_to_structured_idea(
         "why_this_fits": why_this_fits,
         "details_markdown": details_markdown
     }
+    
+    # CRITICAL: Validate that this is a concrete idea
+    if not is_concrete_idea(title, summary):
+        # Log warning but don't fail - we'll filter later
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Generated idea with potentially invalid title: '{title}' - will be filtered")
+    
+    return structured_idea
 
 
 def synthesize_ideas(
@@ -956,5 +994,17 @@ def synthesize_ideas(
         )
         structured_ideas.append(structured_idea)
     
-    return structured_ideas
+    # CRITICAL: Filter out framework terms and invalid ideas
+    from app.utils.idea_validator import filter_valid_ideas
+    valid_ideas = filter_valid_ideas(structured_ideas)
+    
+    # If we filtered out too many, log a warning
+    if len(valid_ideas) < len(structured_ideas):
+        logger.warning(f"Filtered {len(structured_ideas) - len(valid_ideas)} invalid ideas (framework terms)")
+    
+    # If we don't have enough valid ideas, try to generate more
+    if len(valid_ideas) < num_ideas:
+        logger.info(f"Only {len(valid_ideas)} valid ideas generated, requested {num_ideas}")
+    
+    return valid_ideas[:num_ideas]  # Return up to requested number
 

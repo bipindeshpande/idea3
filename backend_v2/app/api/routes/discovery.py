@@ -379,6 +379,11 @@ async def create_run(
                 # Instead, save what we already computed during streaming
                 if stream_completed and collected_output:
                     try:
+                        # Refresh run to get latest state
+                        db.refresh(run)
+                        # Update user_id if it's missing and we have a user_id to set
+                        if user_id and not run.user_id:
+                            run.user_id = user_id
                         # Update run status and save the streamed output
                         run.status = "completed"
                         run.completed_at = datetime.now(timezone.utc)

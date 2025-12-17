@@ -90,13 +90,17 @@ async def get_user_activity(
 async def get_user_actions(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    idea_id: Optional[str] = Query(None, description="Filter actions by idea ID")
+    idea_id: Optional[str] = Query(None, description="Filter actions by idea ID (canonical format: run_id::idea_index)")
 ):
     """
     Get user actions feed
     
+    Canonical idea_id format: {run_id}::idea_{index}
+    Example: "abc123::idea_1"
+    This format must not change.
+    
     Query Parameters:
-    - idea_id: Optional filter by idea ID
+    - idea_id: Optional filter by idea ID (must be in canonical format)
     
     Returns:
         List of user actions
@@ -105,7 +109,15 @@ async def get_user_actions(
         user_service = UserService(db)
         result = user_service.get_user_actions(current_user.user_id, idea_id=idea_id)
         return result
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"[API] Error in get_user_actions: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch user actions: {str(e)}"
@@ -116,13 +128,17 @@ async def get_user_actions(
 async def get_user_notes(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    idea_id: Optional[str] = Query(None, description="Filter notes by idea ID")
+    idea_id: Optional[str] = Query(None, description="Filter notes by idea ID (canonical format: run_id::idea_index)")
 ):
     """
     Get user notes list
     
+    Canonical idea_id format: {run_id}::idea_{index}
+    Example: "abc123::idea_1"
+    This format must not change.
+    
     Query Parameters:
-    - idea_id: Optional filter by idea ID
+    - idea_id: Optional filter by idea ID (must be in canonical format)
     
     Returns:
         List of user notes
@@ -131,7 +147,15 @@ async def get_user_notes(
         user_service = UserService(db)
         result = user_service.get_user_notes(current_user.user_id, idea_id=idea_id)
         return result
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"[API] Error in get_user_notes: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch user notes: {str(e)}"
@@ -169,8 +193,12 @@ async def create_action(
     """
     Create a new action for the current user
     
+    Canonical idea_id format: {run_id}::idea_{index}
+    Example: "abc123::idea_1"
+    This format must not change.
+    
     Request Body:
-        - idea_id: Idea ID
+        - idea_id: Idea ID (canonical format: run_id::idea_index)
         - action_text: Action text
         - status: Action status (default: "pending")
         - due_date: Optional due date (ISO format string)
@@ -194,6 +222,9 @@ async def create_action(
             detail=str(e)
         )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"[API create_action] Exception: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create action: {str(e)}"
@@ -248,8 +279,12 @@ async def create_note(
     """
     Create a new note for the current user
     
+    Canonical idea_id format: {run_id}::idea_{index}
+    Example: "abc123::idea_1"
+    This format must not change.
+    
     Request Body:
-        - idea_id: Idea ID
+        - idea_id: Idea ID (canonical format: run_id::idea_index)
         - content: Note content
         - tags: Optional list of tags (default: [])
     
@@ -271,6 +306,9 @@ async def create_note(
             detail=str(e)
         )
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"[API create_note] Exception: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create note: {str(e)}"
@@ -310,6 +348,43 @@ async def compare_sessions(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to compare sessions: {str(e)}"
+        )
+
+
+@router.delete("/run/{run_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user_run(
+    run_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Soft delete a run for the current user
+    
+    Path Parameters:
+        - run_id: UUID of the run to delete
+    
+    Returns:
+        - 204 No Content on success
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        logger.info(f"[API] delete_user_run called: run_id={run_id}, user_id={current_user.user_id}")
+        
+        from app.services.run_history_service import RunHistoryService
+        run_history_service = RunHistoryService(db)
+        run_history_service.soft_delete_run(run_id=run_id, user_id=current_user.user_id)
+        
+        logger.info(f"[API] Successfully deleted run: run_id={run_id}")
+        return None
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[API] Error deleting run {run_id}: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete run: {str(e)}"
         )
 
 

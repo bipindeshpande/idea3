@@ -19,7 +19,10 @@ class Note(Base):
     user_id = Column(UUID(as_uuid=False), ForeignKey("users.user_id"), nullable=False, index=True)
     
     # Note data
-    idea_id = Column(String(255), nullable=False, index=True)  # Format: "run_{run_id}_idea_{index}" or similar
+    # Canonical idea_id format: {run_id}::idea_{index}
+    # Example: "abc123::idea_1"
+    # This format must not change.
+    idea_id = Column(String(255), nullable=False, index=True)
     content = Column(Text, nullable=False)
     tags = Column(JSONB, nullable=True, default=list)  # Array of strings stored as JSONB
     

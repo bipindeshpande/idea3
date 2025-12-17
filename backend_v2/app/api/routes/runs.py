@@ -196,7 +196,7 @@ async def assign_null_runs_to_user(
 async def delete_run(
     run_id: str,
     db: Session = Depends(get_db),
-    user_id: Optional[str] = None  # TODO: Get from auth middleware
+    current_user: Optional[User] = Depends(get_current_user_or_none)
 ):
     """
     Soft delete a run by setting deleted_at timestamp
@@ -207,13 +207,29 @@ async def delete_run(
     Returns:
     - 204 No Content on success
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
+        user_id = current_user.user_id if current_user else None
+        
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required to delete runs"
+            )
+        
+        logger.info(f"[API] delete_run called: run_id={run_id}, user_id={user_id}")
+        
         run_history_service = RunHistoryService(db)
         run_history_service.soft_delete_run(run_id=run_id, user_id=user_id)
+        
+        logger.info(f"[API] Successfully deleted run: run_id={run_id}")
         return None
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"[API] Error deleting run {run_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete run: {str(e)}"

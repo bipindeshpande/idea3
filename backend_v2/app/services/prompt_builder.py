@@ -9,6 +9,7 @@ to use the new universal intake schema.
 """
 
 from typing import Dict, Any
+from app.services.conflict_detector import ConflictDetector
 
 
 class PromptBuilder:
@@ -54,6 +55,10 @@ class PromptBuilder:
         
         # Get startup category
         startup_category = user_inputs.get('startup_category', 'both')
+        
+        # Detect soft conflicts and build adjustment instructions
+        conflicts = ConflictDetector.detect_conflicts(user_inputs)
+        conflict_instructions = ConflictDetector.build_adjustment_instructions(conflicts, user_inputs)
         
         # Format user inputs section
         user_inputs_section = f"""
@@ -217,6 +222,8 @@ If user selects Food & Beverage + Meal Prep, ideas must be food prep related.
 If user selects AI & Automation + Chatbots, ideas must be chatbot related.
 Stay strictly within the industry boundary.
 
+{conflict_instructions}
+
 BUSINESS REGION CONSIDERATIONS:
 The user's Business Region ({user_inputs.get('business_region', 'Not specified')}) must influence idea feasibility:
 
@@ -254,12 +261,45 @@ why_this_fits: <tie explicitly to user profile>
 ### IDEA_2
 ...
 
+CRITICAL: IDEA TITLE REQUIREMENTS
+
+Each idea title MUST be a CONCRETE STARTUP IDEA, NOT a framework component or abstract concept.
+
+VALID IDEA TITLES (examples):
+- "Non-technical food founders launch cloud kitchens using shared commercial kitchens and Instagram-based ordering"
+- "Local fitness coaches create personalized meal prep services for busy professionals"
+- "Home-based crafters build Etsy stores selling custom pet accessories"
+- "Remote consultants offer AI-powered business automation for small businesses"
+
+INVALID IDEA TITLES (DO NOT USE):
+- "Business Models" ❌
+- "Target Segments" ❌
+- "Value Propositions" ❌
+- "Revenue Models" ❌
+- "Market Opportunities" ❌
+- "Customer Personas" ❌
+- "Go-to-Market Strategy" ❌
+- "Pricing Strategies" ❌
+- "Validation Frameworks" ❌
+- "Execution Plans" ❌
+- Any abstract noun or framework term ❌
+
+TITLE FORMAT REQUIREMENT:
+Each title MUST follow this pattern: [Who] + [Problem] + [Solution]
+
+Examples:
+- "[Non-technical founders] + [struggling to start food businesses] + [launch cloud kitchens using shared kitchens]"
+- "[Local fitness coaches] + [need additional income] + [create personalized meal prep services]"
+- "[Home-based crafters] + [want to monetize skills] + [build Etsy stores selling custom accessories]"
+
 Each IDEA block MUST be:
+- A CONCRETE STARTUP IDEA (not a framework, concept, or strategy term)
 - Practical, realistic, and relevant to the user's constraints
 - Clear, concrete, and operationally feasible
 - Grounded in the user's industry and sub-interest
 - Executable with the user's skills, time, and budget
 - Aligned with the user's psychological profile
+- Include a specific customer (who), specific problem (what), and specific solution (how)
 
 Rules:
 - NO markdown formatting except the ### headers.
@@ -270,6 +310,8 @@ Rules:
 - Each field appears on ONE line only.
 - Output must be plain text, not markdown.
 - Adjust all content (titles, summaries, descriptions) to match the tone guidelines above.
+- DO NOT return frameworks, categories, strategy terms, or abstract concepts as ideas.
+- ONLY return fully-formed, concrete startup ideas.
 """
 
 

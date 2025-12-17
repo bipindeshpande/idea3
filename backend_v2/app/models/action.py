@@ -19,7 +19,10 @@ class Action(Base):
     user_id = Column(UUID(as_uuid=False), ForeignKey("users.user_id"), nullable=False, index=True)
     
     # Action data
-    idea_id = Column(String(255), nullable=False, index=True)  # Format: "run_{run_id}_idea_{index}" or similar
+    # Canonical idea_id format: {run_id}::idea_{index}
+    # Example: "abc123::idea_1"
+    # This format must not change.
+    idea_id = Column(String(255), nullable=False, index=True)
     action_text = Column(String(1000), nullable=False)
     status = Column(String(50), default="pending", index=True)  # pending, in_progress, completed, blocked
     due_date = Column(Date, nullable=True)

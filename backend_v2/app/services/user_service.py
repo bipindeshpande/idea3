@@ -166,9 +166,13 @@ class UserService(BaseService):
         """
         Get user actions feed
         
+        Canonical idea_id format: {run_id}::idea_{index}
+        Example: "abc123::idea_1"
+        This format must not change.
+        
         Args:
             user_id: User ID
-            idea_id: Optional filter by idea ID
+            idea_id: Optional filter by idea ID (must be in canonical format: run_id::idea_index)
             
         Returns:
             List of user actions
@@ -178,6 +182,11 @@ class UserService(BaseService):
         query = self.db.query(Action).filter(Action.user_id == user_id)
         
         if idea_id:
+            idea_id = idea_id.strip()
+            # Validate canonical format
+            if "::idea_" not in idea_id:
+                raise ValueError(f"Invalid idea_id format. Expected canonical format: run_id::idea_index (e.g., 'abc123::idea_1'). Got: {idea_id}")
+            
             query = query.filter(Action.idea_id == idea_id)
         
         actions = query.order_by(desc(Action.created_at)).all()
@@ -198,9 +207,13 @@ class UserService(BaseService):
         """
         Create a new action for a user
         
+        Canonical idea_id format: {run_id}::idea_{index}
+        Example: "abc123::idea_1"
+        This format must not change.
+        
         Args:
             user_id: User ID
-            idea_id: Idea ID
+            idea_id: Idea ID (must be in canonical format: run_id::idea_index)
             action_text: Action text
             status: Action status (default: "pending")
             due_date: Optional due date (ISO format string)
@@ -210,6 +223,21 @@ class UserService(BaseService):
         """
         from app.models.action import Action
         from datetime import datetime
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        # Validate idea_id format - enforce canonical format only
+        if not idea_id or not isinstance(idea_id, str) or not idea_id.strip():
+            raise ValueError("idea_id is required and cannot be empty")
+        
+        idea_id = idea_id.strip()
+        
+        # Enforce canonical format: must contain "::idea_"
+        if "::idea_" not in idea_id:
+            raise ValueError(f"Invalid idea_id format. Expected canonical format: run_id::idea_index (e.g., 'abc123::idea_1'). Got: {idea_id}")
+        
+        logger.info(f"[create_action] Creating action: user_id={user_id}, idea_id={idea_id}")
         
         # Parse due_date if provided
         parsed_due_date = None
@@ -274,9 +302,13 @@ class UserService(BaseService):
         """
         Get user notes list
         
+        Canonical idea_id format: {run_id}::idea_{index}
+        Example: "abc123::idea_1"
+        This format must not change.
+        
         Args:
             user_id: User ID
-            idea_id: Optional filter by idea ID
+            idea_id: Optional filter by idea ID (must be in canonical format: run_id::idea_index)
             
         Returns:
             List of user notes
@@ -286,6 +318,11 @@ class UserService(BaseService):
         query = self.db.query(Note).filter(Note.user_id == user_id)
         
         if idea_id:
+            idea_id = idea_id.strip()
+            # Validate canonical format
+            if "::idea_" not in idea_id:
+                raise ValueError(f"Invalid idea_id format. Expected canonical format: run_id::idea_index (e.g., 'abc123::idea_1'). Got: {idea_id}")
+            
             query = query.filter(Note.idea_id == idea_id)
         
         notes = query.order_by(desc(Note.created_at)).all()
@@ -305,9 +342,13 @@ class UserService(BaseService):
         """
         Create a new note for a user
         
+        Canonical idea_id format: {run_id}::idea_{index}
+        Example: "abc123::idea_1"
+        This format must not change.
+        
         Args:
             user_id: User ID
-            idea_id: Idea ID
+            idea_id: Idea ID (must be in canonical format: run_id::idea_index)
             content: Note content
             tags: Optional list of tags
             
@@ -315,6 +356,21 @@ class UserService(BaseService):
             Created note
         """
         from app.models.note import Note
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        # Validate idea_id format - enforce canonical format only
+        if not idea_id or not isinstance(idea_id, str) or not idea_id.strip():
+            raise ValueError("idea_id is required and cannot be empty")
+        
+        idea_id = idea_id.strip()
+        
+        # Enforce canonical format: must contain "::idea_"
+        if "::idea_" not in idea_id:
+            raise ValueError(f"Invalid idea_id format. Expected canonical format: run_id::idea_index (e.g., 'abc123::idea_1'). Got: {idea_id}")
+        
+        logger.info(f"[create_note] Creating note: user_id={user_id}, idea_id={idea_id}")
         
         note = Note(
             user_id=user_id,

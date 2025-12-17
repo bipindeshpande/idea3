@@ -5,21 +5,23 @@
  * @param {string} className - Additional CSS classes
  * @param {'sm' | 'md' | 'lg'} padding - Padding size (default: 'md')
  */
-export default function Card({ 
-  children, 
-  className = "",
-  padding = "md" 
-}) {
-  const paddingClasses = {
-    sm: "p-4",
-    md: "p-6 md:p-7",
-    lg: "p-8 md:p-10"
-  };
+import UICard from "./ui-card.jsx";
 
-  return (
-    <div className={`rounded-xl border border-gray-200 shadow-sm bg-white ${paddingClasses[padding]} ${className}`}>
-      {children}
-    </div>
-  );
+export default function Card({ 
+ children, 
+ className = "",
+ padding = "md" 
+}) {
+ const paddingClasses = {
+   sm: "ui-pad-sm",
+   md: "ui-pad-md",
+   lg: "ui-pad-lg",
+ };
+
+ return (
+   <UICard className={[paddingClasses[padding], className].filter(Boolean).join(" ")}>
+     {children}
+   </UICard>
+ );
 }
 

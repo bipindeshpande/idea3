@@ -3,19 +3,15 @@
 @tailwind utilities;
 
 body {
-  font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  background: #f8fafc; /* slate-50 - simpler, cleaner, better consistency */
+  /* Theme colors come from CSS variables in `src/styles/theme.css` */
+  font-family: var(--font-sans, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  background: var(--bg);
   min-height: 100vh;
-  color: #1e293b; /* slate-800 - better contrast than #111827 */
+  color: var(--text);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.dark body,
-body.dark {
-  background: #0f172a; /* slate-900 */
-  color: #f1f5f9; /* slate-100 - better contrast */
-}
+/* Dark mode is handled via CSS variables (see `theme.css`). */
 
 a {
   color: inherit;
@@ -33,37 +29,15 @@ textarea {
 .prose h2,
 .prose h3,
 .prose h4 {
-  color: #153274;
+  color: var(--prose-heading);
   scroll-margin-top: 6rem;
-}
-
-.dark .prose h1,
-.dark .prose h2,
-.dark .prose h3,
-.dark .prose h4,
-.prose-invert h1,
-.prose-invert h2,
-.prose-invert h3,
-.prose-invert h4 {
-  color: #e2e8f0;
 }
 
 .prose p,
 .prose li,
 .prose strong,
 .prose em {
-  color: #374151;
-}
-
-.dark .prose p,
-.dark .prose li,
-.dark .prose strong,
-.dark .prose em,
-.prose-invert p,
-.prose-invert li,
-.prose-invert strong,
-.prose-invert em {
-  color: #cbd5e1;
+  color: var(--prose-body);
 }
 
 .prose table {
@@ -72,34 +46,22 @@ textarea {
   margin: 1.5rem 0;
   border-radius: 0.75rem;
   overflow: hidden;
-  box-shadow: 0 12px 30px -18px rgba(15, 64, 111, 0.25);
+  box-shadow: var(--shadow-soft);
 }
 
 .prose table thead {
-  background: linear-gradient(135deg, #224faf, #35c2ff);
-  color: white;
+  background: var(--surface);
+  color: var(--text);
 }
 
 .prose table th,
 .prose table td {
   padding: 0.9rem 1rem;
-  border: 1px solid rgba(21, 50, 116, 0.08);
-}
-
-.dark .prose table th,
-.dark .prose table td,
-.prose-invert table th,
-.prose-invert table td {
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid var(--prose-table-border);
 }
 
 .prose ul > li::marker {
-  color: #224faf;
-}
-
-.dark .prose ul > li::marker,
-.prose-invert ul > li::marker {
-  color: #60a5fa;
+  color: var(--prose-marker);
 }
 
 .tag-chip {
@@ -107,12 +69,12 @@ textarea {
   align-items: center;
   gap: 0.25rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.75);
-  color: #0f2456;
+  background: var(--chip-bg);
+  color: var(--chip-text);
   padding: 0.35rem 0.85rem;
   font-size: 0.9rem;
   font-weight: 500;
-  box-shadow: 0 6px 24px -16px rgba(15, 36, 74, 0.35);
+  box-shadow: var(--chip-shadow);
 }
 
 @keyframes progress {
@@ -139,3 +101,88 @@ textarea {
   align-items: center;
   justify-content: center;
 }
+
+@layer components {
+  /* Bridge: allow new "Workspace layout / Focus Mode layout" patches to use theme classes without breaking Tailwind UI. */
+  .card {
+    @apply p-6;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-card);
+    padding: var(--space-24);
+  }
+  .button-primary {
+    @apply h-11 text-base font-semibold transition-colors shadow-sm;
+    background: var(--accent);
+    color: var(--on-accent);
+    border-radius: var(--radius-btn);
+    padding: 10px 16px;
+  }
+  .button-primary:hover { background: var(--accent-hover); }
+  .button-secondary {
+    @apply h-11 text-base font-medium transition-colors;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-btn);
+    padding: 10px 16px;
+  }
+  .button-secondary:hover { filter: brightness(0.98); }
+  .shadow-soft {
+    @apply shadow-sm;
+  }
+
+  .primary-btn {
+    @apply h-11 px-6 rounded-[10px] text-base font-semibold transition-colors shadow-sm;
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .secondary-btn {
+    @apply h-11 px-6 rounded-[10px] text-base font-medium transition-colors;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .section-description {
+    @apply text-base mb-6;
+    color: var(--text-secondary);
+  }
+
+  .page-wrap {
+    @apply w-full max-w-screen-xl mx-auto;
+  }
+
+  .tab-btn {
+    @apply py-3 border-b-2 text-base font-medium transition-colors;
+  }
+
+  .tab-btn-active {
+    @apply border-b-2;
+    border-bottom-color: var(--accent);
+    color: var(--text);
+  }
+
+  .tab-btn-inactive {
+    @apply border-transparent;
+    color: var(--text-light);
+  }
+  .tab-btn-inactive:hover { color: var(--text); }
+
+  .subtle-card {
+    @apply rounded-xl p-6;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .empty-state-icon {
+    @apply text-4xl mb-3;
+  }
+}
+
+/* Theme utility classes live in `src/styles/theme.css` (single source of truth). */

@@ -1,98 +1,98 @@
 const EXECUTION_TEMPLATES = [
-  "Define the success metrics you will track for {{idea}} so progress maps cleanly to your goal of {{goalType}}.",
-  "Map the end-to-end customer journey for {{idea}}, highlighting where your {{skillStrength}} strengths create outsized value.",
-  "Break work into weekly sprints that respect your availability of {{timeCommitment}}, and assign a focus theme to each sprint.",
-  "Line up at least five discovery conversations with {{focus}} prospects to validate demand before you build further.",
-  "Prototype the core experience for {{idea}} and gather feedback using lightweight tools that fit your {{budgetRange}} budget.",
-  "Run two pricing experiments that reflect how {{idea}} monetizes, keeping each test under {{budgetRange}} per month.",
-  "Design a launch playbook that matches your preferred {{workStyle}} work style and existing distribution channels.",
-  "Outline tooling, partners, or contractors required for {{idea}}, then secure one quick-win collaboration this month.",
-  "Schedule bi-weekly reviews to check traction, cost, and energy levels so {{idea}} stays aligned with your goal of {{goalType}}.",
-  "Identify the first collaborator who complements your {{skillStrength}} strengths and draft how they would accelerate {{idea}}.",
-  "Document a fallback scenario that keeps {{idea}} moving even if key assumptions fail, protecting your {{budgetRange}} commitment.",
+ "Define the success metrics you will track for {{idea}} so progress maps cleanly to your goal of {{goalType}}.",
+ "Map the end-to-end customer journey for {{idea}}, highlighting where your {{skillStrength}} strengths create outsized value.",
+ "Break work into weekly sprints that respect your availability of {{timeCommitment}}, and assign a focus theme to each sprint.",
+ "Line up at least five discovery conversations with {{focus}} prospects to validate demand before you build further.",
+ "Prototype the core experience for {{idea}} and gather feedback using lightweight tools that fit your {{budgetRange}} budget.",
+ "Run two pricing experiments that reflect how {{idea}} monetizes, keeping each test under {{budgetRange}} per month.",
+ "Design a launch playbook that matches your preferred {{workStyle}} work style and existing distribution channels.",
+ "Outline tooling, partners, or contractors required for {{idea}}, then secure one quick-win collaboration this month.",
+ "Schedule bi-weekly reviews to check traction, cost, and energy levels so {{idea}} stays aligned with your goal of {{goalType}}.",
+ "Identify the first collaborator who complements your {{skillStrength}} strengths and draft how they would accelerate {{idea}}.",
+ "Document a fallback scenario that keeps {{idea}} moving even if key assumptions fail, protecting your {{budgetRange}} commitment.",
 ];
 
 const FINANCIAL_TEMPLATES = [
-  {
-    focus: "Launch runway",
-    estimate:
-      "Baseline monthly spend for {{idea}} stays inside your current budget band.",
-    metric: "{{monthlyBurn}} / month",
-  },
-  {
-    focus: "Break-even horizon",
-    estimate:
-      "Projected break-even lands in month {{breakevenMonths}} if you reinvest a share of early revenue.",
-    metric: "Reinvest {{reinvestmentPercent}}",
-  },
-  {
-    focus: "Startup capital",
-    estimate:
-      "You can launch {{idea}} with lean upfront investment while keeping a healthy runway buffer.",
-    metric: "Initial outlay {{startupCost}}",
-  },
-  {
-    focus: "Upside scenario",
-    estimate:
-      "If traction holds, monthly profit potential for {{idea}} can reach a meaningful revenue floor.",
-    metric: "Upside {{upsideRevenue}} / month",
-  },
-  {
-    focus: "Safety reserve",
-    estimate:
-      "Maintain a fallback reserve so unexpected delays do not jeopardize your baseline finances.",
-    metric: "Reserve {{fallbackReserve}} ({{cashBufferPercent}} of savings)",
-  },
+ {
+ focus: "Launch runway",
+ estimate:
+ "Baseline monthly spend for {{idea}} stays inside your current budget band.",
+ metric: "{{monthlyBurn}} / month",
+ },
+ {
+ focus: "Break-even horizon",
+ estimate:
+ "Projected break-even lands in month {{breakevenMonths}} if you reinvest a share of early revenue.",
+ metric: "Reinvest {{reinvestmentPercent}}",
+ },
+ {
+ focus: "Startup capital",
+ estimate:
+ "You can launch {{idea}} with lean upfront investment while keeping a healthy runway buffer.",
+ metric: "Initial outlay {{startupCost}}",
+ },
+ {
+ focus: "Upside scenario",
+ estimate:
+ "If traction holds, monthly profit potential for {{idea}} can reach a meaningful revenue floor.",
+ metric: "Upside {{upsideRevenue}} / month",
+ },
+ {
+ focus: "Safety reserve",
+ estimate:
+ "Maintain a fallback reserve so unexpected delays do not jeopardize your baseline finances.",
+ metric: "Reserve {{fallbackReserve}} ({{cashBufferPercent}} of savings)",
+ },
 ];
 
 const VALIDATION_TEMPLATES = [
-  {
-    question: "What signal would convince you that {{idea}} solves a burning pain for {{audience}}?",
-    listenFor: "Watch for specific moments where the pain shows up, and which workaround they rely on today.",
-    actOn: "Use their answer to prioritize problem statements in your landing page or interview script.",
-  },
-  {
-    question: "How would your ideal customer describe success after using {{idea}} for a month?",
-    listenFor: "Look for tangible outcomes or metrics they expect to improve, not vague feelings.",
-    actOn: "Translate their desired outcome into your product promise and onboarding checklist.",
-  },
-  {
-    question: "Which paid channel or partnership can prove traction for {{idea}} without exceeding your budget?",
-    listenFor: "Note channels they already trust or partners who can introduce them to new audiences quickly.",
-    actOn: "Use the responses to shape your first acquisition experiment and outreach list.",
-  },
-  {
-    question: "What outcome must happen in the next 30 days for you to double down on {{idea}}?",
-    listenFor: "Identify the minimum viable proof they need—usage, lead volume, or revenue threshold.",
-    actOn: "Convert that outcome into an experiment metric so you know when to scale or pivot.",
-  },
-  {
-    question: "What makes {{idea}} the best use of your time compared with other paths toward {{goal}}?",
-    listenFor: "Listen for advantages that differentiate you—speed, domain expertise, or available assets.",
-    actOn: "Highlight those advantages in your pitch and deprioritize activities that don't leverage them.",
-  },
-  {
-    question: "Who can give you the fastest, most honest feedback on the core promise of {{idea}}?",
-    listenFor: "Names of customer segments, advisors, or distribution partners who influence decisions.",
-    actOn: "Reach out to the people mentioned and structure interviews around their decision criteria.",
-  },
-  {
-    question: "What retention or repeat behavior will show {{idea}} is building long-term value?",
-    listenFor: "Seek concrete behaviors—monthly usage, renewals, referrals—rather than general satisfaction.",
-    actOn: "Track the behavior they cite as your north-star metric during pilot tests.",
-  },
+ {
+ question: "What signal would convince you that {{idea}} solves a burning pain for {{audience}}?",
+ listenFor: "Watch for specific moments where the pain shows up, and which workaround they rely on today.",
+ actOn: "Use their answer to prioritize problem statements in your landing page or interview script.",
+ },
+ {
+ question: "How would your ideal customer describe success after using {{idea}} for a month?",
+ listenFor: "Look for tangible outcomes or metrics they expect to improve, not vague feelings.",
+ actOn: "Translate their desired outcome into your product promise and onboarding checklist.",
+ },
+ {
+ question: "Which paid channel or partnership can prove traction for {{idea}} without exceeding your budget?",
+ listenFor: "Note channels they already trust or partners who can introduce them to new audiences quickly.",
+ actOn: "Use the responses to shape your first acquisition experiment and outreach list.",
+ },
+ {
+ question: "What outcome must happen in the next 30 days for you to double down on {{idea}}?",
+ listenFor: "Identify the minimum viable proof they need—usage, lead volume, or revenue threshold.",
+ actOn: "Convert that outcome into an experiment metric so you know when to scale or pivot.",
+ },
+ {
+ question: "What makes {{idea}} the best use of your time compared with other paths toward {{goal}}?",
+ listenFor: "Listen for advantages that differentiate you—speed, domain expertise, or available assets.",
+ actOn: "Highlight those advantages in your pitch and deprioritize activities that don't leverage them.",
+ },
+ {
+ question: "Who can give you the fastest, most honest feedback on the core promise of {{idea}}?",
+ listenFor: "Names of customer segments, advisors, or distribution partners who influence decisions.",
+ actOn: "Reach out to the people mentioned and structure interviews around their decision criteria.",
+ },
+ {
+ question: "What retention or repeat behavior will show {{idea}} is building long-term value?",
+ listenFor: "Seek concrete behaviors—monthly usage, renewals, referrals—rather than general satisfaction.",
+ actOn: "Track the behavior they cite as your north-star metric during pilot tests.",
+ },
 ];
 
 const PERSONALIZATION_RULES = [
-  { pattern: /\bthe user's\b/gi, replacement: "your" },
-  { pattern: /\bthe users\b/gi, replacement: "your" },
-  { pattern: /\bthe user\b/gi, replacement: "you" },
-  { pattern: /\buser's\b/gi, replacement: "your" },
-  { pattern: /\busers\b/gi, replacement: "customers" },
-  { pattern: /\buser\b/gi, replacement: "you" },
-  { pattern: /\btheir goal\b/gi, replacement: "your goal" },
-  { pattern: /\btheir goals\b/gi, replacement: "your goals" },
-  { pattern: /\btheir\b/gi, replacement: "your" },
+ { pattern: /\bthe user's\b/gi, replacement: "your" },
+ { pattern: /\bthe users\b/gi, replacement: "your" },
+ { pattern: /\bthe user\b/gi, replacement: "you" },
+ { pattern: /\buser's\b/gi, replacement: "your" },
+ { pattern: /\busers\b/gi, replacement: "customers" },
+ { pattern: /\buser\b/gi, replacement: "you" },
+ { pattern: /\btheir goal\b/gi, replacement: "your goal" },
+ { pattern: /\btheir goals\b/gi, replacement: "your goals" },
+ { pattern: /\btheir\b/gi, replacement: "your" },
 ];
 
 // Cache for personalizeCopy to avoid re-processing same text
@@ -102,1478 +102,1478 @@ import { logToFile, logSectionToFile } from "../fileLogger.js";
 const MAX_CACHE_SIZE = 1000;
 
 export function personalizeCopy(text = "") {
-  if (!text || typeof text !== "string") return text;
-  
-  // Check cache first
-  if (personalizeCache.has(text)) {
-    return personalizeCache.get(text);
-  }
-  
-  // Apply personalization rules
-  const result = PERSONALIZATION_RULES.reduce(
-    (acc, { pattern, replacement }) => acc.replace(pattern, replacement),
-    text
-  );
-  
-  // Cache the result (with size limit to prevent memory issues)
-  if (personalizeCache.size >= MAX_CACHE_SIZE) {
-    // Remove oldest entry (simple FIFO)
-    const firstKey = personalizeCache.keys().next().value;
-    personalizeCache.delete(firstKey);
-  }
-  personalizeCache.set(text, result);
-  
-  return result;
+ if (!text || typeof text !== "string") return text;
+ 
+ // Check cache first
+ if (personalizeCache.has(text)) {
+ return personalizeCache.get(text);
+ }
+ 
+ // Apply personalization rules
+ const result = PERSONALIZATION_RULES.reduce(
+ (acc, { pattern, replacement }) => acc.replace(pattern, replacement),
+ text
+ );
+ 
+ // Cache the result (with size limit to prevent memory issues)
+ if (personalizeCache.size >= MAX_CACHE_SIZE) {
+ // Remove oldest entry (simple FIFO)
+ const firstKey = personalizeCache.keys().next().value;
+ personalizeCache.delete(firstKey);
+ }
+ personalizeCache.set(text, result);
+ 
+ return result;
 }
 
 export function splitIdeaSections(body = "") {
-  if (!body) {
-    const msg = "splitIdeaSections: Empty body provided";
-    console.log(msg);
-    logToFile(msg, "WARN", "splitIdeaSections");
-    return {};
-  }
-  
-  // Fixed section headings mapping (exact match only)
-  // FIX #2: Support both lowercase and title case headings from backend
-  const FIXED_HEADINGS = {
-    "### intro": "intro",
-    "### Intro": "intro",
-    "### why this idea fits you": "why_fits",
-    "### Why this Idea Fits You": "why_fits",
-    "### financial snapshot": "financial_snapshot",
-    "### Financial Snapshot": "financial_snapshot",
-    "### execution path": "execution_path",
-    "### Execution Path": "execution_path",
-    "### customer persona": "customer_persona",
-    "### Customer Persona": "customer_persona",
-    "### market opportunity": "market_opportunity",
-    "### Market Opportunity": "market_opportunity",
-    "### key risks & mitigations": "key_risks",
-    "### Key Risks & Mitigations": "key_risks",
-    "### validation questions": "validation_questions",
-    "### Validation Questions": "validation_questions",
-    "### immediate experiments": "immediate_experiments",
-    "### Immediate Experiments": "immediate_experiments",
-    "### immediate next steps": "immediate_next_steps",
-    "### Immediate Next Steps": "immediate_next_steps",
-    "### timeline & effort": "timeline_effort",
-    "### Timeline & Effort": "timeline_effort",
-    "### decision checklist": "decision_checklist",
-    "### Decision Checklist": "decision_checklist",
-    "### additional insights": "additional_insights",
-    "### Additional Insights": "additional_insights",
-  };
-  
-  const parseInfo = `Parsing body, length: ${body.length}\nFirst 500 chars: ${body.substring(0, 500)}`;
-  console.log("splitIdeaSections: Parsing body, length:", body.length);
-  console.log("splitIdeaSections: First 500 chars:", body.substring(0, 500));
-  logToFile(parseInfo, "INFO", "splitIdeaSections");
-  
-  const sections = {};
-  let current = null;
-  const lines = body.split(/\r?\n/);
-  
-  for (const line of lines) {
-    const trimmed = line.trim();
-    
-    // FIX #2: Check for exact markdown heading match (### Heading)
-    // Support both ### Heading and ###Heading (with or without space)
-    const headingMatch = trimmed.match(/^###\s*(.+)$/i);
-    if (headingMatch) {
-      const headingText = headingMatch[1].trim().toLowerCase();
-      const fullHeading = `### ${headingText}`;
-      console.log("splitIdeaSections: Found heading:", fullHeading, "| normalized:", headingText);
-      logToFile(`Found heading: ${fullHeading}`, "DEBUG", "splitIdeaSections");
-      
-      // Find matching fixed heading (case-insensitive comparison)
-      let found = false;
-      for (const [fixedHeading, sectionKey] of Object.entries(FIXED_HEADINGS)) {
-        const normalizedFixed = fixedHeading.replace(/^###\s*/i, "").toLowerCase();
-        if (headingText === normalizedFixed) {
-          current = sectionKey;
-          sections[current] = sections[current] || [];
-          console.log("splitIdeaSections: ✅ Matched heading to section:", sectionKey, "| heading:", headingText);
-          logToFile(`Matched heading to section: ${sectionKey}`, "DEBUG", "splitIdeaSections");
-          found = true;
-          break;
-        }
-      }
-      // If no match found, log warning and reset current
-      if (!found) {
-        const warnMsg = `No match for heading: ${headingText}, Available headings: ${Object.keys(FIXED_HEADINGS).join(", ")}`;
-        console.warn("splitIdeaSections: ⚠️ No match for heading:", headingText, "| Available headings:", Object.keys(FIXED_HEADINGS));
-        logToFile(warnMsg, "WARN", "splitIdeaSections");
-        current = null;  // Reset so content doesn't go to wrong section
-      }
-    } else if (trimmed.length > 0 && current) {
-      // Add content to current section
-      sections[current].push(line.replace(/\*\*/g, ""));
-    }
-  }
-  
-  // Convert arrays to strings and personalize
-  const result = Object.fromEntries(
-    Object.entries(sections).map(([key, value]) => [
-      key,
-      personalizeCopy(Array.isArray(value) ? value.join("\n").trim() : (value || "").trim())
-    ])
-  );
-  
-  const sectionsWithContent = Object.keys(result).filter(k => result[k]);
-  console.log("splitIdeaSections: Parsed sections with content:", sectionsWithContent);
-  console.log("splitIdeaSections: Result keys:", Object.keys(result));
-  
-  const parseResult = `Parsed sections with content: ${sectionsWithContent.join(", ")}\nResult keys: ${Object.keys(result).join(", ")}\nFull result: ${JSON.stringify(result, null, 2)}`;
-  logSectionToFile("splitIdeaSections - PARSED RESULT", parseResult, "INFO", "splitIdeaSections");
-  
-  return result;
+ if (!body) {
+ const msg = "splitIdeaSections: Empty body provided";
+ console.log(msg);
+ logToFile(msg, "WARN", "splitIdeaSections");
+ return {};
+ }
+ 
+ // Fixed section headings mapping (exact match only)
+ // FIX #2: Support both lowercase and title case headings from backend
+ const FIXED_HEADINGS = {
+ "### intro": "intro",
+ "### Intro": "intro",
+ "### why this idea fits you": "why_fits",
+ "### Why this Idea Fits You": "why_fits",
+ "### financial snapshot": "financial_snapshot",
+ "### Financial Snapshot": "financial_snapshot",
+ "### execution path": "execution_path",
+ "### Execution Path": "execution_path",
+ "### customer persona": "customer_persona",
+ "### Customer Persona": "customer_persona",
+ "### market opportunity": "market_opportunity",
+ "### Market Opportunity": "market_opportunity",
+ "### key risks & mitigations": "key_risks",
+ "### Key Risks & Mitigations": "key_risks",
+ "### validation questions": "validation_questions",
+ "### Validation Questions": "validation_questions",
+ "### immediate experiments": "immediate_experiments",
+ "### Immediate Experiments": "immediate_experiments",
+ "### immediate next steps": "immediate_next_steps",
+ "### Immediate Next Steps": "immediate_next_steps",
+ "### timeline & effort": "timeline_effort",
+ "### Timeline & Effort": "timeline_effort",
+ "### decision checklist": "decision_checklist",
+ "### Decision Checklist": "decision_checklist",
+ "### additional insights": "additional_insights",
+ "### Additional Insights": "additional_insights",
+ };
+ 
+ const parseInfo = `Parsing body, length: ${body.length}\nFirst 500 chars: ${body.substring(0, 500)}`;
+ console.log("splitIdeaSections: Parsing body, length:", body.length);
+ console.log("splitIdeaSections: First 500 chars:", body.substring(0, 500));
+ logToFile(parseInfo, "INFO", "splitIdeaSections");
+ 
+ const sections = {};
+ let current = null;
+ const lines = body.split(/\r?\n/);
+ 
+ for (const line of lines) {
+ const trimmed = line.trim();
+ 
+ // FIX #2: Check for exact markdown heading match (### Heading)
+ // Support both ### Heading and ###Heading (with or without space)
+ const headingMatch = trimmed.match(/^###\s*(.+)$/i);
+ if (headingMatch) {
+ const headingText = headingMatch[1].trim().toLowerCase();
+ const fullHeading = `### ${headingText}`;
+ console.log("splitIdeaSections: Found heading:", fullHeading, "| normalized:", headingText);
+ logToFile(`Found heading: ${fullHeading}`, "DEBUG", "splitIdeaSections");
+ 
+ // Find matching fixed heading (case-insensitive comparison)
+ let found = false;
+ for (const [fixedHeading, sectionKey] of Object.entries(FIXED_HEADINGS)) {
+ const normalizedFixed = fixedHeading.replace(/^###\s*/i, "").toLowerCase();
+ if (headingText === normalizedFixed) {
+ current = sectionKey;
+ sections[current] = sections[current] || [];
+ console.log("splitIdeaSections: ✅ Matched heading to section:", sectionKey, "| heading:", headingText);
+ logToFile(`Matched heading to section: ${sectionKey}`, "DEBUG", "splitIdeaSections");
+ found = true;
+ break;
+ }
+ }
+ // If no match found, log warning and reset current
+ if (!found) {
+ const warnMsg = `No match for heading: ${headingText}, Available headings: ${Object.keys(FIXED_HEADINGS).join(", ")}`;
+ console.warn("splitIdeaSections: ⚠️ No match for heading:", headingText, "| Available headings:", Object.keys(FIXED_HEADINGS));
+ logToFile(warnMsg, "WARN", "splitIdeaSections");
+ current = null; // Reset so content doesn't go to wrong section
+ }
+ } else if (trimmed.length > 0 && current) {
+ // Add content to current section
+ sections[current].push(line.replace(/\*\*/g, ""));
+ }
+ }
+ 
+ // Convert arrays to strings and personalize
+ const result = Object.fromEntries(
+ Object.entries(sections).map(([key, value]) => [
+ key,
+ personalizeCopy(Array.isArray(value) ? value.join("\n").trim() : (value || "").trim())
+ ])
+ );
+ 
+ const sectionsWithContent = Object.keys(result).filter(k => result[k]);
+ console.log("splitIdeaSections: Parsed sections with content:", sectionsWithContent);
+ console.log("splitIdeaSections: Result keys:", Object.keys(result));
+ 
+ const parseResult = `Parsed sections with content: ${sectionsWithContent.join(", ")}\nResult keys: ${Object.keys(result).join(", ")}\nFull result: ${JSON.stringify(result, null, 2)}`;
+ logSectionToFile("splitIdeaSections - PARSED RESULT", parseResult, "INFO", "splitIdeaSections");
+ 
+ return result;
 }
 
 export function formatSectionHeading(raw = "") {
-  const cleaned = personalizeCopy(raw)
-    .replace(/[_-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return cleaned.replace(/\b\w/g, (char) => char.toUpperCase());
+ const cleaned = personalizeCopy(raw)
+ .replace(/[_-]/g, " ")
+ .replace(/\s+/g, " ")
+ .trim();
+ return cleaned.replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function extractListFromText(text = "") {
-  if (!text) return [];
-  const lines = text.split(/\r?\n/);
-  const items = [];
-  lines.forEach((line) => {
-    const trimmed = line.trim();
-    // Skip lines that are section headers like "Execution Path:" or "Days 0-30:"
-    if (/^(execution\s+path|days\s+0[-\s]?30)[:\s]*$/i.test(trimmed)) {
-      return;
-    }
-    if (/^[-*+]\s+/.test(trimmed)) {
-      const item = trimmed.replace(/^[-*+]\s+/, "").trim();
-      // Skip if it's just "Execution Path:" or similar
-      if (!/^(execution\s+path|days\s+0[-\s]?30)[:\s]*$/i.test(item)) {
-        items.push(item);
-      }
-    } else if (/^\d+[\.\)]\s+/.test(trimmed)) {
-      const item = trimmed.replace(/^\d+[\.\)]\s+/, "").trim();
-      // Skip if it's just "Execution Path:" or similar
-      if (!/^(execution\s+path|days\s+0[-\s]?30)[:\s]*$/i.test(item)) {
-        items.push(item);
-      }
-    }
-  });
+ if (!text) return [];
+ const lines = text.split(/\r?\n/);
+ const items = [];
+ lines.forEach((line) => {
+ const trimmed = line.trim();
+ // Skip lines that are section headers like "Execution Path:" or "Days 0-30:"
+ if (/^(execution\s+path|days\s+0[-\s]?30)[:\s]*$/i.test(trimmed)) {
+ return;
+ }
+ if (/^[-*+]\s+/.test(trimmed)) {
+ const item = trimmed.replace(/^[-*+]\s+/, "").trim();
+ // Skip if it's just "Execution Path:" or similar
+ if (!/^(execution\s+path|days\s+0[-\s]?30)[:\s]*$/i.test(item)) {
+ items.push(item);
+ }
+ } else if (/^\d+[\.\)]\s+/.test(trimmed)) {
+ const item = trimmed.replace(/^\d+[\.\)]\s+/, "").trim();
+ // Skip if it's just "Execution Path:" or similar
+ if (!/^(execution\s+path|days\s+0[-\s]?30)[:\s]*$/i.test(item)) {
+ items.push(item);
+ }
+ }
+ });
 
-  if (items.length > 0) {
-    return items.map((item) => {
-      // Clean item - remove "Execution Path:" prefix if present
-      const cleaned = personalizeCopy(item)
-        .replace(/^execution\s+path[:\s]*/i, "")
-        .replace(/^[-*]\s*\*\*execution\s+path\*\*[:\s]*/i, "")
-        .replace(/^[-*]\s*execution\s+path[:\s]*/i, "")
-        .replace(/\*\*execution\s+path\*\*[:\s]*/gi, "")
-        .replace(/^[-*]\s*/g, "")
-        .trim();
-      return cleaned;
-    });
-  }
+ if (items.length > 0) {
+ return items.map((item) => {
+ // Clean item - remove "Execution Path:" prefix if present
+ const cleaned = personalizeCopy(item)
+ .replace(/^execution\s+path[:\s]*/i, "")
+ .replace(/^[-*]\s*\*\*execution\s+path\*\*[:\s]*/i, "")
+ .replace(/^[-*]\s*execution\s+path[:\s]*/i, "")
+ .replace(/\*\*execution\s+path\*\*[:\s]*/gi, "")
+ .replace(/^[-*]\s*/g, "")
+ .trim();
+ return cleaned;
+ });
+ }
 
-  // Fallback: split into sentences if bullets are missing.
-  const sentenceItems = text
-    .split(/(?<=[.!?])\s+/)
-    .map((sentence) => sentence.trim())
-    .filter((sentence) => sentence.length > 0);
-  return sentenceItems.map((sentence) => personalizeCopy(sentence));
+ // Fallback: split into sentences if bullets are missing.
+ const sentenceItems = text
+ .split(/(?<=[.!?])\s+/)
+ .map((sentence) => sentence.trim())
+ .filter((sentence) => sentence.length > 0);
+ return sentenceItems.map((sentence) => personalizeCopy(sentence));
 }
 
 export function extractWhyFit(sectionText = "") {
-  return extractListFromText(sectionText);
+ return extractListFromText(sectionText);
 }
 
 export function buildExecutionSteps(
-  sectionText = "",
-  ideaTitle = "",
-  {
-    goalType = "your goal",
-    timeCommitment = "10–15 hrs/week",
-    budgetRange = "a lean launch budget",
-    workStyle = "your preferred work style",
-    skillStrength = "core strengths",
-    focus = "target customers",
-  } = {}
+ sectionText = "",
+ ideaTitle = "",
+ {
+ goalType = "your goal",
+ timeCommitment = "10–15 hrs/week",
+ budgetRange = "a lean launch budget",
+ workStyle = "your preferred work style",
+ skillStrength = "core strengths",
+ focus = "target customers",
+ } = {}
 ) {
-  const items = extractListFromText(sectionText);
-  const normalizedTitle = ideaTitle || "this idea";
-  const steps = [];
+ const items = extractListFromText(sectionText);
+ const normalizedTitle = ideaTitle || "this idea";
+ const steps = [];
 
-  const seen = new Set();
-  items.forEach((item) => {
-    const cleaned = personalizeCopy(item);
-    const fingerprint = cleaned.toLowerCase();
-    if (!seen.has(fingerprint)) {
-      seen.add(fingerprint);
-      steps.push(cleaned);
-    }
-  });
+ const seen = new Set();
+ items.forEach((item) => {
+ const cleaned = personalizeCopy(item);
+ const fingerprint = cleaned.toLowerCase();
+ if (!seen.has(fingerprint)) {
+ seen.add(fingerprint);
+ steps.push(cleaned);
+ }
+ });
 
-  // Create idea-specific variations by using idea title to seed template selection
-  // This ensures different ideas get different step orders and variations
-  const ideaHash = normalizedTitle.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const shuffledTemplates = [...EXECUTION_TEMPLATES];
-  
-  // Shuffle templates based on idea title to vary the order
-  for (let i = shuffledTemplates.length - 1; i > 0; i--) {
-    const j = (ideaHash + i) % (i + 1);
-    [shuffledTemplates[i], shuffledTemplates[j]] = [shuffledTemplates[j], shuffledTemplates[i]];
-  }
+ // Create idea-specific variations by using idea title to seed template selection
+ // This ensures different ideas get different step orders and variations
+ const ideaHash = normalizedTitle.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+ const shuffledTemplates = [...EXECUTION_TEMPLATES];
+ 
+ // Shuffle templates based on idea title to vary the order
+ for (let i = shuffledTemplates.length - 1; i > 0; i--) {
+ const j = (ideaHash + i) % (i + 1);
+ [shuffledTemplates[i], shuffledTemplates[j]] = [shuffledTemplates[j], shuffledTemplates[i]];
+ }
 
-  let templateIndex = 0;
-  while (steps.length < 10 && templateIndex < shuffledTemplates.length) {
-    const template = shuffledTemplates[templateIndex];
-    
-    // Add idea-specific variations to make steps more unique
-    const ideaVariations = {
-      "ai": "Leverage AI tools and APIs",
-      "platform": "Set up your platform infrastructure",
-      "marketplace": "Build your marketplace foundation",
-      "service": "Design your service delivery model",
-      "app": "Develop your app architecture",
-      "saas": "Build your SaaS infrastructure",
-    };
-    
-    let ideaSpecificPrefix = "";
-    for (const [keyword, prefix] of Object.entries(ideaVariations)) {
-      if (normalizedTitle.toLowerCase().includes(keyword)) {
-        ideaSpecificPrefix = prefix;
-        break;
-      }
-    }
-    
-    const filled = template
-      .replace(/{{idea}}/g, normalizedTitle)
-      .replace(/{{goalType}}/g, goalType)
-      .replace(/{{timeCommitment}}/g, timeCommitment)
-      .replace(/{{budgetRange}}/g, budgetRange)
-      .replace(/{{workStyle}}/g, workStyle)
-      .replace(/{{skillStrength}}/g, skillStrength)
-      .replace(/{{focus}}/g, focus)
-      .replace(/{{categoryPlan}}/g, focusSpecificPlan(focus));
-    
-    // Add idea-specific context to make steps more unique (only for first step to avoid duplication)
-    let enhancedStep = filled;
-    // Only add prefix if it's the first template AND the filled template doesn't already contain the prefix text
-    const prefixFirstWord = ideaSpecificPrefix ? ideaSpecificPrefix.toLowerCase().split(' ')[0] : '';
-    const filledLower = filled.toLowerCase();
-    const alreadyHasPrefix = prefixFirstWord && filledLower.includes(prefixFirstWord) && filledLower.includes('service delivery');
-    
-    if (ideaSpecificPrefix && templateIndex === 0 && !alreadyHasPrefix) {
-      enhancedStep = `${ideaSpecificPrefix} for ${normalizedTitle}. ${filled}`;
-    }
-    
-    const cleaned = personalizeCopy(enhancedStep);
-    const fingerprint = cleaned.toLowerCase();
-    
-    // Check for duplicates - both full text and core content (without prefix)
-    const coreContent = cleaned.replace(/^[^.]*\.\s*/i, '').toLowerCase().trim();
-    const isDuplicate = seen.has(fingerprint) || seen.has(coreContent);
-    
-    if (!isDuplicate) {
-      seen.add(fingerprint);
-      seen.add(coreContent);
-      steps.push(cleaned);
-    }
-    templateIndex += 1;
-  }
-  
-  // Add more idea-specific fallbacks
-  while (steps.length < 10) {
-    const ideaSpecificFallbacks = [
-      `Research competitors in the ${normalizedTitle} space and identify your unique positioning.`,
-      `Create a minimum viable version of ${normalizedTitle} that you can test with real users.`,
-      `Set up analytics and tracking to measure how ${normalizedTitle} performs.`,
-      `Build a waitlist or early access program for ${normalizedTitle}.`,
-      `Develop a go-to-market strategy specifically for ${normalizedTitle}.`,
-    ];
-    const fallbackIndex = (ideaHash + steps.length) % ideaSpecificFallbacks.length;
-    const fallback = ideaSpecificFallbacks[fallbackIndex]
-      .replace(/{{idea}}/g, normalizedTitle)
-      .replace(/{{goalType}}/g, goalType);
-    const fingerprint = fallback.toLowerCase();
-    if (!seen.has(fingerprint)) {
-      seen.add(fingerprint);
-      steps.push(fallback);
-    } else {
-      break;
-    }
-  }
-  return steps.slice(0, Math.max(10, steps.length));
+ let templateIndex = 0;
+ while (steps.length < 10 && templateIndex < shuffledTemplates.length) {
+ const template = shuffledTemplates[templateIndex];
+ 
+ // Add idea-specific variations to make steps more unique
+ const ideaVariations = {
+ "ai": "Leverage AI tools and APIs",
+ "platform": "Set up your platform infrastructure",
+ "marketplace": "Build your marketplace foundation",
+ "service": "Design your service delivery model",
+ "app": "Develop your app architecture",
+ "saas": "Build your SaaS infrastructure",
+ };
+ 
+ let ideaSpecificPrefix = "";
+ for (const [keyword, prefix] of Object.entries(ideaVariations)) {
+ if (normalizedTitle.toLowerCase().includes(keyword)) {
+ ideaSpecificPrefix = prefix;
+ break;
+ }
+ }
+ 
+ const filled = template
+ .replace(/{{idea}}/g, normalizedTitle)
+ .replace(/{{goalType}}/g, goalType)
+ .replace(/{{timeCommitment}}/g, timeCommitment)
+ .replace(/{{budgetRange}}/g, budgetRange)
+ .replace(/{{workStyle}}/g, workStyle)
+ .replace(/{{skillStrength}}/g, skillStrength)
+ .replace(/{{focus}}/g, focus)
+ .replace(/{{categoryPlan}}/g, focusSpecificPlan(focus));
+ 
+ // Add idea-specific context to make steps more unique (only for first step to avoid duplication)
+ let enhancedStep = filled;
+ // Only add prefix if it's the first template AND the filled template doesn't already contain the prefix text
+ const prefixFirstWord = ideaSpecificPrefix ? ideaSpecificPrefix.toLowerCase().split(' ')[0] : '';
+ const filledLower = filled.toLowerCase();
+ const alreadyHasPrefix = prefixFirstWord && filledLower.includes(prefixFirstWord) && filledLower.includes('service delivery');
+ 
+ if (ideaSpecificPrefix && templateIndex === 0 && !alreadyHasPrefix) {
+ enhancedStep = `${ideaSpecificPrefix} for ${normalizedTitle}. ${filled}`;
+ }
+ 
+ const cleaned = personalizeCopy(enhancedStep);
+ const fingerprint = cleaned.toLowerCase();
+ 
+ // Check for duplicates - both full text and core content (without prefix)
+ const coreContent = cleaned.replace(/^[^.]*\.\s*/i, '').toLowerCase().trim();
+ const isDuplicate = seen.has(fingerprint) || seen.has(coreContent);
+ 
+ if (!isDuplicate) {
+ seen.add(fingerprint);
+ seen.add(coreContent);
+ steps.push(cleaned);
+ }
+ templateIndex += 1;
+ }
+ 
+ // Add more idea-specific fallbacks
+ while (steps.length < 10) {
+ const ideaSpecificFallbacks = [
+ `Research competitors in the ${normalizedTitle} space and identify your unique positioning.`,
+ `Create a minimum viable version of ${normalizedTitle} that you can test with real users.`,
+ `Set up analytics and tracking to measure how ${normalizedTitle} performs.`,
+ `Build a waitlist or early access program for ${normalizedTitle}.`,
+ `Develop a go-to-market strategy specifically for ${normalizedTitle}.`,
+ ];
+ const fallbackIndex = (ideaHash + steps.length) % ideaSpecificFallbacks.length;
+ const fallback = ideaSpecificFallbacks[fallbackIndex]
+ .replace(/{{idea}}/g, normalizedTitle)
+ .replace(/{{goalType}}/g, goalType);
+ const fingerprint = fallback.toLowerCase();
+ if (!seen.has(fingerprint)) {
+ seen.add(fingerprint);
+ steps.push(fallback);
+ } else {
+ break;
+ }
+ }
+ return steps.slice(0, Math.max(10, steps.length));
 }
 
 // Extract numeric value from text (e.g., "$25K" -> 25000, "$120,000" -> 120000)
 function extractCurrency(text) {
-  const match = text.match(/\$[\d,]+(?:\.\d+)?[KMB]?/i);
-  if (!match) return null;
-  let value = match[0].replace(/[$,]/g, "");
-  if (/K/i.test(value)) {
-    value = parseFloat(value) * 1000;
-  } else if (/M/i.test(value)) {
-    value = parseFloat(value) * 1000000;
-  } else if (/B/i.test(value)) {
-    value = parseFloat(value) * 1000000000;
-  }
-  return Math.round(parseFloat(value));
+ const match = text.match(/\$[\d,]+(?:\.\d+)?[KMB]?/i);
+ if (!match) return null;
+ let value = match[0].replace(/[$,]/g, "");
+ if (/K/i.test(value)) {
+ value = parseFloat(value) * 1000;
+ } else if (/M/i.test(value)) {
+ value = parseFloat(value) * 1000000;
+ } else if (/B/i.test(value)) {
+ value = parseFloat(value) * 1000000000;
+ }
+ return Math.round(parseFloat(value));
 }
 
 // Extract time period (e.g., "Year 1", "month 6", "within 12 months")
 function extractTimeframe(text) {
-  const yearMatch = text.match(/(?:within\s+)?(?:year|yr)\s*(\d+)/i);
-  if (yearMatch) return `Year ${yearMatch[1]}`;
-  const monthMatch = text.match(/(?:within\s+)?(?:month|mo)\s*(\d+)/i);
-  if (monthMatch) return `Month ${monthMatch[1]}`;
-  const monthsMatch = text.match(/(\d+)\s*(?:months?|mos?)/i);
-  if (monthsMatch) return `${monthsMatch[1]} months`;
-  return null;
+ const yearMatch = text.match(/(?:within\s+)?(?:year|yr)\s*(\d+)/i);
+ if (yearMatch) return `Year ${yearMatch[1]}`;
+ const monthMatch = text.match(/(?:within\s+)?(?:month|mo)\s*(\d+)/i);
+ if (monthMatch) return `Month ${monthMatch[1]}`;
+ const monthsMatch = text.match(/(\d+)\s*(?:months?|mos?)/i);
+ if (monthsMatch) return `${monthsMatch[1]} months`;
+ return null;
 }
 
 // Parse budget range to get max budget value
 function parseBudgetRange(budgetRange = "") {
-  if (!budgetRange) return null;
-  
-  // Extract numbers from budget range strings like "Up to $5 K", "$20 K and Above", etc.
-  const match = budgetRange.match(/\$?\s*(\d+(?:,\d+)?)\s*K/i);
-  if (match) {
-    return parseInt(match[1].replace(/,/g, "")) * 1000;
-  }
-  
-  // Handle "Free" or "$0"
-  if (/free|sweat|0/i.test(budgetRange)) {
-    return 0;
-  }
-  
-  // Handle ranges like "$1 K" to "$5 K"
-  const rangeMatch = budgetRange.match(/\$?\s*(\d+(?:,\d+)?)\s*K\s*(?:to|-)\s*\$?\s*(\d+(?:,\d+)?)\s*K/i);
-  if (rangeMatch) {
-    return parseInt(rangeMatch[2].replace(/,/g, "")) * 1000;
-  }
-  
-  // Handle "$20 K and Above"
-  if (/and\s+above/i.test(budgetRange)) {
-    const aboveMatch = budgetRange.match(/\$?\s*(\d+(?:,\d+)?)\s*K/i);
-    if (aboveMatch) {
-      return parseInt(aboveMatch[1].replace(/,/g, "")) * 1000;
-    }
-  }
-  
-  return null;
+ if (!budgetRange) return null;
+ 
+ // Extract numbers from budget range strings like "Up to $5 K", "$20 K and Above", etc.
+ const match = budgetRange.match(/\$?\s*(\d+(?:,\d+)?)\s*K/i);
+ if (match) {
+ return parseInt(match[1].replace(/,/g, "")) * 1000;
+ }
+ 
+ // Handle "Free" or "$0"
+ if (/free|sweat|0/i.test(budgetRange)) {
+ return 0;
+ }
+ 
+ // Handle ranges like "$1 K" to "$5 K"
+ const rangeMatch = budgetRange.match(/\$?\s*(\d+(?:,\d+)?)\s*K\s*(?:to|-)\s*\$?\s*(\d+(?:,\d+)?)\s*K/i);
+ if (rangeMatch) {
+ return parseInt(rangeMatch[2].replace(/,/g, "")) * 1000;
+ }
+ 
+ // Handle "$20 K and Above"
+ if (/and\s+above/i.test(budgetRange)) {
+ const aboveMatch = budgetRange.match(/\$?\s*(\d+(?:,\d+)?)\s*K/i);
+ if (aboveMatch) {
+ return parseInt(aboveMatch[1].replace(/,/g, "")) * 1000;
+ }
+ }
+ 
+ return null;
 }
 
 export function buildFinancialSnapshots(sectionText = "", ideaTitle = "", budgetRange = "") {
-  const normalizedTitle = ideaTitle || "this idea";
-  const entries = [];
-  const seen = new Set();
+ const normalizedTitle = ideaTitle || "this idea";
+ const entries = [];
+ const seen = new Set();
 
-  // Parse actual financial data from agent output
-  const text = sectionText.toLowerCase();
-  
-  // Extract startup costs - try multiple patterns to catch all variations
-  let startupCostValue = null;
-  let startupCostText = null;
-  
-  // Pattern 1: "Startup costs: $25,000"
-  const startupCostMatch1 = sectionText.match(/startup\s+costs?[:\-]?\s*(.+?)(?:\n|$)/i);
-  if (startupCostMatch1) {
-    const costText = startupCostMatch1[1];
-    const costValue = extractCurrency(costText);
-    if (costValue) {
-      startupCostValue = costValue;
-      startupCostText = costText.trim();
-    }
-  }
-  
-  // Pattern 2: "Estimated Startup Costs: $25,000" or "Startup investment: $25,000"
-  if (!startupCostValue) {
-    const startupCostMatch2 = sectionText.match(/(?:estimated\s+)?(?:startup\s+)?(?:costs?|investment)[:\-]?\s*(.+?)(?:\n|$)/i);
-    if (startupCostMatch2) {
-      const costText = startupCostMatch2[1];
-      const costValue = extractCurrency(costText);
-      if (costValue) {
-        startupCostValue = costValue;
-        startupCostText = costText.trim();
-      }
-    }
-  }
-  
-  // Pattern 3: Look for any currency amount near "startup" keyword
-  if (!startupCostValue) {
-    const startupContextMatch = sectionText.match(/startup[^:]*?(\$[\d,]+(?:\s*(?:K|thousand))?)/i);
-    if (startupContextMatch) {
-      const costValue = extractCurrency(startupContextMatch[1]);
-      if (costValue) {
-        startupCostValue = costValue;
-        startupCostText = startupContextMatch[1];
-      }
-    }
-  }
-  
-  // Pattern 4: Look for "$25,000" or "$25K" in the first few lines (common format)
-  if (!startupCostValue) {
-    const firstLines = sectionText.split('\n').slice(0, 5).join('\n');
-    const currencyMatch = firstLines.match(/\$[\d,]+(?:\s*(?:K|thousand))?/i);
-    if (currencyMatch) {
-      const costValue = extractCurrency(currencyMatch[0]);
-      if (costValue && costValue >= 1000) { // Only if it's a reasonable startup cost
-        startupCostValue = costValue;
-        startupCostText = currencyMatch[0];
-      }
-    }
-  }
-  
-  if (startupCostValue) {
-    entries.push({
-      focus: "Estimated startup investment",
-      estimate: startupCostText ? personalizeCopy(startupCostText) : `Initial setup costs for ${normalizedTitle}`,
-      metric: formatCurrency(startupCostValue),
-    });
-    seen.add("startup costs");
-  }
+ // Parse actual financial data from agent output
+ const text = sectionText.toLowerCase();
+ 
+ // Extract startup costs - try multiple patterns to catch all variations
+ let startupCostValue = null;
+ let startupCostText = null;
+ 
+ // Pattern 1: "Startup costs: $25,000"
+ const startupCostMatch1 = sectionText.match(/startup\s+costs?[:\-]?\s*(.+?)(?:\n|$)/i);
+ if (startupCostMatch1) {
+ const costText = startupCostMatch1[1];
+ const costValue = extractCurrency(costText);
+ if (costValue) {
+ startupCostValue = costValue;
+ startupCostText = costText.trim();
+ }
+ }
+ 
+ // Pattern 2: "Estimated Startup Costs: $25,000" or "Startup investment: $25,000"
+ if (!startupCostValue) {
+ const startupCostMatch2 = sectionText.match(/(?:estimated\s+)?(?:startup\s+)?(?:costs?|investment)[:\-]?\s*(.+?)(?:\n|$)/i);
+ if (startupCostMatch2) {
+ const costText = startupCostMatch2[1];
+ const costValue = extractCurrency(costText);
+ if (costValue) {
+ startupCostValue = costValue;
+ startupCostText = costText.trim();
+ }
+ }
+ }
+ 
+ // Pattern 3: Look for any currency amount near "startup" keyword
+ if (!startupCostValue) {
+ const startupContextMatch = sectionText.match(/startup[^:]*?(\$[\d,]+(?:\s*(?:K|thousand))?)/i);
+ if (startupContextMatch) {
+ const costValue = extractCurrency(startupContextMatch[1]);
+ if (costValue) {
+ startupCostValue = costValue;
+ startupCostText = startupContextMatch[1];
+ }
+ }
+ }
+ 
+ // Pattern 4: Look for "$25,000" or "$25K" in the first few lines (common format)
+ if (!startupCostValue) {
+ const firstLines = sectionText.split('\n').slice(0, 5).join('\n');
+ const currencyMatch = firstLines.match(/\$[\d,]+(?:\s*(?:K|thousand))?/i);
+ if (currencyMatch) {
+ const costValue = extractCurrency(currencyMatch[0]);
+ if (costValue && costValue >= 1000) { // Only if it's a reasonable startup cost
+ startupCostValue = costValue;
+ startupCostText = currencyMatch[0];
+ }
+ }
+ }
+ 
+ if (startupCostValue) {
+ entries.push({
+ focus: "Estimated startup investment",
+ estimate: startupCostText ? personalizeCopy(startupCostText) : `Initial setup costs for ${normalizedTitle}`,
+ metric: formatCurrency(startupCostValue),
+ });
+ seen.add("startup costs");
+ }
 
-  // Extract revenue projections
-  const revenueMatch = sectionText.match(/revenue\s+projections?[:\-]?\s*(.+?)(?:\n|$)/i);
-  if (revenueMatch) {
-    const revenueText = revenueMatch[1];
-    const revenueValue = extractCurrency(revenueText);
-    const timeframe = extractTimeframe(revenueText);
-    if (revenueValue) {
-      entries.push({
-        focus: "Revenue potential",
-        estimate: personalizeCopy(revenueMatch[1].trim()),
-        metric: timeframe ? `${formatCurrency(revenueValue)} (${timeframe})` : formatCurrency(revenueValue),
-      });
-      seen.add("revenue");
-    }
-  }
+ // Extract revenue projections
+ const revenueMatch = sectionText.match(/revenue\s+projections?[:\-]?\s*(.+?)(?:\n|$)/i);
+ if (revenueMatch) {
+ const revenueText = revenueMatch[1];
+ const revenueValue = extractCurrency(revenueText);
+ const timeframe = extractTimeframe(revenueText);
+ if (revenueValue) {
+ entries.push({
+ focus: "Revenue potential",
+ estimate: personalizeCopy(revenueMatch[1].trim()),
+ metric: timeframe ? `${formatCurrency(revenueValue)} (${timeframe})` : formatCurrency(revenueValue),
+ });
+ seen.add("revenue");
+ }
+ }
 
-  // Extract breakeven
-  const breakevenMatch = sectionText.match(/breakeven[:\-]?\s*(.+?)(?:\n|$)/i);
-  if (breakevenMatch) {
-    const breakevenText = breakevenMatch[1];
-    const timeframe = extractTimeframe(breakevenText);
-    entries.push({
-      focus: "Breakeven timeline",
-      estimate: personalizeCopy(breakevenMatch[1].trim()),
-      metric: timeframe || "TBD",
-    });
-    seen.add("breakeven");
-  }
+ // Extract breakeven
+ const breakevenMatch = sectionText.match(/breakeven[:\-]?\s*(.+?)(?:\n|$)/i);
+ if (breakevenMatch) {
+ const breakevenText = breakevenMatch[1];
+ const timeframe = extractTimeframe(breakevenText);
+ entries.push({
+ focus: "Breakeven timeline",
+ estimate: personalizeCopy(breakevenMatch[1].trim()),
+ metric: timeframe || "TBD",
+ });
+ seen.add("breakeven");
+ }
 
-  // Extract monthly burn/operating costs
-  const burnMatch = sectionText.match(/(?:monthly\s+)?(?:burn|operating\s+costs?|monthly\s+costs?)[:\-]?\s*(.+?)(?:\n|$)/i);
-  if (burnMatch) {
-    const burnValue = extractCurrency(burnMatch[1]);
-    if (burnValue) {
-      entries.push({
-        focus: "Monthly operating costs",
-        estimate: personalizeCopy(burnMatch[1].trim()),
-        metric: formatCurrency(burnValue) + "/month",
-      });
-      seen.add("burn");
-    }
-  }
+ // Extract monthly burn/operating costs
+ const burnMatch = sectionText.match(/(?:monthly\s+)?(?:burn|operating\s+costs?|monthly\s+costs?)[:\-]?\s*(.+?)(?:\n|$)/i);
+ if (burnMatch) {
+ const burnValue = extractCurrency(burnMatch[1]);
+ if (burnValue) {
+ entries.push({
+ focus: "Monthly operating costs",
+ estimate: personalizeCopy(burnMatch[1].trim()),
+ metric: formatCurrency(burnValue) + "/month",
+ });
+ seen.add("burn");
+ }
+ }
 
-  // Extract profit margins or unit economics if mentioned
-  const marginMatch = sectionText.match(/(?:profit\s+)?margin[:\-]?\s*(.+?)(?:\n|$)/i);
-  if (marginMatch && !seen.has("margin")) {
-    entries.push({
-      focus: "Profit margin",
-      estimate: personalizeCopy(marginMatch[1].trim()),
-      metric: marginMatch[1].match(/\d+%/) ? marginMatch[1].match(/\d+%/)[0] : "TBD",
-    });
-    seen.add("margin");
-  }
+ // Extract profit margins or unit economics if mentioned
+ const marginMatch = sectionText.match(/(?:profit\s+)?margin[:\-]?\s*(.+?)(?:\n|$)/i);
+ if (marginMatch && !seen.has("margin")) {
+ entries.push({
+ focus: "Profit margin",
+ estimate: personalizeCopy(marginMatch[1].trim()),
+ metric: marginMatch[1].match(/\d+%/) ? marginMatch[1].match(/\d+%/)[0] : "TBD",
+ });
+ seen.add("margin");
+ }
 
-  // If we have real data, return it. Otherwise, use minimal fallbacks only
-  if (entries.length >= 3) {
-    return entries;
-  }
+ // If we have real data, return it. Otherwise, use minimal fallbacks only
+ if (entries.length >= 3) {
+ return entries;
+ }
 
-  // Only add fallbacks if agent didn't provide enough data
-  // Use realistic estimates based on user's actual budget, not arbitrary caps
-  const ideaType = normalizedTitle.toLowerCase();
-  const userMaxBudget = parseBudgetRange(budgetRange);
-  
-  // Only add fallbacks if we have less than 3 entries (agent didn't provide enough)
-  // And make them realistic based on the user's actual budget range
-  if (entries.length < 3) {
-    // Determine realistic estimates based on budget range, not idea type
-    let estimatedStartupCost = null;
-    let estimatedMonthlyRevenue = null;
-    
-    if (userMaxBudget !== null) {
-      // Use realistic percentages of the budget based on typical startup cost breakdowns
-      if (userMaxBudget <= 1000) {
-        // Very lean budget - focus on minimal viable setup
-        estimatedStartupCost = Math.floor(userMaxBudget * 0.8); // Use 80% for tools/setup
-        estimatedMonthlyRevenue = 500; // Conservative for lean startups
-      } else if (userMaxBudget <= 5000) {
-        // Small budget - can cover basic tools, some marketing
-        estimatedStartupCost = Math.floor(userMaxBudget * 0.7); // 70% for setup, 30% buffer
-        estimatedMonthlyRevenue = 1000; // Realistic for small budget ideas
-      } else if (userMaxBudget <= 10000) {
-        // Medium budget - more room for tools, development, marketing
-        estimatedStartupCost = Math.floor(userMaxBudget * 0.6); // 60% for setup
-        estimatedMonthlyRevenue = 2000;
-      } else if (userMaxBudget <= 20000) {
-        // Larger budget - can support more development
-        estimatedStartupCost = Math.floor(userMaxBudget * 0.5); // 50% for initial setup
-        estimatedMonthlyRevenue = 3000;
-      } else {
-        // Large budget - significant investment possible
-        estimatedStartupCost = Math.floor(userMaxBudget * 0.4); // 40% for setup, rest for runway
-        estimatedMonthlyRevenue = 5000;
-      }
-    } else {
-      // No budget specified - use conservative defaults
-      estimatedStartupCost = 3000;
-      estimatedMonthlyRevenue = 1000;
-    }
+ // Only add fallbacks if agent didn't provide enough data
+ // Use realistic estimates based on user's actual budget, not arbitrary caps
+ const ideaType = normalizedTitle.toLowerCase();
+ const userMaxBudget = parseBudgetRange(budgetRange);
+ 
+ // Only add fallbacks if we have less than 3 entries (agent didn't provide enough)
+ // And make them realistic based on the user's actual budget range
+ if (entries.length < 3) {
+ // Determine realistic estimates based on budget range, not idea type
+ let estimatedStartupCost = null;
+ let estimatedMonthlyRevenue = null;
+ 
+ if (userMaxBudget !== null) {
+ // Use realistic percentages of the budget based on typical startup cost breakdowns
+ if (userMaxBudget <= 1000) {
+ // Very lean budget - focus on minimal viable setup
+ estimatedStartupCost = Math.floor(userMaxBudget * 0.8); // Use 80% for tools/setup
+ estimatedMonthlyRevenue = 500; // Conservative for lean startups
+ } else if (userMaxBudget <= 5000) {
+ // Small budget - can cover basic tools, some marketing
+ estimatedStartupCost = Math.floor(userMaxBudget * 0.7); // 70% for setup, 30% buffer
+ estimatedMonthlyRevenue = 1000; // Realistic for small budget ideas
+ } else if (userMaxBudget <= 10000) {
+ // Medium budget - more room for tools, development, marketing
+ estimatedStartupCost = Math.floor(userMaxBudget * 0.6); // 60% for setup
+ estimatedMonthlyRevenue = 2000;
+ } else if (userMaxBudget <= 20000) {
+ // Larger budget - can support more development
+ estimatedStartupCost = Math.floor(userMaxBudget * 0.5); // 50% for initial setup
+ estimatedMonthlyRevenue = 3000;
+ } else {
+ // Large budget - significant investment possible
+ estimatedStartupCost = Math.floor(userMaxBudget * 0.4); // 40% for setup, rest for runway
+ estimatedMonthlyRevenue = 5000;
+ }
+ } else {
+ // No budget specified - use conservative defaults
+ estimatedStartupCost = 3000;
+ estimatedMonthlyRevenue = 1000;
+ }
 
-    // Add startup cost estimate only if agent didn't provide it
-    if (!seen.has("startup costs") && estimatedStartupCost !== null) {
-      entries.push({
-        focus: "Estimated startup investment",
-        estimate: `Based on your ${budgetRange || "budget"}, initial setup costs for ${normalizedTitle}`,
-        metric: formatCurrency(estimatedStartupCost),
-      });
-    }
-    
-    // Add revenue estimate only if agent didn't provide it
-    if (!seen.has("revenue") && estimatedMonthlyRevenue !== null) {
-      entries.push({
-        focus: "Revenue potential",
-        estimate: `Conservative monthly revenue projection for ${normalizedTitle} based on typical early-stage performance`,
-        metric: formatCurrency(estimatedMonthlyRevenue) + "/month",
-      });
-    }
-  }
+ // Add startup cost estimate only if agent didn't provide it
+ if (!seen.has("startup costs") && estimatedStartupCost !== null) {
+ entries.push({
+ focus: "Estimated startup investment",
+ estimate: `Based on your ${budgetRange || "budget"}, initial setup costs for ${normalizedTitle}`,
+ metric: formatCurrency(estimatedStartupCost),
+ });
+ }
+ 
+ // Add revenue estimate only if agent didn't provide it
+ if (!seen.has("revenue") && estimatedMonthlyRevenue !== null) {
+ entries.push({
+ focus: "Revenue potential",
+ estimate: `Conservative monthly revenue projection for ${normalizedTitle} based on typical early-stage performance`,
+ metric: formatCurrency(estimatedMonthlyRevenue) + "/month",
+ });
+ }
+ }
 
-  return entries.slice(0, 5);
+ return entries.slice(0, 5);
 }
 
 function fakerNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+ return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function formatCurrency(amount) {
-  return `$${amount.toLocaleString()}`;
+ return `$${amount.toLocaleString()}`;
 }
 
 export function parseRiskRows(sectionText = "") {
-  if (!sectionText) return [];
-  
-  // First, check if this is a markdown table format
-  const tableRows = sectionText.match(/\|.*\|/g);
-  if (tableRows && tableRows.length >= 2) {
-    // Skip header row and separator row
-    const dataRows = tableRows.slice(2);
-    const results = [];
-    
-    for (const row of dataRows) {
-      const cells = row.split("|").map(cell => cell.trim()).filter(cell => cell);
-      
-      if (cells.length >= 3) {
-        // Table format: [Risk Category, Risk Description, Mitigation Strategies]
-        const riskCategory = cells[0] || "";
-        const riskDescription = cells[1] || "";
-        const mitigation = cells[2] || "";
-        
-        // Combine category and description for the risk text
-        let riskText = riskCategory;
-        if (riskDescription && riskDescription !== riskCategory) {
-          riskText = riskCategory ? `${riskCategory}: ${riskDescription}` : riskDescription;
-        }
-        
-        // Try to extract severity from the risk text or description
-        let severity = "MEDIUM";
-        const severityMatch =
-          (riskText + " " + riskDescription).match(/\b(severe|critical|extreme|high)\b/i) ||
-          (riskText + " " + riskDescription).match(/\b(medium|moderate)\b/i) ||
-          (riskText + " " + riskDescription).match(/\b(low|minor)\b/i);
-        if (severityMatch) {
-          const severityText = severityMatch[0].toLowerCase();
-          if (severityText.match(/\b(severe|critical|extreme|high)\b/i)) {
-            severity = "HIGH";
-          } else if (severityText.match(/\b(low|minor)\b/i)) {
-            severity = "LOW";
-          }
-        }
-        
-        results.push({
-          risk: personalizeCopy(riskText.replace(/\*\*/g, "").trim()),
-          severity,
-          mitigation: personalizeCopy(mitigation.replace(/\*\*/g, "").trim() || "Create a mitigation experiment to reduce this risk within the next sprint."),
-        });
-      } else if (cells.length === 2) {
-        // Two-column format: [Risk, Mitigation]
-        const riskText = cells[0] || "";
-        const mitigation = cells[1] || "";
-        
-        // Try to extract severity
-        let severity = "MEDIUM";
-        const severityMatch =
-          riskText.match(/\b(severe|critical|extreme|high)\b/i) ||
-          riskText.match(/\b(medium|moderate)\b/i) ||
-          riskText.match(/\b(low|minor)\b/i);
-        if (severityMatch) {
-          const severityText = severityMatch[0].toLowerCase();
-          if (severityText.match(/\b(severe|critical|extreme|high)\b/i)) {
-            severity = "HIGH";
-          } else if (severityText.match(/\b(low|minor)\b/i)) {
-            severity = "LOW";
-          }
-        }
-        
-        results.push({
-          risk: personalizeCopy(riskText.replace(/\*\*/g, "").trim()),
-          severity,
-          mitigation: personalizeCopy(mitigation.replace(/\*\*/g, "").trim() || "Create a mitigation experiment to reduce this risk within the next sprint."),
-        });
-      }
-    }
-    
-    if (results.length > 0) {
-      return results;
-    }
-  }
-  
-  // Fall back to list format parsing
-  const items = extractListFromText(sectionText);
-  return items.map((item) => {
-    // Clean up the item - remove markdown bold markers
-    let cleaned = item.replace(/\*\*/g, "").trim();
-    
-    // Try to parse format: "Risk Name (Severity severity): Mitigation"
-    // Example: "Market saturation (Medium severity): Focus on a specific niche"
-    const severityInParensMatch = cleaned.match(/\(([^)]*severity[^)]*)\)/i);
-    let severity = "MEDIUM";
-    let riskText = cleaned;
-    let mitigation = "";
-    
-    if (severityInParensMatch) {
-      // Extract severity from parentheses
-      const severityText = severityInParensMatch[1];
-      if (severityText.match(/\b(severe|critical|extreme|high)\b/i)) {
-        severity = "HIGH";
-      } else if (severityText.match(/\b(medium|moderate)\b/i)) {
-        severity = "MEDIUM";
-      } else if (severityText.match(/\b(low|minor)\b/i)) {
-        severity = "LOW";
-      }
-      
-      // Split on the severity parentheses to get risk and mitigation
-      const parts = cleaned.split(/\([^)]*severity[^)]*\)/i);
-      if (parts.length >= 2) {
-        riskText = parts[0].trim();
-        mitigation = parts.slice(1).join(":").replace(/^:\s*/, "").trim();
-      }
-    } else {
-      // Try to find severity in the text without parentheses
-      const severityMatch =
-        cleaned.match(/\b(severe|critical|extreme|high)\b/i) ||
-        cleaned.match(/\b(medium|moderate)\b/i) ||
-        cleaned.match(/\b(low|minor)\b/i);
-      severity = severityMatch ? severityMatch[0].toUpperCase() : "MEDIUM";
-      
-      // Try to find mitigation with colon separator
-      const colonIndex = cleaned.indexOf(":");
-      if (colonIndex > 0) {
-        riskText = cleaned.slice(0, colonIndex).trim();
-        mitigation = cleaned.slice(colonIndex + 1).trim();
-      } else {
-        // Try em dash or regular dash
-        if (cleaned.includes("—") || cleaned.includes("–")) {
-          const split = cleaned.split(/[—–]/u);
-          riskText = split[0].trim();
-          mitigation = split.slice(1).join("—").trim();
-        } else if (cleaned.includes(" - ")) {
-          const split = cleaned.split(" - ");
-          riskText = split[0].trim();
-          mitigation = split.slice(1).join(" - ").trim();
-        } else {
-          // Try mitigation keyword
-          const mitigationMatch = cleaned.match(/mitigation[:\-]?\s*(.+)$/i);
-          if (mitigationMatch) {
-            riskText = cleaned.slice(0, mitigationMatch.index).trim().replace(/[—–-]\s*$/u, "");
-            mitigation = mitigationMatch[1].trim();
-          } else {
-            riskText = cleaned;
-          }
-        }
-      }
-    }
-    
-    // Clean up risk text - remove any remaining markdown or extra formatting
-    riskText = riskText.replace(/^\*\*|\*\*$/g, "").replace(/^[-•]\s*/, "").trim();
-    
-    // If no mitigation found, provide default
-    if (!mitigation || mitigation.length === 0) {
-      mitigation = "Create a mitigation experiment to reduce this risk within the next sprint.";
-    }
-    
-    // Clean up mitigation text
-    mitigation = mitigation.replace(/^:\s*/, "").trim();
+ if (!sectionText) return [];
+ 
+ // First, check if this is a markdown table format
+ const tableRows = sectionText.match(/\|.*\|/g);
+ if (tableRows && tableRows.length >= 2) {
+ // Skip header row and separator row
+ const dataRows = tableRows.slice(2);
+ const results = [];
+ 
+ for (const row of dataRows) {
+ const cells = row.split("|").map(cell => cell.trim()).filter(cell => cell);
+ 
+ if (cells.length >= 3) {
+ // Table format: [Risk Category, Risk Description, Mitigation Strategies]
+ const riskCategory = cells[0] || "";
+ const riskDescription = cells[1] || "";
+ const mitigation = cells[2] || "";
+ 
+ // Combine category and description for the risk text
+ let riskText = riskCategory;
+ if (riskDescription && riskDescription !== riskCategory) {
+ riskText = riskCategory ? `${riskCategory}: ${riskDescription}` : riskDescription;
+ }
+ 
+ // Try to extract severity from the risk text or description
+ let severity = "MEDIUM";
+ const severityMatch =
+ (riskText + " " + riskDescription).match(/\b(severe|critical|extreme|high)\b/i) ||
+ (riskText + " " + riskDescription).match(/\b(medium|moderate)\b/i) ||
+ (riskText + " " + riskDescription).match(/\b(low|minor)\b/i);
+ if (severityMatch) {
+ const severityText = severityMatch[0].toLowerCase();
+ if (severityText.match(/\b(severe|critical|extreme|high)\b/i)) {
+ severity = "HIGH";
+ } else if (severityText.match(/\b(low|minor)\b/i)) {
+ severity = "LOW";
+ }
+ }
+ 
+ results.push({
+ risk: personalizeCopy(riskText.replace(/\*\*/g, "").trim()),
+ severity,
+ mitigation: personalizeCopy(mitigation.replace(/\*\*/g, "").trim() || "Create a mitigation experiment to reduce this risk within the next sprint."),
+ });
+ } else if (cells.length === 2) {
+ // Two-column format: [Risk, Mitigation]
+ const riskText = cells[0] || "";
+ const mitigation = cells[1] || "";
+ 
+ // Try to extract severity
+ let severity = "MEDIUM";
+ const severityMatch =
+ riskText.match(/\b(severe|critical|extreme|high)\b/i) ||
+ riskText.match(/\b(medium|moderate)\b/i) ||
+ riskText.match(/\b(low|minor)\b/i);
+ if (severityMatch) {
+ const severityText = severityMatch[0].toLowerCase();
+ if (severityText.match(/\b(severe|critical|extreme|high)\b/i)) {
+ severity = "HIGH";
+ } else if (severityText.match(/\b(low|minor)\b/i)) {
+ severity = "LOW";
+ }
+ }
+ 
+ results.push({
+ risk: personalizeCopy(riskText.replace(/\*\*/g, "").trim()),
+ severity,
+ mitigation: personalizeCopy(mitigation.replace(/\*\*/g, "").trim() || "Create a mitigation experiment to reduce this risk within the next sprint."),
+ });
+ }
+ }
+ 
+ if (results.length > 0) {
+ return results;
+ }
+ }
+ 
+ // Fall back to list format parsing
+ const items = extractListFromText(sectionText);
+ return items.map((item) => {
+ // Clean up the item - remove markdown bold markers
+ let cleaned = item.replace(/\*\*/g, "").trim();
+ 
+ // Try to parse format: "Risk Name (Severity severity): Mitigation"
+ // Example: "Market saturation (Medium severity): Focus on a specific niche"
+ const severityInParensMatch = cleaned.match(/\(([^)]*severity[^)]*)\)/i);
+ let severity = "MEDIUM";
+ let riskText = cleaned;
+ let mitigation = "";
+ 
+ if (severityInParensMatch) {
+ // Extract severity from parentheses
+ const severityText = severityInParensMatch[1];
+ if (severityText.match(/\b(severe|critical|extreme|high)\b/i)) {
+ severity = "HIGH";
+ } else if (severityText.match(/\b(medium|moderate)\b/i)) {
+ severity = "MEDIUM";
+ } else if (severityText.match(/\b(low|minor)\b/i)) {
+ severity = "LOW";
+ }
+ 
+ // Split on the severity parentheses to get risk and mitigation
+ const parts = cleaned.split(/\([^)]*severity[^)]*\)/i);
+ if (parts.length >= 2) {
+ riskText = parts[0].trim();
+ mitigation = parts.slice(1).join(":").replace(/^:\s*/, "").trim();
+ }
+ } else {
+ // Try to find severity in the text without parentheses
+ const severityMatch =
+ cleaned.match(/\b(severe|critical|extreme|high)\b/i) ||
+ cleaned.match(/\b(medium|moderate)\b/i) ||
+ cleaned.match(/\b(low|minor)\b/i);
+ severity = severityMatch ? severityMatch[0].toUpperCase() : "MEDIUM";
+ 
+ // Try to find mitigation with colon separator
+ const colonIndex = cleaned.indexOf(":");
+ if (colonIndex > 0) {
+ riskText = cleaned.slice(0, colonIndex).trim();
+ mitigation = cleaned.slice(colonIndex + 1).trim();
+ } else {
+ // Try em dash or regular dash
+ if (cleaned.includes("—") || cleaned.includes("–")) {
+ const split = cleaned.split(/[—–]/u);
+ riskText = split[0].trim();
+ mitigation = split.slice(1).join("—").trim();
+ } else if (cleaned.includes(" - ")) {
+ const split = cleaned.split(" - ");
+ riskText = split[0].trim();
+ mitigation = split.slice(1).join(" - ").trim();
+ } else {
+ // Try mitigation keyword
+ const mitigationMatch = cleaned.match(/mitigation[:\-]?\s*(.+)$/i);
+ if (mitigationMatch) {
+ riskText = cleaned.slice(0, mitigationMatch.index).trim().replace(/[—–-]\s*$/u, "");
+ mitigation = mitigationMatch[1].trim();
+ } else {
+ riskText = cleaned;
+ }
+ }
+ }
+ }
+ 
+ // Clean up risk text - remove any remaining markdown or extra formatting
+ riskText = riskText.replace(/^\*\*|\*\*$/g, "").replace(/^[-•]\s*/, "").trim();
+ 
+ // If no mitigation found, provide default
+ if (!mitigation || mitigation.length === 0) {
+ mitigation = "Create a mitigation experiment to reduce this risk within the next sprint.";
+ }
+ 
+ // Clean up mitigation text
+ mitigation = mitigation.replace(/^:\s*/, "").trim();
 
-    return {
-      risk: personalizeCopy(riskText),
-      severity,
-      mitigation: personalizeCopy(mitigation),
-    };
-  });
+ return {
+ risk: personalizeCopy(riskText),
+ severity,
+ mitigation: personalizeCopy(mitigation),
+ };
+ });
 }
 
 export function extractValidationQuestions(sectionText = "") {
-  return extractListFromText(sectionText);
+ return extractListFromText(sectionText);
 }
 
 export function buildValidationQuestions(sectionText = "", ideaTitle = "", audience = "", goal = "") {
-  const list = extractValidationQuestions(sectionText);
-  const combined = [];
-  const seen = new Set();
+ const list = extractValidationQuestions(sectionText);
+ const combined = [];
+ const seen = new Set();
 
-  const normalizedIdea = ideaTitle || "this idea";
-  const normalizedAudience = audience || "your target customers";
-  const normalizedGoal = goal || "your primary goal";
+ const normalizedIdea = ideaTitle || "this idea";
+ const normalizedAudience = audience || "your target customers";
+ const normalizedGoal = goal || "your primary goal";
 
-  list.forEach((item, index) => {
-    // Parse the item to extract question, listenFor, and actOn
-    const lines = item.split(/\n/).map(l => l.trim()).filter(l => l);
-    let question = "";
-    let listenFor = null;
-    let actOn = null;
-    
-    // Find the question (usually the first line that's not a "What to listen for" or "Act on it" line)
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (line.match(/what\s+to\s+listen\s+for[:\-]/i)) {
-        listenFor = line.replace(/what\s+to\s+listen\s+for[:\-]\s*/i, "").trim();
-      } else if (line.match(/act\s+on\s+it[:\-]/i)) {
-        actOn = line.replace(/act\s+on\s+it[:\-]\s*/i, "").trim();
-      } else if (!question && line.length > 10 && !line.match(/^[-*+]\s*$/)) {
-        // First substantial line that's not a bullet point marker is likely the question
-        question = line.replace(/^[-*+]\s*/, "").replace(/^\d+\.\s*/, "").trim();
-      }
-    }
-    
-    // If no question found, use the first line
-    if (!question && lines.length > 0) {
-      question = lines[0].replace(/^[-*+]\s*/, "").replace(/^\d+\.\s*/, "").trim();
-    }
-    
-    const cleaned = personalizeCopy(question);
-    const fingerprint = cleaned.toLowerCase();
-    
-    if (!seen.has(fingerprint) && question) {
-      seen.add(fingerprint);
-      
-      // If listenFor/actOn not found in markdown, match question to appropriate template
-      if (!listenFor || !actOn) {
-        const questionLower = cleaned.toLowerCase();
-        let templateIndex = 0;
-        
-        // Match question content to appropriate template
-        if (questionLower.includes("pain point") || questionLower.includes("problem") || questionLower.includes("challenge") || questionLower.includes("biggest")) {
-          templateIndex = 0; // Pain point question
-        } else if (questionLower.includes("success") || questionLower.includes("outcome") || questionLower.includes("result") || questionLower.includes("describe")) {
-          templateIndex = 1; // Success/outcome question
-        } else if (questionLower.includes("channel") || questionLower.includes("partnership") || questionLower.includes("marketing") || questionLower.includes("paid")) {
-          templateIndex = 2; // Channel/partnership question
-        } else if (questionLower.includes("30 days") || questionLower.includes("double down") || questionLower.includes("outcome must")) {
-          templateIndex = 3; // 30-day outcome question
-        } else if (questionLower.includes("best use") || questionLower.includes("time") || questionLower.includes("compared") || questionLower.includes("other paths")) {
-          templateIndex = 4; // Best use of time question
-        } else if (questionLower.includes("feedback") || questionLower.includes("honest") || questionLower.includes("advice") || questionLower.includes("fastest")) {
-          templateIndex = 5; // Feedback question
-        } else if (questionLower.includes("retention") || questionLower.includes("repeat") || questionLower.includes("long-term") || questionLower.includes("behavior")) {
-          templateIndex = 6; // Retention question
-        } else {
-          // Default: cycle through templates based on index
-          templateIndex = index % VALIDATION_TEMPLATES.length;
-        }
-        
-        const template = VALIDATION_TEMPLATES[templateIndex] || VALIDATION_TEMPLATES[0];
-        listenFor = listenFor || personalizeCopy(
-          template.listenFor
-            .replace(/{{idea}}/g, normalizedIdea)
-            .replace(/{{audience}}/g, normalizedAudience)
-            .replace(/{{goal}}/g, normalizedGoal)
-        );
-        actOn = actOn || personalizeCopy(
-          template.actOn
-            .replace(/{{idea}}/g, normalizedIdea)
-            .replace(/{{audience}}/g, normalizedAudience)
-            .replace(/{{goal}}/g, normalizedGoal)
-        );
-      }
-      
-      combined.push({
-        question: cleaned,
-        listenFor: listenFor || "Listen for specific, concrete answers that reveal the customer's true needs and priorities.",
-        actOn: actOn || "Use the response to inform your product development, messaging, or go-to-market strategy.",
-      });
-    }
-  });
+ list.forEach((item, index) => {
+ // Parse the item to extract question, listenFor, and actOn
+ const lines = item.split(/\n/).map(l => l.trim()).filter(l => l);
+ let question = "";
+ let listenFor = null;
+ let actOn = null;
+ 
+ // Find the question (usually the first line that's not a "What to listen for" or "Act on it" line)
+ for (let i = 0; i < lines.length; i++) {
+ const line = lines[i];
+ if (line.match(/what\s+to\s+listen\s+for[:\-]/i)) {
+ listenFor = line.replace(/what\s+to\s+listen\s+for[:\-]\s*/i, "").trim();
+ } else if (line.match(/act\s+on\s+it[:\-]/i)) {
+ actOn = line.replace(/act\s+on\s+it[:\-]\s*/i, "").trim();
+ } else if (!question && line.length > 10 && !line.match(/^[-*+]\s*$/)) {
+ // First substantial line that's not a bullet point marker is likely the question
+ question = line.replace(/^[-*+]\s*/, "").replace(/^\d+\.\s*/, "").trim();
+ }
+ }
+ 
+ // If no question found, use the first line
+ if (!question && lines.length > 0) {
+ question = lines[0].replace(/^[-*+]\s*/, "").replace(/^\d+\.\s*/, "").trim();
+ }
+ 
+ const cleaned = personalizeCopy(question);
+ const fingerprint = cleaned.toLowerCase();
+ 
+ if (!seen.has(fingerprint) && question) {
+ seen.add(fingerprint);
+ 
+ // If listenFor/actOn not found in markdown, match question to appropriate template
+ if (!listenFor || !actOn) {
+ const questionLower = cleaned.toLowerCase();
+ let templateIndex = 0;
+ 
+ // Match question content to appropriate template
+ if (questionLower.includes("pain point") || questionLower.includes("problem") || questionLower.includes("challenge") || questionLower.includes("biggest")) {
+ templateIndex = 0; // Pain point question
+ } else if (questionLower.includes("success") || questionLower.includes("outcome") || questionLower.includes("result") || questionLower.includes("describe")) {
+ templateIndex = 1; // Success/outcome question
+ } else if (questionLower.includes("channel") || questionLower.includes("partnership") || questionLower.includes("marketing") || questionLower.includes("paid")) {
+ templateIndex = 2; // Channel/partnership question
+ } else if (questionLower.includes("30 days") || questionLower.includes("double down") || questionLower.includes("outcome must")) {
+ templateIndex = 3; // 30-day outcome question
+ } else if (questionLower.includes("best use") || questionLower.includes("time") || questionLower.includes("compared") || questionLower.includes("other paths")) {
+ templateIndex = 4; // Best use of time question
+ } else if (questionLower.includes("feedback") || questionLower.includes("honest") || questionLower.includes("advice") || questionLower.includes("fastest")) {
+ templateIndex = 5; // Feedback question
+ } else if (questionLower.includes("retention") || questionLower.includes("repeat") || questionLower.includes("long-term") || questionLower.includes("behavior")) {
+ templateIndex = 6; // Retention question
+ } else {
+ // Default: cycle through templates based on index
+ templateIndex = index % VALIDATION_TEMPLATES.length;
+ }
+ 
+ const template = VALIDATION_TEMPLATES[templateIndex] || VALIDATION_TEMPLATES[0];
+ listenFor = listenFor || personalizeCopy(
+ template.listenFor
+ .replace(/{{idea}}/g, normalizedIdea)
+ .replace(/{{audience}}/g, normalizedAudience)
+ .replace(/{{goal}}/g, normalizedGoal)
+ );
+ actOn = actOn || personalizeCopy(
+ template.actOn
+ .replace(/{{idea}}/g, normalizedIdea)
+ .replace(/{{audience}}/g, normalizedAudience)
+ .replace(/{{goal}}/g, normalizedGoal)
+ );
+ }
+ 
+ combined.push({
+ question: cleaned,
+ listenFor: listenFor || "Listen for specific, concrete answers that reveal the customer's true needs and priorities.",
+ actOn: actOn || "Use the response to inform your product development, messaging, or go-to-market strategy.",
+ });
+ }
+ });
 
-  // Fill up to 6 questions if needed using templates
-  let templateIndex = 0;
-  while (combined.length < 6 && templateIndex < VALIDATION_TEMPLATES.length) {
-    const template = VALIDATION_TEMPLATES[templateIndex];
-    const question = personalizeCopy(
-      template.question
-        .replace(/{{idea}}/g, normalizedIdea)
-        .replace(/{{audience}}/g, normalizedAudience)
-        .replace(/{{goal}}/g, normalizedGoal)
-    );
-    const listenFor = personalizeCopy(
-      template.listenFor
-        .replace(/{{idea}}/g, normalizedIdea)
-        .replace(/{{audience}}/g, normalizedAudience)
-        .replace(/{{goal}}/g, normalizedGoal)
-    );
-    const actOn = personalizeCopy(
-      template.actOn
-        .replace(/{{idea}}/g, normalizedIdea)
-        .replace(/{{audience}}/g, normalizedAudience)
-        .replace(/{{goal}}/g, normalizedGoal)
-    );
-    const fingerprint = question.toLowerCase();
-    if (!seen.has(fingerprint)) {
-      seen.add(fingerprint);
-      combined.push({
-        question,
-        listenFor,
-        actOn,
-      });
-    }
-    templateIndex += 1;
-  }
+ // Fill up to 6 questions if needed using templates
+ let templateIndex = 0;
+ while (combined.length < 6 && templateIndex < VALIDATION_TEMPLATES.length) {
+ const template = VALIDATION_TEMPLATES[templateIndex];
+ const question = personalizeCopy(
+ template.question
+ .replace(/{{idea}}/g, normalizedIdea)
+ .replace(/{{audience}}/g, normalizedAudience)
+ .replace(/{{goal}}/g, normalizedGoal)
+ );
+ const listenFor = personalizeCopy(
+ template.listenFor
+ .replace(/{{idea}}/g, normalizedIdea)
+ .replace(/{{audience}}/g, normalizedAudience)
+ .replace(/{{goal}}/g, normalizedGoal)
+ );
+ const actOn = personalizeCopy(
+ template.actOn
+ .replace(/{{idea}}/g, normalizedIdea)
+ .replace(/{{audience}}/g, normalizedAudience)
+ .replace(/{{goal}}/g, normalizedGoal)
+ );
+ const fingerprint = question.toLowerCase();
+ if (!seen.has(fingerprint)) {
+ seen.add(fingerprint);
+ combined.push({
+ question,
+ listenFor,
+ actOn,
+ });
+ }
+ templateIndex += 1;
+ }
 
-  return combined;
+ return combined;
 }
 
 export function extractOtherSection(sectionText = "") {
-  if (!sectionText) return "";
-  // Remove "- **Execution Path:** -" pattern and similar empty execution path markers
-  let cleaned = sectionText
-    .replace(/^-\s*\*\*Execution\s+Path\*\*:\s*-?\s*$/gim, "")
-    .replace(/^-\s*\*\*execution\s+path\*\*:\s*-?\s*$/gim, "")
-    .replace(/^\*\*Execution\s+Path\*\*:\s*-?\s*$/gim, "")
-    .replace(/^\*\*execution\s+path\*\*:\s*-?\s*$/gim, "")
-    .trim();
-  return personalizeCopy(cleaned);
+ if (!sectionText) return "";
+ // Remove "- **Execution Path:** -" pattern and similar empty execution path markers
+ let cleaned = sectionText
+ .replace(/^-\s*\*\*Execution\s+Path\*\*:\s*-?\s*$/gim, "")
+ .replace(/^-\s*\*\*execution\s+path\*\*:\s*-?\s*$/gim, "")
+ .replace(/^\*\*Execution\s+Path\*\*:\s*-?\s*$/gim, "")
+ .replace(/^\*\*execution\s+path\*\*:\s*-?\s*$/gim, "")
+ .trim();
+ return personalizeCopy(cleaned);
 }
 
 export function parseProfileSummary(sectionText = "") {
-  if (!sectionText) return [];
+ if (!sectionText) return [];
 
-  const lines = sectionText
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
+ const lines = sectionText
+ .split(/\r?\n/)
+ .map((line) => line.trim())
+ .filter(Boolean);
 
-  const items = lines.length > 0 ? lines : extractListFromText(sectionText);
-  const results = [];
+ const items = lines.length > 0 ? lines : extractListFromText(sectionText);
+ const results = [];
 
-  items.forEach((item) => {
-    const cleaned = personalizeCopy(item.replace(/\*\*/g, ""));
-    const colonIndex = cleaned.indexOf(":");
-    if (colonIndex > 0) {
-      const label = cleaned.slice(0, colonIndex).trim();
-      const value = cleaned.slice(colonIndex + 1).trim();
-      results.push({
-        label: formatSectionHeading(label),
-        value: value || "Not specified",
-      });
-    } else {
-      results.push({
-        label: "Insight",
-        value: cleaned,
-      });
-    }
-  });
+ items.forEach((item) => {
+ const cleaned = personalizeCopy(item.replace(/\*\*/g, ""));
+ const colonIndex = cleaned.indexOf(":");
+ if (colonIndex > 0) {
+ const label = cleaned.slice(0, colonIndex).trim();
+ const value = cleaned.slice(colonIndex + 1).trim();
+ results.push({
+ label: formatSectionHeading(label),
+ value: value || "Not specified",
+ });
+ } else {
+ results.push({
+ label: "Insight",
+ value: cleaned,
+ });
+ }
+ });
 
-  return results;
+ return results;
 }
 
 export function splitFullReportSections(markdown = "") {
-  if (!markdown) return {};
-  const sections = {};
-  let current = "";
-  markdown.split(/\r?\n/).forEach((line) => {
-    // Match both ### and #### headings
-    const headingMatch = line.trim().match(/^#{3,4}\s+(.+)$/);
-    if (headingMatch) {
-      current = headingMatch[1].trim().toLowerCase();
-      sections[current] = [];
-    } else if (current) {
-      sections[current].push(line);
-    }
-  });
-  return Object.fromEntries(
-    Object.entries(sections).map(([key, value]) => [key, personalizeCopy(value.join("\n").trim())])
-  );
+ if (!markdown) return {};
+ const sections = {};
+ let current = "";
+ markdown.split(/\r?\n/).forEach((line) => {
+ // Match both ### and #### headings
+ const headingMatch = line.trim().match(/^#{3,4}\s+(.+)$/);
+ if (headingMatch) {
+ current = headingMatch[1].trim().toLowerCase();
+ sections[current] = [];
+ } else if (current) {
+ sections[current].push(line);
+ }
+ });
+ return Object.fromEntries(
+ Object.entries(sections).map(([key, value]) => [key, personalizeCopy(value.join("\n").trim())])
+ );
 }
 
 export function parseRecommendationMatrix(matrixText = "") {
-  if (!matrixText) return [];
-  
-  const lines = matrixText.split(/\r?\n/).map(l => l.trim()).filter(l => l);
-  const rows = [];
-  
-  // First, try to parse as markdown table (primary format)
-  let tableStartIndex = -1;
-  let headerLine = null;
-  let separatorLine = null;
-  
-  // Find the table header and separator
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    // Check if this looks like a table header (contains | and common column names)
-    if (line.includes('|') && (
-      line.toLowerCase().includes('idea') || 
-      line.toLowerCase().includes('goal') || 
-      line.toLowerCase().includes('time') || 
-      line.toLowerCase().includes('budget')
-    )) {
-      headerLine = line;
-      // Check if next line is a separator
-      if (i + 1 < lines.length && lines[i + 1].match(/^\|[\s\-:]+\|/)) {
-        separatorLine = lines[i + 1];
-        tableStartIndex = i;
-        break;
-      }
-    }
-  }
-  
-  // If we found a markdown table, parse it
-  if (tableStartIndex >= 0 && headerLine) {
-    const headerCells = headerLine.split('|').map(c => c.trim()).filter(c => c);
-    
-    // Find column indices
-    const ideaCol = headerCells.findIndex(c => c.toLowerCase().includes('idea'));
-    const goalCol = headerCells.findIndex(c => c.toLowerCase().includes('goal') || c.toLowerCase().includes('alignment'));
-    const timeCol = headerCells.findIndex(c => c.toLowerCase().includes('time') || c.toLowerCase().includes('commitment'));
-    const budgetCol = headerCells.findIndex(c => c.toLowerCase().includes('budget'));
-    const skillCol = headerCells.findIndex(c => c.toLowerCase().includes('skill') || c.toLowerCase().includes('fit'));
-    const workStyleCol = headerCells.findIndex(c => c.toLowerCase().includes('work') || c.toLowerCase().includes('style'));
-    
-    // Parse data rows (skip header and separator, stop at empty line or next heading)
-    for (let i = tableStartIndex + 2; i < lines.length; i++) {
-      const line = lines[i];
-      
-      // Stop if we hit a new section (heading) or empty line
-      if (line.startsWith('#') || line.startsWith('###') || line === '') {
-        break;
-      }
-      
-      // Skip separator lines
-      if (line.match(/^\|[\s\-:]+\|/)) continue;
-      
-      // Parse table row
-      if (line.includes('|')) {
-        const cells = line.split('|').map(c => c.trim()).filter(c => c);
-        
-        if (cells.length > 0) {
-          const idea = cells[ideaCol] || cells[0] || '';
-          const goal = cells[goalCol] || '';
-          const time = cells[timeCol] || '';
-          const budget = cells[budgetCol] || '';
-          const skill = cells[skillCol] || '';
-          const workStyle = cells[workStyleCol] || '';
-          
-          // Extract idea number and name
-          const ideaMatch = idea.match(/(\d+)\.\s*(.+)/) || idea.match(/\*\*(\d+)\.\s*(.+?)\*\*/);
-          const order = ideaMatch ? parseInt(ideaMatch[1], 10) : rows.length + 1;
-          const ideaName = ideaMatch ? ideaMatch[2] : idea.replace(/\*\*/g, '').trim();
-          
-          rows.push({
-            order,
-            idea: personalizeCopy(ideaName),
-            goal: personalizeCopy(goal.replace(/\*\*/g, '').trim() || 'Strong'),
-            time: personalizeCopy(time.replace(/\*\*/g, '').trim() || 'Aligned'),
-            budget: personalizeCopy(budget.replace(/\*\*/g, '').trim() || 'Within range'),
-            skill: personalizeCopy(skill.replace(/\*\*/g, '').trim() || 'Leverages strengths'),
-            workStyle: personalizeCopy(workStyle.replace(/\*\*/g, '').trim() || 'Matches preferences'),
-            notes: '', // Notes column not typically in the table
-          });
-        }
-      }
-    }
-    
-    if (rows.length > 0) {
-      return rows;
-    }
-  }
-  
-  // Fallback: try to parse as bullet list format (legacy)
-  let current = null;
-  lines.forEach((line) => {
-    const trimmed = line.trim();
-    
-    // Stop if we hit a new section
-    if (trimmed.startsWith('#') || trimmed.startsWith('###')) {
-      if (current) {
-        rows.push(current);
-        current = null;
-      }
-      return;
-    }
-    
-    if (/^[-*+]\s*\*\*(.+?)\*\*/.test(trimmed)) {
-      if (current) {
-        rows.push(current);
-      }
-      const ideaMatch = trimmed.match(/^[-*+]\s*\*\*(.+?)\*\*\s*[:\-–—]?\s*(.*)$/u);
-      const ideaText = ideaMatch ? ideaMatch[1].trim() : trimmed.replace(/^[-*+]\s*/, "").trim();
-      const ideaNumMatch = ideaText.match(/(\d+)\.\s*(.+)/);
-      const order = ideaNumMatch ? parseInt(ideaNumMatch[1], 10) : rows.length + 1;
-      const ideaName = ideaNumMatch ? ideaNumMatch[2] : ideaText;
-      
-      current = {
-        idea: ideaName,
-        goal: "",
-        time: "",
-        budget: "",
-        skill: "",
-        workStyle: "",
-        notes: "",
-        order,
-      };
-      const extra = ideaMatch && ideaMatch[2] ? ideaMatch[2].trim() : "";
-      if (extra) {
-        parseMatrixAttributes(extra, current);
-      }
-    } else if (/^[-*+]\s+/.test(trimmed) && current) {
-      const attribute = trimmed.replace(/^[-*+]\s+/, "");
-      parseMatrixAttributes(attribute, current);
-    } else if (trimmed && current && !trimmed.match(/^\|[\s\-:]+\|/)) {
-      // Don't add table separators or markdown table content to notes
-      if (!trimmed.startsWith('|') || trimmed.split('|').length <= 2) {
-        current.notes = current.notes ? `${current.notes} ${trimmed}` : trimmed;
-      }
-    }
-  });
+ if (!matrixText) return [];
+ 
+ const lines = matrixText.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+ const rows = [];
+ 
+ // First, try to parse as markdown table (primary format)
+ let tableStartIndex = -1;
+ let headerLine = null;
+ let separatorLine = null;
+ 
+ // Find the table header and separator
+ for (let i = 0; i < lines.length; i++) {
+ const line = lines[i];
+ // Check if this looks like a table header (contains | and common column names)
+ if (line.includes('|') && (
+ line.toLowerCase().includes('idea') || 
+ line.toLowerCase().includes('goal') || 
+ line.toLowerCase().includes('time') || 
+ line.toLowerCase().includes('budget')
+ )) {
+ headerLine = line;
+ // Check if next line is a separator
+ if (i + 1 < lines.length && lines[i + 1].match(/^\|[\s\-:]+\|/)) {
+ separatorLine = lines[i + 1];
+ tableStartIndex = i;
+ break;
+ }
+ }
+ }
+ 
+ // If we found a markdown table, parse it
+ if (tableStartIndex >= 0 && headerLine) {
+ const headerCells = headerLine.split('|').map(c => c.trim()).filter(c => c);
+ 
+ // Find column indices
+ const ideaCol = headerCells.findIndex(c => c.toLowerCase().includes('idea'));
+ const goalCol = headerCells.findIndex(c => c.toLowerCase().includes('goal') || c.toLowerCase().includes('alignment'));
+ const timeCol = headerCells.findIndex(c => c.toLowerCase().includes('time') || c.toLowerCase().includes('commitment'));
+ const budgetCol = headerCells.findIndex(c => c.toLowerCase().includes('budget'));
+ const skillCol = headerCells.findIndex(c => c.toLowerCase().includes('skill') || c.toLowerCase().includes('fit'));
+ const workStyleCol = headerCells.findIndex(c => c.toLowerCase().includes('work') || c.toLowerCase().includes('style'));
+ 
+ // Parse data rows (skip header and separator, stop at empty line or next heading)
+ for (let i = tableStartIndex + 2; i < lines.length; i++) {
+ const line = lines[i];
+ 
+ // Stop if we hit a new section (heading) or empty line
+ if (line.startsWith('#') || line.startsWith('###') || line === '') {
+ break;
+ }
+ 
+ // Skip separator lines
+ if (line.match(/^\|[\s\-:]+\|/)) continue;
+ 
+ // Parse table row
+ if (line.includes('|')) {
+ const cells = line.split('|').map(c => c.trim()).filter(c => c);
+ 
+ if (cells.length > 0) {
+ const idea = cells[ideaCol] || cells[0] || '';
+ const goal = cells[goalCol] || '';
+ const time = cells[timeCol] || '';
+ const budget = cells[budgetCol] || '';
+ const skill = cells[skillCol] || '';
+ const workStyle = cells[workStyleCol] || '';
+ 
+ // Extract idea number and name
+ const ideaMatch = idea.match(/(\d+)\.\s*(.+)/) || idea.match(/\*\*(\d+)\.\s*(.+?)\*\*/);
+ const order = ideaMatch ? parseInt(ideaMatch[1], 10) : rows.length + 1;
+ const ideaName = ideaMatch ? ideaMatch[2] : idea.replace(/\*\*/g, '').trim();
+ 
+ rows.push({
+ order,
+ idea: personalizeCopy(ideaName),
+ goal: personalizeCopy(goal.replace(/\*\*/g, '').trim() || 'Strong'),
+ time: personalizeCopy(time.replace(/\*\*/g, '').trim() || 'Aligned'),
+ budget: personalizeCopy(budget.replace(/\*\*/g, '').trim() || 'Within range'),
+ skill: personalizeCopy(skill.replace(/\*\*/g, '').trim() || 'Leverages strengths'),
+ workStyle: personalizeCopy(workStyle.replace(/\*\*/g, '').trim() || 'Matches preferences'),
+ notes: '', // Notes column not typically in the table
+ });
+ }
+ }
+ }
+ 
+ if (rows.length > 0) {
+ return rows;
+ }
+ }
+ 
+ // Fallback: try to parse as bullet list format (legacy)
+ let current = null;
+ lines.forEach((line) => {
+ const trimmed = line.trim();
+ 
+ // Stop if we hit a new section
+ if (trimmed.startsWith('#') || trimmed.startsWith('###')) {
+ if (current) {
+ rows.push(current);
+ current = null;
+ }
+ return;
+ }
+ 
+ if (/^[-*+]\s*\*\*(.+?)\*\*/.test(trimmed)) {
+ if (current) {
+ rows.push(current);
+ }
+ const ideaMatch = trimmed.match(/^[-*+]\s*\*\*(.+?)\*\*\s*[:\-–—]?\s*(.*)$/u);
+ const ideaText = ideaMatch ? ideaMatch[1].trim() : trimmed.replace(/^[-*+]\s*/, "").trim();
+ const ideaNumMatch = ideaText.match(/(\d+)\.\s*(.+)/);
+ const order = ideaNumMatch ? parseInt(ideaNumMatch[1], 10) : rows.length + 1;
+ const ideaName = ideaNumMatch ? ideaNumMatch[2] : ideaText;
+ 
+ current = {
+ idea: ideaName,
+ goal: "",
+ time: "",
+ budget: "",
+ skill: "",
+ workStyle: "",
+ notes: "",
+ order,
+ };
+ const extra = ideaMatch && ideaMatch[2] ? ideaMatch[2].trim() : "";
+ if (extra) {
+ parseMatrixAttributes(extra, current);
+ }
+ } else if (/^[-*+]\s+/.test(trimmed) && current) {
+ const attribute = trimmed.replace(/^[-*+]\s+/, "");
+ parseMatrixAttributes(attribute, current);
+ } else if (trimmed && current && !trimmed.match(/^\|[\s\-:]+\|/)) {
+ // Don't add table separators or markdown table content to notes
+ if (!trimmed.startsWith('|') || trimmed.split('|').length <= 2) {
+ current.notes = current.notes ? `${current.notes} ${trimmed}` : trimmed;
+ }
+ }
+ });
 
-  if (current) {
-    rows.push(current);
-  }
+ if (current) {
+ rows.push(current);
+ }
 
-  return rows.map((row, idx) => ({
-    order: row.order ?? idx + 1,
-    idea: personalizeCopy(row.idea),
-    goal: row.goal || "Strong",
-    time: row.time || "Aligned",
-    budget: row.budget || "Within range",
-    skill: row.skill || "Leverages strengths",
-    workStyle: row.workStyle || "Matches preferences",
-    notes: truncateText(sanitizeMatrixNotes(row.notes), 160),
-  }));
+ return rows.map((row, idx) => ({
+ order: row.order ?? idx + 1,
+ idea: personalizeCopy(row.idea),
+ goal: row.goal || "Strong",
+ time: row.time || "Aligned",
+ budget: row.budget || "Within range",
+ skill: row.skill || "Leverages strengths",
+ workStyle: row.workStyle || "Matches preferences",
+ notes: truncateText(sanitizeMatrixNotes(row.notes), 160),
+ }));
 }
 
 function parseMatrixAttributes(attribute, row) {
-  const segments = attribute.split(/\s*\|\s*/);
-  segments.forEach((segment) => {
-    const [rawKey, rawValue] = segment.split(/[:\-–—]/, 2);
-    if (!rawKey) return;
-    const key = rawKey.trim().toLowerCase();
-    const value = rawValue ? rawValue.trim() : "";
-    if (key.includes("goal")) {
-      row.goal = value || row.goal;
-    } else if (key.includes("time")) {
-      row.time = value || row.time;
-    } else if (key.includes("budget")) {
-      row.budget = value || row.budget;
-    } else if (key.includes("skill")) {
-      row.skill = value || row.skill;
-    } else if (key.includes("work")) {
-      row.workStyle = value || row.workStyle;
-    } else if (!row.notes) {
-      row.notes = segment.trim();
-    } else {
-      row.notes = `${row.notes}; ${segment.trim()}`;
-    }
-  });
+ const segments = attribute.split(/\s*\|\s*/);
+ segments.forEach((segment) => {
+ const [rawKey, rawValue] = segment.split(/[:\-–—]/, 2);
+ if (!rawKey) return;
+ const key = rawKey.trim().toLowerCase();
+ const value = rawValue ? rawValue.trim() : "";
+ if (key.includes("goal")) {
+ row.goal = value || row.goal;
+ } else if (key.includes("time")) {
+ row.time = value || row.time;
+ } else if (key.includes("budget")) {
+ row.budget = value || row.budget;
+ } else if (key.includes("skill")) {
+ row.skill = value || row.skill;
+ } else if (key.includes("work")) {
+ row.workStyle = value || row.workStyle;
+ } else if (!row.notes) {
+ row.notes = segment.trim();
+ } else {
+ row.notes = `${row.notes}; ${segment.trim()}`;
+ }
+ });
 }
 
 function sanitizeMatrixNotes(notes = "") {
-  if (!notes) return "";
-  const stripped = notes
-    .replace(/^#+\s+/gm, "") // Remove markdown headings
-    .replace(/###\s+30\/60\/90\s+Day\s+Roadmap.*$/gmi, "") // Remove roadmap tables
-    .replace(/###\s+Decision\s+Checklist.*$/gmi, "") // Remove decision checklist
-    .replace(/\|[\s\-:]+\|/g, "") // Remove table separators
-    .replace(/\|/g, " ") // Replace remaining pipes with spaces
-    .replace(/\*\*/g, "") // Remove bold markers
-    .replace(/Days\s*\|\s*Milestones/g, "") // Remove table headers
-    .replace(/\d+-\d+\s*\|\s*[^\|]+/g, "") // Remove table rows (e.g., "0-30 | Define business model")
-    .replace(/\s+/g, " ") // Normalize whitespace
-    .trim();
-  return personalizeCopy(stripped);
+ if (!notes) return "";
+ const stripped = notes
+ .replace(/^#+\s+/gm, "") // Remove markdown headings
+ .replace(/###\s+30\/60\/90\s+Day\s+Roadmap.*$/gmi, "") // Remove roadmap tables
+ .replace(/###\s+Decision\s+Checklist.*$/gmi, "") // Remove decision checklist
+ .replace(/\|[\s\-:]+\|/g, "") // Remove table separators
+ .replace(/\|/g, " ") // Replace remaining pipes with spaces
+ .replace(/\*\*/g, "") // Remove bold markers
+ .replace(/Days\s*\|\s*Milestones/g, "") // Remove table headers
+ .replace(/\d+-\d+\s*\|\s*[^\|]+/g, "") // Remove table rows (e.g., "0-30 | Define business model")
+ .replace(/\s+/g, " ") // Normalize whitespace
+ .trim();
+ return personalizeCopy(stripped);
 }
 
 export function extractTimelineSlice(markdown = "", segmentIndex = 0) {
-  if (!markdown) return "Define clear milestones for this period.";
-  
-  // Debug logging (only in development)
-  if (process.env.NODE_ENV === 'development' && segmentIndex === 0) {
-    console.log('[extractTimelineSlice] Markdown preview:', markdown.substring(0, 200));
-  }
-  
-  // FIX: First, try to parse as simple bullet list (- prefix)
-  // This handles enrichment markdown that uses simple bullets like:
-  // - MVP Development: 4–6 weeks...
-  // - Launch: Aim for 3 months...
-  const lines = markdown.split(/\r?\n/);
-  const bulletLines = lines
-    .map(line => line.trim())
-    .filter(line => {
-      // Match lines starting with - or * (bullet points)
-      return /^[-*]\s+/.test(line);
-    })
-    .map(line => {
-      // Remove bullet prefix and clean up
-      return line.replace(/^[-*]\s+/, "").trim();
-    })
-    .filter(line => line.length > 0);
-  
-  if (bulletLines.length > 0) {
-    console.log(`[extractTimelineSlice] Found ${bulletLines.length} bullet points`);
-    // Return the requested segment if it exists, otherwise return all bullets as fallback
-    if (bulletLines[segmentIndex]) {
-      console.log(`[extractTimelineSlice] Returning bullet segment ${segmentIndex}:`, bulletLines[segmentIndex].substring(0, 80));
-      return bulletLines[segmentIndex];
-    }
-    // If segmentIndex is out of range, return first bullet or all bullets joined
-    if (segmentIndex === 0) {
-      return bulletLines[0];
-    }
-    // For other indices, return the first bullet as fallback
-    return bulletLines[0];
-  }
-  
-  // First, try to parse as markdown table
-  const rows = markdown.match(/\|.*\|/g);
-  if (rows && rows.length >= 3) {
-    const dataRows = rows.slice(2); // skip header and separator
-    const target = dataRows[segmentIndex];
-    if (target) {
-      const cells = target.split("|").map((cell) => cell.trim()).filter(cell => cell);
-      if (cells.length >= 2) {
-        // Usually the content is in the last cell
-        const content = cells[cells.length - 1] || cells[1];
-        if (content && content !== "Define clear milestones for this period." && content.length > 10) {
-          return content;
-        }
-      }
-    }
-  }
-  
-  // Split by lines for more reliable parsing
-  const segments = [];
-  let currentSegment = [];
-  let currentSegmentIndex = -1;
-  
-  // Day range patterns - handle various formats
-  // Note: Handle em dash (–, \u2013), en dash (–, \u2014), and regular dash (-)
-  // The dash can be directly attached to numbers or have spaces
-  // Also handle cases where "Days" might be singular or plural
-  const dayPatterns = [
-    { index: 0, patterns: [
-      /\*\*Days?\s*0\s*[–\-\u2013\u2014]\s*30\s*\*\*:?/i,  // **Days 0 – 30**: (with spaces)
-      /\*\*Days?\s*0[–\-\u2013\u2014]30\s*\*\*:?/i,  // **Days 0–30**: (no spaces, em dash)
-      /\*\*Days?\s*0-30\s*\*\*:?/i,  // **Days 0-30**: (no spaces, regular dash)
-      /\*\*Days?\s*0\s*to\s*30\s*\*\*:?/i,  // **Days 0 to 30**:
-      /\*\*30\s*Days?:\*\*/i,
-      /\*\*Days?\s*0\s*[-–]\s*30\s*Days?:\*\*/i
-    ]},
-    { index: 1, patterns: [
-      /\*\*Days?\s*30\s*[–\-\u2013\u2014]\s*60\s*\*\*:?/i,  // **Days 30 – 60**: (with spaces)
-      /\*\*Days?\s*30[–\-\u2013\u2014]60\s*\*\*:?/i,  // **Days 30–60**: (no spaces, em dash)
-      /\*\*Days?\s*30-60\s*\*\*:?/i,  // **Days 30-60**: (no spaces, regular dash)
-      /\*\*Days?\s*30\s*to\s*60\s*\*\*:?/i,  // **Days 30 to 60**:
-      /\*\*60\s*Days?:\*\*/i,
-      /\*\*Days?\s*30\s*[-–]\s*60\s*Days?:\*\*/i
-    ]},
-    { index: 2, patterns: [
-      /\*\*Days?\s*60\s*[–\-\u2013\u2014]\s*90\s*\*\*:?/i,  // **Days 60 – 90**: (with spaces)
-      /\*\*Days?\s*60[–\-\u2013\u2014]90\s*\*\*:?/i,  // **Days 60–90**: (no spaces, em dash)
-      /\*\*Days?\s*60-90\s*\*\*:?/i,  // **Days 60-90**: (no spaces, regular dash)
-      /\*\*Days?\s*60\s*to\s*90\s*\*\*:?/i,  // **Days 60 to 90**:
-      /\*\*90\s*Days?:\*\*/i,
-      /\*\*Days?\s*60\s*[-–]\s*90\s*Days?:\*\*/i
-    ]}
-  ];
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    let lineProcessed = false;
-    
-    // Check if this line starts a new segment
-    for (const dayPattern of dayPatterns) {
-      for (const pattern of dayPattern.patterns) {
-        if (pattern.test(line)) {
-          // Save previous segment if exists
-          if (currentSegmentIndex >= 0 && currentSegment.length > 0) {
-            segments[currentSegmentIndex] = currentSegment.join("\n").trim();
-          }
-          
-          // Start new segment
-          currentSegmentIndex = dayPattern.index;
-          currentSegment = [];
-          
-          // Remove the day marker and add the rest of the line
-          const cleanedLine = line.replace(pattern, "").trim().replace(/^[:–\-\s]+/, "").trim();
-          if (cleanedLine) {
-            currentSegment.push(cleanedLine);
-          }
-          lineProcessed = true;
-          
-          // Debug logging
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`[extractTimelineSlice] Found pattern for segment ${dayPattern.index} in line:`, line.substring(0, 80));
-          }
-          break;
-        }
-      }
-      if (lineProcessed) break;
-    }
-    
-    // If we're in a segment and line wasn't processed as a day marker, add it to current segment
-    if (currentSegmentIndex >= 0 && !lineProcessed) {
-      currentSegment.push(line);
-    }
-  }
-  
-  // Save the last segment
-  if (currentSegmentIndex >= 0 && currentSegment.length > 0) {
-    segments[currentSegmentIndex] = currentSegment.join("\n").trim();
-  }
-  
-  // Return the requested segment
-  if (segments[segmentIndex] && segments[segmentIndex].length > 10) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[extractTimelineSlice] Returning segment ${segmentIndex}, length:`, segments[segmentIndex].length);
-    }
-    return segments[segmentIndex];
-  }
-  
-  // Debug: log what we found
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[extractTimelineSlice] No segment found for index ${segmentIndex}. Found segments:`, segments.map((s, i) => ({ index: i, length: s?.length || 0 })));
-    console.log(`[extractTimelineSlice] Markdown lines count:`, lines.length);
-    console.log(`[extractTimelineSlice] First 10 lines:`, lines.slice(0, 10));
-  }
-  
-  // FIX: Fallback - if no segments found, return the whole timeline_effort text
-  // This prevents UI from breaking when timeline parsing fails
-  const trimmedMarkdown = markdown.trim();
-  if (trimmedMarkdown.length > 0) {
-    console.log(`[extractTimelineSlice] No segments found, returning full markdown as fallback (length: ${trimmedMarkdown.length})`);
-    return trimmedMarkdown;
-  }
-  
-  return "Define clear milestones for this period.";
+ if (!markdown) return "Define clear milestones for this period.";
+ 
+ // Debug logging (only in development)
+ if (process.env.NODE_ENV === 'development' && segmentIndex === 0) {
+ console.log('[extractTimelineSlice] Markdown preview:', markdown.substring(0, 200));
+ }
+ 
+ // FIX: First, try to parse as simple bullet list (- prefix)
+ // This handles enrichment markdown that uses simple bullets like:
+ // - MVP Development: 4–6 weeks...
+ // - Launch: Aim for 3 months...
+ const lines = markdown.split(/\r?\n/);
+ const bulletLines = lines
+ .map(line => line.trim())
+ .filter(line => {
+ // Match lines starting with - or * (bullet points)
+ return /^[-*]\s+/.test(line);
+ })
+ .map(line => {
+ // Remove bullet prefix and clean up
+ return line.replace(/^[-*]\s+/, "").trim();
+ })
+ .filter(line => line.length > 0);
+ 
+ if (bulletLines.length > 0) {
+ console.log(`[extractTimelineSlice] Found ${bulletLines.length} bullet points`);
+ // Return the requested segment if it exists, otherwise return all bullets as fallback
+ if (bulletLines[segmentIndex]) {
+ console.log(`[extractTimelineSlice] Returning bullet segment ${segmentIndex}:`, bulletLines[segmentIndex].substring(0, 80));
+ return bulletLines[segmentIndex];
+ }
+ // If segmentIndex is out of range, return first bullet or all bullets joined
+ if (segmentIndex === 0) {
+ return bulletLines[0];
+ }
+ // For other indices, return the first bullet as fallback
+ return bulletLines[0];
+ }
+ 
+ // First, try to parse as markdown table
+ const rows = markdown.match(/\|.*\|/g);
+ if (rows && rows.length >= 3) {
+ const dataRows = rows.slice(2); // skip header and separator
+ const target = dataRows[segmentIndex];
+ if (target) {
+ const cells = target.split("|").map((cell) => cell.trim()).filter(cell => cell);
+ if (cells.length >= 2) {
+ // Usually the content is in the last cell
+ const content = cells[cells.length - 1] || cells[1];
+ if (content && content !== "Define clear milestones for this period." && content.length > 10) {
+ return content;
+ }
+ }
+ }
+ }
+ 
+ // Split by lines for more reliable parsing
+ const segments = [];
+ let currentSegment = [];
+ let currentSegmentIndex = -1;
+ 
+ // Day range patterns - handle various formats
+ // Note: Handle em dash (–, \u2013), en dash (–, \u2014), and regular dash (-)
+ // The dash can be directly attached to numbers or have spaces
+ // Also handle cases where "Days" might be singular or plural
+ const dayPatterns = [
+ { index: 0, patterns: [
+ /\*\*Days?\s*0\s*[–\-\u2013\u2014]\s*30\s*\*\*:?/i, // **Days 0 – 30**: (with spaces)
+ /\*\*Days?\s*0[–\-\u2013\u2014]30\s*\*\*:?/i, // **Days 0–30**: (no spaces, em dash)
+ /\*\*Days?\s*0-30\s*\*\*:?/i, // **Days 0-30**: (no spaces, regular dash)
+ /\*\*Days?\s*0\s*to\s*30\s*\*\*:?/i, // **Days 0 to 30**:
+ /\*\*30\s*Days?:\*\*/i,
+ /\*\*Days?\s*0\s*[-–]\s*30\s*Days?:\*\*/i
+ ]},
+ { index: 1, patterns: [
+ /\*\*Days?\s*30\s*[–\-\u2013\u2014]\s*60\s*\*\*:?/i, // **Days 30 – 60**: (with spaces)
+ /\*\*Days?\s*30[–\-\u2013\u2014]60\s*\*\*:?/i, // **Days 30–60**: (no spaces, em dash)
+ /\*\*Days?\s*30-60\s*\*\*:?/i, // **Days 30-60**: (no spaces, regular dash)
+ /\*\*Days?\s*30\s*to\s*60\s*\*\*:?/i, // **Days 30 to 60**:
+ /\*\*60\s*Days?:\*\*/i,
+ /\*\*Days?\s*30\s*[-–]\s*60\s*Days?:\*\*/i
+ ]},
+ { index: 2, patterns: [
+ /\*\*Days?\s*60\s*[–\-\u2013\u2014]\s*90\s*\*\*:?/i, // **Days 60 – 90**: (with spaces)
+ /\*\*Days?\s*60[–\-\u2013\u2014]90\s*\*\*:?/i, // **Days 60–90**: (no spaces, em dash)
+ /\*\*Days?\s*60-90\s*\*\*:?/i, // **Days 60-90**: (no spaces, regular dash)
+ /\*\*Days?\s*60\s*to\s*90\s*\*\*:?/i, // **Days 60 to 90**:
+ /\*\*90\s*Days?:\*\*/i,
+ /\*\*Days?\s*60\s*[-–]\s*90\s*Days?:\*\*/i
+ ]}
+ ];
+ 
+ for (let i = 0; i < lines.length; i++) {
+ const line = lines[i];
+ let lineProcessed = false;
+ 
+ // Check if this line starts a new segment
+ for (const dayPattern of dayPatterns) {
+ for (const pattern of dayPattern.patterns) {
+ if (pattern.test(line)) {
+ // Save previous segment if exists
+ if (currentSegmentIndex >= 0 && currentSegment.length > 0) {
+ segments[currentSegmentIndex] = currentSegment.join("\n").trim();
+ }
+ 
+ // Start new segment
+ currentSegmentIndex = dayPattern.index;
+ currentSegment = [];
+ 
+ // Remove the day marker and add the rest of the line
+ const cleanedLine = line.replace(pattern, "").trim().replace(/^[:–\-\s]+/, "").trim();
+ if (cleanedLine) {
+ currentSegment.push(cleanedLine);
+ }
+ lineProcessed = true;
+ 
+ // Debug logging
+ if (process.env.NODE_ENV === 'development') {
+ console.log(`[extractTimelineSlice] Found pattern for segment ${dayPattern.index} in line:`, line.substring(0, 80));
+ }
+ break;
+ }
+ }
+ if (lineProcessed) break;
+ }
+ 
+ // If we're in a segment and line wasn't processed as a day marker, add it to current segment
+ if (currentSegmentIndex >= 0 && !lineProcessed) {
+ currentSegment.push(line);
+ }
+ }
+ 
+ // Save the last segment
+ if (currentSegmentIndex >= 0 && currentSegment.length > 0) {
+ segments[currentSegmentIndex] = currentSegment.join("\n").trim();
+ }
+ 
+ // Return the requested segment
+ if (segments[segmentIndex] && segments[segmentIndex].length > 10) {
+ if (process.env.NODE_ENV === 'development') {
+ console.log(`[extractTimelineSlice] Returning segment ${segmentIndex}, length:`, segments[segmentIndex].length);
+ }
+ return segments[segmentIndex];
+ }
+ 
+ // Debug: log what we found
+ if (process.env.NODE_ENV === 'development') {
+ console.log(`[extractTimelineSlice] No segment found for index ${segmentIndex}. Found segments:`, segments.map((s, i) => ({ index: i, length: s?.length || 0 })));
+ console.log(`[extractTimelineSlice] Markdown lines count:`, lines.length);
+ console.log(`[extractTimelineSlice] First 10 lines:`, lines.slice(0, 10));
+ }
+ 
+ // FIX: Fallback - if no segments found, return the whole timeline_effort text
+ // This prevents UI from breaking when timeline parsing fails
+ const trimmedMarkdown = markdown.trim();
+ if (trimmedMarkdown.length > 0) {
+ console.log(`[extractTimelineSlice] No segments found, returning full markdown as fallback (length: ${trimmedMarkdown.length})`);
+ return trimmedMarkdown;
+ }
+ 
+ return "Define clear milestones for this period.";
 }
 
 function truncateText(value = "", maxLength = 140) {
-  if (!value) return "";
-  const cleaned = value.replace(/\s+/g, " ").trim();
-  if (cleaned.length <= maxLength) {
-    return cleaned;
-  }
-  return `${cleaned.slice(0, maxLength).trimEnd()}…`;
+ if (!value) return "";
+ const cleaned = value.replace(/\s+/g, " ").trim();
+ if (cleaned.length <= maxLength) {
+ return cleaned;
+ }
+ return `${cleaned.slice(0, maxLength).trimEnd()}…`;
 }
 
 function focusSpecificPlan(focus = "") {
-  const topic = focus.toLowerCase();
-  if (topic.includes("ai") || topic.includes("automation")) {
-    return "Launch a proof-of-concept demo using low/no-code AI tooling and publish a before/after case study";
-  }
-  if (topic.includes("consulting")) {
-    return "Create a signature diagnostic workshop and map outreach to three warm prospects";
-  }
-  if (topic.includes("education") || topic.includes("edtech")) {
-    return "Design a pilot curriculum outline and recruit five beta learners for feedback";
-  }
-  if (topic.includes("health") || topic.includes("wellness")) {
-    return "Validate compliance needs, partner with a domain expert, and schedule initial practitioner interviews";
-  }
-  if (topic.includes("finance")) {
-    return "Prepare a lightweight financial model and test trust signals with two target customer segments";
-  }
-  if (topic.includes("e-commerce") || topic.includes("retail")) {
-    return "Source initial inventory partners, build a landing page with top three SKUs, and set up retargeting audiences";
-  }
-  if (topic.includes("content") || topic.includes("media")) {
-    return "Draft a content calendar, produce a flagship piece, and run hooks across two distribution channels";
-  }
-  if (topic.includes("sustainability") || topic.includes("green")) {
-    return "Document measurable impact metrics and align them with potential partners or certification bodies";
-  }
-  if (topic.includes("lifestyle") || topic.includes("travel") || topic.includes("food")) {
-    return "Curate packages with local partners and run a concierge-style pilot to collect testimonials";
-  }
-  return "Document the most critical milestone for your niche and map how it ladders to revenue or traction goals";
+ const topic = focus.toLowerCase();
+ if (topic.includes("ai") || topic.includes("automation")) {
+ return "Launch a proof-of-concept demo using low/no-code AI tooling and publish a before/after case study";
+ }
+ if (topic.includes("consulting")) {
+ return "Create a signature diagnostic workshop and map outreach to three warm prospects";
+ }
+ if (topic.includes("education") || topic.includes("edtech")) {
+ return "Design a pilot curriculum outline and recruit five beta learners for feedback";
+ }
+ if (topic.includes("health") || topic.includes("wellness")) {
+ return "Validate compliance needs, partner with a domain expert, and schedule initial practitioner interviews";
+ }
+ if (topic.includes("finance")) {
+ return "Prepare a lightweight financial model and test trust signals with two target customer segments";
+ }
+ if (topic.includes("e-commerce") || topic.includes("retail")) {
+ return "Source initial inventory partners, build a landing page with top three SKUs, and set up retargeting audiences";
+ }
+ if (topic.includes("content") || topic.includes("media")) {
+ return "Draft a content calendar, produce a flagship piece, and run hooks across two distribution channels";
+ }
+ if (topic.includes("sustainability") || topic.includes("green")) {
+ return "Document measurable impact metrics and align them with potential partners or certification bodies";
+ }
+ if (topic.includes("lifestyle") || topic.includes("travel") || topic.includes("food")) {
+ return "Curate packages with local partners and run a concierge-style pilot to collect testimonials";
+ }
+ return "Document the most critical milestone for your niche and map how it ladders to revenue or traction goals";
 }
 
 export function cleanNarrativeMarkdown(markdown = "") {
-  if (!markdown) return "";
-  const personalized = personalizeCopy(markdown);
-  const sentences = personalized.split(/(?<=[.!?])\s+/);
-  const filtered = sentences.filter((sentence, index) => {
-    const trimmed = sentence.trim();
-    if (!trimmed) return false;
-    if (
-      index === 0 &&
-      (/^given\b/i.test(trimmed) ||
-        /^overall\b/i.test(trimmed) ||
-        /^in summary\b/i.test(trimmed) ||
-        /^in conclusion\b/i.test(trimmed))
-    ) {
-      return false;
-    }
-    return true;
-  });
-  if (filtered.length === 0) {
-    return personalized;
-  }
-  const cleaned = filtered.join(" ").replace(/\bthe user'?s?\b/gi, (match) => {
-    if (/users/i.test(match)) return "customers";
-    if (/user's/i.test(match)) return "your";
-    return "you";
-  });
-  return cleaned
-    .replace(/\byou can leverage\b/gi, "you can use")
-    .replace(/\bleverage\b/gi, "use")
-    .replace(/\s+/g, " ")
-    .trim();
+ if (!markdown) return "";
+ const personalized = personalizeCopy(markdown);
+ const sentences = personalized.split(/(?<=[.!?])\s+/);
+ const filtered = sentences.filter((sentence, index) => {
+ const trimmed = sentence.trim();
+ if (!trimmed) return false;
+ if (
+ index === 0 &&
+ (/^given\b/i.test(trimmed) ||
+ /^overall\b/i.test(trimmed) ||
+ /^in summary\b/i.test(trimmed) ||
+ /^in conclusion\b/i.test(trimmed))
+ ) {
+ return false;
+ }
+ return true;
+ });
+ if (filtered.length === 0) {
+ return personalized;
+ }
+ const cleaned = filtered.join(" ").replace(/\bthe user'?s?\b/gi, (match) => {
+ if (/users/i.test(match)) return "customers";
+ if (/user's/i.test(match)) return "your";
+ return "you";
+ });
+ return cleaned
+ .replace(/\byou can leverage\b/gi, "you can use")
+ .replace(/\bleverage\b/gi, "use")
+ .replace(/\s+/g, " ")
+ .trim();
 }
 
 /**
  * Generates a final conclusion with decision and rationale based on top ideas and matrix data
  */
 export function buildFinalConclusion(topIdeas = [], matrixRows = [], inputs = {}) {
-  if (!topIdeas || topIdeas.length === 0) {
-    return null;
-  }
+ if (!topIdeas || topIdeas.length === 0) {
+ return null;
+ }
 
-  // Score each idea based on matrix data
-  const ideaScores = topIdeas.map((idea, index) => {
-    const matrixRow = matrixRows.find((row) => row.order === index + 1 || row.idea.toLowerCase().includes(idea.title.toLowerCase().substring(0, 20)));
-    if (!matrixRow) return { idea, score: 0, reasons: [] };
+ // Score each idea based on matrix data
+ const ideaScores = topIdeas.map((idea, index) => {
+ const matrixRow = matrixRows.find((row) => row.order === index + 1 || row.idea.toLowerCase().includes(idea.title.toLowerCase().substring(0, 20)));
+ if (!matrixRow) return { idea, score: 0, reasons: [] };
 
-    let score = 0;
-    const reasons = [];
+ let score = 0;
+ const reasons = [];
 
-    // Goal alignment (weight: 3)
-    const goalLower = (matrixRow.goal || "").toLowerCase();
-    if (goalLower.includes("high") || goalLower.includes("strong")) {
-      score += 3;
-      reasons.push("strong goal alignment");
-    } else if (goalLower.includes("medium") || goalLower.includes("moderate")) {
-      score += 1.5;
-      reasons.push("moderate goal alignment");
-    }
+ // Goal alignment (weight: 3)
+ const goalLower = (matrixRow.goal || "").toLowerCase();
+ if (goalLower.includes("high") || goalLower.includes("strong")) {
+ score += 3;
+ reasons.push("strong goal alignment");
+ } else if (goalLower.includes("medium") || goalLower.includes("moderate")) {
+ score += 1.5;
+ reasons.push("moderate goal alignment");
+ }
 
-    // Skill fit (weight: 2)
-    const skillLower = (matrixRow.skill || "").toLowerCase();
-    if (skillLower.includes("high") || skillLower.includes("strong")) {
-      score += 2;
-      reasons.push("excellent skill match");
-    } else if (skillLower.includes("medium")) {
-      score += 1;
-      reasons.push("good skill match");
-    }
+ // Skill fit (weight: 2)
+ const skillLower = (matrixRow.skill || "").toLowerCase();
+ if (skillLower.includes("high") || skillLower.includes("strong")) {
+ score += 2;
+ reasons.push("excellent skill match");
+ } else if (skillLower.includes("medium")) {
+ score += 1;
+ reasons.push("good skill match");
+ }
 
-    // Work style (weight: 1.5)
-    const workStyleLower = (matrixRow.workStyle || "").toLowerCase();
-    if (workStyleLower.includes("strongly") || workStyleLower.includes("perfect")) {
-      score += 1.5;
-      reasons.push("ideal work style fit");
-    } else if (workStyleLower.includes("aligned") || workStyleLower.includes("matches")) {
-      score += 0.75;
-      reasons.push("compatible work style");
-    }
+ // Work style (weight: 1.5)
+ const workStyleLower = (matrixRow.workStyle || "").toLowerCase();
+ if (workStyleLower.includes("strongly") || workStyleLower.includes("perfect")) {
+ score += 1.5;
+ reasons.push("ideal work style fit");
+ } else if (workStyleLower.includes("aligned") || workStyleLower.includes("matches")) {
+ score += 0.75;
+ reasons.push("compatible work style");
+ }
 
-    // Budget fit (weight: 1)
-    const budgetLower = (matrixRow.budget || "").toLowerCase();
-    if (budgetLower.includes("within") || budgetLower.includes("fits")) {
-      score += 1;
-      reasons.push("budget-friendly");
-    }
+ // Budget fit (weight: 1)
+ const budgetLower = (matrixRow.budget || "").toLowerCase();
+ if (budgetLower.includes("within") || budgetLower.includes("fits")) {
+ score += 1;
+ reasons.push("budget-friendly");
+ }
 
-    // Time fit (weight: 1)
-    const timeLower = (matrixRow.time || "").toLowerCase();
-    if (timeLower.includes("aligned") || timeLower.includes("fits")) {
-      score += 1;
-      reasons.push("time-appropriate");
-    }
+ // Time fit (weight: 1)
+ const timeLower = (matrixRow.time || "").toLowerCase();
+ if (timeLower.includes("aligned") || timeLower.includes("fits")) {
+ score += 1;
+ reasons.push("time-appropriate");
+ }
 
-    return { idea, score, reasons, matrixRow };
-  });
+ return { idea, score, reasons, matrixRow };
+ });
 
-  // Sort by score
-  ideaScores.sort((a, b) => b.score - a.score);
-  const topRecommendation = ideaScores[0];
-  const secondChoice = ideaScores[1];
-  const thirdChoice = ideaScores[2];
+ // Sort by score
+ ideaScores.sort((a, b) => b.score - a.score);
+ const topRecommendation = ideaScores[0];
+ const secondChoice = ideaScores[1];
+ const thirdChoice = ideaScores[2];
 
-  // Build conclusion text
-  const goalType = inputs.goal_type || "your goals";
-  const timeCommitment = inputs.time_commitment || "your available time";
-  const budgetRange = inputs.budget_range || "your budget";
+ // Build conclusion text
+ const goalType = inputs.goal_type || "your goals";
+ const timeCommitment = inputs.time_commitment || "your available time";
+ const budgetRange = inputs.budget_range || "your budget";
 
-  // Build concise, one-page conclusion
-  const topReasons = topRecommendation.reasons.slice(0, 3).join(", ");
-  const isClearWinner = topRecommendation.score > (secondChoice?.score || 0) + 1;
-  
-  let conclusion = `## Final Recommendation & Decision Rationale\n\n`;
-  
-  conclusion += `**Top Recommendation: ${topRecommendation.idea.title}**\n\n`;
-  conclusion += `This idea scores highest for your profile (${goalType}, ${timeCommitment}, ${budgetRange}) because: ${topReasons}. `;
-  
-  if (isClearWinner) {
-    conclusion += `It clearly stands out from alternatives, aligning strongly with your ${goalType} goal while leveraging your strengths.\n\n`;
-  } else {
-    conclusion += `While it's the top choice, ${secondChoice?.idea.title || "the second option"} is close—consider your personal interest and risk tolerance.\n\n`;
-  }
+ // Build concise, one-page conclusion
+ const topReasons = topRecommendation.reasons.slice(0, 3).join(", ");
+ const isClearWinner = topRecommendation.score > (secondChoice?.score || 0) + 1;
+ 
+ let conclusion = `## Final Recommendation & Decision Rationale\n\n`;
+ 
+ conclusion += `**Top Recommendation: ${topRecommendation.idea.title}**\n\n`;
+ conclusion += `This idea scores highest for your profile (${goalType}, ${timeCommitment}, ${budgetRange}) because: ${topReasons}. `;
+ 
+ if (isClearWinner) {
+ conclusion += `It clearly stands out from alternatives, aligning strongly with your ${goalType} goal while leveraging your strengths.\n\n`;
+ } else {
+ conclusion += `While it's the top choice, ${secondChoice?.idea.title || "the second option"} is close—consider your personal interest and risk tolerance.\n\n`;
+ }
 
-  if (secondChoice && secondChoice.score > 0) {
-    const altReasons = secondChoice.reasons.slice(0, 2).join(", ");
-    conclusion += `**Alternative: ${secondChoice.idea.title}** — Consider if: ${altReasons}. `;
-    conclusion += `A solid backup if priorities shift.\n\n`;
-  }
+ if (secondChoice && secondChoice.score > 0) {
+ const altReasons = secondChoice.reasons.slice(0, 2).join(", ");
+ conclusion += `**Alternative: ${secondChoice.idea.title}** — Consider if: ${altReasons}. `;
+ conclusion += `A solid backup if priorities shift.\n\n`;
+ }
 
-  conclusion += `**Decision Guide:** Choose ${topRecommendation.idea.title} for highest goal alignment and ${timeCommitment} fit. `;
-  conclusion += `Consider ${secondChoice?.idea.title || "the alternative"} if you have stronger interest in that domain or want to diversify.\n\n`;
-  
-  conclusion += `**Next Steps:** (1) Validate using the questions provided, (2) Review financial outlook for ${budgetRange} fit, (3) Check risk radar, (4) Follow the 30/60/90 roadmap, (5) Revisit after 30 days.\n\n`;
-  
-  conclusion += `*Remember: The best idea is one you'll execute. If you're more excited about ${secondChoice?.idea.title || "another option"}, that enthusiasm often outweighs perfect alignment scores.*`;
+ conclusion += `**Decision Guide:** Choose ${topRecommendation.idea.title} for highest goal alignment and ${timeCommitment} fit. `;
+ conclusion += `Consider ${secondChoice?.idea.title || "the alternative"} if you have stronger interest in that domain or want to diversify.\n\n`;
+ 
+ conclusion += `**Next Steps:** (1) Validate using the questions provided, (2) Review financial outlook for ${budgetRange} fit, (3) Check risk radar, (4) Follow the 30/60/90 roadmap, (5) Revisit after 30 days.\n\n`;
+ 
+ conclusion += `*Remember: The best idea is one you'll execute. If you're more excited about ${secondChoice?.idea.title || "another option"}, that enthusiasm often outweighs perfect alignment scores.*`;
 
-  return personalizeCopy(conclusion);
+ return personalizeCopy(conclusion);
 }
 
 export function dedupeStrings(items = []) {
-  const seen = new Set();
-  return items
-    .map((item) => personalizeCopy(item).trim())
-    .filter((item) => {
-      if (!item) return false;
-      const normalized = item.toLowerCase().replace(/\s+/g, " ");
-      if (seen.has(normalized)) {
-        return false;
-      }
-      seen.add(normalized);
-      return true;
-    });
+ const seen = new Set();
+ return items
+ .map((item) => personalizeCopy(item).trim())
+ .filter((item) => {
+ if (!item) return false;
+ const normalized = item.toLowerCase().replace(/\s+/g, " ");
+ if (seen.has(normalized)) {
+ return false;
+ }
+ seen.add(normalized);
+ return true;
+ });
 }
 
 

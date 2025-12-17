@@ -143,3 +143,5 @@ Test with these profiles to verify personalization:
 - Frontend gracefully handles both old and new formats
 - No breaking changes to API contracts
 
+
+

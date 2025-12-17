@@ -76,12 +76,16 @@ class RecommendationParser:
         # Apply uniqueness filter
         unique_recommendations = RecommendationParser._filter_unique_ideas(recommendations)
         
+        # CRITICAL: Filter out framework terms and invalid ideas
+        from app.utils.idea_validator import filter_valid_ideas
+        valid_recommendations = filter_valid_ideas(unique_recommendations)
+        
         # Log results for verification
-        logger.info(f"Parsed {len(recommendations)} ideas, {len(unique_recommendations)} unique after filtering")
-        for idx, idea in enumerate(unique_recommendations, 1):
+        logger.info(f"Parsed {len(recommendations)} ideas, {len(unique_recommendations)} unique, {len(valid_recommendations)} valid after filtering")
+        for idx, idea in enumerate(valid_recommendations, 1):
             logger.info(f"Idea {idx}: id={idea.get('id')}, title={idea.get('title', '')[:50]}, summary={idea.get('summary', '')[:50]}")
         
-        return unique_recommendations
+        return valid_recommendations
     
     @staticmethod
     def _parse_idea_block(content: str) -> Optional[Dict[str, Any]]:

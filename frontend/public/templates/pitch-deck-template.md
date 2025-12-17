@@ -209,5 +209,5 @@
 
 ---
 
-**Need help?** Use our validation tool to get feedback on your pitch deck content.
+**Need help validating your startup idea?** Use our [Idea Validator](/validate-idea) to get comprehensive feedback before creating your pitch deck.
 

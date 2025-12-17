@@ -357,6 +357,10 @@ Be specific, practical, and organized into clear timeframes."""
             "go_to_market_strategy": 7.0,
         }
         
+        # Clamp all scores to minimum of 1 - never allow 0 for analyzed content
+        for key in scores:
+            scores[key] = max(scores[key], 1.0)
+        
         overall_score = sum(scores.values()) / len(scores)
         
         return {

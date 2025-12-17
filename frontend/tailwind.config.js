@@ -3,7 +3,7 @@ import typography from "@tailwindcss/typography";
 import validationPreset from "./tailwind.validation.preset.js";
 
 export default {
-  darkMode: "class", // Enable class-based dark mode
+  darkMode: ["selector", '[data-theme="dark"]'], // Use data-theme attribute
   presets: [validationPreset],
   content: [
     "./index.html",

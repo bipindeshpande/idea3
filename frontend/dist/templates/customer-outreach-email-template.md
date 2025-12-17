@@ -163,5 +163,5 @@ Best,
 
 ---
 
-**Need help?** Use our validation tool to refine your customer outreach strategy.
+**Need help validating your startup idea?** Use our [Idea Validator](/validate-idea) to get comprehensive feedback before reaching out to customers.
 

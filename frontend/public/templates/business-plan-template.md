@@ -181,5 +181,5 @@
 
 ---
 
-**Need help?** Use our validation tool to get feedback on your business plan sections.
+**Need help validating your startup idea?** Use our [Idea Validator](/validate-idea) to get comprehensive feedback before writing your business plan.
 

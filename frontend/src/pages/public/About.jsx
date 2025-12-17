@@ -1,83 +1,263 @@
+import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
-import WhatsNew from "../../components/dashboard/WhatsNew.jsx";
 import PageHeader from "../../components/layout/PageHeader.jsx";
 import Card from "../../components/ui/Card.jsx";
+import UIButton from "../../components/ui/ui-button.jsx";
+import UIHeading from "../../components/ui/ui-heading.jsx";
 import SectionHeader from "../../components/layout/SectionHeader.jsx";
 import PageContainer from "../../components/layout/PageContainer.jsx";
+import MarketingLayout from "../../layouts/MarketingLayout.jsx";
 
 export default function AboutPage() {
-  return (
-    <PageContainer>
-      <Seo
-        title="About | Startup Idea Advisor"
-        description="Learn why we built Startup Idea Advisor and how our AI advisor empowers founders to validate ideas faster."
-        path="/about"
-      />
-      
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Main Content */}
-        <div className="lg:col-span-2">
-          <Card className="relative">
-            <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-indigo-300 opacity-[0.09] blur-2xl pointer-events-none"></div>
-            <div className="relative z-10">
-            <PageHeader 
-              title="About"
-              description="We built Startup Idea Advisor after watching countless professionals struggle to translate their strengths into viable ventures. Our mission is to combine founder empathy with AI-assisted research so you can explore opportunities confidently and efficiently."
-            />
-            {/* Founder Story Section */}
-            <Card className="mt-10 md:mt-12">
-              <div className="mb-6 flex items-center gap-4">
-                <div className="icon-circle bg-[#f3f5ff] text-indigo-600 text-2xl">
-                  👨‍💼
-                </div>
-                <div>
-                  <SectionHeader title="Built by Entrepreneurs, for Entrepreneurs" />
-                  <p className="mt-1 text-sm text-gray-600">Our founder's story</p>
-                </div>
-              </div>
-              
-              <div className="space-y-4 text-[15px] text-gray-700 leading-relaxed">
-                <p>
-                  After years of working in startups and watching countless entrepreneurs struggle with the same problem—<strong>how do I know if my idea is worth pursuing?</strong>—I decided to build something different.
-                </p>
-                <p>
-                  I've been there: spending weeks researching markets, analyzing competitors, and trying to validate ideas manually. The process was time-consuming, expensive, and often left me with more questions than answers. That's when I realized: <strong>what if AI could do the heavy lifting?</strong>
-                </p>
-                <p>
-                  Startup Idea Advisor was born from a simple belief: <strong>every entrepreneur deserves access to professional-grade validation</strong>, regardless of budget or connections. We combine AI-powered research with founder empathy to give you the insights you need—in minutes, not weeks.
-                </p>
-                <p>
-                  This isn't just another AI tool. It's built by someone who understands the startup journey, the uncertainty, and the need for honest, actionable feedback. <strong>We're here to help you make better decisions, faster.</strong>
-                </p>
-              </div>
-            </Card>
+ return (
+ <MarketingLayout>
+ <PageContainer>
+ <Seo
+ title="About | Startup Idea Advisor"
+ description="Learn why we built Startup Idea Advisor and how our AI advisor empowers founders to validate ideas faster."
+ path="/about"
+ />
+ 
+ <div>
+ {/* Main Content */}
+ <div>
+ <Card className="relative">
+ <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-surface opacity-[0.09] blur-2xl pointer-events-none"></div>
+ <div className="relative z-10">
+ <PageHeader 
+ title="About"
+ description="We built Startup Idea Advisor after watching countless professionals struggle to translate their strengths into viable ventures. Our mission is to combine founder empathy with AI-assisted research so you can explore opportunities confidently and efficiently."
+ />
 
-            <div className="mt-6 md:mt-8 grid gap-6 md:gap-8 md:grid-cols-2">
-              <Card>
-                <SectionHeader title="Why we exist" />
-                <p className="mt-2 text-[15px] text-gray-700 leading-relaxed">
-                  Traditional ideation services are expensive, slow, and rarely personalized. By orchestrating multiple
-                  specialist agents, we give founders advisor-grade analysis on demand.
-                </p>
-              </Card>
-              <Card>
-                <SectionHeader title="What we believe" />
-                <p className="mt-2 text-[15px] text-gray-700 leading-relaxed">
-                  The best ideas start with the founder. Understanding your goals, skills, and constraints is essential to
-                  crafting opportunities that are aligned and executable.
-                </p>
-              </Card>
-            </div>
-            </div>
-          </Card>
-        </div>
+ {/* Our Mission Section */}
+ <Card className="mt-10 md:mt-12">
+ <div className="mb-6 flex items-center gap-4">
+ <div className="icon-circle bg-surface text-accent text-2xl">
+ 🎯
+ </div>
+ <div>
+ <SectionHeader title="Our Mission" />
+ <p className="mt-1 text-xs text-secondary">Why we exist</p>
+ </div>
+ </div>
+ 
+ <div className="space-y-4 text-primary text-primary leading-relaxed">
+ <p>
+ We believe <strong>every entrepreneur deserves access to professional-grade validation</strong>, regardless of budget, background, or connections.
+ </p>
+ <p>
+ Traditional validation is broken. Consultants charge $5,000+ for basic research. Incubators require applications and equity. Most founders are left guessing whether their idea is worth pursuing—or they skip validation entirely and build blindly.
+ </p>
+ <p>
+ Startup Idea Advisor exists to change that. We combine AI-powered research with founder empathy to deliver <strong>advisor-grade analysis in minutes—not weeks, and at a fraction of the cost</strong>.
+ </p>
+ <p>
+ By orchestrating multiple specialist AI agents, we automate the research, analysis, and strategic thinking that advisors do, so you can focus on building.
+ </p>
+ </div>
+ </Card>
 
-        {/* What's New Sidebar */}
-        <div className="lg:col-span-1">
-          <WhatsNew />
-        </div>
-      </div>
-    </PageContainer>
-  );
+ {/* The Problem We Solve Section */}
+ <Card className="mt-6 md:mt-8">
+ <div className="mb-6 flex items-center gap-4">
+ <div className="icon-circle bg-surface text-accent text-2xl">
+ 🔍
+ </div>
+ <div>
+ <SectionHeader title="The Problem We Solve" />
+ <p className="mt-1 text-xs text-secondary">What founders struggle with</p>
+ </div>
+ </div>
+ 
+ <div className="space-y-4 text-primary text-primary leading-relaxed">
+ <p>
+ Founders waste months (and thousands of dollars) on ideas that won't work because they don't have access to:
+ </p>
+ <ul className="list-disc list-outside ml-6 space-y-2">
+ <li>Market research and competitive analysis</li>
+ <li>Financial modeling and revenue projections</li>
+ <li>Risk assessment and mitigation strategies</li>
+ <li>Validation frameworks and customer discovery methods</li>
+ <li>Personalized recommendations based on their unique constraints</li>
+ </ul>
+ <p>
+ Most founders either <strong>skip validation and build blindly</strong> (leading to high failure rates), <strong>pay consultants thousands</strong> for basic research, or <strong>spend weeks doing manual research</strong> that's often incomplete or outdated.
+ </p>
+ <p>
+ We automate the research and analysis that advisors do, so you can make informed decisions without the cost or time investment.
+ </p>
+ </div>
+ </Card>
+
+ {/* How It Works Section */}
+ <Card className="mt-6 md:mt-8">
+ <div className="mb-6 flex items-center gap-4">
+ <div className="icon-circle bg-surface text-accent text-2xl">
+ ⚙️
+ </div>
+ <div>
+ <SectionHeader title="How We Deliver Advisor-Grade Analysis" />
+ <p className="mt-1 text-xs text-secondary">Our AI system explained</p>
+ </div>
+ </div>
+ 
+ <div className="space-y-4 text-primary text-primary leading-relaxed">
+ <p>
+ Our AI system uses multiple specialist agents working together to deliver comprehensive analysis:
+ </p>
+ <ul className="list-disc list-outside ml-6 space-y-2">
+ <li><strong>Profile Analysis</strong> - Understands your goals, constraints, and strengths</li>
+ <li><strong>Market Research</strong> - Analyzes markets, competitors, and industry trends</li>
+ <li><strong>Idea Generation</strong> - Generates ideas tailored to your unique profile</li>
+ <li><strong>Financial Modeling</strong> - Projects costs, revenue, and breakeven timelines</li>
+ <li><strong>Risk Assessment</strong> - Identifies and provides mitigation strategies for potential risks</li>
+ <li><strong>Validation Frameworks</strong> - Provides structured methods to test your ideas</li>
+ </ul>
+ <p>
+ All of this happens in minutes, not weeks. And it's personalized to your unique situation—your time commitment, budget, skills, and goals.
+ </p>
+ <div className="mt-4">
+ <Link to="/product">
+ <UIButton variant="secondary" className="w-full md:w-auto">
+ Learn more about how it works →
+ </UIButton>
+ </Link>
+ </div>
+ </div>
+ </Card>
+
+ {/* Founder Story Section */}
+ <Card className="mt-6 md:mt-8">
+ <div className="mb-6 flex items-center gap-4">
+ <div className="icon-circle bg-surface text-accent text-2xl">
+ 👨‍💼
+ </div>
+ <div>
+ <SectionHeader title="Built by Entrepreneurs, for Entrepreneurs" />
+ <p className="mt-1 text-xs text-secondary">Our founder's story</p>
+ </div>
+ </div>
+ 
+ <div className="space-y-4 text-primary text-primary leading-relaxed">
+ <p>
+ After years of working in startups and watching countless entrepreneurs struggle with the same problem—<strong>how do I know if my idea is worth pursuing?</strong>—I decided to build something different.
+ </p>
+ <p>
+ I've been there: spending weeks researching markets, analyzing competitors, and trying to validate ideas manually. The process was time-consuming, expensive, and often left me with more questions than answers. That's when I realized: <strong>what if AI could do the heavy lifting?</strong>
+ </p>
+ <p>
+ Startup Idea Advisor was born from a simple belief: <strong>every entrepreneur deserves access to professional-grade validation</strong>, regardless of budget or connections. We combine AI-powered research with founder empathy to give you the insights you need—in minutes, not weeks.
+ </p>
+ <p>
+ This isn't just another AI tool. It's built by someone who understands the startup journey, the uncertainty, and the need for honest, actionable feedback. <strong>We're here to help you make better decisions, faster.</strong>
+ </p>
+ </div>
+ </Card>
+
+ {/* What We Believe Section */}
+ <Card className="mt-6 md:mt-8">
+ <div className="mb-6 flex items-center gap-4">
+ <div className="icon-circle bg-surface text-accent text-2xl">
+ 💡
+ </div>
+ <div>
+ <SectionHeader title="What We Believe" />
+ <p className="mt-1 text-xs text-secondary">Our core values</p>
+ </div>
+ </div>
+ 
+ <div className="space-y-5 text-primary text-primary leading-relaxed">
+ <div>
+ <h4 className="font-semibold text-primary mb-1">1. Ideas must fit the founder</h4>
+ <p>
+ The best startup idea for you is one that aligns with your goals, skills, time, and budget. Generic advice doesn't work. That's why every recommendation we generate is personalized to your unique profile and constraints.
+ </p>
+ </div>
+ <div>
+ <h4 className="font-semibold text-primary mb-1">2. Validation before building</h4>
+ <p>
+ Validate problems, test willingness to pay, and assess risks before writing code. This saves time and money. Our validation frameworks help you test assumptions quickly and cheaply.
+ </p>
+ </div>
+ <div>
+ <h4 className="font-semibold text-primary mb-1">3. Honest feedback &gt; false encouragement</h4>
+ <p>
+ We tell you the hard truths about your ideas because that's what helps you succeed. Our risk assessments and red flags are designed to help you avoid costly mistakes, not to discourage you.
+ </p>
+ </div>
+ <div>
+ <h4 className="font-semibold text-primary mb-1">4. Accessibility matters</h4>
+ <p>
+ Professional-grade validation shouldn't require VC connections or a $10,000 budget. We're committed to making advisor-quality insights available to every founder, regardless of their starting point.
+ </p>
+ </div>
+ </div>
+ </Card>
+
+ {/* What's Next Section */}
+ <Card className="mt-6 md:mt-8">
+ <div className="mb-6 flex items-center gap-4">
+ <div className="icon-circle bg-surface text-accent text-2xl">
+ 🚀
+ </div>
+ <div>
+ <SectionHeader title="What's Next" />
+ <p className="mt-1 text-xs text-secondary">Our vision and roadmap</p>
+ </div>
+ </div>
+ 
+ <div className="space-y-4 text-primary text-primary leading-relaxed">
+ <p>
+ We're constantly improving our AI models and adding new features based on founder feedback. Our goal is to make Startup Idea Advisor the most comprehensive, accurate, and helpful validation tool available.
+ </p>
+ <p>
+ We're always looking for ways to improve the analysis, add new capabilities, and make the experience better for founders. Your feedback drives what we build next.
+ </p>
+ <p>
+ Have ideas or feedback? We'd love to hear from you. <Link to="/contact" className="text-accent hover:text-accent font-semibold">Contact us</Link> or check out our <Link to="/blog" className="text-accent hover:text-accent font-semibold">blog</Link> for the latest updates and insights.
+ </p>
+ </div>
+ </Card>
+
+ {/* Bottom CTA Section */}
+ <div className="mt-8 md:mt-10 pt-8 border-t border-default">
+ <div className="text-center">
+ <UIHeading level="h3" className="text-primary mb-3">Ready to explore your startup ideas?</UIHeading>
+ <p className="text-primary text-primary mb-6">
+ Get personalized startup ideas, validation frameworks, and advisor-grade analysis in minutes.
+ </p>
+ <div className="flex flex-col sm:flex-row gap-4 justify-center">
+ <Link to="/advisor">
+ <UIButton variant="primary">
+ Start Discovery Session
+ </UIButton>
+ </Link>
+ <Link to="/product">
+ <UIButton variant="secondary">
+ See How It Works
+ </UIButton>
+ </Link>
+ </div>
+ <div className="mt-6 flex flex-wrap justify-center gap-4 text-base">
+ <Link to="/pricing" className="text-accent hover:text-accent font-medium">
+ View Pricing →
+ </Link>
+ <Link to="/resources" className="text-accent hover:text-accent font-medium">
+ Resources & Guides →
+ </Link>
+ <Link to="/blog" className="text-accent hover:text-accent font-medium">
+ Read Blog →
+ </Link>
+ </div>
+ </div>
+ </div>
+ </div>
+ </Card>
+ </div>
+
+ </div>
+ </PageContainer>
+ </MarketingLayout>
+ );
 }
 

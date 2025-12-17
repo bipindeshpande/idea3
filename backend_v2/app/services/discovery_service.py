@@ -22,6 +22,7 @@ from app.models.discovery_result import DiscoveryResult
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.logger import log_discovery_run, run_id_var
+from app.services.conflict_detector import ConflictDetector
 
 
 class DiscoveryService(BaseService):
@@ -77,6 +78,11 @@ class DiscoveryService(BaseService):
                         completed_at=datetime.now(timezone.utc)
                     )
                     self.db.add(run)
+                else:
+                    # Update user_id if it's missing and we have a user_id to set
+                    if user_id and not run.user_id:
+                        run.user_id = user_id
+                        self._log(f"Updated cached run {run_id} with user_id={user_id}", "INFO")
             else:
                 run = Run(
                     user_id=user_id,
@@ -135,6 +141,11 @@ class DiscoveryService(BaseService):
             run = self.db.query(Run).filter(Run.run_id == run_id).first()
             if not run:
                 raise ValueError(f"Run {run_id} not found")
+            # Update user_id if it's missing and we have a user_id to set
+            if user_id and not run.user_id:
+                run.user_id = user_id
+                self.db.commit()
+                self._log(f"Updated run {run_id} with user_id={user_id}", "INFO")
             # Update run_id in context
             run_id_var.set(run_id)
         else:
@@ -160,12 +171,20 @@ class DiscoveryService(BaseService):
             # Determine realism level for output
             realism_level = self.determine_realism_level(inputs)
             
+            # Detect conflicts and get user message
+            conflicts = ConflictDetector.detect_conflicts(inputs)
+            conflict_message = ConflictDetector.build_user_message(conflicts, inputs)
+            
             # Assemble structured outputs
             final_outputs = self.result_assembler.assemble(
                 profile_analysis=results["profile_analysis"],
                 stage2_output=results["recommendations"],
                 realism_level=realism_level
             )
+            
+            # Add conflict adjustment message if conflicts detected
+            if conflict_message:
+                final_outputs["conflict_adjustment"] = conflict_message
 
             # Generate Final Recommendation (premium decision summary)
             if "structured_recommendations" in final_outputs and final_outputs["structured_recommendations"]:
@@ -682,6 +701,14 @@ CRITICAL RULES:
 - Each IDEA block must have exactly these fields: title, summary, target_market, revenue_model, validation_score, timeline, why_this_fits
 - Follow the format EXACTLY as specified.
 
+IDEA TITLE REQUIREMENTS (CRITICAL):
+- Each idea title MUST be a CONCRETE STARTUP IDEA, NOT a framework component or abstract concept
+- DO NOT return: "Business Models", "Target Segments", "Value Propositions", "Revenue Models", "Market Opportunities", "Customer Personas", "Go-to-Market Strategy", "Pricing Strategies", "Validation Frameworks", "Execution Plans", or any other framework terms
+- Each title MUST follow pattern: [Who] + [Problem] + [Solution]
+- Examples of VALID titles: "Non-technical food founders launch cloud kitchens using shared commercial kitchens", "Local fitness coaches create personalized meal prep services for busy professionals"
+- Examples of INVALID titles: "Business Models", "Target Segments", "Value Propositions" (these are framework terms, not ideas)
+- ONLY return fully-formed, concrete startup ideas with specific customers, problems, and solutions
+
 REALISM ENFORCEMENT:
 - Ideas MUST match user's actual skills (if user only has cooking skills, NO tech/AI/software ideas)
 - Ideas MUST fit user's time commitment, budget, preferred work style, and startup style
@@ -691,7 +718,8 @@ REALISM ENFORCEMENT:
 - Ideas MUST be executable within user's earnings timeline
 - Ideas MUST be from user's selected industry and sub-interest ONLY
 - Ideas MUST be operationally simple and feasible for the user's skill level
-- NO hallucinations, NO irrelevant tech, NO ideas from different industries"""
+- NO hallucinations, NO irrelevant tech, NO ideas from different industries
+- NO framework terms, NO abstract concepts, NO strategy categories - ONLY concrete startup ideas"""
 
         llm_response = self.llm_service.generate(
             prompt=prompt,
@@ -974,6 +1002,14 @@ CRITICAL RULES:
 - Each IDEA block must have exactly these fields: title, summary, target_market, revenue_model, validation_score, timeline, why_this_fits
 - Follow the format EXACTLY as specified.
 
+IDEA TITLE REQUIREMENTS (CRITICAL):
+- Each idea title MUST be a CONCRETE STARTUP IDEA, NOT a framework component or abstract concept
+- DO NOT return: "Business Models", "Target Segments", "Value Propositions", "Revenue Models", "Market Opportunities", "Customer Personas", "Go-to-Market Strategy", "Pricing Strategies", "Validation Frameworks", "Execution Plans", or any other framework terms
+- Each title MUST follow pattern: [Who] + [Problem] + [Solution]
+- Examples of VALID titles: "Non-technical food founders launch cloud kitchens using shared commercial kitchens", "Local fitness coaches create personalized meal prep services for busy professionals"
+- Examples of INVALID titles: "Business Models", "Target Segments", "Value Propositions" (these are framework terms, not ideas)
+- ONLY return fully-formed, concrete startup ideas with specific customers, problems, and solutions
+
 REALISM ENFORCEMENT:
 - Ideas MUST match user's actual skills (if user only has cooking skills, NO tech/AI/software ideas)
 - Ideas MUST fit user's time commitment, budget, preferred work style, and startup style
@@ -983,7 +1019,8 @@ REALISM ENFORCEMENT:
 - Ideas MUST be executable within user's earnings timeline
 - Ideas MUST be from user's selected industry and sub-interest ONLY
 - Ideas MUST be operationally simple and feasible for the user's skill level
-- NO hallucinations, NO irrelevant tech, NO ideas from different industries"""
+- NO hallucinations, NO irrelevant tech, NO ideas from different industries
+- NO framework terms, NO abstract concepts, NO strategy categories - ONLY concrete startup ideas"""
 
         llm_stream = self.llm_service.generate_stream(
             prompt=prompt,

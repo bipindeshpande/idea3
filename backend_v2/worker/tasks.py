@@ -21,6 +21,9 @@ def run_stage2(run_id: str, inputs: Dict[str, Any], user_id: Optional[str] = Non
         if run:
             run.status = "processing"
             run.started_at = datetime.now(timezone.utc) if hasattr(run, "started_at") else run.created_at
+            # Update user_id if it's missing and we have a user_id to set
+            if user_id and not run.user_id:
+                run.user_id = user_id
             db.commit()
 
         service = DiscoveryService(db)
