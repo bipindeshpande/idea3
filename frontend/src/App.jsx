@@ -10,12 +10,18 @@ import { Outlet } from "react-router-dom";
 
 // Public pages
 import LandingPage from "./pages/public/Landing.jsx";
+import PublicHomePage from "./pages/public/Home.jsx";
 import AboutPage from "./pages/public/About.jsx";
 import ContactPage from "./pages/public/Contact.jsx";
 import PricingPage from "./pages/public/Pricing.jsx";
 import ProductPage from "./pages/public/Product.jsx";
+import ProductDiscoverPage from "./pages/public/ProductDiscover.jsx";
+import ProductValidatePage from "./pages/public/ProductValidate.jsx";
+import ProductNetworkPage from "./pages/public/ProductNetwork.jsx";
 import PrivacyPage from "./pages/public/Privacy.jsx";
 import TermsPage from "./pages/public/Terms.jsx";
+import ResourceTemplatesPage from "./pages/public/ResourceTemplates.jsx";
+import BlogArticlePage from "./pages/public/BlogArticle.jsx";
 
 // Discovery pages
 import HomePage from "./pages/discovery/Home.jsx";
@@ -78,7 +84,7 @@ export default function App() {
  <Route
  path="/"
  element={
- isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />
+ isAuthenticated ? <Navigate to="/dashboard" replace /> : <PublicHomePage />
  }
  />
  <Route path="/register" element={<RegisterPage />} />
@@ -110,11 +116,16 @@ export default function App() {
  }
  />
  <Route path="/product" element={<ProductPage />} />
+ <Route path="/product/discover" element={<ProductDiscoverPage />} />
+ <Route path="/product/validate" element={<ProductValidatePage />} />
+ <Route path="/product/network" element={<ProductNetworkPage />} />
  <Route path="/pricing" element={<PricingPage />} />
  <Route path="/resources" element={<ResourcesPage />} />
+ <Route path="/resources/templates" element={<ResourceTemplatesPage />} />
+ <Route path="/resources/frameworks" element={<FrameworksPage />} />
  <Route path="/advisor-resources" element={<AdvisorResourcesPage />} />
  <Route path="/blog" element={<BlogPage />} />
- <Route path="/blog/:slug" element={<BlogPage />} />
+ <Route path="/blog/:slug" element={<BlogArticlePage />} />
  <Route path="/frameworks" element={<FrameworksPage />} />
  <Route path="/about" element={<AboutPage />} />
  <Route path="/contact" element={<ContactPage />} />

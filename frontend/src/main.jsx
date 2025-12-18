@@ -9,6 +9,7 @@ import { AuthProvider } from "./context/AuthContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import "./styles/theme.css";
 import "./styles.css";
+import "./styles/marketing.css";
 
 const GA_ID = import.meta.env.VITE_GA_ID;
 

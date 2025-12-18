@@ -1,9 +1,11 @@
 import { useState } from "react";
 import Seo from "../../components/common/Seo.jsx";
-import PageHeader from "../../components/layout/PageHeader.jsx";
+import HeroSection from "../../components/marketing/HeroSection.jsx";
+import Blob from "../../components/marketing/Blob.jsx";
 import PageContainer from "../../components/layout/PageContainer.jsx";
 import Card from "../../components/ui/Card.jsx";
 import UIButton from "../../components/ui/ui-button.jsx";
+import UIHeading from "../../components/ui/ui-heading.jsx";
 import FormInput from "../../components/ui/FormInput.jsx";
 import FormTextarea from "../../components/ui/FormTextarea.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
@@ -73,15 +75,19 @@ export default function ContactPage() {
  path="/contact"
  />
  
+ {/* Hero Section */}
+ <HeroSection
+ title="Get in Touch"
+ subtitle="Interested in pilots, partnerships, or press? Drop us a note and we'll get back within one business day."
+ className="mb-16"
+ />
+
  <div className="grid gap-8 lg:grid-cols-3">
  {/* Main Contact Form */}
  <div className="lg:col-span-2">
- <Card className="relative">
+ <Card className="marketing-card-blue relative overflow-hidden">
+ <Blob size="small" position="top-right" />
  <div className="relative z-10">
- <PageHeader
- title="Get in Touch"
- description="Interested in pilots, partnerships, or press? Drop us a note and we'll get back within one business day."
- />
  
  {success && (
  <Card className="mb-6 border-default border-default bg-surface bg-surface">
@@ -165,64 +171,58 @@ export default function ContactPage() {
  <div className="lg:col-span-1">
  <div className="space-y-6">
  {/* Direct Contact Card */}
- <Card>
- <div className="mb-4 flex items-center gap-3">
- <div className="icon-circle bg-surface bg-surface text-accent text-accent text-xl">
- ✉️
+ <Card className="marketing-card-purple">
+ <div className="marketing-icon-circle mb-4 mx-auto">
+ <span className="text-2xl">✉️</span>
  </div>
- <h3 className="text-lg font-semibold text-primary text-secondary">Email Us</h3>
- </div>
- <p className="text-sm text-secondary text-secondary mb-3">
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-3 text-center">Email Us</UIHeading>
+ <p className="text-base text-secondary mb-4 text-center">
  Prefer to email directly? We're here to help.
  </p>
  <a
  href="mailto:hello@ideabunch.com"
- className="text-accent hover:text-accent-hover font-semibold text-primary break-all"
+ className="text-base text-accent hover:text-accent-hover font-semibold break-all text-center block"
  >
  hello@ideabunch.com
  </a>
  </Card>
 
  {/* Response Time Card */}
- <Card>
- <div className="mb-4 flex items-center gap-3">
- <div className="icon-circle bg-surface bg-surface text-accent text-accent text-xl">
- ⏱️
+ <Card className="marketing-card-teal">
+ <div className="marketing-icon-circle mb-4 mx-auto">
+ <span className="text-2xl">⏱️</span>
  </div>
- <h3 className="text-lg font-semibold text-primary text-secondary">Response Time</h3>
- </div>
- <p className="text-sm text-secondary text-secondary leading-relaxed">
- We typically respond within <strong className="text-primary text-secondary">one business day</strong>. For urgent matters, please mention it in your message.
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-3 text-center">Response Time</UIHeading>
+ <p className="text-base text-secondary leading-relaxed text-center">
+ We typically respond within <strong className="text-primary">one business day</strong>. For urgent matters, please mention it in your message.
  </p>
  </Card>
 
  {/* What We Can Help With Card */}
- <Card>
- <div className="mb-4 flex items-center gap-3">
- <div className="icon-circle bg-surface bg-surface text-accent text-accent text-xl">
- 💬
+ <Card className="marketing-card-orange">
+ <div className="marketing-icon-circle mb-4 mx-auto">
+ <span className="text-2xl">💬</span>
  </div>
- <h3 className="text-lg font-semibold text-primary text-secondary">We Can Help With</h3>
- </div>
- <ul className="space-y-2 text-sm text-secondary text-secondary">
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-4 text-center">We Can Help With</UIHeading>
+ <ul className="space-y-3 text-base text-secondary">
  <li className="flex items-start gap-2">
- <span className="text-accent text-accent mt-0.5">•</span>
+ <span className="text-accent mt-0.5 font-bold">•</span>
  <span>Partnership opportunities</span>
  </li>
  <li className="flex items-start gap-2">
- <span className="text-accent text-accent mt-0.5">•</span>
+ <span className="text-accent mt-0.5 font-bold">•</span>
  <span>Pilot program inquiries</span>
  </li>
  <li className="flex items-start gap-2">
- <span className="text-accent text-accent mt-0.5">•</span>
+ <span className="text-accent mt-0.5 font-bold">•</span>
  <span>Press and media requests</span>
  </li>
  <li className="flex items-start gap-2">
- <span className="text-accent text-accent mt-0.5">•</span>
+ <span className="text-accent mt-0.5 font-bold">•</span>
  <span>Product feedback and suggestions</span>
  </li>
  <li className="flex items-start gap-2">
- <span className="text-accent text-accent mt-0.5">•</span>
+ <span className="text-accent mt-0.5 font-bold">•</span>
  <span>Technical support</span>
  </li>
  </ul>

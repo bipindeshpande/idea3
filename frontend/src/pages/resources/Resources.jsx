@@ -2,12 +2,15 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { frameworks } from "../../templates/frameworksConfig.js";
-import PageHeader from "../../components/layout/PageHeader.jsx";
+import HeroSection from "../../components/marketing/HeroSection.jsx";
+import SectionHeader from "../../components/marketing/SectionHeader.jsx";
+import FeatureGrid from "../../components/marketing/FeatureGrid.jsx";
+import CTASection from "../../components/marketing/CTASection.jsx";
+import Blob from "../../components/marketing/Blob.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
 import Card from "../../components/ui/Card.jsx";
 import UIButton from "../../components/ui/ui-button.jsx";
 import UIHeading from "../../components/ui/ui-heading.jsx";
-import SectionHeader from "../../components/layout/SectionHeader.jsx";
 import TemplatePreviewModal from "../../components/resources/TemplatePreviewModal.jsx";
 import { markdownToDocx } from "../../utils/markdownToDocx.js";
 
@@ -31,72 +34,75 @@ export default function ResourcesPage() {
  />
 
  {/* Hero Section */}
- <PageHeader
+ <HeroSection
  title="Resources to go from insight to traction"
- description={
- <>
- Use these playbooks and templates alongside your reports to keep momentum—run experiments, gather signal, and generate new recommendations when you need fresh direction.
- <span className="block mt-2 text-xs text-secondary">
- All templates download as editable Word documents (.docx) that you can customize.
- </span>
- </>
- }
- className="text-center mb-8"
+ subtitle="Use these playbooks and templates alongside your reports to keep momentum—run experiments, gather signal, and generate new recommendations when you need fresh direction. All templates download as editable Word documents (.docx) that you can customize."
+ primaryCTA={{ to: "/advisor", label: "Get Started" }}
+ secondaryCTA={{ to: "/blog", label: "Read Guides" }}
+ className="mb-20"
  />
 
+ {/* Section Divider */}
+ <div className="marketing-divider my-16" />
+
  {/* Start Here Section */}
- <div className="mb-10">
- <Card className="border-2 border-default shadow-sm">
- <div className="mb-5">
- <UIHeading level="h2" className="text-primary mb-2">New here? Start with this path</UIHeading>
- <p className="text-base text-primary font-medium">Complete these three steps in order to validate your idea before building.</p>
+ <section className="relative py-12 mb-16">
+ <Blob size="medium" position="top-left" />
+ <Card className="marketing-card-blue relative overflow-hidden">
+ <div className="relative z-10 mb-6">
+ <SectionHeader title="New here? Start with this path" subtitle="Complete these three steps in order to validate your idea before building." center />
  </div>
- <div className="space-y-4">
+ <div className="space-y-6">
  <div className="flex items-start gap-4">
- <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent text-on-accent text-xs font-bold flex items-center justify-center shadow-sm">1</div>
- <div className="flex-1">
- <p className="text-base font-semibold text-primary">Validate the problem exists</p>
- <p className="text-xs text-secondary mt-1">Use the Problem Validation Checklist to confirm people actually have this problem.</p>
+ <div className="marketing-icon-circle flex-shrink-0">
+ <span className="text-lg font-bold text-accent font-mono">1</span>
  </div>
- </div>
- <div className="flex items-start gap-4">
- <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent text-on-accent text-xs font-bold flex items-center justify-center shadow-sm">2</div>
  <div className="flex-1">
- <p className="text-base font-semibold text-primary">Test willingness to pay</p>
- <p className="text-xs text-secondary mt-1">Run pricing validation to see if customers will pay for your solution.</p>
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-2">Validate the problem exists</UIHeading>
+ <p className="text-base text-secondary">Use the Problem Validation Checklist to confirm people actually have this problem.</p>
  </div>
  </div>
  <div className="flex items-start gap-4">
- <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent text-on-accent text-xs font-bold flex items-center justify-center shadow-sm">3</div>
+ <div className="marketing-icon-circle flex-shrink-0">
+ <span className="text-lg font-bold text-accent font-mono">2</span>
+ </div>
  <div className="flex-1">
- <p className="text-base font-semibold text-primary">Build your MVP roadmap</p>
- <p className="text-xs text-secondary mt-1">Use the MVP Prioritization Matrix to decide what to build first.</p>
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-2">Test willingness to pay</UIHeading>
+ <p className="text-base text-secondary">Run pricing validation to see if customers will pay for your solution.</p>
+ </div>
+ </div>
+ <div className="flex items-start gap-4">
+ <div className="marketing-icon-circle flex-shrink-0">
+ <span className="text-lg font-bold text-accent font-mono">3</span>
+ </div>
+ <div className="flex-1">
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-2">Build your MVP roadmap</UIHeading>
+ <p className="text-base text-secondary">Use the MVP Prioritization Matrix to decide what to build first.</p>
  </div>
  </div>
  </div>
  </Card>
- </div>
+ </section>
 
  {/* Flagship Resource */}
- <div className="mb-10">
+ <section className="relative py-12 mb-16">
+ <Blob size="small" position="top-right" />
  <div className="mb-4">
- <span className="text-xs font-semibold uppercase tracking-wide text-accent text-accent">Most Popular</span>
+ <span className="ui-badge ui-badge--info">Most Popular</span>
  </div>
- <Card className="border-2 border-default transition hover:shadow-lg shadow-sm">
- <div className="flex flex-col md:flex-row gap-6">
+ <Card className="marketing-card-red relative overflow-hidden">
+ <div className="relative z-10 flex flex-col md:flex-row gap-6">
+ <div className="marketing-icon-circle flex-shrink-0">
+ <span className="text-4xl">{flagshipFramework.icon}</span>
+ </div>
  <div className="flex-1">
- <div className="mb-3 flex items-center gap-3">
- <div className="text-4xl shrink-0">{flagshipFramework.icon}</div>
- <div>
- <UIHeading level="h3" className="text-primary">{flagshipFramework.title}</UIHeading>
- <p className="text-xs text-accent mt-1 font-medium">Use this first if you haven't validated your problem yet</p>
- </div>
- </div>
- <p className="text-base text-primary mb-4">{flagshipFramework.description}</p>
- <div className="flex flex-wrap gap-2 mb-4">
+ <UIHeading level="h2" className="marketing-section-title text-primary mb-2">{flagshipFramework.title}</UIHeading>
+ <p className="text-base text-accent mb-3 font-medium">Use this first if you haven't validated your problem yet</p>
+ <p className="text-base text-secondary mb-6">{flagshipFramework.description}</p>
+ <div className="flex flex-wrap gap-4 mb-6">
  <Link
  to="/blog/complete-guide-to-problem-validation"
- className="text-xs text-accent hover:text-accent-hover font-medium"
+ className="text-base text-accent hover:text-accent-hover font-medium"
  >
  Use with: Problem Validation Guide →
  </Link>
@@ -107,101 +113,111 @@ export default function ResourcesPage() {
  setPreviewTemplate({ title: flagshipFramework.title, downloadName: `${flagshipFramework.title.toLowerCase().replace(/\s+/g, "-")}.docx` });
  setPreviewContent(flagshipFramework.content);
  }}
- className="w-full md:w-auto"
+ className="marketing-btn-primary"
  >
  Download checklist
  </UIButton>
  </div>
  </div>
  </Card>
- </div>
+ </section>
+
+ {/* Section Divider */}
+ <div className="marketing-divider my-16" />
 
  {/* Templates Section */}
- <div className="mb-8">
+ <section className="relative py-12 mb-16">
+ <Blob size="medium" position="bottom-right" />
  <SectionHeader
  title="Startup Templates"
- description="Ready-to-use templates for business plans, pitch decks, and customer outreach."
- className="text-center mb-4"
+ subtitle="Ready-to-use templates for business plans, pitch decks, and customer outreach."
+ center
+ className="mb-12"
  />
- <div className="grid gap-4 md:grid-cols-3">
- <Card className="flex flex-col border-default bg-surface transition hover:shadow-md">
- <div className="mb-3 flex items-center gap-3">
- <div className="text-3xl shrink-0">📄</div>
- <UIHeading level="h3" className="text-primary">Business Plan Template</UIHeading>
+ <div className="grid gap-6 md:grid-cols-3">
+ <Card className="marketing-feature-card marketing-card-blue flex flex-col">
+ <div className="marketing-icon-circle mb-4 mx-auto">
+ <span className="text-3xl">📄</span>
  </div>
- <p className="mt-2 text-xs text-primary flex-1">Complete business plan template with all sections you need.</p>
- <div className="mt-auto pt-4">
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-3 text-center">Business Plan Template</UIHeading>
+ <p className="text-base text-secondary flex-1 text-center mb-6">Complete business plan template with all sections you need.</p>
+ <div className="mt-auto">
  <UIButton
  variant="secondary"
  onClick={() => {
  setPreviewTemplate({ title: "Business Plan Template", downloadName: "business-plan-template.docx" });
  setPreviewContent("/templates/business-plan-template.md");
  }}
- className="w-full"
+ className="w-full marketing-btn-secondary"
  >
  Plan your business
  </UIButton>
  </div>
  </Card>
- <Card className="flex flex-col border-aqua-200 bg-aqua-50 transition hover:shadow-md">
- <div className="mb-3 flex items-center gap-3">
- <div className="text-3xl shrink-0">🎯</div>
- <UIHeading level="h3" className="text-primary">Pitch Deck Template</UIHeading>
+ <Card className="marketing-feature-card marketing-card-blue flex flex-col">
+ <div className="marketing-icon-circle mb-4 mx-auto">
+ <span className="text-3xl">🎯</span>
  </div>
- <p className="mt-2 text-xs text-primary flex-1">12-slide investor pitch deck template with design tips.</p>
- <div className="mt-auto pt-4">
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-3 text-center">Pitch Deck Template</UIHeading>
+ <p className="text-base text-secondary flex-1 text-center mb-6">12-slide investor pitch deck template with design tips.</p>
+ <div className="mt-auto">
  <UIButton
  variant="secondary"
  onClick={() => {
  setPreviewTemplate({ title: "Pitch Deck Template", downloadName: "pitch-deck-template.docx" });
  setPreviewContent("/templates/pitch-deck-template.md");
  }}
- className="w-full"
+ className="w-full marketing-btn-secondary"
  >
  Create pitch deck
  </UIButton>
  </div>
  </Card>
- <Card className="flex flex-col border-coral-200 bg-coral-50 transition hover:shadow-md">
- <div className="mb-3 flex items-center gap-3">
- <div className="text-3xl shrink-0">✉️</div>
- <UIHeading level="h3" className="text-primary">Email Templates</UIHeading>
+ <Card className="marketing-feature-card marketing-card-purple flex flex-col">
+ <div className="marketing-icon-circle mb-4 mx-auto">
+ <span className="text-3xl">✉️</span>
  </div>
- <p className="mt-2 text-xs text-primary flex-1">Customer outreach email templates for validation.</p>
- <div className="mt-auto pt-4">
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-3 text-center">Email Templates</UIHeading>
+ <p className="text-base text-secondary flex-1 text-center mb-6">Customer outreach email templates for validation.</p>
+ <div className="mt-auto">
  <UIButton
  variant="secondary"
  onClick={() => {
  setPreviewTemplate({ title: "Customer Outreach Email Templates", downloadName: "customer-outreach-email-template.docx" });
  setPreviewContent("/templates/customer-outreach-email-template.md");
  }}
- className="w-full"
+ className="w-full marketing-btn-secondary"
  >
  Start customer outreach
  </UIButton>
  </div>
  </Card>
  </div>
- </div>
+ </section>
+
+ {/* Section Divider */}
+ <div className="marketing-divider my-16" />
 
  {/* Frameworks & Templates Section */}
- <div className="mb-6">
+ <section className="relative py-12 mb-16">
+ <Blob size="large" position="center" />
  <SectionHeader
  title="Validation Frameworks & Templates"
- description="Download free, actionable frameworks to validate your startup idea, test pricing, conduct interviews, and build your MVP."
- className="text-center mb-4"
+ subtitle="Download free, actionable frameworks to validate your startup idea, test pricing, conduct interviews, and build your MVP."
+ center
+ className="mb-12"
  />
- <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+ <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
  {frameworks.map((framework, index) => {
- const colorClasses = [
- { border: "border-default", bg: "bg-surface" },
- { border: "border-aqua-200", bg: "bg-aqua-50" },
- { border: "border-coral-200", bg: "bg-coral-50" },
- { border: "border-sand-200", bg: "bg-sand-50" },
- { border: "border-default", bg: "bg-surface" },
- { border: "border-aqua-200", bg: "bg-aqua-50" },
+ const colorMap = [
+ "marketing-card-red",
+ "marketing-card-blue",
+ "marketing-card-orange",
+ "marketing-card-teal",
+ "marketing-card-purple",
+ "marketing-card-blue",
  ];
- const colors = colorClasses[index % colorClasses.length];
+ const colorClass = colorMap[index % colorMap.length];
 
  // Map frameworks to relevant blog articles
  const blogLinks = {
@@ -226,31 +242,32 @@ export default function ResourcesPage() {
  return (
  <Card
  key={framework.id}
- className={`flex flex-col ${colors.border} ${colors.bg} transition hover:shadow-md`}
+ className={`marketing-feature-card ${colorClass} flex flex-col marketing-fade-in`}
+ style={{ animationDelay: `${index * 0.1}s` }}
  >
- <div className="mb-3 flex items-center gap-3">
- <div className="text-3xl shrink-0">{framework.icon}</div>
- <UIHeading level="h3" className="text-primary">{framework.title}</UIHeading>
+ <div className="marketing-icon-circle mb-4 mx-auto">
+ <span className="text-3xl">{framework.icon}</span>
  </div>
- <p className="mt-2 text-xs text-primary flex-1">{framework.description}</p>
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-3 text-center">{framework.title}</UIHeading>
+ <p className="text-base text-secondary flex-1 text-center mb-4">{framework.description}</p>
  {blogLink && (
- <div className="mt-3 mb-2">
+ <div className="mb-4 text-center">
  <Link
  to={`/blog/${blogLink.slug}`}
- className="text-xs text-secondary hover:text-accent-hover font-medium"
+ className="text-base text-accent hover:text-accent-hover font-medium"
  >
  Use with: {blogLink.text} →
  </Link>
  </div>
  )}
- <div className="mt-auto pt-4">
+ <div className="mt-auto">
  <UIButton
  variant="secondary"
  onClick={() => {
  setPreviewTemplate({ title: framework.title, downloadName: `${framework.title.toLowerCase().replace(/\s+/g, "-")}.docx` });
  setPreviewContent(framework.content);
  }}
- className="w-full"
+ className="w-full marketing-btn-secondary"
  >
  {actionText}
  </UIButton>
@@ -259,44 +276,24 @@ export default function ResourcesPage() {
  );
  })}
  </div>
- </div>
+ </section>
 
  {/* Progress Note */}
- <div className="mt-8 mb-6 text-center">
- <p className="text-xs text-secondary italic">
+ <div className="my-12 text-center">
+ <p className="text-base text-secondary italic">
  Most founders complete steps 1–3 in under a week
  </p>
  </div>
 
- {/* Next Steps Section */}
- <div className="mt-12 pt-8 border-t border-default">
- <Card className="bg-app bg-surface border-default">
- <div className="text-center">
- <UIHeading level="h3" className="text-primary mb-2">Ready to validate your idea?</UIHeading>
- <p className="text-base text-secondary mb-6">
- Use these resources to test your startup idea, then get AI-powered recommendations tailored to your situation.
- </p>
- <div className="flex flex-col sm:flex-row gap-4 justify-center">
- <div className="flex flex-col items-center">
- <UIButton as={Link} to="/advisor" variant="primary" className="w-full sm:w-auto">
- Run a discovery session
- </UIButton>
- <p className="text-xs text-secondary mt-2 max-w-xs">
- Get personalized startup ideas based on your time, budget, and skills
- </p>
- </div>
- <div className="flex flex-col items-center">
- <UIButton as={Link} to="/blog" variant="secondary" className="w-full sm:w-auto">
- Read validation guides
- </UIButton>
- <p className="text-xs text-secondary mt-2 max-w-xs">
- Learn step-by-step methods to test problems, pricing, and solutions
- </p>
- </div>
- </div>
- </div>
- </Card>
- </div>
+ {/* CTA Section */}
+ <CTASection
+ title="Ready to validate your idea?"
+ description="Use these resources to test your startup idea, then get AI-powered recommendations tailored to your situation."
+ primaryCTA={{ to: "/advisor", label: "Run a discovery session" }}
+ secondaryCTA={{ to: "/blog", label: "Read validation guides" }}
+ gradient
+ className="my-20"
+ />
 
  {/* Template Preview Modal */}
  {previewTemplate && (

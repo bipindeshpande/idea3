@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
-import PageHeader from "../../components/layout/PageHeader.jsx";
+import HeroSection from "../../components/marketing/HeroSection.jsx";
+import SectionHeader from "../../components/marketing/SectionHeader.jsx";
+import CTASection from "../../components/marketing/CTASection.jsx";
+import Blob from "../../components/marketing/Blob.jsx";
 import Card from "../../components/ui/Card.jsx";
 import UIButton from "../../components/ui/ui-button.jsx";
 import UIHeading from "../../components/ui/ui-heading.jsx";
-import SectionHeader from "../../components/layout/SectionHeader.jsx";
 import PageContainer from "../../components/layout/PageContainer.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
 
@@ -18,28 +20,27 @@ export default function AboutPage() {
  path="/about"
  />
  
- <div>
- {/* Main Content */}
- <div>
- <Card className="relative">
- <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-surface opacity-[0.09] blur-2xl pointer-events-none"></div>
- <div className="relative z-10">
- <PageHeader 
+ {/* Hero Section */}
+ <HeroSection
  title="About"
- description="We built Startup Idea Advisor after watching countless professionals struggle to translate their strengths into viable ventures. Our mission is to combine founder empathy with AI-assisted research so you can explore opportunities confidently and efficiently."
+ subtitle="We built Startup Idea Advisor after watching countless professionals struggle to translate their strengths into viable ventures. Our mission is to combine founder empathy with AI-assisted research so you can explore opportunities confidently and efficiently."
+ className="mb-20"
  />
 
+ {/* Section Divider */}
+ <div className="marketing-divider my-16" />
+
+ <div className="space-y-12">
+
  {/* Our Mission Section */}
- <Card className="mt-10 md:mt-12">
- <div className="mb-6 flex items-center gap-4">
- <div className="icon-circle bg-surface text-accent text-2xl">
- 🎯
+ <section className="relative py-8">
+ <Card className="marketing-card-blue relative overflow-hidden">
+ <Blob size="small" position="top-right" />
+ <div className="relative z-10">
+ <div className="marketing-icon-circle mb-6 mx-auto">
+ <span className="text-3xl">🎯</span>
  </div>
- <div>
- <SectionHeader title="Our Mission" />
- <p className="mt-1 text-xs text-secondary">Why we exist</p>
- </div>
- </div>
+ <SectionHeader title="Our Mission" subtitle="Why we exist" center className="mb-6" />
  
  <div className="space-y-4 text-primary text-primary leading-relaxed">
  <p>
@@ -55,19 +56,19 @@ export default function AboutPage() {
  By orchestrating multiple specialist AI agents, we automate the research, analysis, and strategic thinking that advisors do, so you can focus on building.
  </p>
  </div>
+ </div>
  </Card>
+ </section>
 
  {/* The Problem We Solve Section */}
- <Card className="mt-6 md:mt-8">
- <div className="mb-6 flex items-center gap-4">
- <div className="icon-circle bg-surface text-accent text-2xl">
- 🔍
+ <section className="relative py-8">
+ <Card className="marketing-card-purple relative overflow-hidden">
+ <Blob size="small" position="bottom-left" />
+ <div className="relative z-10">
+ <div className="marketing-icon-circle mb-6 mx-auto">
+ <span className="text-3xl">🔍</span>
  </div>
- <div>
- <SectionHeader title="The Problem We Solve" />
- <p className="mt-1 text-xs text-secondary">What founders struggle with</p>
- </div>
- </div>
+ <SectionHeader title="The Problem We Solve" subtitle="What founders struggle with" center className="mb-6" />
  
  <div className="space-y-4 text-primary text-primary leading-relaxed">
  <p>
@@ -87,19 +88,19 @@ export default function AboutPage() {
  We automate the research and analysis that advisors do, so you can make informed decisions without the cost or time investment.
  </p>
  </div>
+ </div>
  </Card>
+ </section>
 
  {/* How It Works Section */}
- <Card className="mt-6 md:mt-8">
- <div className="mb-6 flex items-center gap-4">
- <div className="icon-circle bg-surface text-accent text-2xl">
- ⚙️
+ <section className="relative py-8">
+ <Card className="marketing-card-teal relative overflow-hidden">
+ <Blob size="small" position="top-right" />
+ <div className="relative z-10">
+ <div className="marketing-icon-circle mb-6 mx-auto">
+ <span className="text-3xl">⚙️</span>
  </div>
- <div>
- <SectionHeader title="How We Deliver Advisor-Grade Analysis" />
- <p className="mt-1 text-xs text-secondary">Our AI system explained</p>
- </div>
- </div>
+ <SectionHeader title="How We Deliver Advisor-Grade Analysis" subtitle="Our AI system explained" center className="mb-6" />
  
  <div className="space-y-4 text-primary text-primary leading-relaxed">
  <p>
@@ -124,19 +125,19 @@ export default function AboutPage() {
  </Link>
  </div>
  </div>
+ </div>
  </Card>
+ </section>
 
  {/* Founder Story Section */}
- <Card className="mt-6 md:mt-8">
- <div className="mb-6 flex items-center gap-4">
- <div className="icon-circle bg-surface text-accent text-2xl">
- 👨‍💼
+ <section className="relative py-8">
+ <Card className="marketing-card-orange relative overflow-hidden">
+ <Blob size="small" position="bottom-right" />
+ <div className="relative z-10">
+ <div className="marketing-icon-circle mb-6 mx-auto">
+ <span className="text-3xl">👨‍💼</span>
  </div>
- <div>
- <SectionHeader title="Built by Entrepreneurs, for Entrepreneurs" />
- <p className="mt-1 text-xs text-secondary">Our founder's story</p>
- </div>
- </div>
+ <SectionHeader title="Built by Entrepreneurs, for Entrepreneurs" subtitle="Our founder's story" center className="mb-6" />
  
  <div className="space-y-4 text-primary text-primary leading-relaxed">
  <p>
@@ -152,19 +153,19 @@ export default function AboutPage() {
  This isn't just another AI tool. It's built by someone who understands the startup journey, the uncertainty, and the need for honest, actionable feedback. <strong>We're here to help you make better decisions, faster.</strong>
  </p>
  </div>
+ </div>
  </Card>
+ </section>
 
  {/* What We Believe Section */}
- <Card className="mt-6 md:mt-8">
- <div className="mb-6 flex items-center gap-4">
- <div className="icon-circle bg-surface text-accent text-2xl">
- 💡
+ <section className="relative py-8">
+ <Card className="marketing-card-blue relative overflow-hidden">
+ <Blob size="small" position="top-left" />
+ <div className="relative z-10">
+ <div className="marketing-icon-circle mb-6 mx-auto">
+ <span className="text-3xl">💡</span>
  </div>
- <div>
- <SectionHeader title="What We Believe" />
- <p className="mt-1 text-xs text-secondary">Our core values</p>
- </div>
- </div>
+ <SectionHeader title="What We Believe" subtitle="Our core values" center className="mb-6" />
  
  <div className="space-y-5 text-primary text-primary leading-relaxed">
  <div>
@@ -192,19 +193,19 @@ export default function AboutPage() {
  </p>
  </div>
  </div>
+ </div>
  </Card>
+ </section>
 
  {/* What's Next Section */}
- <Card className="mt-6 md:mt-8">
- <div className="mb-6 flex items-center gap-4">
- <div className="icon-circle bg-surface text-accent text-2xl">
- 🚀
+ <section className="relative py-8">
+ <Card className="marketing-card-purple relative overflow-hidden">
+ <Blob size="small" position="top-right" />
+ <div className="relative z-10">
+ <div className="marketing-icon-circle mb-6 mx-auto">
+ <span className="text-3xl">🚀</span>
  </div>
- <div>
- <SectionHeader title="What's Next" />
- <p className="mt-1 text-xs text-secondary">Our vision and roadmap</p>
- </div>
- </div>
+ <SectionHeader title="What's Next" subtitle="Our vision and roadmap" center className="mb-6" />
  
  <div className="space-y-4 text-primary text-primary leading-relaxed">
  <p>
@@ -217,45 +218,24 @@ export default function AboutPage() {
  Have ideas or feedback? We'd love to hear from you. <Link to="/contact" className="text-accent hover:text-accent font-semibold">Contact us</Link> or check out our <Link to="/blog" className="text-accent hover:text-accent font-semibold">blog</Link> for the latest updates and insights.
  </p>
  </div>
- </Card>
-
- {/* Bottom CTA Section */}
- <div className="mt-8 md:mt-10 pt-8 border-t border-default">
- <div className="text-center">
- <UIHeading level="h3" className="text-primary mb-3">Ready to explore your startup ideas?</UIHeading>
- <p className="text-primary text-primary mb-6">
- Get personalized startup ideas, validation frameworks, and advisor-grade analysis in minutes.
- </p>
- <div className="flex flex-col sm:flex-row gap-4 justify-center">
- <Link to="/advisor">
- <UIButton variant="primary">
- Start Discovery Session
- </UIButton>
- </Link>
- <Link to="/product">
- <UIButton variant="secondary">
- See How It Works
- </UIButton>
- </Link>
- </div>
- <div className="mt-6 flex flex-wrap justify-center gap-4 text-base">
- <Link to="/pricing" className="text-accent hover:text-accent font-medium">
- View Pricing →
- </Link>
- <Link to="/resources" className="text-accent hover:text-accent font-medium">
- Resources & Guides →
- </Link>
- <Link to="/blog" className="text-accent hover:text-accent font-medium">
- Read Blog →
- </Link>
- </div>
- </div>
- </div>
  </div>
  </Card>
- </div>
+ </section>
 
  </div>
+
+ {/* Section Divider */}
+ <div className="marketing-divider my-16" />
+
+ {/* CTA Section */}
+ <CTASection
+ title="Ready to explore your startup ideas?"
+ description="Get personalized startup ideas, validation frameworks, and advisor-grade analysis in minutes."
+ primaryCTA={{ to: "/advisor", label: "Start Discovery Session" }}
+ secondaryCTA={{ to: "/product", label: "See How It Works" }}
+ gradient
+ className="my-20"
+ />
  </PageContainer>
  </MarketingLayout>
  );

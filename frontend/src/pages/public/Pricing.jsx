@@ -2,11 +2,14 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
-import PageHeader from "../../components/layout/PageHeader.jsx";
+import HeroSection from "../../components/marketing/HeroSection.jsx";
+import SectionHeader from "../../components/marketing/SectionHeader.jsx";
+import CTASection from "../../components/marketing/CTASection.jsx";
+import Blob from "../../components/marketing/Blob.jsx";
 import PageContainer from "../../components/layout/PageContainer.jsx";
 import Card from "../../components/ui/Card.jsx";
 import UIButton from "../../components/ui/ui-button.jsx";
-import SectionHeader from "../../components/layout/SectionHeader.jsx";
+import UIHeading from "../../components/ui/ui-heading.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
 
 // Lazy load the entire payment modal to avoid loading the payment provider until needed
@@ -132,86 +135,95 @@ export default function PricingPage() {
  />
 
  {/* Hero Section */}
- <header className="mb-8 text-center relative">
- <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-surface opacity-[0.09] blur-2xl pointer-events-none"></div>
- <div className="relative z-10">
- <PageHeader
+ <HeroSection
  title="Start free, upgrade when you need more"
- description="Get 2 free validations and 4 free discoveries. No credit card required. Upgrade to unlock more when you're ready."
+ subtitle="Get 2 free validations and 4 free discoveries. No credit card required. Upgrade to unlock more when you're ready."
+ primaryCTA={{ to: "/register", label: "Get Started Free" }}
+ secondaryCTA={{ to: "/product", label: "Learn More" }}
+ className="mb-20"
  />
- <div className="flex items-center justify-center gap-2">
- <span className="text-lg">🤝</span>
- <span className="text-sm text-secondary">
+ <div className="flex items-center justify-center gap-2 mb-12">
+ <span className="text-2xl">🤝</span>
+ <span className="text-base text-secondary">
  All plans include Founder Connect - find co-founders and collaborators
  </span>
  </div>
- </div>
- </header>
+
+ {/* Section Divider */}
+ <div className="marketing-divider my-16" />
 
  {/* Pricing Tiers */}
- <div className="mb-10 grid gap-4 md:grid-cols-3">
- {tiers.filter(t => !t.annual).map((tier) => {
+ <section className="relative py-12">
+ <Blob size="medium" position="top-right" />
+ <div className="grid gap-6 md:grid-cols-3 mb-12">
+ {tiers.filter(t => !t.annual).map((tier, index) => {
  const isCurrentPlan =
  isAuthenticated &&
  subscription &&
  subscription.type === tier.id &&
  subscription.is_active;
 
+ const colorMap = {
+ brand: "marketing-card-blue",
+ coral: "marketing-card-orange",
+ };
+ const colorClass = colorMap[tier.color] || "marketing-card-blue";
+
  return (
  <Card
  key={tier.id}
-   className={`group relative overflow-hidden ui-card rounded-[16px] p-6 transition ${
-    tier.highlight ? "border-accent shadow-card-lg" : "shadow-card"
-   }`}
+ className={`marketing-feature-card ${tier.highlight ? "marketing-card-orange border-accent" : colorClass} relative overflow-hidden marketing-fade-in`}
+ style={{ animationDelay: `${index * 0.1}s` }}
  >
- <div className="mb-3">
- <p className="text-lg font-semibold text-primary flex items-center gap-2">{tier.name}</p>
- <div className="mt-2 flex items-baseline gap-2">
- <p className="text-4xl font-bold tracking-tight text-primary">{tier.price}</p>
- <p className="text-sm text-secondary">{tier.period}</p>
+ {tier.highlight && (
+ <div className="absolute top-0 right-0 bg-accent text-on-accent px-3 py-1 rounded-bl-lg text-xs font-semibold">
+ Most Popular
+ </div>
+ )}
+ <div className="mb-4">
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-2">
+ {tier.name}
+ </UIHeading>
+ <div className="mt-3 flex items-baseline gap-2">
+ <UIHeading level="h1" className="text-5xl font-bold tracking-tight text-primary font-mono">
+ {tier.price}
+ </UIHeading>
+ <p className="text-base text-secondary">{tier.period}</p>
  </div>
  </div>
-  <p className="mb-4 text-sm text-secondary">{tier.description}</p>
- <ul className="mb-4 space-y-2">
+ <p className="mb-6 text-base text-secondary">{tier.description}</p>
+ <ul className="mb-6 space-y-3">
  {tier.features.map((feature) => (
  <li key={feature} className="flex items-start gap-3">
-     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-muted text-xs font-semibold text-accent">✓</span>
-     <span className="text-sm text-secondary">{feature}</span>
+ <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent text-xs font-semibold">✓</span>
+ <span className="text-base text-secondary">{feature}</span>
  </li>
  ))}
  </ul>
  {tier.id === "free" ? (
- <Card className="text-center">
- <p className="text-sm font-semibold text-primary">Default Plan</p>
+ <div className="text-center py-3 rounded-lg bg-surface-muted">
+ <p className="text-base font-semibold text-primary">Default Plan</p>
  <p className="mt-1 text-sm text-secondary">No payment required</p>
- </Card>
- ) : isCurrentPlan ? (
- <Card className="text-center">
- <p className="text-sm font-semibold text-primary">Current Plan</p>
- <p className="mt-1 text-sm text-secondary">
- Active
- </p>
- </Card>
- ) : (
-  <button
-   type="button"
-   onClick={() => handleSubscribe(tier)}
-   className={`w-full whitespace-nowrap focus-visible:outline-accent ${tier.highlight ? "ui-btn ui-btn-primary" : "ui-btn ui-btn-secondary"}`}
-  >
-   {isAuthenticated ? "Subscribe Now" : "Get Started"}
-  </button>
- )}
- {tier.highlight && (
- <div className="mt-3 text-center">
-    <span className="inline-block rounded-full bg-surface-muted px-4 py-1.5 text-xs font-semibold text-accent">
- Most Popular
- </span>
  </div>
+ ) : isCurrentPlan ? (
+ <div className="text-center py-3 rounded-lg bg-accent text-on-accent">
+ <p className="text-base font-semibold">Current Plan</p>
+ <p className="mt-1 text-sm opacity-90">Active</p>
+ </div>
+ ) : (
+ <UIButton
+ variant={tier.highlight ? "primary" : "secondary"}
+ onClick={() => handleSubscribe(tier)}
+ className="w-full marketing-btn-primary"
+ >
+ {isAuthenticated ? "Subscribe Now" : "Get Started"}
+ </UIButton>
  )}
  </Card>
  );
  })}
  </div>
+ </section>
 
  {/* Payment Modal - Lazy loaded */}
  {selectedTier && (
@@ -254,36 +266,51 @@ export default function PricingPage() {
  </div>
  )}
 
+ {/* Section Divider */}
+ <div className="marketing-divider my-16" />
+
  {/* FAQ Section */}
- <div className="ui-card rounded-[16px] p-6 shadow-card">
- <SectionHeader title="Frequently Asked Questions" className="mb-3" />
- <div className="space-y-3">
+ <section className="relative py-12">
+ <Card className="marketing-card-blue">
+ <SectionHeader title="Frequently Asked Questions" center className="mb-8" />
+ <div className="space-y-6">
  <div>
-  <h3 className="mb-2 font-semibold text-primary">What's included in the free trial?</h3>
-  <p className="text-sm text-secondary">
- The 3-day free trial includes full access to all features: unlimited idea discovery runs, idea validations, full reports, and PDF downloads.
- </p>
+  <UIHeading level="h3" className="marketing-card-title text-primary mb-2">What's included in the free plan?</UIHeading>
+  <p className="text-base text-secondary">
+ The free plan includes 2 idea validations and 4 idea discoveries (lifetime), plus 3 founder connections per month. Full reports and PDF downloads are included.
+  </p>
  </div>
  <div>
-  <h3 className="mb-2 font-semibold text-primary">Can I cancel anytime?</h3>
-  <p className="text-sm text-secondary">
+  <UIHeading level="h3" className="marketing-card-title text-primary mb-2">Can I cancel anytime?</UIHeading>
+  <p className="text-base text-secondary">
  Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your current billing period.
- </p>
+  </p>
  </div>
  <div>
-  <h3 className="mb-2 font-semibold text-primary">What payment methods do you accept?</h3>
-  <p className="text-sm text-secondary">
+  <UIHeading level="h3" className="marketing-card-title text-primary mb-2">What payment methods do you accept?</UIHeading>
+  <p className="text-base text-secondary">
  We accept all major credit and debit cards through our payment provider. Your payment information is securely processed and never stored on our servers.
- </p>
+  </p>
  </div>
  <div>
-  <h3 className="mb-2 font-semibold text-primary">What happens after my free validations are used?</h3>
-  <p className="text-sm text-secondary">
+  <UIHeading level="h3" className="marketing-card-title text-primary mb-2">What happens after my free validations are used?</UIHeading>
+  <p className="text-base text-secondary">
  After using your 2 free validations and 4 free discoveries, you'll need to subscribe to continue. Choose between Starter ($9/month), Pro ($15/month), or Annual ($120/year - save $60).
- </p>
+  </p>
  </div>
  </div>
- </div>
+ </Card>
+ </section>
+
+ {/* CTA Section */}
+ <CTASection
+ title="Ready to get started?"
+ description="Start with the free plan - no credit card required. Upgrade when you need more."
+ primaryCTA={{ to: "/register", label: "Get Started Free" }}
+ secondaryCTA={{ to: "/product", label: "Learn More" }}
+ gradient
+ className="my-20"
+ />
  </PageContainer>
  </MarketingLayout>
  );

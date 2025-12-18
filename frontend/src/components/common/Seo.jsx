@@ -9,9 +9,22 @@ export default function Seo({
  keywords = "ai startup ideas, business idea generator, personalized startup recommendations",
  type = "website",
  ogImage = `${SITE_URL}/og-image.jpg`,
+ ogTitle,
+ ogDescription,
+ structuredData,
  children,
 }) {
  const canonical = `${SITE_URL}${path}`;
+ 
+ // Default structured data if not provided
+ const defaultStructuredData = structuredData || {
+   "@context": "https://schema.org",
+   "@type": "WebPage",
+   name: title,
+   description: description,
+   url: canonical,
+ };
+ 
  return (
  <Helmet>
  <title>{title}</title>
@@ -20,8 +33,8 @@ export default function Seo({
  <link rel="canonical" href={canonical} />
 
  <meta property="og:type" content={type} />
- <meta property="og:title" content={title} />
- <meta property="og:description" content={description} />
+ <meta property="og:title" content={ogTitle || title} />
+ <meta property="og:description" content={ogDescription || description} />
  <meta property="og:url" content={canonical} />
  <meta property="og:image" content={ogImage} />
 
@@ -29,6 +42,12 @@ export default function Seo({
  <meta name="twitter:title" content={title} />
  <meta name="twitter:description" content={description} />
  <meta name="twitter:image" content={ogImage} />
+ 
+ {/* Structured Data (JSON-LD) */}
+ <script type="application/ld+json">
+ {JSON.stringify(defaultStructuredData)}
+ </script>
+ 
  {children}
  </Helmet>
  );

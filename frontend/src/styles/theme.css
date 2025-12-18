@@ -80,6 +80,57 @@
   --color-radius-small: var(--radius-input);
   --primary: var(--accent);
   --primary-hover: var(--accent-hover);
+
+  /* Marketing-only tokens (for public pages only) */
+  --mkt-hero-start: #eef2ff;
+  --mkt-hero-end: #dbeafe;
+  --mkt-surface: #ffffff;
+  --mkt-surface-hover: #f8fafc;
+  --mkt-surface-muted: #f8fafc;
+  --mkt-text: #1e293b;
+  --mkt-text-dim: #64748b;
+  --mkt-heading: #0f172a;
+  --mkt-subheading: #475569;
+  --mkt-primary: #2563eb;
+  --mkt-primary-hover: #1d4ed8;
+  --mkt-outline: #e2e8f0;
+  --mkt-divider: #e2e8f0;
+  --mkt-card-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  --mkt-layer-shadow: 0 20px 60px -12px rgba(0,0,0,0.15);
+  --mkt-card-blue: #eff6ff;
+  --mkt-card-green: #ecfdf5;
+  --mkt-card-orange: #fff7ed;
+  --mkt-card-purple: #f3e8ff;
+  --mkt-card-yellow: #fefce8;
+  --mkt-paragraph: var(--mkt-text-dim);
+  --mkt-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  
+  /* Marketing typographic scale */
+  --mkt-h1: 48px;
+  --mkt-h2: 36px;
+  --mkt-h3: 28px;
+  --mkt-body: 18px;
+  
+  /* Marketing typography tokens (V3) */
+  --mkt-display: clamp(36px, 5vw, 56px);
+  --mkt-eyebrow: 12px;
+  --mkt-lead: 18px;
+  
+  /* Marketing gradient tokens (V3) */
+  --mkt-blob-purple: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  --mkt-blob-blue: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+  --mkt-blob-green: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+  --mkt-card-glow: 0 0 40px rgba(59, 130, 246, 0.2);
+  --mkt-glass-bg: rgba(255, 255, 255, 0.7);
+  --mkt-glass-border: rgba(255, 255, 255, 0.2);
+  
+  /* V5: 3D + Glass tokens */
+  --mkt-card-3d-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  --mkt-glow-primary: rgba(120, 100, 255, 0.6);
+  
+  /* Marketing spacing scale */
+  --mkt-pad-section: 96px;
+  --mkt-pad-block: 40px;
 }
 
 /* Explicit light mode selector - ensures light tokens apply when data-theme="light" */
@@ -132,6 +183,53 @@
   --shadow-soft: 0 1px 2px rgba(0,0,0,0.04);
   --shadow-card: 0 1px 2px rgba(0,0,0,0.04);
   --shadow-card-lg: 0 18px 60px -34px rgba(15, 23, 42, 0.25);
+
+  /* Marketing-only tokens (for public pages only) */
+  --mkt-hero-start: #eef2ff;
+  --mkt-hero-end: #dbeafe;
+  --mkt-surface: #ffffff;
+  --mkt-surface-hover: #f8fafc;
+  --mkt-surface-muted: #f8fafc;
+  --mkt-text: #1e293b;
+  --mkt-text-dim: #64748b;
+  --mkt-heading: #0f172a;
+  --mkt-subheading: #475569;
+  --mkt-primary: #2563eb;
+  --mkt-primary-hover: #1d4ed8;
+  --mkt-outline: #e2e8f0;
+  --mkt-divider: #e2e8f0;
+  --mkt-card-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  --mkt-layer-shadow: 0 20px 60px -12px rgba(0,0,0,0.15);
+  --mkt-card-blue: #eff6ff;
+  --mkt-card-green: #ecfdf5;
+  --mkt-card-orange: #fff7ed;
+  --mkt-card-purple: #f3e8ff;
+  --mkt-card-yellow: #fefce8;
+  --mkt-paragraph: var(--mkt-text-dim);
+  --mkt-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  
+  /* Marketing typographic scale */
+  --mkt-h1: 48px;
+  --mkt-h2: 36px;
+  --mkt-h3: 28px;
+  --mkt-body: 18px;
+  
+  /* Marketing typography tokens (V3) */
+  --mkt-display: clamp(36px, 5vw, 56px);
+  --mkt-eyebrow: 12px;
+  --mkt-lead: 18px;
+  
+  /* Marketing gradient tokens (V3) */
+  --mkt-blob-purple: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  --mkt-blob-blue: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+  --mkt-blob-green: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+  --mkt-card-glow: 0 0 40px rgba(59, 130, 246, 0.2);
+  --mkt-glass-bg: rgba(255, 255, 255, 0.7);
+  --mkt-glass-border: rgba(255, 255, 255, 0.2);
+  
+  /* Marketing spacing scale */
+  --mkt-pad-section: 96px;
+  --mkt-pad-block: 40px;
 }
 
 [data-theme="dark"] {
@@ -182,6 +280,57 @@
   --badge-danger-bg: rgba(239, 68, 68, 0.18);
   --badge-danger-text: #FCA5A5;
   --badge-danger-border: rgba(239, 68, 68, 0.35);
+
+  /* Marketing-only tokens (for public pages only) */
+  --mkt-hero-start: rgba(30, 41, 59, 0.3);
+  --mkt-hero-end: rgba(51, 65, 85, 0.3);
+  --mkt-surface: #1e293b;
+  --mkt-surface-hover: #24324a;
+  --mkt-surface-muted: #0f172a;
+  --mkt-text: #f1f5f9;
+  --mkt-text-dim: #94a3b8;
+  --mkt-heading: #f8fafc;
+  --mkt-subheading: #cbd5e1;
+  --mkt-primary: #3b82f6;
+  --mkt-primary-hover: #2563eb;
+  --mkt-outline: #334155;
+  --mkt-divider: #334155;
+  --mkt-card-shadow: 0 4px 18px rgba(0,0,0,0.3);
+  --mkt-layer-shadow: 0 20px 60px -12px rgba(0,0,0,0.5);
+  --mkt-card-blue: rgba(59, 130, 246, 0.1);
+  --mkt-card-green: rgba(34, 197, 94, 0.1);
+  --mkt-card-orange: rgba(249, 115, 22, 0.1);
+  --mkt-card-purple: rgba(139, 92, 246, 0.1);
+  --mkt-card-yellow: rgba(234, 179, 8, 0.1);
+  --mkt-paragraph: var(--mkt-text-dim);
+  --mkt-shadow: 0 4px 18px rgba(0,0,0,0.3);
+  
+  /* Marketing typographic scale */
+  --mkt-h1: 48px;
+  --mkt-h2: 36px;
+  --mkt-h3: 28px;
+  --mkt-body: 18px;
+  
+  /* Marketing typography tokens (V3) */
+  --mkt-display: clamp(36px, 5vw, 56px);
+  --mkt-eyebrow: 12px;
+  --mkt-lead: 18px;
+  
+  /* Marketing gradient tokens (V3) */
+  --mkt-blob-purple: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%);
+  --mkt-blob-blue: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+  --mkt-blob-green: radial-gradient(circle, rgba(34, 197, 94, 0.25) 0%, transparent 70%);
+  --mkt-card-glow: 0 0 40px rgba(59, 130, 246, 0.3);
+  --mkt-glass-bg: rgba(30, 41, 59, 0.6);
+  --mkt-glass-border: rgba(255, 255, 255, 0.1);
+  
+  /* V5: 3D + Glass tokens (dark mode) */
+  --mkt-card-3d-shadow: 0 8px 28px rgba(0,0,0,0.5);
+  --mkt-glow-primary: rgba(120, 100, 255, 0.8);
+  
+  /* Marketing spacing scale */
+  --mkt-pad-section: 96px;
+  --mkt-pad-block: 40px;
 }
 
 /* Base */
@@ -470,4 +619,311 @@ body {
 
 .shadow-soft {
   box-shadow: var(--shadow-soft);
+}
+
+/* ---------------------------------------------------
+   Marketing-only utilities (public pages only)
+   DO NOT use in logged-in workspace UI
+--------------------------------------------------- */
+
+/* ---------------------------------------------------
+   Marketing-only utilities (public pages only)
+   DO NOT use in logged-in workspace UI
+--------------------------------------------------- */
+
+/* Hero gradient utility */
+.hero-gradient {
+  background: linear-gradient(135deg, var(--mkt-hero-start), var(--mkt-hero-end));
+}
+
+.mkt-hero-gradient {
+  background: linear-gradient(135deg, var(--mkt-hero-start), var(--mkt-hero-end));
+}
+
+/* Section gradient utilities */
+.mkt-section-gradient-blue {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.05));
+}
+
+.mkt-section-gradient-purple {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.05));
+}
+
+.mkt-section-gradient-orange {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(251, 146, 60, 0.05));
+}
+
+.mkt-section-gradient-green {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(74, 222, 128, 0.05));
+}
+
+/* Card tint utilities */
+.card-tint-blue { background: var(--mkt-card-blue); }
+.card-tint-green { background: var(--mkt-card-green); }
+.card-tint-orange { background: var(--mkt-card-orange); }
+.card-tint-purple { background: var(--mkt-card-purple); }
+.card-tint-yellow { background: var(--mkt-card-yellow); }
+
+/* Marketing card utilities */
+.mkt-card {
+  background: var(--mkt-surface);
+  border: 1px solid var(--mkt-outline);
+  border-radius: 16px;
+  padding: var(--mkt-pad-block);
+  box-shadow: var(--mkt-card-shadow);
+  transition: all 0.3s ease;
+}
+
+.mkt-card--tinted {
+  background: var(--mkt-card-blue);
+  border-color: transparent;
+}
+
+.mkt-card--floating {
+  box-shadow: var(--mkt-layer-shadow);
+}
+
+/* Marketing typography utilities */
+.mkt-h1 {
+  font-size: var(--mkt-h1);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--mkt-heading);
+}
+
+.mkt-h2 {
+  font-size: var(--mkt-h2);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--mkt-heading);
+}
+
+.mkt-h3 {
+  font-size: var(--mkt-h3);
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--mkt-heading);
+}
+
+.mkt-body {
+  font-size: var(--mkt-body);
+  line-height: 1.6;
+  color: var(--mkt-paragraph);
+}
+
+/* Marketing spacing utilities */
+.mkt-pad-section {
+  padding: var(--mkt-pad-section) 0;
+}
+
+.mkt-pad-block {
+  padding: var(--mkt-pad-block) 0;
+}
+
+/* Marketing animations - V4 */
+@keyframes mkt-fadeUp {
+  0% { 
+    opacity: 0; 
+    transform: translateY(16px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes mkt-slideIn {
+  0% { 
+    opacity: 0; 
+    transform: translateX(24px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+@keyframes mkt-float {
+  0%, 100% { 
+    transform: translateY(0); 
+  }
+  50% { 
+    transform: translateY(-6px); 
+  }
+}
+
+@keyframes mkt-glowPulse {
+  0% { 
+    box-shadow: 0 0 0px var(--mkt-glow-primary); 
+  }
+  50% { 
+    box-shadow: 0 0 16px var(--mkt-glow-primary); 
+  }
+  100% { 
+    box-shadow: 0 0 0px var(--mkt-glow-primary); 
+  }
+}
+
+/* Animation utility classes */
+.mkt-anim-fade {
+  animation: mkt-fadeUp 0.8s ease forwards;
+}
+
+.mkt-anim-slide {
+  animation: mkt-slideIn 0.8s ease forwards;
+}
+
+.mkt-anim-float {
+  animation: mkt-float 4s ease-in-out infinite;
+}
+
+.mkt-anim-glow {
+  animation: mkt-glowPulse 3s ease-in-out infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mkt-anim-fade,
+  .mkt-anim-slide,
+  .mkt-anim-float,
+  .mkt-anim-glow {
+    animation: none !important;
+  }
+}
+
+/* Legacy animation classes (backward compatibility) */
+.animate-mkt-fadeUp {
+  animation: mkt-fadeUp 0.6s ease-out;
+}
+
+.animate-mkt-slideIn {
+  animation: mkt-slideIn 0.5s ease-out;
+}
+
+.animate-mkt-float {
+  animation: mkt-float 6s ease-in-out infinite;
+}
+
+/* Marketing V3 Utilities */
+.hero-gradient {
+  background: linear-gradient(135deg, var(--mkt-hero-start), var(--mkt-hero-end));
+}
+
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.glass-card {
+  background: var(--mkt-glass-bg);
+  border: 1px solid var(--mkt-glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* V5: Visual utility classes */
+.glass-surface {
+  backdrop-filter: blur(16px);
+  background: var(--mkt-glass-bg);
+  border: 1px solid var(--mkt-glass-border);
+}
+
+.card-3d {
+  box-shadow: var(--mkt-card-3d-shadow);
+  border-radius: 16px;
+}
+
+.glow-accent {
+  box-shadow: 0 0 24px var(--mkt-glow-primary);
+}
+
+.orb-bg {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+}
+
+.mockup-window {
+  background: var(--mkt-surface);
+  border-radius: 12px;
+  box-shadow: var(--mkt-card-shadow);
+  overflow: hidden;
+}
+
+.mockup-device {
+  background: var(--mkt-surface);
+  border-radius: 24px;
+  box-shadow: var(--mkt-layer-shadow);
+  padding: 8px;
+}
+
+.card-floating {
+  box-shadow: var(--mkt-layer-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-floating:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 80px -16px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .card-floating:hover {
+  box-shadow: 0 24px 80px -16px rgba(0, 0, 0, 0.6);
+}
+
+.mkt-divider {
+  height: 1px;
+  width: 100%;
+  background: var(--mkt-divider);
+  margin: var(--mkt-pad-block) 0;
+}
+
+/* Marketing V3 Animation Keyframes */
+/* Scroll reveal classes */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: 0.7s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Marketing V3 Typography Utilities */
+.mkt-display {
+  font-size: var(--mkt-display);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--mkt-heading);
+}
+
+.mkt-eyebrow {
+  font-size: var(--mkt-eyebrow);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mkt-text-dim);
+}
+
+.mkt-lead {
+  font-size: var(--mkt-lead);
+  line-height: 1.6;
+  color: var(--mkt-subheading);
+  font-weight: 400;
 }

@@ -5,14 +5,20 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import ThemeToggle from "./ThemeToggle.jsx";
 
 // Marketing navigation (logged-out only)
-const marketingNavLinks = [
- { label: "Product", to: "/product" },
- { label: "Pricing", to: "/pricing" },
+const productNavLinks = [
+ { label: "Overview", to: "/product" },
+ { label: "Discover Ideas", to: "/product/discover" },
+ { label: "Validate Ideas", to: "/product/validate" },
+ { label: "Founder Network", to: "/product/network" },
+];
+
+const resourcesNavLinks = [
+ { label: "Templates", to: "/resources/templates" },
+ { label: "Resources", to: "/resources" },
+ { label: "Blog", to: "/blog" },
 ];
 
 const learnNavLinks = [
- { label: "Resources", to: "/resources" },
- { label: "Blog", to: "/blog" },
  { label: "About", to: "/about" },
  { label: "Contact", to: "/contact" },
 ];
@@ -22,8 +28,12 @@ export default function Navigation() {
  const { user, isAuthenticated, subscription, logout } = useAuth();
  const navigate = useNavigate();
  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+ const [productMenuOpen, setProductMenuOpen] = useState(false);
+ const [resourcesMenuOpen, setResourcesMenuOpen] = useState(false);
  const [learnMenuOpen, setLearnMenuOpen] = useState(false);
  const [userMenuOpen, setUserMenuOpen] = useState(false);
+ const productMenuRef = useRef(null);
+ const resourcesMenuRef = useRef(null);
  const learnMenuRef = useRef(null);
  const userMenuRef = useRef(null);
 
@@ -52,12 +62,28 @@ export default function Navigation() {
 
  const closeAllMenus = () => {
  setMobileMenuOpen(false);
+ setProductMenuOpen(false);
+ setResourcesMenuOpen(false);
  setLearnMenuOpen(false);
  setUserMenuOpen(false);
  };
 
  useEffect(() => {
  const handleClickOutside = (event) => {
+ if (
+ productMenuRef.current &&
+ !productMenuRef.current.contains(event.target) &&
+ productMenuOpen
+ ) {
+ setProductMenuOpen(false);
+ }
+ if (
+ resourcesMenuRef.current &&
+ !resourcesMenuRef.current.contains(event.target) &&
+ resourcesMenuOpen
+ ) {
+ setResourcesMenuOpen(false);
+ }
  if (
  learnMenuRef.current &&
  !learnMenuRef.current.contains(event.target) &&
@@ -86,7 +112,7 @@ export default function Navigation() {
  document.removeEventListener("mousedown", handleClickOutside);
  document.removeEventListener("keyup", handleEscape);
  };
- }, [learnMenuOpen, userMenuOpen]);
+ }, [productMenuOpen, resourcesMenuOpen, learnMenuOpen, userMenuOpen]);
 
  return (
  <header className="z-40 border-b border-default bg-surface">
@@ -220,11 +246,89 @@ export default function Navigation() {
  // Logged-Out Navigation (Marketing Mode)
  <>
  <nav className="flex items-center gap-6">
- {marketingNavLinks.map(({ label, to }) => (
- <NavLink key={to} to={to} className={marketingLinkClass} onClick={closeAllMenus}>
+ <Link to="/pricing" className={marketingLinkClass({ isActive: false })} onClick={closeAllMenus}>
+ Pricing
+ </Link>
+ <div className="group relative" ref={productMenuRef}>
+ <button
+ type="button"
+ className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-secondary transition hover:text-accent-hover focus-visible:outline-accent"
+ onClick={() => {
+ setProductMenuOpen((prev) => !prev);
+ setResourcesMenuOpen(false);
+ setLearnMenuOpen(false);
+ }}
+ onMouseEnter={() => setProductMenuOpen(true)}
+ aria-expanded={productMenuOpen}
+ >
+ Product
+ <span className="text-xs">▾</span>
+ </button>
+ <div
+ className={`absolute left-0 z-40 mt-2 w-56 rounded-xl border border-default bg-surface p-2 shadow-lg transition-all duration-200 ${
+ productMenuOpen ? "pointer-events-auto opacity-100 visible" : "pointer-events-none opacity-0 invisible"
+ } group-hover:pointer-events-auto group-hover:opacity-100 group-hover:visible`}
+ onMouseEnter={() => setProductMenuOpen(true)}
+ onMouseLeave={() => setProductMenuOpen(false)}
+ >
+ {productNavLinks.map(({ label, to }) => (
+ <NavLink
+ key={to}
+ to={to}
+ className={({ isActive }) =>
+ `block rounded-lg px-3 py-2 text-sm transition ${
+ isActive
+ ? "bg-surface bg-surface text-accent text-accent"
+ : "text-primary text-secondary hover:bg-surface hover:bg-surface"
+ }`
+ }
+ onClick={closeAllMenus}
+ >
  {label}
  </NavLink>
  ))}
+ </div>
+ </div>
+ <div className="group relative" ref={resourcesMenuRef}>
+ <button
+ type="button"
+ className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-secondary transition hover:text-accent-hover focus-visible:outline-accent"
+ onClick={() => {
+ setResourcesMenuOpen((prev) => !prev);
+ setProductMenuOpen(false);
+ setLearnMenuOpen(false);
+ }}
+ onMouseEnter={() => setResourcesMenuOpen(true)}
+ aria-expanded={resourcesMenuOpen}
+ >
+ Resources
+ <span className="text-xs">▾</span>
+ </button>
+ <div
+ className={`absolute left-0 z-40 mt-2 w-56 rounded-xl border border-default bg-surface p-2 shadow-lg transition-all duration-200 ${
+ resourcesMenuOpen ? "pointer-events-auto opacity-100 visible" : "pointer-events-none opacity-0 invisible"
+ } group-hover:pointer-events-auto group-hover:opacity-100 group-hover:visible`}
+ onMouseEnter={() => setResourcesMenuOpen(true)}
+ onMouseLeave={() => setResourcesMenuOpen(false)}
+ >
+ {resourcesNavLinks.map(({ label, to }) => (
+ <NavLink
+ key={to}
+ to={to}
+ className={({ isActive }) =>
+ `block rounded-lg px-3 py-2 text-sm transition ${
+ isActive
+ ? "bg-surface bg-surface text-accent text-accent"
+ : "text-primary text-secondary hover:bg-surface hover:bg-surface"
+ }`
+ }
+ onClick={closeAllMenus}
+ >
+ {label}
+ </NavLink>
+ ))}
+ </div>
+ </div>
  <div className="group relative" ref={learnMenuRef}>
  <button
  type="button"
