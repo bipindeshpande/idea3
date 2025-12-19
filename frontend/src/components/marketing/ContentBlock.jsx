@@ -18,12 +18,12 @@ export default function ContentBlock({
   
   return (
     <div className={`${animationClass || ""} ${className}`}>
-      <div className={`flex flex-col ${contentOrder} gap-12 items-center`}>
+      <div className={`flex flex-col ${contentOrder} gap-8 items-center`}>
         {/* Text content */}
         <div className="flex-1">
           {title && (
             <h3 
-              className="mkt-h3 font-semibold mb-6"
+              className="mkt-h3 font-semibold mb-4"
               style={{ color: "var(--mkt-heading)" }}
             >
               {title}
@@ -31,7 +31,7 @@ export default function ContentBlock({
           )}
           {description && (
             <p 
-              className="mkt-body mb-6 leading-relaxed"
+              className="mkt-body mb-4 leading-relaxed"
               style={{ color: "var(--mkt-paragraph)" }}
             >
               {description}
@@ -42,13 +42,13 @@ export default function ContentBlock({
         
         {/* Visual block */}
         {visual && (
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full max-w-md">
             <div 
-              className="w-full h-80 rounded-2xl mkt-card--floating"
+              className="w-full h-56 rounded-xl mkt-card--floating"
               style={{
                 background: visual.gradient || "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-purple))",
                 boxShadow: "var(--mkt-layer-shadow)",
-                borderRadius: "16px"
+                borderRadius: "12px"
               }}
             >
               {visual.content || (

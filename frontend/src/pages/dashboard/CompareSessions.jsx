@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import LoadingIndicator from "../../components/common/LoadingIndicator.jsx";
-import { parseTopIdeas } from "../../utils/markdown/markdown.js";
+import { parseStructuredIdeas } from "../../utils/streamingParser.js";
 
 export default function CompareSessionsPage() {
  const { getAuthHeaders, isAuthenticated } = useAuth();
@@ -38,7 +38,7 @@ export default function CompareSessionsPage() {
  const ideasList = [];
  runsData.forEach((run) => {
  if (run.reports?.personalized_recommendations) {
- const topIdeas = parseTopIdeas(run.reports.personalized_recommendations, 3);
+ const topIdeas = parseStructuredIdeas(run.reports.personalized_recommendations, 3);
  topIdeas.forEach((idea) => {
  ideasList.push({
  id: `${run.run_id}-${idea.index}`,
@@ -106,7 +106,7 @@ export default function CompareSessionsPage() {
  ideas: selectedIdeasData.map(idea => {
  const run = data.comparison.runs?.find(r => r.run_id === idea.runId);
  if (run && run.reports?.personalized_recommendations) {
- const topIdeas = parseTopIdeas(run.reports.personalized_recommendations, 3);
+ const topIdeas = parseStructuredIdeas(run.reports.personalized_recommendations, 3);
  const matchedIdea = topIdeas.find(i => i.index === idea.ideaIndex);
  return {
  ...idea,

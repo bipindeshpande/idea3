@@ -28,7 +28,7 @@ export default function BlogCard({
   return (
     <Link
       to={`/blog/${slug}`}
-      className={`block rounded-2xl overflow-hidden transition-all duration-300 card-3d ${animationClass || ""} ${className}`}
+      className={`block rounded-xl overflow-hidden transition-all duration-300 card-3d max-w-sm ${animationClass || ""} ${className}`}
       style={{
         background: "var(--mkt-surface)",
         border: "1px solid var(--mkt-outline)",
@@ -58,10 +58,10 @@ export default function BlogCard({
           }}
         />
       )}
-      <div className="p-6">
+      <div className="p-4">
         {category && (
           <span
-            className="inline-block text-xs font-semibold uppercase tracking-wide mb-3 px-3 py-1 rounded-full"
+            className="inline-block text-xs font-semibold uppercase tracking-wide mb-2 px-2 py-1 rounded-full"
             style={{ 
               color: "var(--mkt-primary)",
               background: "var(--mkt-card-blue)"
@@ -71,14 +71,14 @@ export default function BlogCard({
           </span>
         )}
         <h3
-          className="text-xl font-semibold mb-3 line-clamp-2"
+          className="text-lg font-semibold mb-2 line-clamp-2"
           style={{ color: "var(--mkt-heading)" }}
         >
           {title}
         </h3>
         {excerpt && (
           <p
-            className="text-base mb-4 line-clamp-3 leading-relaxed"
+            className="text-sm mb-3 line-clamp-3 leading-relaxed"
             style={{ color: "var(--mkt-paragraph)" }}
           >
             {excerpt}

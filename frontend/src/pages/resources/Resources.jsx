@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { frameworks } from "../../templates/frameworksConfig.js";
-import HeroSection from "../../components/marketing/HeroSection.jsx";
+import { templates } from "../../templates/templatesConfig.js";
+import { HeroSection } from "../../sections/marketing/resources";
 import SectionHeader from "../../components/marketing/SectionHeader.jsx";
 import FeatureGrid from "../../components/marketing/FeatureGrid.jsx";
 import CTASection from "../../components/marketing/CTASection.jsx";
@@ -14,8 +15,9 @@ import UIHeading from "../../components/ui/ui-heading.jsx";
 import TemplatePreviewModal from "../../components/resources/TemplatePreviewModal.jsx";
 import { markdownToDocx } from "../../utils/markdownToDocx.js";
 
-// Note: Frameworks are now imported from templates/frameworksConfig.js
-// Templates are stored in separate .md files in frontend/src/templates/
+// Note: Frameworks are imported from templates/frameworksConfig.js
+// Templates are imported from templates/templatesConfig.js
+// All templates are stored in separate .md files in frontend/src/templates/
 
 export default function ResourcesPage() {
  // Find the flagship resource (Problem Validation Checklist)
@@ -135,63 +137,43 @@ export default function ResourcesPage() {
  className="mb-12"
  />
  <div className="grid gap-6 md:grid-cols-3">
- <Card className="marketing-feature-card marketing-card-blue flex flex-col">
+ {templates.map((template, index) => {
+ const colorClasses = [
+ "marketing-card-blue",
+ "marketing-card-blue",
+ "marketing-card-purple",
+ ];
+ const colorClass = colorClasses[index % colorClasses.length];
+
+ const actionTexts = {
+ "business-plan": "Plan your business",
+ "pitch-deck": "Create pitch deck",
+ "customer-outreach-email": "Start customer outreach",
+ };
+ const actionText = actionTexts[template.id] || "Get template";
+
+ return (
+ <Card key={template.id} className={`marketing-feature-card ${colorClass} flex flex-col`}>
  <div className="marketing-icon-circle mb-4 mx-auto">
- <span className="text-3xl">📄</span>
+ <span className="text-3xl">{template.icon}</span>
  </div>
- <UIHeading level="h3" className="marketing-card-title text-primary mb-3 text-center">Business Plan Template</UIHeading>
- <p className="text-base text-secondary flex-1 text-center mb-6">Complete business plan template with all sections you need.</p>
+ <UIHeading level="h3" className="marketing-card-title text-primary mb-3 text-center">{template.title}</UIHeading>
+ <p className="text-base text-secondary flex-1 text-center mb-6">{template.description}</p>
  <div className="mt-auto">
  <UIButton
  variant="secondary"
  onClick={() => {
- setPreviewTemplate({ title: "Business Plan Template", downloadName: "business-plan-template.docx" });
- setPreviewContent("/templates/business-plan-template.md");
+ setPreviewTemplate({ title: template.title, downloadName: template.downloadName });
+ setPreviewContent(template.content);
  }}
  className="w-full marketing-btn-secondary"
  >
- Plan your business
+ {actionText}
  </UIButton>
  </div>
  </Card>
- <Card className="marketing-feature-card marketing-card-blue flex flex-col">
- <div className="marketing-icon-circle mb-4 mx-auto">
- <span className="text-3xl">🎯</span>
- </div>
- <UIHeading level="h3" className="marketing-card-title text-primary mb-3 text-center">Pitch Deck Template</UIHeading>
- <p className="text-base text-secondary flex-1 text-center mb-6">12-slide investor pitch deck template with design tips.</p>
- <div className="mt-auto">
- <UIButton
- variant="secondary"
- onClick={() => {
- setPreviewTemplate({ title: "Pitch Deck Template", downloadName: "pitch-deck-template.docx" });
- setPreviewContent("/templates/pitch-deck-template.md");
- }}
- className="w-full marketing-btn-secondary"
- >
- Create pitch deck
- </UIButton>
- </div>
- </Card>
- <Card className="marketing-feature-card marketing-card-purple flex flex-col">
- <div className="marketing-icon-circle mb-4 mx-auto">
- <span className="text-3xl">✉️</span>
- </div>
- <UIHeading level="h3" className="marketing-card-title text-primary mb-3 text-center">Email Templates</UIHeading>
- <p className="text-base text-secondary flex-1 text-center mb-6">Customer outreach email templates for validation.</p>
- <div className="mt-auto">
- <UIButton
- variant="secondary"
- onClick={() => {
- setPreviewTemplate({ title: "Customer Outreach Email Templates", downloadName: "customer-outreach-email-template.docx" });
- setPreviewContent("/templates/customer-outreach-email-template.md");
- }}
- className="w-full marketing-btn-secondary"
- >
- Start customer outreach
- </UIButton>
- </div>
- </Card>
+ );
+ })}
  </div>
  </section>
 
@@ -306,18 +288,8 @@ export default function ResourcesPage() {
  }}
  onDownload={async (fetchedContent) => {
  // Use fetched content if provided (from modal), otherwise use previewContent
- let contentToDownload = fetchedContent || previewContent;
- 
- // If content is a URL, fetch it first
- if (typeof previewContent === "string" && previewContent.startsWith("/templates/") && !fetchedContent) {
- try {
- const response = await fetch(previewContent);
- contentToDownload = await response.text();
- } catch (err) {
- console.error("Failed to fetch template:", err);
- return;
- }
- }
+ // Since templates are now bundled, previewContent will always be the template content string
+ const contentToDownload = fetchedContent || previewContent;
  
  // Convert markdown to DOCX and download
  try {

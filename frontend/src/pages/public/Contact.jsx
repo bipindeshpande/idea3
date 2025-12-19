@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Seo from "../../components/common/Seo.jsx";
-import HeroSection from "../../components/marketing/HeroSection.jsx";
+import { HeroSection } from "../../sections/marketing/contact";
 import Blob from "../../components/marketing/Blob.jsx";
 import PageContainer from "../../components/layout/PageContainer.jsx";
 import Card from "../../components/ui/Card.jsx";
@@ -82,7 +82,7 @@ export default function ContactPage() {
  className="mb-16"
  />
 
- <div className="grid gap-8 lg:grid-cols-3">
+ <div className="grid gap-4 lg:grid-cols-3">
  {/* Main Contact Form */}
  <div className="lg:col-span-2">
  <Card className="marketing-card-blue relative overflow-hidden">

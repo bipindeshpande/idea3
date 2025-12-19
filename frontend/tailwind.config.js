@@ -12,7 +12,20 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+      },
+      fontSize: {
+        "ui-h1": "clamp(28px, 4vw, 36px)",
+        "ui-h2": "clamp(22px, 3vw, 28px)",
+        "ui-h3": "20px",
+        "ui-body": "16px",
+        "ui-small": "14px",
+        "ui-xs": "12px",
+      },
+      lineHeight: {
+        "ui-tight": "1.15",
+        "ui-normal": "1.35",
+        "ui-relaxed": "1.5",
       },
       colors: {
         brand: {

@@ -1,83 +1,30 @@
 import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
-import Hero from "../../components/marketing/Hero.jsx";
-import FeatureCard from "../../components/marketing/FeatureCard.jsx";
-import SectionTitle from "../../components/marketing/SectionTitle.jsx";
-import ContentBlock from "../../components/marketing/ContentBlock.jsx";
-import CTASection from "../../components/marketing/CTASection.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
-import MockupBrowser from "../../components/marketing/mockups/MockupBrowser.jsx";
-
-// SEO metadata
-export const seo = {
-  title: "Startup Idea Advisor — Discover Ideas",
-  description: "Let AI discover personalized startup opportunities tailored to your profile, goals, and constraints. Get ranked recommendations with detailed fit analysis.",
-  keywords: "discover startup ideas, ai idea generator, personalized startup recommendations, business idea discovery, startup idea discovery",
-  canonical: "/product/discover",
-  ogTitle: "Startup Idea Advisor — Discover Ideas",
-  ogDescription: "Let AI discover personalized startup opportunities tailored to your profile, goals, and constraints. Get ranked recommendations with detailed fit analysis.",
-  structuredData: {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "Startup Idea Discovery",
-    applicationCategory: "BusinessApplication",
-    description: "AI-powered startup idea discovery tool that generates personalized business opportunities",
-    url: "https://ideabunch.com/product/discover",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD"
-    }
-  }
-};
-
-const exampleIdeas = [
-  {
-    title: "AI-Powered Fitness Coach",
-    description: "Personalized workout plans based on fitness goals and schedule",
-    icon: "🏋️",
-    tint: "blue",
-  },
-  {
-    title: "Sustainable Home Goods Marketplace",
-    description: "Curated marketplace for eco-friendly home products",
-    icon: "🌱",
-    tint: "green",
-  },
-  {
-    title: "Remote Team Collaboration Platform",
-    description: "Tools for distributed teams to collaborate effectively",
-    icon: "👥",
-    tint: "purple",
-  },
-];
-
-const features = [
-  {
-    icon: "🎯",
-    title: "Personalized Profile Matching",
-    description: "Our AI analyzes your goals, time, budget, skills, and work style to find ideas that truly fit you.",
-    tint: "blue",
-  },
-  {
-    icon: "📊",
-    title: "Ranked Recommendations",
-    description: "Get top 3 ideas with detailed scoring across goal fit, time fit, budget fit, and skill fit.",
-    tint: "purple",
-  },
-  {
-    icon: "💰",
-    title: "Financial Analysis",
-    description: "Understand startup costs, revenue potential, and breakeven timelines for each idea.",
-    tint: "orange",
-  },
-  {
-    icon: "⚠️",
-    title: "Risk Assessment",
-    description: "See potential risks and mitigation strategies before you commit to building.",
-    tint: "green",
-  },
-];
+import SocialProof from "../../components/marketing/SocialProof.jsx";
+import MiniFlow from "../../components/marketing/behavior/MiniFlow.jsx";
+import UseCaseList from "../../components/marketing/credibility/UseCaseList.jsx";
+import CTASection from "../../components/marketing/CTASection.jsx";
+import SectionTitle from "../../components/marketing/SectionTitle.jsx";
+import FeatureCard from "../../components/marketing/FeatureCard.jsx";
+import ContentBlock from "../../components/marketing/ContentBlock.jsx";
+import { HeroSection, MockupSection } from "../../sections/marketing/discover";
+import {
+  seo,
+  heroData,
+  miniFlowData,
+  mockupData,
+  useCaseItems,
+  predictiveExpectationData,
+  wrongChoiceItems,
+  whyUsFeatures,
+  exampleIdeas,
+  features,
+  contentBlocks,
+  howItWorksSteps,
+  deliverables,
+  ctaData
+} from "../../data/marketing/discover.js";
 
 export default function ProductDiscoverPage() {
   return (
@@ -92,66 +39,127 @@ export default function ProductDiscoverPage() {
         structuredData={seo.structuredData}
       />
 
-      {/* Hero Section */}
-      <Hero
-        title="Discover high-quality startup ideas"
-        subheadline="Let our AI discover personalized startup opportunities tailored to your unique profile, goals, and constraints."
-        primaryCTA={{ to: "/advisor", label: "Start Discovery" }}
-        secondaryCTA={{ to: "/product", label: "View All Features" }}
-        illustration={{
-          gradient: "linear-gradient(135deg, var(--mkt-card-purple), var(--mkt-card-orange))"
-        }}
-      />
-
-      {/* Screenshot Mockup Block */}
-      <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
+      <HeroSection data={heroData} />
+      
+      <section className="mkt-section-sm" style={{ background: "var(--mkt-surface)" }}>
         <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            title="Discovery Dashboard Preview"
-            subtitle="See how our AI generates personalized recommendations"
-            center
-          />
-          <div className="max-w-5xl mx-auto mt-12">
-            <MockupBrowser url="https://app.startupideaadvisor.com/advisor">
-              <div 
-                className="w-full h-80 rounded-lg"
-                style={{ 
-                  background: "linear-gradient(135deg, #e5e7eb, #d1d5db)",
-                  border: "1px solid var(--mkt-outline)"
-                }}
-              />
-            </MockupBrowser>
+          <SocialProof showLogos={true} showTestimonials={true} />
+        </div>
+      </section>
+
+      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
+        <div className="max-w-2xl mx-auto px-6">
+          <h3 className="text-2xl font-bold text-center" style={{ color: "var(--mkt-heading)" }}>
+            {miniFlowData.title}
+          </h3>
+          <MiniFlow {...miniFlowData} />
+        </div>
+      </section>
+
+      <MockupSection data={mockupData} />
+
+      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
+        <UseCaseList items={useCaseItems} ctaText="See how the product handles this →" ctaTo="/product/discover" />
+      </section>
+
+      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
+        <div className="max-w-4xl mx-auto px-6">
+          <h3 className="text-2xl font-bold text-center" style={{ color: "var(--mkt-heading)" }}>
+            Here's what your brain expects — and why Discover exceeds it
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-6 rounded-xl" style={{ background: "var(--mkt-surface-muted)", border: "1px solid var(--mkt-outline)" }}>
+              <h4 className="font-semibold mb-4 text-sm" style={{ color: "var(--mkt-heading)" }}>{predictiveExpectationData.expected.title}</h4>
+              <ul className="space-y-2">
+                {predictiveExpectationData.expected.items.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs" style={{ color: "var(--mkt-paragraph)" }}>
+                    <span className="text-gray-400 mt-0.5">○</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="p-6 rounded-xl mkt-anchor">
+              <h4 className="font-semibold mb-4 text-sm" style={{ color: "var(--mkt-heading)" }}>{predictiveExpectationData.actual.title}</h4>
+              <ul className="space-y-2">
+                {predictiveExpectationData.actual.items.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs" style={{ color: "var(--mkt-paragraph)" }}>
+                    <span className="text-green-500 mt-0.5">✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="text-center mt-8">
+            <Link 
+              to="/product/discover" 
+              className="inline-flex items-center gap-2 text-sm font-semibold hover:gap-3 transition-all"
+              style={{ color: "var(--mkt-primary)" }}
+            >
+              Show me ideas that match me →
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Example Idea Cards */}
-      <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
+      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
+        <div className="max-w-4xl mx-auto px-6">
+          <SectionTitle title="What happens when you choose wrong?" subtitle="The emotional and practical cost of bad decisions" center />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            {wrongChoiceItems.map((item, i) => (
+              <div key={i} className="p-5 rounded-xl" style={{ background: "var(--mkt-surface-muted)", border: "1px solid var(--mkt-outline)" }}>
+                <h4 className="font-semibold mb-3 text-sm" style={{ color: "var(--mkt-heading)" }}>{item.title}</h4>
+                <p className="text-xs" style={{ color: "var(--mkt-paragraph)" }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 p-6 rounded-xl mkt-soft-glow" style={{ background: "var(--mkt-surface)", border: "2px solid var(--mkt-primary)" }}>
+            <h4 className="font-semibold mb-3 text-center" style={{ color: "var(--mkt-heading)" }}>Discover fixes this with objective scoring and founder-fit logic.</h4>
+            <p className="text-sm text-center opacity-80" style={{ color: "var(--mkt-paragraph)" }}>
+              No more guessing. No more self-doubt. Just clear, data-driven recommendations that match your real profile.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mkt-section mkt-section-gradient-blue">
         <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            title="Example Ideas Generated"
-            subtitle="See the quality of ideas our AI discovers"
-            center
-          />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <SectionTitle title="Why founders choose Startup Advisor" subtitle="What makes us different" center animate="slide" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            {whyUsFeatures.map((feature, index) => (
+              <FeatureCard key={index} {...feature} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mkt-section mkt-section-bg-light" style={{ background: "var(--mkt-surface)" }}>
+        <div className="max-w-7xl mx-auto px-6">
+          <SectionTitle title="Example Ideas Generated" subtitle="See the quality of ideas our AI discovers" center />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {exampleIdeas.map((idea, index) => (
               <div key={index} className="animate-mkt-fadeUp" style={{ animationDelay: `${index * 0.1}s` }}>
                 <FeatureCard {...idea} />
               </div>
             ))}
           </div>
+          <div className="text-center">
+            <Link 
+              to="/advisor" 
+              className="inline-flex items-center gap-2 text-sm font-semibold hover:gap-3 transition-all"
+              style={{ color: "var(--mkt-primary)" }}
+            >
+              Generate 20 more ideas →
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* How AI Generates Ideas */}
-      <section className="mkt-pad-section mkt-section-gradient-blue">
+      <section className="mkt-section mkt-section-gradient-blue">
         <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            title="How AI Generates Ideas"
-            subtitle="Our intelligent system matches opportunities to your unique profile"
-            center
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <SectionTitle title="How AI Generates Ideas" subtitle="Our intelligent system matches opportunities to your unique profile" center />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {features.map((feature, index) => (
               <div key={index} className="animate-mkt-fadeUp" style={{ animationDelay: `${index * 0.1}s` }}>
                 <FeatureCard {...feature} />
@@ -161,63 +169,22 @@ export default function ProductDiscoverPage() {
         </div>
       </section>
 
-      {/* Content Blocks */}
-      <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
+      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
         <div className="max-w-7xl mx-auto px-6 space-y-20">
-          <ContentBlock
-            title="Market Research"
-            description="Our AI analyzes market trends, competitor landscapes, and growth opportunities to identify viable ideas that match your profile."
-            visual={{
-              gradient: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-green))",
-            }}
-          />
-          <ContentBlock
-            title="Financial Modeling"
-            description="Each idea includes detailed financial projections, startup costs, revenue models, and breakeven analysis tailored to your budget."
-            visual={{
-              gradient: "linear-gradient(135deg, var(--mkt-card-orange), var(--mkt-card-yellow))",
-            }}
-            reverse
-          />
+          {contentBlocks.map((block, i) => (
+            <ContentBlock key={i} {...block} />
+          ))}
         </div>
       </section>
 
-      {/* How It Works - 3-Step Section */}
-      <section className="mkt-pad-section mkt-section-gradient-blue">
+      <section className="mkt-section mkt-section-gradient-blue">
         <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            title="How Discovery Works"
-            subtitle="Get personalized startup ideas in three steps"
-            center
-          />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-            {[
-              {
-                step: "1",
-                title: "Complete Your Profile",
-                description: "Share your goals, time commitment, budget, skills, and work style. Our intake form captures everything we need.",
-                icon: "📝",
-              },
-              {
-                step: "2",
-                title: "AI Generates Ideas",
-                description: "Our AI researches markets, analyzes opportunities, and generates personalized startup ideas tailored to your profile.",
-                icon: "🤖",
-              },
-              {
-                step: "3",
-                title: "Review Recommendations",
-                description: "Receive top 3 ranked ideas with detailed fit analysis, financial projections, risk assessment, and roadmaps.",
-                icon: "📊",
-              },
-            ].map((step, index) => (
-              <div 
-                key={index}
-                className="text-center animate-mkt-fadeUp"
-                style={{ animationDelay: `${index * 0.2}s` }}
-              >
+          <SectionTitle title="How Discovery Works" subtitle="Get personalized startup ideas in three steps" center />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {howItWorksSteps.map((step, index) => (
+              <div key={index} className="text-center animate-mkt-fadeUp" style={{ animationDelay: `${index * 0.2}s` }}>
                 <div 
-                  className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 text-2xl font-bold"
+                  className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 text-xl font-bold"
                   style={{
                     background: "var(--mkt-surface)",
                     color: "var(--mkt-primary)",
@@ -227,80 +194,36 @@ export default function ProductDiscoverPage() {
                 >
                   {step.step}
                 </div>
-                <h3 
-                  className="mkt-h3 mb-4"
-                  style={{ color: "var(--mkt-heading)" }}
-                >
-                  {step.title}
-                </h3>
-                <p 
-                  className="mkt-body"
-                  style={{ color: "var(--mkt-paragraph)" }}
-                >
-                  {step.description}
-                </p>
+                <h3 className="mkt-h3 mb-3" style={{ color: "var(--mkt-heading)" }}>{step.title}</h3>
+                <p className="mkt-body" style={{ color: "var(--mkt-paragraph)" }}>{step.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Real Deliverables List */}
-      <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
+      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
         <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            title="Discovery Deliverables"
-            subtitle="Everything you'll receive from your discovery session"
-            center
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-            {[
-              "Personalized Profile Analysis",
-              "Top 3 Ranked Startup Ideas",
-              "Goal Fit Scoring",
-              "Time Commitment Analysis",
-              "Budget Fit Assessment",
-              "Skill Match Evaluation",
-              "Financial Outlook & Projections",
-              "Risk Assessment & Mitigation",
-              "30/60/90 Day Roadmap",
-              "Validation Questions & Scripts",
-            ].map((deliverable, index) => (
+          <SectionTitle title="Discovery Deliverables" subtitle="Everything you'll receive from your discovery session" center />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+            {deliverables.map((deliverable, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-4 rounded-xl"
+                className="flex items-start gap-2 p-3 rounded-lg"
                 style={{
                   background: "var(--mkt-surface-muted)",
                   border: "1px solid var(--mkt-outline)",
                 }}
               >
-                <span
-                  className="text-xl mt-0.5"
-                  style={{ color: "var(--mkt-primary)" }}
-                >
-                  ✓
-                </span>
-                <span
-                  className="text-base font-medium"
-                  style={{ color: "var(--mkt-heading)" }}
-                >
-                  {deliverable}
-                </span>
+                <span className="text-xl mt-0.5" style={{ color: "var(--mkt-primary)" }}>✓</span>
+                <span className="text-base font-medium" style={{ color: "var(--mkt-heading)" }}>{deliverable}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <CTASection
-        title="Ready to discover your next startup idea?"
-        description="Get personalized recommendations in minutes. No credit card required."
-        primaryCTA={{ to: "/advisor", label: "Start Discovery Session" }}
-        secondaryCTA={{ to: "/pricing", label: "View Pricing" }}
-        gradient
-        className="my-20"
-      />
+      <CTASection {...ctaData} gradient className="my-12" />
     </MarketingLayout>
   );
 }

@@ -11,6 +11,7 @@ export default function CTASection({
   description,
   primaryCTA,
   secondaryCTA,
+  credibilityMicrocopy, // V11: Credibility cue under CTAs
   gradient = false,
   className = "",
 }) {
@@ -32,7 +33,7 @@ export default function CTASection({
           opacity: 0.15
         }}
       />
-      <div className="relative z-10 max-w-3xl mx-auto text-center px-4 glass-surface rounded-3xl p-12">
+      <div className="relative z-10 max-w-2xl mx-auto text-center px-4 glass-surface rounded-xl p-8">
         <UIHeading level="h2" className="marketing-section-title text-primary mb-4">
           {title}
         </UIHeading>
@@ -63,6 +64,12 @@ export default function CTASection({
             </UIButton>
           )}
         </div>
+        {/* V11: Credibility microcopy under CTAs */}
+        {credibilityMicrocopy && (
+          <p className="text-xs mt-4 opacity-60" style={{ color: "var(--mkt-text-dim)" }}>
+            {credibilityMicrocopy}
+          </p>
+        )}
       </div>
     </section>
   );

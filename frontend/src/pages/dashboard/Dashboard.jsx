@@ -19,7 +19,7 @@ import DashboardHistoryTab from "../../components/dashboard/DashboardHistoryTab.
 import DashboardValidationsTab from "../../components/dashboard/DashboardValidationsTab.jsx";
 import DashboardCompareTab from "../../components/dashboard/DashboardCompareTab.jsx";
 
-import { parseTopIdeas } from "../../utils/markdown/markdown.js";
+import { parseStructuredIdeas } from "../../utils/streamingParser.js";
 import {
  buildFinancialSnapshots,
  parseRiskRows,
@@ -280,7 +280,7 @@ export default function DashboardPage() {
 
  if (!recs) continue;
 
- const top = parseTopIdeas(recs, 3);
+ const top = parseStructuredIdeas(recs, 3);
  top.forEach(idea => {
  const idx = String(idea.index);
  const id = `${runId}-${idx}`;
@@ -314,7 +314,7 @@ export default function DashboardPage() {
  }
  const recs = run.outputs?.personalized_recommendations;
  if (!recs) return;
- const top = parseTopIdeas(recs, 3);
+ const top = parseStructuredIdeas(recs, 3);
  top.forEach(idea => {
  const idx = String(idea.index);
  const id = `${runId}-${idx}`;
@@ -414,7 +414,7 @@ export default function DashboardPage() {
  let fullIdeaData = { ...idea };
  if (idea.runReports?.personalized_recommendations) {
  const recs = idea.runReports.personalized_recommendations;
- const parsed = parseTopIdeas(typeof recs === 'string' ? recs : '', 10);
+ const parsed = parseStructuredIdeas(typeof recs === 'string' ? recs : '', 10);
  const matchedIdea = parsed.find(p => String(p.index) === String(idea.ideaIndex));
  if (matchedIdea) {
  // Try to extract additional fields from body if available

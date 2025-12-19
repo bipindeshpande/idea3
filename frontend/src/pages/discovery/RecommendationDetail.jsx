@@ -7,8 +7,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import { useValidation } from "../../context/ValidationContext.jsx";
 import OpenForCollaboratorsButton from "../../components/founder/OpenForCollaboratorsButton.jsx";
 import CollapsibleSection from "../../components/ui/CollapsibleSection.jsx";
-import { parseTopIdeas, trimFromHeading } from "../../utils/markdown/markdown.js";
-import { parseStructuredIdeas } from "../../utils/streamingParser.js";
+import { parseStructuredIdeas, trimFromHeading } from "../../utils/streamingParser.js";
 import {
  splitIdeaSections,
  extractWhyFit,
@@ -284,7 +283,7 @@ export default function RecommendationDetail() {
  return structuredParsed;
  }
  // Fallback: markdown parser
- return parseTopIdeas(stage2Markdown, 10);
+ return parseStructuredIdeas(stage2Markdown, 10);
  }, [stage2Markdown, stableReports, cachedAllIdeas, cachedIdea]);
  
  const numericIndex = Number.parseInt(ideaIndex ?? "", 10);

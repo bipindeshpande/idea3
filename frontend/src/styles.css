@@ -2,15 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  /* Theme colors come from CSS variables in `src/styles/theme.css` */
-  font-family: var(--font-sans, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
-  background: var(--bg);
-  min-height: 100vh;
-  color: var(--text);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
+/* Body styles are defined in theme.css - this file only adds Tailwind utilities */
 /* Dark mode is handled via CSS variables (see `theme.css`). */
 
 a {
@@ -104,6 +96,7 @@ textarea {
 
 @layer components {
   /* Bridge: allow new "Workspace layout / Focus Mode layout" patches to use theme classes without breaking Tailwind UI. */
+  /* Note: Base class definitions live in theme.css - this layer adds Tailwind @apply for compatibility */
   .card {
     @apply p-6;
     background: var(--surface);
@@ -111,7 +104,6 @@ textarea {
     border: 1px solid var(--border);
     box-shadow: var(--shadow-card);
     border-radius: var(--radius-card);
-    padding: var(--space-24);
   }
   .button-primary {
     @apply h-11 text-base font-semibold transition-colors shadow-sm;
@@ -132,19 +124,6 @@ textarea {
   .button-secondary:hover { filter: brightness(0.98); }
   .shadow-soft {
     @apply shadow-sm;
-  }
-
-  .primary-btn {
-    @apply h-11 px-6 rounded-[10px] text-base font-semibold transition-colors shadow-sm;
-    background: var(--accent);
-    color: var(--on-accent);
-  }
-
-  .secondary-btn {
-    @apply h-11 px-6 rounded-[10px] text-base font-medium transition-colors;
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
   }
 
   .section-description {

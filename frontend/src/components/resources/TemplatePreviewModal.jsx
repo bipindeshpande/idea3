@@ -1,40 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import UIButton from "../ui/ui-button.jsx";
 import UIHeading from "../ui/ui-heading.jsx";
 import { markdownToDocx } from "../../utils/markdownToDocx.js";
 
 export default function TemplatePreviewModal({ template, content, onClose, onDownload }) {
- const [isLoading, setIsLoading] = useState(false);
- const [templateContent, setTemplateContent] = useState(content || "");
-
- // If content is a URL, fetch it
- useEffect(() => {
- if (content && content.startsWith("/templates/")) {
- setIsLoading(true);
- fetch(content)
- .then((res) => res.text())
- .then((text) => {
- setTemplateContent(text);
- setIsLoading(false);
- })
- .catch((err) => {
- console.error("Failed to load template:", err);
- setIsLoading(false);
- });
- }
- }, [content]);
+ // Content is now always passed directly as a string (templates are bundled)
+ const templateContent = content || "";
 
  const handleDownload = async () => {
  if (onDownload) {
- // If we have fetched content, pass it to onDownload
- if (templateContent && !content?.startsWith("/templates/")) {
+ // Pass the content to the download handler
  await onDownload(templateContent);
- } else if (templateContent) {
- await onDownload(templateContent);
- } else {
- await onDownload();
- }
  }
  onClose();
  };
@@ -88,11 +65,7 @@ export default function TemplatePreviewModal({ template, content, onClose, onDow
 
  {/* Scrollable Content */}
  <div className="flex-1 overflow-y-auto p-6">
- {isLoading ? (
- <div className="flex items-center justify-center py-12">
- <div className="text-secondary text-secondary">Loading template...</div>
- </div>
- ) : templateContent ? (
+ {templateContent ? (
  <div className="prose prose-slate max-w-none">
  <ReactMarkdown>{templateContent}</ReactMarkdown>
  </div>

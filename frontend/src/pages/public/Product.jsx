@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
-import Hero from "../../components/marketing/Hero.jsx";
+import { HeroSection } from "../../sections/marketing/product";
 import FeatureCard from "../../components/marketing/FeatureCard.jsx";
 import SectionTitle from "../../components/marketing/SectionTitle.jsx";
 import ContentBlock from "../../components/marketing/ContentBlock.jsx";
@@ -100,14 +100,21 @@ export default function ProductPage() {
         structuredData={seo.structuredData}
       />
 
-      {/* Hero Section */}
-      <Hero
-        title="Validate your idea or discover new opportunities"
-        subheadline="Choose your path: validate an existing startup idea across 10 key parameters, or let our AI discover personalized opportunities tailored to your profile, goals, and constraints."
-        primaryCTA={{ to: "/validate-idea", label: "Validate Idea" }}
-        secondaryCTA={{ to: "/advisor", label: "Discover Ideas" }}
-        illustration={{
-          gradient: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-purple))"
+      {/* Hero Section - V8: Persuasion Edition */}
+      <HeroSection
+        data={{
+          eyebrow: "Founders struggle with clarity",
+          title: "Find the startup you were meant to build.",
+          subheadline: "AI analyzes your skills, pace, constraints, and goals to recommend ideas that fit your real life—not someone else's.",
+          identity: "If you're the kind of founder who wants clarity instead of chaos, you're in the right place.",
+          loss: "Most founders give up because they choose the wrong idea, not because they lacked motivation.",
+          urgency: "Every founder's journey starts with a small step.",
+          primaryCTA: { to: "/advisor", label: "Find My Startup Idea" },
+          secondaryCTA: { to: "/product", label: "See Example Outputs" },
+          microcopy: "Free forever plan included. No credit card required.",
+          illustration: {
+            gradient: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-purple))"
+          }
         }}
         animate="fade"
       />
@@ -135,6 +142,41 @@ export default function ProductPage() {
         </div>
       </section>
 
+      {/* V7: Why Us Section */}
+      <section className="mkt-pad-section mkt-section-gradient-blue">
+        <div className="max-w-7xl mx-auto px-6">
+          <SectionTitle
+            title="Why founders choose Startup Advisor"
+            subtitle="What makes us different"
+            center
+            animate="slide"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            <FeatureCard
+              title="Clarity vs guesswork"
+              description="Get objective scoring and data-driven insights instead of guessing which idea to pursue."
+              tint="blue"
+              eyebrow="Data-Driven"
+              microBenefit="No more decision paralysis"
+            />
+            <FeatureCard
+              title="Founder personalization"
+              description="Every recommendation is tailored to YOUR skills, time, budget, and goals—not generic advice."
+              tint="purple"
+              eyebrow="Personalized"
+              microBenefit="Ideas that actually fit your life"
+            />
+            <FeatureCard
+              title="Structured, repeatable insights"
+              description="Use the same frameworks that successful founders use—YC, Lean Startup, and Product Discovery principles."
+              tint="orange"
+              eyebrow="Proven Frameworks"
+              microBenefit="Learn while you build"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Value Panels / Features */}
       <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
         <div className="max-w-7xl mx-auto px-6">
@@ -144,7 +186,7 @@ export default function ProductPage() {
             center
             animate="slide"
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {valuePanels.map((panel, index) => (
               <div key={index} className="scroll-reveal">
                 <FeatureCard
@@ -168,11 +210,11 @@ export default function ProductPage() {
             subtitle="The industry's most comprehensive idea validation system"
             center
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {validationParams.map((param, index) => (
               <div
                 key={index}
-                className="rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02]"
+                className="rounded-xl p-4 transition-all duration-300 hover:scale-[1.02]"
                 style={{
                   background: "var(--mkt-surface)",
                   border: "1px solid var(--mkt-outline)",
@@ -197,14 +239,14 @@ export default function ProductPage() {
           <div className="mt-12 text-center">
             <Link
               to="/product/validate"
-              className="inline-block px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+              className="inline-block px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
               style={{
                 background: "var(--mkt-primary)",
                 color: "white",
                 boxShadow: "var(--mkt-card-shadow)"
               }}
             >
-              Learn More About Validation →
+              See How Validation Works →
             </Link>
           </div>
         </div>
@@ -248,7 +290,7 @@ export default function ProductPage() {
               boxShadow: "var(--mkt-layer-shadow)"
             }}
           >
-            <div className="flex flex-col md:flex-row items-start gap-8">
+            <div className="flex flex-col md:flex-row items-start gap-6">
               <div className="text-6xl">🤝</div>
               <div className="flex-1">
                 <h2
@@ -288,14 +330,14 @@ export default function ProductPage() {
                 </ul>
                 <Link
                   to="/product/network"
-                  className="inline-block px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                  className="inline-block px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
                   style={{
                     background: "var(--mkt-primary)",
                     color: "white",
                     boxShadow: "var(--mkt-card-shadow)"
                   }}
                 >
-                  Explore Founder Connect →
+                  Show Me Founder Connect →
                 </Link>
               </div>
             </div>
@@ -307,11 +349,11 @@ export default function ProductPage() {
       <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
         <div className="max-w-7xl mx-auto px-6">
           <SectionTitle
-            title="Explore Our Products"
+            title="See Our Products"
             subtitle="Learn more about each feature"
             center
           />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               {
                 title: "Discover Ideas",
@@ -362,7 +404,7 @@ export default function ProductPage() {
             center
             animate="slide"
           />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 relative">
             {[
               {
                 step: "1",
@@ -385,21 +427,29 @@ export default function ProductPage() {
             ].map((step, index) => (
               <div 
                 key={index}
-                className="text-center scroll-reveal"
+                className="text-center scroll-reveal relative"
+                style={{
+                  marginTop: index === 1 ? "16px" : "0" // V6: Rhythm spacing
+                }}
               >
-                <div 
-                  className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 text-2xl font-bold"
-                  style={{
-                    background: "var(--mkt-surface)",
-                    color: "var(--mkt-primary)",
-                    boxShadow: "var(--mkt-card-shadow)",
-                    border: "2px solid var(--mkt-primary)",
-                  }}
-                >
+                {/* V6: Dotted connector between steps */}
+                {index < 2 && (
+                  <div 
+                    className="hidden md:block absolute top-6 left-full w-full mkt-dotted-connector"
+                    style={{ 
+                      width: "calc(100% - 48px)",
+                      marginLeft: "24px"
+                    }}
+                  />
+                )}
+                
+                {/* V6: Premium step badge */}
+                <div className="mkt-step-badge mx-auto mb-4">
                   {step.step}
                 </div>
+                
                 <h3 
-                  className="mkt-h3 mb-4"
+                  className="mkt-h3 mb-3"
                   style={{ color: "var(--mkt-heading)" }}
                 >
                   {step.title}
@@ -413,6 +463,16 @@ export default function ProductPage() {
               </div>
             ))}
           </div>
+          {/* V6: Ending CTA */}
+          <div className="text-center mt-8">
+            <Link 
+              to="/product" 
+              className="inline-flex items-center gap-2 text-sm font-semibold hover:gap-3 transition-all"
+              style={{ color: "var(--mkt-primary)" }}
+            >
+              Learn how it works →
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -425,7 +485,7 @@ export default function ProductPage() {
             center
             animate="slide"
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
             {[
               "Personalized Profile Analysis",
               "Top 3 Ranked Startup Ideas",
@@ -440,7 +500,7 @@ export default function ProductPage() {
             ].map((deliverable, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-4 rounded-xl"
+                className="flex items-start gap-2 p-3 rounded-lg"
                 style={{
                   background: "var(--mkt-surface-muted)",
                   border: "1px solid var(--mkt-outline)",
@@ -471,7 +531,7 @@ export default function ProductPage() {
         primaryCTA={{ to: "/validate-idea", label: "Validate Idea" }}
         secondaryCTA={{ to: "/advisor", label: "Discover Ideas" }}
         gradient
-        className="my-20"
+        className="my-12"
       />
     </MarketingLayout>
   );

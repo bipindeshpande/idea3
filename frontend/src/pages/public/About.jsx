@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
-import HeroSection from "../../components/marketing/HeroSection.jsx";
+import { HeroSection } from "../../sections/marketing/about";
 import SectionHeader from "../../components/marketing/SectionHeader.jsx";
 import CTASection from "../../components/marketing/CTASection.jsx";
 import Blob from "../../components/marketing/Blob.jsx";
@@ -234,7 +234,7 @@ export default function AboutPage() {
  primaryCTA={{ to: "/advisor", label: "Start Discovery Session" }}
  secondaryCTA={{ to: "/product", label: "See How It Works" }}
  gradient
- className="my-20"
+ className="my-12"
  />
  </PageContainer>
  </MarketingLayout>

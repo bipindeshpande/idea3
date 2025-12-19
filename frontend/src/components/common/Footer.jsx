@@ -87,16 +87,17 @@ export default function Footer() {
  </ul>
  </div>
  ))}
- </div>
- <div className="border-t border-default mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
- <p className="text-sm text-secondary">
- © {new Date().getFullYear()} Idea Bunch. All rights reserved.
- </p>
- <div className="flex items-center gap-6 text-sm text-secondary">
- <NavLink to="/privacy" className="hover:text-accent transition-colors">Privacy</NavLink>
- <NavLink to="/terms" className="hover:text-accent transition-colors">Terms</NavLink>
- </div>
- </div>
+  </div>
+
+<div className="border-t border-default pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+<p className="text-sm text-secondary">
+© {new Date().getFullYear()} Idea Bunch. All rights reserved.
+</p>
+<div className="flex items-center gap-6 text-sm text-secondary">
+<NavLink to="/privacy" className="hover:text-accent transition-colors">Privacy</NavLink>
+<NavLink to="/terms" className="hover:text-accent transition-colors">Terms</NavLink>
+</div>
+</div>
  </div>
  </footer>
  );

@@ -9,7 +9,6 @@ import WorkspaceLayout from "./layouts/WorkspaceLayout.jsx";
 import { Outlet } from "react-router-dom";
 
 // Public pages
-import LandingPage from "./pages/public/Landing.jsx";
 import PublicHomePage from "./pages/public/Home.jsx";
 import AboutPage from "./pages/public/About.jsx";
 import ContactPage from "./pages/public/Contact.jsx";
@@ -41,7 +40,6 @@ import FrameworksPage from "./pages/resources/Frameworks.jsx";
 
 // Dashboard pages
 import DashboardPage from "./pages/dashboard/Dashboard.jsx";
-import WorkspacePage from "./pages/dashboard/WorkspacePage.jsx";
 import CompareSessionsPage from "./pages/dashboard/CompareSessions.jsx";
 import RunHistoryPage from "./pages/dashboard/RunHistoryPage.jsx";
 import FounderConnectPage from "./pages/founder/FounderConnect.jsx";

@@ -50,12 +50,31 @@
   /* Typography */
   --font-sans: Inter, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+  --ui-font: Inter, system-ui, sans-serif;
+
+  /* UI Typography Scale */
+  --ui-h1: clamp(28px, 4vw, 36px);
+  --ui-h2: clamp(22px, 3vw, 28px);
+  --ui-h3: 20px;
+  --ui-body: 16px;
+  --ui-small: 14px;
+  --ui-xs: 12px;
+
+  /* Line Heights */
+  --ui-lh-tight: 1.15;
+  --ui-lh-normal: 1.35;
+  --ui-lh-relaxed: 1.5;
 
   /* Spacing + radii (8px scale) */
+  --space-4: 4px;
   --space-8: 8px;
+  --space-12: 12px;
   --space-16: 16px;
+  --space-20: 20px;
   --space-24: 24px;
   --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
 
   --radius-page: 24px;
   --radius-card: 16px;
@@ -95,8 +114,8 @@
   --mkt-primary-hover: #1d4ed8;
   --mkt-outline: #e2e8f0;
   --mkt-divider: #e2e8f0;
-  --mkt-card-shadow: 0 4px 18px rgba(0,0,0,0.06);
-  --mkt-layer-shadow: 0 20px 60px -12px rgba(0,0,0,0.15);
+  --mkt-card-shadow: 0 2px 12px rgba(0,0,0,0.06); /* Tighter shadow */
+  --mkt-layer-shadow: 0 12px 40px -8px rgba(0,0,0,0.12); /* Tighter shadow */
   --mkt-card-blue: #eff6ff;
   --mkt-card-green: #ecfdf5;
   --mkt-card-orange: #fff7ed;
@@ -105,16 +124,16 @@
   --mkt-paragraph: var(--mkt-text-dim);
   --mkt-shadow: 0 4px 18px rgba(0,0,0,0.06);
   
-  /* Marketing typographic scale */
-  --mkt-h1: 48px;
-  --mkt-h2: 36px;
-  --mkt-h3: 28px;
-  --mkt-body: 18px;
+  /* Marketing typographic scale - Tightened for premium density */
+  --mkt-h1: 40px;
+  --mkt-h2: 32px;
+  --mkt-h3: 22px; /* Card titles: ~18px equivalent */
+  --mkt-body: 15px; /* Body text: 14-15px */
   
-  /* Marketing typography tokens (V3) */
-  --mkt-display: clamp(36px, 5vw, 56px);
+  /* Marketing typography tokens (V3) - Tightened for premium density */
+  --mkt-display: clamp(30px, 4.2vw, 48px);
   --mkt-eyebrow: 12px;
-  --mkt-lead: 18px;
+  --mkt-lead: 16px;
   
   /* Marketing gradient tokens (V3) */
   --mkt-blob-purple: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
@@ -125,12 +144,12 @@
   --mkt-glass-border: rgba(255, 255, 255, 0.2);
   
   /* V5: 3D + Glass tokens */
-  --mkt-card-3d-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  --mkt-card-3d-shadow: 0 4px 16px rgba(0,0,0,0.1); /* Tighter 3D shadow */
   --mkt-glow-primary: rgba(120, 100, 255, 0.6);
   
-  /* Marketing spacing scale */
-  --mkt-pad-section: 96px;
-  --mkt-pad-block: 40px;
+  /* Marketing spacing scale - Optimized for better density */
+  --mkt-pad-section: 40px; /* Reduced by 20% from 50px */
+  --mkt-pad-block: 30px; /* Reduced from 40px (~25%) */
 }
 
 /* Explicit light mode selector - ensures light tokens apply when data-theme="light" */
@@ -198,8 +217,8 @@
   --mkt-primary-hover: #1d4ed8;
   --mkt-outline: #e2e8f0;
   --mkt-divider: #e2e8f0;
-  --mkt-card-shadow: 0 4px 18px rgba(0,0,0,0.06);
-  --mkt-layer-shadow: 0 20px 60px -12px rgba(0,0,0,0.15);
+  --mkt-card-shadow: 0 2px 12px rgba(0,0,0,0.06); /* Tighter shadow */
+  --mkt-layer-shadow: 0 12px 40px -8px rgba(0,0,0,0.12); /* Tighter shadow */
   --mkt-card-blue: #eff6ff;
   --mkt-card-green: #ecfdf5;
   --mkt-card-orange: #fff7ed;
@@ -208,16 +227,16 @@
   --mkt-paragraph: var(--mkt-text-dim);
   --mkt-shadow: 0 4px 18px rgba(0,0,0,0.06);
   
-  /* Marketing typographic scale */
-  --mkt-h1: 48px;
-  --mkt-h2: 36px;
-  --mkt-h3: 28px;
-  --mkt-body: 18px;
+  /* Marketing typographic scale - Tightened for premium density */
+  --mkt-h1: 40px;
+  --mkt-h2: 32px;
+  --mkt-h3: 22px; /* Card titles: ~18px equivalent */
+  --mkt-body: 15px; /* Body text: 14-15px */
   
-  /* Marketing typography tokens (V3) */
-  --mkt-display: clamp(36px, 5vw, 56px);
+  /* Marketing typography tokens (V3) - Tightened for premium density */
+  --mkt-display: clamp(30px, 4.2vw, 48px);
   --mkt-eyebrow: 12px;
-  --mkt-lead: 18px;
+  --mkt-lead: 16px;
   
   /* Marketing gradient tokens (V3) */
   --mkt-blob-purple: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
@@ -227,9 +246,9 @@
   --mkt-glass-bg: rgba(255, 255, 255, 0.7);
   --mkt-glass-border: rgba(255, 255, 255, 0.2);
   
-  /* Marketing spacing scale */
-  --mkt-pad-section: 96px;
-  --mkt-pad-block: 40px;
+  /* Marketing spacing scale - Optimized for better density */
+  --mkt-pad-section: 40px; /* Reduced by 20% from 50px */
+  --mkt-pad-block: 30px; /* Reduced from 40px (~25%) */
 }
 
 [data-theme="dark"] {
@@ -246,6 +265,18 @@
   --on-accent: #FFFFFF;
   --surface-hover: #24324a;
   --overlay-light: rgba(2, 6, 23, 0.66);
+
+  /* UI Typography tokens (same sizes, colors adapt via --text variables) */
+  --ui-font: Inter, system-ui, sans-serif;
+  --ui-h1: clamp(28px, 4vw, 36px);
+  --ui-h2: clamp(22px, 3vw, 28px);
+  --ui-h3: 20px;
+  --ui-body: 16px;
+  --ui-small: 14px;
+  --ui-xs: 12px;
+  --ui-lh-tight: 1.15;
+  --ui-lh-normal: 1.35;
+  --ui-lh-relaxed: 1.5;
 
   /* Semantic */
   --success: #4ADE80;
@@ -295,8 +326,8 @@
   --mkt-primary-hover: #2563eb;
   --mkt-outline: #334155;
   --mkt-divider: #334155;
-  --mkt-card-shadow: 0 4px 18px rgba(0,0,0,0.3);
-  --mkt-layer-shadow: 0 20px 60px -12px rgba(0,0,0,0.5);
+  --mkt-card-shadow: 0 2px 12px rgba(0,0,0,0.3); /* Tighter shadow */
+  --mkt-layer-shadow: 0 12px 40px -8px rgba(0,0,0,0.4); /* Tighter shadow */
   --mkt-card-blue: rgba(59, 130, 246, 0.1);
   --mkt-card-green: rgba(34, 197, 94, 0.1);
   --mkt-card-orange: rgba(249, 115, 22, 0.1);
@@ -305,16 +336,16 @@
   --mkt-paragraph: var(--mkt-text-dim);
   --mkt-shadow: 0 4px 18px rgba(0,0,0,0.3);
   
-  /* Marketing typographic scale */
-  --mkt-h1: 48px;
-  --mkt-h2: 36px;
-  --mkt-h3: 28px;
-  --mkt-body: 18px;
+  /* Marketing typographic scale - Tightened for premium density */
+  --mkt-h1: 40px;
+  --mkt-h2: 32px;
+  --mkt-h3: 22px; /* Card titles: ~18px equivalent */
+  --mkt-body: 15px; /* Body text: 14-15px */
   
-  /* Marketing typography tokens (V3) */
-  --mkt-display: clamp(36px, 5vw, 56px);
+  /* Marketing typography tokens (V3) - Tightened for premium density */
+  --mkt-display: clamp(30px, 4.2vw, 48px);
   --mkt-eyebrow: 12px;
-  --mkt-lead: 18px;
+  --mkt-lead: 16px;
   
   /* Marketing gradient tokens (V3) */
   --mkt-blob-purple: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%);
@@ -325,12 +356,12 @@
   --mkt-glass-border: rgba(255, 255, 255, 0.1);
   
   /* V5: 3D + Glass tokens (dark mode) */
-  --mkt-card-3d-shadow: 0 8px 28px rgba(0,0,0,0.5);
+  --mkt-card-3d-shadow: 0 4px 20px rgba(0,0,0,0.4); /* Tighter 3D shadow */
   --mkt-glow-primary: rgba(120, 100, 255, 0.8);
   
-  /* Marketing spacing scale */
-  --mkt-pad-section: 96px;
-  --mkt-pad-block: 40px;
+  /* Marketing spacing scale - Optimized for better density */
+  --mkt-pad-section: 40px; /* Reduced by 20% from 50px */
+  --mkt-pad-block: 30px; /* Reduced from 40px (~25%) */
 }
 
 /* Base */
@@ -383,15 +414,24 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-8);
   border-radius: var(--radius-btn);
-  padding: 10px 16px;
-  font-weight: 600;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
+  padding: 10px 18px;
+  font-family: var(--ui-font);
+  font-size: var(--ui-body);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
 }
 .ui-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+.ui-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .ui-btn-primary {
@@ -399,7 +439,7 @@ body {
   color: var(--on-accent);
   border: 1px solid transparent;
 }
-.ui-btn-primary:hover {
+.ui-btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
 }
 
@@ -408,41 +448,44 @@ body {
   color: var(--text);
   border: 1px solid var(--border);
 }
-.ui-btn-secondary:hover {
-  filter: brightness(0.98);
+.ui-btn-secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
 }
 
 /* ---------------------------------------------------
    Canonical UI primitives (design-system level)
    NOTE: these are used by src/components/ui/ui-*.jsx
 --------------------------------------------------- */
+/* Legacy .ui-button system - maps to consolidated .ui-btn for backward compatibility */
 .ui-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-8);
   border-radius: var(--radius-btn);
-  padding: 10px 16px;
-  font-weight: 600;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text);
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
+  padding: 10px 18px;
+  font-family: var(--ui-font);
+  font-size: var(--ui-body);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
 }
 .ui-button:disabled { opacity: 0.6; cursor: not-allowed; }
 .ui-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.ui-button--primary { background: var(--accent); color: var(--on-accent); }
-.ui-button--primary:hover { background: var(--accent-hover); }
+.ui-button--primary { background: var(--accent); color: var(--on-accent); border: 1px solid transparent; }
+.ui-button--primary:hover:not(:disabled) { background: var(--accent-hover); }
 
-.ui-button--secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
-.ui-button--secondary:hover { background: var(--surface-hover); }
+.ui-button--secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.ui-button--secondary:hover:not(:disabled) { background: var(--surface-hover); }
 
-.ui-button--ghost { background: transparent; color: var(--text); border-color: var(--border); }
-.ui-button--ghost:hover { background: var(--surface-hover); }
+.ui-button--ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.ui-button--ghost:hover:not(:disabled) { background: var(--surface-hover); }
 
-.ui-button--danger { background: var(--danger); color: var(--on-accent); }
-.ui-button--danger:hover { filter: brightness(0.95); }
+.ui-button--danger { background: var(--danger); color: var(--on-accent); border: 1px solid transparent; }
+.ui-button--danger:hover:not(:disabled) { filter: brightness(0.95); }
 
 .ui-control {
   width: 100%;
@@ -482,10 +525,77 @@ body {
 .ui-heading {
   margin: 0;
   color: var(--text);
+  font-family: var(--ui-font);
 }
-.ui-heading--h1 { font-size: 24px; font-weight: 600; line-height: 1.2; }
-.ui-heading--h2 { font-size: 18px; font-weight: 500; line-height: 1.25; }
-.ui-heading--h3 { font-size: 16px; font-weight: 600; line-height: 1.25; }
+.ui-heading--h1 { 
+  font-size: var(--ui-h1); 
+  font-weight: 600; 
+  line-height: var(--ui-lh-tight); 
+  letter-spacing: -0.02em;
+}
+.ui-heading--h2 { 
+  font-size: var(--ui-h2); 
+  font-weight: 600; 
+  line-height: var(--ui-lh-tight); 
+  letter-spacing: -0.01em;
+}
+.ui-heading--h3 { 
+  font-size: var(--ui-h3); 
+  font-weight: 600; 
+  line-height: var(--ui-lh-normal); 
+}
+
+/* Semantic Typography Utilities */
+.ui-h1 {
+  font-size: var(--ui-h1);
+  line-height: var(--ui-lh-tight);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+
+.ui-h2 {
+  font-size: var(--ui-h2);
+  line-height: var(--ui-lh-tight);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+
+.ui-h3 {
+  font-size: var(--ui-h3);
+  line-height: var(--ui-lh-normal);
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+
+.ui-body {
+  font-size: var(--ui-body);
+  line-height: var(--ui-lh-relaxed);
+  font-weight: 400;
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+
+.ui-small {
+  font-size: var(--ui-small);
+  line-height: var(--ui-lh-normal);
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+
+.ui-xs {
+  font-size: var(--ui-xs);
+  line-height: var(--ui-lh-normal);
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  font-family: var(--ui-font);
+}
 
 .ui-section { display: grid; gap: var(--space-16); }
 
@@ -587,24 +697,49 @@ body {
   padding: var(--space-24);
 }
 
-.button-primary {
+/* Legacy .button-primary / .button-secondary - maps to .ui-btn for backward compatibility */
+.button-primary,
+.primary-btn {
   background: var(--accent);
   color: var(--on-accent);
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: var(--radius-btn);
-  font-weight: 600;
-  transition: background 0.2s ease;
+  font-family: var(--ui-font);
+  font-size: var(--ui-body);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
-.button-primary:hover {
+.button-primary:hover:not(:disabled),
+.primary-btn:hover:not(:disabled) {
   background: var(--accent-hover);
 }
 
-.button-secondary {
+.button-secondary,
+.secondary-btn {
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: var(--radius-btn);
   color: var(--text);
+  font-family: var(--ui-font);
+  font-size: var(--ui-body);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.button-secondary:hover:not(:disabled),
+.secondary-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
 }
 
 .input {
@@ -620,11 +755,6 @@ body {
 .shadow-soft {
   box-shadow: var(--shadow-soft);
 }
-
-/* ---------------------------------------------------
-   Marketing-only utilities (public pages only)
-   DO NOT use in logged-in workspace UI
---------------------------------------------------- */
 
 /* ---------------------------------------------------
    Marketing-only utilities (public pages only)
@@ -668,7 +798,7 @@ body {
 .mkt-card {
   background: var(--mkt-surface);
   border: 1px solid var(--mkt-outline);
-  border-radius: 16px;
+  border-radius: 12px; /* Reduced from 16px */
   padding: var(--mkt-pad-block);
   box-shadow: var(--mkt-card-shadow);
   transition: all 0.3s ease;
@@ -694,7 +824,7 @@ body {
 
 .mkt-h2 {
   font-size: var(--mkt-h2);
-  line-height: 1.2;
+  line-height: 1.25; /* Tighter for density */
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--mkt-heading);
@@ -709,8 +839,65 @@ body {
 
 .mkt-body {
   font-size: var(--mkt-body);
-  line-height: 1.6;
+  line-height: 1.5; /* Tighter for density */
   color: var(--mkt-paragraph);
+}
+
+/* V6: Accent bar utility */
+.mkt-accent-bar {
+  height: 2px;
+  width: 48px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--mkt-hero-start), var(--mkt-hero-end));
+  margin-bottom: 16px;
+}
+
+/* V6: Soft glow utility */
+.mkt-soft-glow {
+  box-shadow: var(--mkt-card-glow);
+  position: relative;
+}
+
+.mkt-soft-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: var(--mkt-card-glow);
+  opacity: 0.3;
+  filter: blur(8px);
+  z-index: -1;
+}
+
+/* V6: Section background variations */
+.mkt-section-bg-light {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.02) 0%, 
+    rgba(139, 92, 246, 0.01) 100%);
+}
+
+.mkt-section-bg-diagonal {
+  background: linear-gradient(135deg, 
+    transparent 0%, 
+    rgba(59, 130, 246, 0.03) 50%, 
+    transparent 100%);
+}
+
+/* V6: Asymmetry utilities */
+.mkt-split-left {
+  grid-template-columns: 1fr 1.5fr;
+}
+
+.mkt-split-right {
+  grid-template-columns: 1.5fr 1fr;
+}
+
+.mkt-offset-y {
+  transform: translateY(16px);
+}
+
+.mkt-offset-y-lg {
+  transform: translateY(32px);
 }
 
 /* Marketing spacing utilities */
@@ -807,10 +994,6 @@ body {
 }
 
 /* Marketing V3 Utilities */
-.hero-gradient {
-  background: linear-gradient(135deg, var(--mkt-hero-start), var(--mkt-hero-end));
-}
-
 .hero-blob {
   position: absolute;
   border-radius: 50%;
@@ -835,7 +1018,7 @@ body {
 
 .card-3d {
   box-shadow: var(--mkt-card-3d-shadow);
-  border-radius: 16px;
+  border-radius: 12px; /* Reduced from 16px */
 }
 
 .glow-accent {
@@ -858,7 +1041,7 @@ body {
 
 .mockup-device {
   background: var(--mkt-surface);
-  border-radius: 24px;
+  border-radius: 16px; /* Reduced from 24px */
   box-shadow: var(--mkt-layer-shadow);
   padding: 8px;
 }
@@ -904,20 +1087,252 @@ body {
   }
 }
 
+/* V6: Angled lighting overlay for heroes */
+.mkt-hero-lighting::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(135deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.05) 50%, 
+    transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+[data-theme="dark"] .mkt-hero-lighting::after {
+  background: linear-gradient(135deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.02) 50%, 
+    transparent 100%);
+}
+
+/* V6: Premium step badge */
+.mkt-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--mkt-primary), var(--mkt-card-purple));
+  color: white;
+  box-shadow: 0 0 16px rgba(120, 100, 255, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.mkt-step-badge::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--mkt-primary), var(--mkt-card-purple));
+  opacity: 0.3;
+  filter: blur(8px);
+  z-index: -1;
+}
+
+/* V6: Dotted gradient connector */
+.mkt-dotted-connector {
+  position: relative;
+  height: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent 8px,
+    var(--mkt-primary) 8px,
+    var(--mkt-primary) 10px
+  );
+  background-size: 20px 2px;
+  opacity: 0.4;
+  margin: 24px 0;
+}
+
+/* ============================================================
+   V8: Persuasion Edition utilities
+   ============================================================ */
+
+/* V8: Identity mirroring */
+.mkt-identity {
+  opacity: 0.85;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--mkt-text-dim);
+  line-height: 1.5;
+}
+
+/* V8: Soft urgency (without pressure) */
+.mkt-soft-urgency {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  color: var(--mkt-text-dim);
+  font-weight: 400;
+}
+
+/* ============================================================
+   V9: Behavioral Sequencing utilities
+   ============================================================ */
+
+/* V9: Progressive Question Styles */
+.mkt-question {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+  color: var(--mkt-heading);
+  font-weight: 500;
+}
+
+.mkt-question-option {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: var(--mkt-surface);
+  border: 1px solid var(--mkt-outline);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--mkt-paragraph);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.mkt-question-option:hover {
+  background: var(--mkt-surface-muted);
+  border-color: var(--mkt-primary);
+  transform: translateX(4px);
+}
+
+.mkt-question-option.selected {
+  background: var(--mkt-primary);
+  color: white;
+  border-color: var(--mkt-primary);
+}
+
+/* V9: Step Reveal Animation */
+.mkt-reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.5s ease;
+}
+
+.mkt-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* V9: Preview Highlight Frame */
+.mkt-preview-frame {
+  border: 1px solid var(--mkt-outline);
+  border-radius: 12px;
+  padding: 1rem;
+  background: var(--mkt-surface);
+  box-shadow: var(--mkt-card-shadow);
+}
+
+/* V9: Micro-Step Number Badge */
+.mkt-step-badge-micro {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  border-radius: 50%;
+  background: var(--mkt-card-glow);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   V10: Neural Framework utilities
+   ============================================================ */
+
+/* V10: Cognitive Ease Styles */
+.mkt-cognitive-ease {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  line-height: 1.45;
+  color: var(--mkt-paragraph);
+}
+
+/* V10: Contrast Block */
+.mkt-contrast-block {
+  padding: 1rem;
+  border-left: 4px solid var(--mkt-card-glow);
+  background: var(--mkt-surface);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+/* V10: Decision Anchor Highlight */
+.mkt-anchor {
+  border: 2px solid var(--mkt-hero-start);
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--mkt-surface);
+  position: relative;
+}
+
+.mkt-anchor::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--mkt-hero-start), var(--mkt-hero-end));
+  opacity: 0.1;
+  z-index: -1;
+}
+
+/* V10: Primed Headline */
+.mkt-preheadline {
+  font-size: 0.85rem;
+  opacity: 0.65;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+  color: var(--mkt-text-dim);
+  font-weight: 500;
+}
+
+/* V10: Emotional Gradient Text */
+.mkt-emotional {
+  background: linear-gradient(
+    90deg,
+    var(--mkt-card-glow),
+    var(--mkt-blob-purple)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
 /* Marketing V3 Typography Utilities */
 .mkt-display {
   font-size: var(--mkt-display);
-  line-height: 1.1;
+  line-height: 1.15; /* Slightly tighter */
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--mkt-heading);
 }
 
 .mkt-eyebrow {
-  font-size: var(--mkt-eyebrow);
+  font-size: 12px; /* V6: Fixed size for consistency */
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em; /* V6: Tighter spacing */
+  opacity: 0.8; /* V6: Subtle opacity */
   color: var(--mkt-text-dim);
 }
 
@@ -926,4 +1341,120 @@ body {
   line-height: 1.6;
   color: var(--mkt-subheading);
   font-weight: 400;
+}
+
+/* ============================================================
+   V12: Pricing Psychology utilities
+   ============================================================ */
+
+.mkt-pricing-anchor {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin-top: 0.25rem;
+}
+
+.mkt-pricing-highlight {
+  border: 2px solid var(--mkt-hero-start);
+  border-radius: 12px;
+  padding: 1rem;
+  background: var(--mkt-surface);
+  box-shadow: 0 0 12px rgba(120, 60, 255, 0.15);
+}
+
+.mkt-pricing-preheadline {
+  font-size: 0.9rem;
+  opacity: 0.65;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================================
+   V13: Layout Harmony spacing utilities
+   ============================================================ */
+
+.mkt-section {
+  padding: var(--mkt-pad-section) 0;
+}
+
+.mkt-section-sm {
+  padding: calc(var(--mkt-pad-section) * 0.5) 0;
+}
+
+.mkt-section-lg {
+  padding: 56px 0; /* Reduced by 20% from 70px */
+}
+
+.mkt-tight {
+  padding: calc(var(--mkt-pad-section) * 0.25) 0;
+}
+
+.mkt-normal {
+  padding: var(--mkt-pad-section) 0;
+}
+
+.mkt-loose {
+  padding: calc(var(--mkt-pad-section) * 2) 0;
+}
+
+/* ============================================================
+   V11: Credibility Layer utilities
+   ============================================================ */
+
+/* V11: Credibility Eyebrow */
+.mkt-credibility-eyebrow {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.25rem;
+  color: var(--mkt-text-dim);
+}
+
+/* V11: Authority Badge */
+.mkt-authority-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  background: var(--mkt-surface);
+  border: 1px solid var(--mkt-outline);
+  font-size: 0.75rem;
+  opacity: 0.8;
+  color: var(--mkt-text-dim);
+}
+
+/* V11: Founder Story Block */
+.mkt-founder-block {
+  padding: 1.25rem;
+  background: var(--mkt-surface);
+  border-radius: 12px;
+  border-left: 4px solid var(--mkt-primary);
+  box-shadow: var(--mkt-card-shadow);
+}
+
+[data-theme="dark"] .mkt-founder-block {
+  border-left-color: var(--mkt-primary);
+}
+
+/* V11: Persona Badge */
+.mkt-persona-badge {
+  padding: 0.3rem 0.6rem;
+  background: var(--mkt-surface-hover);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  opacity: 0.9;
+  color: var(--mkt-heading);
+  border: 1px solid var(--mkt-outline);
+}
+
+/* V11: Credibility Divider */
+.mkt-cred-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--mkt-outline),
+    transparent
+  );
+  margin: 2rem 0;
 }

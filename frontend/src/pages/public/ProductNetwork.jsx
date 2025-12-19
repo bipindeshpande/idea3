@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
-import Hero from "../../components/marketing/Hero.jsx";
+import { HeroSection } from "../../sections/marketing/network";
 import FeatureCard from "../../components/marketing/FeatureCard.jsx";
 import SectionTitle from "../../components/marketing/SectionTitle.jsx";
 import ContentBlock from "../../components/marketing/ContentBlock.jsx";
@@ -93,13 +93,15 @@ export default function ProductNetworkPage() {
       />
 
       {/* Hero Section */}
-      <Hero
-        title="Find the right co-founder"
-        subheadline="Connect with other founders to find co-founders, collaborators, and build your startup team. Privacy-first networking designed for entrepreneurs."
-        primaryCTA={{ to: "/founder-connect", label: "Explore Network" }}
-        secondaryCTA={{ to: "/product", label: "View All Features" }}
-        illustration={{
-          gradient: "linear-gradient(135deg, var(--mkt-card-green), var(--mkt-card-blue))"
+      <HeroSection
+        data={{
+          title: "Find the right co-founder",
+          subheadline: "Connect with other founders to find co-founders, collaborators, and build your startup team. Privacy-first networking designed for entrepreneurs.",
+          primaryCTA: { to: "/founder-connect", label: "Show Me Examples" },
+          secondaryCTA: { to: "/product", label: "View All Features" },
+          illustration: {
+            gradient: "linear-gradient(135deg, var(--mkt-card-green), var(--mkt-card-blue))"
+          }
         }}
       />
 
@@ -133,7 +135,7 @@ export default function ProductNetworkPage() {
             subtitle="Find the perfect co-founder or collaborator"
             center
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {roles.map((role, index) => (
               <div key={index} className="animate-mkt-fadeUp" style={{ animationDelay: `${index * 0.1}s` }}>
                 <FeatureCard {...role} />
@@ -151,7 +153,7 @@ export default function ProductNetworkPage() {
             subtitle="Privacy-first networking for founders"
             center
           />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {features.map((feature, index) => (
               <div key={index} className="animate-mkt-fadeUp" style={{ animationDelay: `${index * 0.1}s` }}>
                 <FeatureCard {...feature} />
@@ -190,7 +192,7 @@ export default function ProductNetworkPage() {
             subtitle="Connect with founders in three simple steps"
             center
           />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
             {[
               {
                 step: "1",
@@ -217,7 +219,7 @@ export default function ProductNetworkPage() {
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
                 <div 
-                  className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 text-2xl font-bold"
+                  className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 text-xl font-bold"
                   style={{
                     background: "var(--mkt-surface)",
                     color: "var(--mkt-primary)",
@@ -228,7 +230,7 @@ export default function ProductNetworkPage() {
                   {step.step}
                 </div>
                 <h3 
-                  className="mkt-h3 mb-4"
+                  className="mkt-h3 mb-3"
                   style={{ color: "var(--mkt-heading)" }}
                 >
                   {step.title}
@@ -253,7 +255,7 @@ export default function ProductNetworkPage() {
             subtitle="Everything you get with Founder Network"
             center
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
             {[
               "Anonymized Profile Browsing",
               "Idea Listing & Discovery",
@@ -268,7 +270,7 @@ export default function ProductNetworkPage() {
             ].map((deliverable, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-4 rounded-xl"
+                className="flex items-start gap-2 p-3 rounded-lg"
                 style={{
                   background: "var(--mkt-surface-muted)",
                   border: "1px solid var(--mkt-outline)",
@@ -296,10 +298,10 @@ export default function ProductNetworkPage() {
       <CTASection
         title="Ready to find your co-founder?"
         description="Join the Founder Network and connect with other entrepreneurs. Free plan includes 3 connections per month."
-        primaryCTA={{ to: "/founder-connect", label: "Explore Network" }}
+        primaryCTA={{ to: "/founder-connect", label: "Show Me Examples" }}
         secondaryCTA={{ to: "/pricing", label: "View Pricing" }}
         gradient
-        className="my-20"
+        className="my-12"
       />
     </MarketingLayout>
   );

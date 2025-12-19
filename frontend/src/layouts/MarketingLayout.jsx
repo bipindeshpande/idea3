@@ -38,6 +38,30 @@ export default function MarketingLayout({ children, fullWidth = false }) {
     };
   }, [children]);
 
+  // V9: Behavioral sequencing reveal observer for .mkt-reveal components
+  useEffect(() => {
+    const mktRevealElements = document.querySelectorAll('.mkt-reveal');
+    
+    if (mktRevealElements.length === 0) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    mktRevealElements.forEach(el => observer.observe(el));
+
+    return () => {
+      mktRevealElements.forEach(el => observer.unobserve(el));
+    };
+  }, [children]);
+
   return (
     <div className="app-shell bg-app text-primary font-sans">
       {/* Navigation with scroll-based styling */}

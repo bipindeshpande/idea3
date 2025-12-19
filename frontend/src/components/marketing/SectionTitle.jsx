@@ -12,16 +12,16 @@ export default function SectionTitle({
                          animate === "slide" ? " mkt-anim-slide" :
                          animate === "float" ? " mkt-anim-float" : "";
   return (
-    <div className={`${center ? "text-center" : ""} mb-16 ${animationClass || ""} ${className}`}>
+    <div className={`${center ? "text-center" : ""} mb-10 ${animationClass || ""} ${className}`}>
       <h2 
-        className="mkt-h2 font-bold mb-4"
+        className="mkt-h2 font-bold mb-3"
         style={{ color: "var(--mkt-heading)" }}
       >
         {title}
       </h2>
       {subtitle && (
         <p 
-          className={`mkt-body ${center ? "max-w-2xl mx-auto" : ""}`}
+          className={`mkt-body ${center ? "max-w-xl mx-auto" : ""}`}
           style={{ color: "var(--mkt-subheading)" }}
         >
           {subtitle}

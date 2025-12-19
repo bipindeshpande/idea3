@@ -7,9 +7,8 @@ import Seo from "../../components/common/Seo.jsx";
 import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useValidation } from "../../context/ValidationContext.jsx";
-import { trimFromHeading, parseTopIdeas } from "../../utils/markdown/markdown.js";
+import { trimFromHeading, parseStructuredIdeas } from "../../utils/streamingParser.js";
 import { personalizeCopy, buildFinalConclusion, parseRecommendationMatrix, splitFullReportSections } from "../../utils/formatters/recommendationFormatters.js";
-import { parseStructuredIdeas } from "../../utils/streamingParser.js";
 import ReactMarkdown from "react-markdown";
 import UIBadge from "../../components/ui/ui-badge.jsx";
 
@@ -445,7 +444,7 @@ export default function RecommendationsReport() {
  }
  
  // Fallback: parse from markdown (for backward compatibility)
- const parsed = parseTopIdeas(markdown, 10);
+ const parsed = parseStructuredIdeas(markdown, 10);
  return parsed;
  } catch (err) {
  if (process.env.NODE_ENV === 'development') {
