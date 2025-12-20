@@ -60,9 +60,10 @@ export default function ValueSection({
         {/* Value Items - Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item, index) => {
-            // Cycle through accent colors for variety
-            const accents = [null, "primary", "accent-1", null, "accent-2"];
-            const accent = accents[index % accents.length];
+            // Semantic color assignment: Most important = Blue, Supporting = Purple, Positive outcomes = Green
+            // Pattern: Blue (primary) → Purple (secondary) → Green (success) → Blue → Purple → Green
+            const semanticAccents = ["primary", "accent-1", "accent-2", "primary", "accent-1", "accent-2"];
+            const accent = semanticAccents[index % semanticAccents.length];
             
             return (
             <Card 
@@ -82,10 +83,10 @@ export default function ValueSection({
                     borderRadius: "var(--radius-md)",
                     backgroundColor: accent 
                       ? (accent === "primary" 
-                          ? "var(--mkt-card-blue)" 
+                          ? "var(--mkt-card-primary)" 
                           : accent === "accent-1"
-                          ? "var(--mkt-card-purple)"
-                          : "var(--mkt-card-green)")
+                          ? "var(--mkt-card-secondary)"
+                          : "var(--mkt-card-accent)") /* Use accent green for variety */
                       : "var(--mkt-surface-muted)",
                   }}
                 >

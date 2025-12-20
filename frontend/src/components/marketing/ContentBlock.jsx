@@ -46,7 +46,7 @@ export default function ContentBlock({
             <div 
               className="w-full h-56 rounded-xl mkt-card--floating"
               style={{
-                background: visual.gradient || "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-purple))",
+                background: visual.gradient || "linear-gradient(135deg, var(--mkt-card-primary), var(--mkt-card-secondary))",
                 boxShadow: "var(--mkt-layer-shadow)",
                 borderRadius: "12px"
               }}

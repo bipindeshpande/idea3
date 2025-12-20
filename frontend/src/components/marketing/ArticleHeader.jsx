@@ -28,7 +28,7 @@ export default function ArticleHeader({
             className="inline-block text-sm font-semibold uppercase tracking-wide mb-4 px-4 py-2 rounded-full"
             style={{ 
               color: "var(--mkt-primary)",
-              background: "var(--mkt-card-blue)"
+              background: "var(--mkt-card-primary)"
             }}
           >
             {category}

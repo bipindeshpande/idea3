@@ -34,7 +34,7 @@ export const heroData = {
   credibilityMicrocopy: "Trusted by founders in 20+ countries.",
   split: "left",
   illustration: {
-    gradient: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-purple))",
+    gradient: "linear-gradient(135deg, var(--mkt-card-primary), var(--mkt-card-accent))", /* Primary to accent green */
     caption: "Live Preview — Validation Dashboard"
   }
 };
@@ -44,8 +44,8 @@ export const mockupData = {
   caption: "Live Preview — Validation Dashboard",
   kpis: [
     { label: "Market Fit", value: "8.5/10", desc: "Strong demand indicators", color: "var(--mkt-primary)" },
-    { label: "Financial Viability", value: "7.8/10", desc: "Positive projections", color: "var(--mkt-card-green)" },
-    { label: "Strength Assessment", value: "8.2/10", desc: "Well-positioned", color: "var(--mkt-card-purple)" }
+    { label: "Financial Viability", value: "7.8/10", desc: "Positive projections", color: "var(--mkt-card-accent)" }, /* Accent green */
+    { label: "Strength Assessment", value: "8.2/10", desc: "Well-positioned", color: "var(--mkt-card-secondary)" }
   ]
 };
 
@@ -137,21 +137,21 @@ export const whyUsFeatures = [
   {
     title: "Clarity vs guesswork",
     description: "Get objective scoring and data-driven insights instead of guessing which idea to pursue.",
-    tint: "blue",
+    tint: "blue", // Primary benefit - most important
     eyebrow: "Data-Driven",
     microBenefit: "No more decision paralysis"
   },
   {
     title: "Founder personalization",
     description: "Every recommendation is tailored to YOUR skills, time, budget, and goals—not generic advice.",
-    tint: "purple",
+    tint: "purple", // Secondary benefit - supporting
     eyebrow: "Personalized",
     microBenefit: "Ideas that actually fit your life"
   },
   {
     title: "Structured, repeatable insights",
     description: "Use the same frameworks that successful founders use—YC, Lean Startup, and Product Discovery principles.",
-    tint: "orange",
+    tint: "green", // Success/proven - completion
     eyebrow: "Proven Frameworks",
     microBenefit: "Learn while you build"
   }
@@ -162,25 +162,25 @@ export const validationFeatures = [
     icon: "📈",
     title: "Market Opportunity",
     description: "Analyze market size, growth trends, and addressable market to assess opportunity.",
-    tint: "blue",
+    tint: "blue", // Primary - most important validation parameter
   },
   {
     icon: "⚔️",
     title: "Competitive Landscape",
     description: "Understand competitors, differentiation opportunities, and barriers to entry.",
-    tint: "purple",
+    tint: "purple", // Secondary - supporting analysis
   },
   {
     icon: "💰",
     title: "Financial Viability",
     description: "Assess startup costs, revenue projections, and financial sustainability.",
-    tint: "orange",
+    tint: "green", // Success/positive - financial viability is a positive outcome
   },
   {
     icon: "⚠️",
     title: "Risk Assessment",
     description: "Identify key risks with severity ratings and mitigation strategies.",
-    tint: "green",
+    tint: "blue", // Important - critical for decision making (primary importance)
   },
 ];
 
@@ -188,12 +188,12 @@ export const scorecards = [
   {
     title: "Market Analysis",
     description: "We assess market size, growth potential, competitive landscape, and your positioning to give you a clear picture of opportunity.",
-    gradient: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-green))",
+    gradient: "linear-gradient(135deg, var(--mkt-card-primary), var(--mkt-card-accent))", /* Primary to accent green */
   },
   {
     title: "Financial Projections",
     description: "Detailed financial modeling including startup costs, revenue forecasts, unit economics, and breakeven analysis.",
-    gradient: "linear-gradient(135deg, var(--mkt-card-orange), var(--mkt-card-yellow))",
+    gradient: "linear-gradient(135deg, var(--mkt-card-secondary), var(--mkt-card-primary))", /* Replaced orange/yellow */
     reverse: true
   }
 ];

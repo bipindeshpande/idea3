@@ -59,7 +59,9 @@ export default function PersonasSection({
         {/* Personas - Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {personas.map((persona, index) => {
-            // Different style for each persona
+            // Cycle through accent colors for variety
+            const accents = ["primary", "accent-1", "accent-2", null];
+            const accent = accents[index % accents.length];
             const variants = ["default", "muted", "default", "muted"];
             const variant = variants[index % variants.length];
             
@@ -68,6 +70,7 @@ export default function PersonasSection({
               key={index} 
               padding="md" 
               variant={variant}
+              accent={accent}
               className="text-center scroll-reveal"
             >
               {persona.icon && (
@@ -83,7 +86,7 @@ export default function PersonasSection({
                     justifyContent: "center",
                     borderRadius: "var(--radius-full)",
                     backgroundColor: variant === "muted" 
-                      ? "var(--mkt-card-blue)" 
+                      ? "var(--mkt-card-primary)" 
                       : "var(--mkt-surface-muted)",
                   }}
                 >

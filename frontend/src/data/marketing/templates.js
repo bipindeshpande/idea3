@@ -11,7 +11,7 @@ export const heroData = {
   subheadline: "Download free templates for validation, customer discovery, business planning, and more. All templates are available to everyone—no sign-up required.",
   primaryCTA: { to: "#templates", label: "Browse Templates" },
   illustration: {
-    gradient: "linear-gradient(135deg, var(--mkt-card-orange), var(--mkt-card-yellow))"
+    gradient: "linear-gradient(135deg, var(--mkt-card-secondary), var(--mkt-card-primary))" /* Replaced orange/yellow */
   }
 };
 
@@ -105,7 +105,7 @@ export const templates = [
     icon: "📋",
     title: "Idea Validation Template",
     description: "Structured framework for validating your startup idea across 10 key parameters. Includes scoring sheets and action plans.",
-    tint: "blue",
+    tint: "blue", // Primary - most important template
     category: "Validation",
     eyebrow: "Validation",
   },
@@ -113,7 +113,7 @@ export const templates = [
     icon: "👥",
     title: "Customer Discovery Script",
     description: "Ready-to-use interview scripts for customer discovery. Includes questions, follow-ups, and analysis framework.",
-    tint: "green",
+    tint: "purple", // Secondary - supporting template
     category: "Discovery",
     eyebrow: "Discovery",
   },
@@ -121,7 +121,7 @@ export const templates = [
     icon: "📊",
     title: "Business Model Canvas",
     description: "Interactive canvas for mapping your business model. Visual framework for planning revenue, costs, and value proposition.",
-    tint: "orange",
+    tint: "green", // Success/positive - planning leads to success
     category: "Planning",
     eyebrow: "Planning",
   },
@@ -129,7 +129,7 @@ export const templates = [
     icon: "💰",
     title: "Financial Projections Template",
     description: "Excel template for startup financial projections. Includes revenue models, expense tracking, and breakeven analysis.",
-    tint: "purple",
+    tint: "blue", // Important - cycles back to primary
     category: "Finance",
     eyebrow: "Finance",
   },
@@ -137,14 +137,14 @@ export const templates = [
     icon: "🎯",
     title: "Go-to-Market Plan",
     description: "Step-by-step template for planning your launch. Includes market entry strategy, channels, and metrics.",
-    tint: "yellow",
+    tint: "purple", // Secondary - supporting template
     category: "Marketing",
   },
   {
     icon: "🤝",
     title: "Co-Founder Agreement Template",
     description: "Legal template for co-founder agreements. Covers equity, roles, vesting, and conflict resolution.",
-    tint: "blue",
+    tint: "green", // Success - positive collaboration outcome
     category: "Legal",
   },
 ];

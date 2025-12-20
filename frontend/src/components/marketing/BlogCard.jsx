@@ -54,7 +54,7 @@ export default function BlogCard({
         <div 
           className="aspect-video w-full"
           style={{
-            background: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-purple))"
+            background: "linear-gradient(135deg, var(--mkt-card-primary), var(--mkt-card-secondary))"
           }}
         />
       )}
@@ -64,7 +64,7 @@ export default function BlogCard({
             className="inline-block text-xs font-semibold uppercase tracking-wide mb-2 px-2 py-1 rounded-full"
             style={{ 
               color: "var(--mkt-primary)",
-              background: "var(--mkt-card-blue)"
+              background: "var(--mkt-card-primary)"
             }}
           >
             {category}

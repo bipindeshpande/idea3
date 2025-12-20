@@ -38,37 +38,37 @@ const valuePanels = [
     icon: "🎯",
     title: "Personalized Profile Analysis",
     summary: "Deep insights into your motivations, constraints, strengths, and opportunity angles tailored to your unique profile.",
-    tint: "blue",
+    tint: "blue", // Primary - most important feature
   },
   {
     icon: "💡",
     title: "Ranked Startup Ideas",
     summary: "Top 3 ideas scored against your goals, time commitment, budget, and skills with detailed fit analysis.",
-    tint: "purple",
+    tint: "purple", // Secondary - supporting feature
   },
   {
     icon: "💰",
     title: "Financial Outlook",
     summary: "Realistic startup costs, revenue projections, and breakeven timelines that respect your budget constraints.",
-    tint: "orange",
+    tint: "green", // Success/positive - financial viability is positive
   },
   {
     icon: "⚠️",
     title: "Risk Radar",
     summary: "Identified risks with severity ratings and actionable mitigation strategies for each recommendation.",
-    tint: "green",
+    tint: "blue", // Important - critical for decision making
   },
   {
     icon: "🔍",
     title: "Validation Questions",
     summary: "Customer discovery scripts with guidance on what to listen for and how to act on responses.",
-    tint: "yellow",
+    tint: "purple", // Secondary - supporting feature
   },
   {
     icon: "🗺️",
     title: "30/60/90 Day Roadmap",
     summary: "Customized execution plan with specific milestones and checkpoints for your chosen idea.",
-    tint: "purple",
+    tint: "green", // Success - roadmap leads to completion
   },
 ];
 
@@ -136,7 +136,7 @@ export default function ProductPage() {
             <FeatureCard
               title="Structured, repeatable insights"
               description="Use the same frameworks that successful founders use—YC, Lean Startup, and Product Discovery principles."
-              tint="orange"
+              tint="green"
               eyebrow="Proven Frameworks"
               microBenefit="Learn while you build"
             />
@@ -298,21 +298,21 @@ export default function ProductPage() {
                 title: "Discover Ideas",
                 description: "AI-powered idea discovery tailored to your profile",
                 link: "/product/discover",
-                tint: "purple",
+                tint: "blue", // Primary - main product
                 icon: "💡",
               },
               {
                 title: "Validate Ideas",
                 description: "10-parameter validation framework for comprehensive analysis",
                 link: "/product/validate",
-                tint: "blue",
+                tint: "purple", // Secondary - supporting product
                 icon: "🔍",
               },
               {
                 title: "Founder Network",
                 description: "Privacy-first networking to find co-founders",
                 link: "/product/network",
-                tint: "green",
+                tint: "green", // Success - collaboration/connection
                 icon: "🤝",
               },
             ].map((item, index) => (

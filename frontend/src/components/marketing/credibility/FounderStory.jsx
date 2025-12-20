@@ -25,7 +25,7 @@ export default function FounderStory({
             <div 
               className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
               style={{
-                background: "linear-gradient(135deg, var(--mkt-primary), var(--mkt-card-purple))"
+                background: "linear-gradient(135deg, var(--mkt-primary), var(--mkt-card-secondary))"
               }}
             >
               {name?.charAt(0) || "F"}

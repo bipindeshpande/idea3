@@ -16,11 +16,11 @@ export default function PricingTiersSection({ tiers, valueStackItems, onSubscrib
           const isPro = tier.id === "pro";
           const isHighlighted = isStarter || isPro || tier.highlight;
           
-          // Card background gradients based on tier - refined colors
+          // Card background gradients based on tier - semantic colors
           const getCardBackground = () => {
             if (tier.id === "free") return "var(--mkt-surface)";
-            if (tier.id === "starter") return "linear-gradient(135deg, var(--mkt-card-blue) 0%, var(--mkt-card-blue) 100%)";
-            if (tier.id === "pro") return "linear-gradient(135deg, var(--mkt-card-orange) 0%, var(--mkt-card-orange) 100%)";
+            if (tier.id === "starter") return "var(--mkt-card-primary)"; // Blue - primary tier
+            if (tier.id === "pro") return "var(--mkt-card-secondary)"; // Purple - premium tier
             return "var(--mkt-surface)";
           };
 
@@ -223,7 +223,7 @@ export default function PricingTiersSection({ tiers, valueStackItems, onSubscrib
                       <div 
                         className="text-center py-4 rounded-xl"
                         style={{
-                          background: "linear-gradient(135deg, var(--mkt-card-blue), rgba(239, 246, 255, 0.5))",
+                          background: "linear-gradient(135deg, var(--mkt-card-primary), rgba(239, 246, 255, 0.5))",
                           border: "1px solid var(--mkt-primary)",
                         }}
                       >

@@ -48,13 +48,12 @@ export default function HeroSection({
   if (wrapperClassName || Object.keys(wrapperStyle).length > 0) {
     return (
       <section 
-        className={wrapperClassName}
+        className={`${wrapperClassName} relative`}
         style={wrapperStyle}
         data-section-file="HeroSection.jsx"
       >
-        <Hero {...heroProps}>
-          {children}
-        </Hero>
+        {children}
+        <Hero {...heroProps} />
       </section>
     );
   }

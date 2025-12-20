@@ -122,27 +122,27 @@ export default function AboutPage() {
         </p>
         <ul className="space-y-3 mt-4">
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(20, 184, 166, 0.15)', color: '#059669' }}>✓</span>
+            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--mkt-card-accent)', color: 'var(--mkt-primary)' }}>✓</span>
             <span><strong>Profile Analysis</strong> - Understands your goals, constraints, and strengths</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(20, 184, 166, 0.15)', color: '#059669' }}>✓</span>
+            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--mkt-card-accent)', color: 'var(--mkt-primary)' }}>✓</span>
             <span><strong>Market Research</strong> - Analyzes markets, competitors, and industry trends</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(20, 184, 166, 0.15)', color: '#059669' }}>✓</span>
+            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--mkt-card-accent)', color: 'var(--mkt-primary)' }}>✓</span>
             <span><strong>Idea Generation</strong> - Generates ideas tailored to your unique profile</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(20, 184, 166, 0.15)', color: '#059669' }}>✓</span>
+            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--mkt-card-accent)', color: 'var(--mkt-primary)' }}>✓</span>
             <span><strong>Financial Modeling</strong> - Projects costs, revenue, and breakeven timelines</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(20, 184, 166, 0.15)', color: '#059669' }}>✓</span>
+            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--mkt-card-accent)', color: 'var(--mkt-primary)' }}>✓</span>
             <span><strong>Risk Assessment</strong> - Identifies and provides mitigation strategies for potential risks</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(20, 184, 166, 0.15)', color: '#059669' }}>✓</span>
+            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--mkt-card-accent)', color: 'var(--mkt-primary)' }}>✓</span>
             <span><strong>Validation Frameworks</strong> - Provides structured methods to test your ideas</span>
           </li>
         </ul>

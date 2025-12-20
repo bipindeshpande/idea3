@@ -29,25 +29,29 @@ const Card = forwardRef(function Card(
     lg: { padding: "var(--space-8)" },
   };
   
-  // Variant styles
-  const variantStyles = {
+  // Variant styles (only apply when no accent - accent overrides background)
+  const variantStyles = accent ? {} : {
     default: { backgroundColor: "var(--mkt-surface)" },
     muted: { backgroundColor: "var(--mkt-surface-muted)" },
     elevated: { boxShadow: "var(--shadow-md)" },
   };
   
-  // Accent border styles
+  // Accent styles - both border and background for visual interest
   const accentStyles = accent ? {
-    borderTop: `3px solid ${accent === "primary" ? "var(--mkt-primary)" : accent === "accent-1" ? "var(--mkt-card-purple)" : "var(--mkt-card-green)"}`,
+    borderTop: `3px solid ${accent === "primary" ? "var(--mkt-primary)" : accent === "accent-1" ? "var(--mkt-card-secondary)" : "var(--mkt-card-accent)"}`,
     borderLeft: "1px solid var(--mkt-outline)",
     borderRight: "1px solid var(--mkt-outline)",
     borderBottom: "1px solid var(--mkt-outline)",
+    backgroundColor: accent === "primary" 
+      ? "var(--mkt-card-primary)" 
+      : accent === "accent-1" 
+      ? "var(--mkt-card-secondary)" 
+      : "var(--mkt-card-accent)", /* Tinted background for visual interest */
   } : {
     border: "1px solid var(--mkt-outline)",
   };
   
   const baseStyle = {
-    backgroundColor: variant === "muted" ? "var(--mkt-surface-muted)" : "var(--mkt-surface)",
     borderRadius: "var(--radius-lg)",
     boxShadow: variant === "elevated" ? "var(--shadow-md)" : "var(--shadow-sm)",
     ...paddingStyles[padding],

@@ -35,25 +35,25 @@ const roles = [
     title: "Technical Founders",
     description: "Engineers, developers, and technical experts looking for business partners.",
     icon: "💻",
-    tint: "blue",
+    tint: "blue", // Primary - most common role
   },
   {
     title: "Designers",
     description: "Product designers and UX experts seeking technical co-founders.",
     icon: "🎨",
-    tint: "purple",
+    tint: "purple", // Secondary - supporting role
   },
   {
     title: "Marketers",
     description: "Growth hackers and marketers looking for product teams.",
     icon: "📈",
-    tint: "orange",
+    tint: "green", // Success/positive - growth-oriented
   },
   {
     title: "Business Founders",
     description: "Business-minded entrepreneurs seeking technical talent.",
     icon: "💼",
-    tint: "green",
+    tint: "blue", // Important - cycles back to primary
   },
 ];
 
@@ -62,19 +62,19 @@ const features = [
     icon: "🔒",
     title: "Privacy-First",
     description: "Identities remain anonymous until both sides accept a connection request. Browse safely and connect on your terms.",
-    tint: "blue",
+    tint: "blue", // Primary - most important feature
   },
   {
     icon: "🤝",
     title: "Smart Matching",
     description: "Browse anonymized profiles and listings. Filter by skills, interests, and idea categories to find the perfect match.",
-    tint: "purple",
+    tint: "purple", // Secondary - supporting feature
   },
   {
     icon: "📊",
     title: "Profile Analytics",
     description: "See who viewed your profile and track your connection success rate to optimize your listing.",
-    tint: "orange",
+    tint: "green", // Success/positive - analytics show positive outcomes
   },
 ];
 
@@ -99,7 +99,7 @@ export default function ProductNetworkPage() {
           primaryCTA: { to: "/founder-connect", label: "Show Me Examples" },
           secondaryCTA: { to: "/product", label: "View All Features" },
           illustration: {
-            gradient: "linear-gradient(135deg, var(--mkt-card-green), var(--mkt-card-blue))"
+            gradient: "linear-gradient(135deg, var(--mkt-card-primary), var(--mkt-card-secondary))"
           }
         }}
       />
@@ -199,10 +199,14 @@ export default function ProductNetworkPage() {
                 <div 
                   className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 text-xl font-bold"
                   style={{
-                    background: "var(--mkt-surface)",
-                    color: "var(--mkt-primary)",
+                    background: index === 0 
+                      ? "var(--mkt-primary)" 
+                      : index === 1
+                      ? "var(--mkt-card-secondary)"
+                      : "var(--mkt-card-accent)", /* Green for completion */
+                    color: "white",
                     boxShadow: "var(--mkt-card-shadow)",
-                    border: "2px solid var(--mkt-primary)",
+                    border: "2px solid transparent",
                   }}
                 >
                   {step.step}

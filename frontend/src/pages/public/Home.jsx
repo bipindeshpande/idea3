@@ -111,12 +111,15 @@ export default function HomePage() {
           {/* Use Cases Grid */}
           <div className="mb-16">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {useCases.map((useCase, index) => (
+              {useCases.map((useCase, index) => {
+                // Semantic color flow: Discover (Blue - primary), Validate (Green - success), Network (Purple - secondary)
+                const accentMap = ["primary", "accent-2", "accent-1"]; // Blue, Green, Purple
+                return (
                   <Card 
                     key={index} 
                     padding="md" 
                     variant={index === 1 ? "elevated" : "default"}
-                    accent={index === 0 ? "primary" : null}
+                    accent={accentMap[index]}
                     className="scroll-reveal flex flex-col"
                   >
                     {useCase.icon && (
@@ -167,7 +170,8 @@ export default function HomePage() {
                       </div>
                     )}
                   </Card>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -217,18 +221,18 @@ export default function HomePage() {
                     <Card 
                       padding="md" 
                       variant={index === 1 ? "elevated" : "default"}
-                      accent={index === 0 ? "primary" : null}
+                      accent={index === 0 ? "primary" : index === 1 ? "accent-1" : "accent-2"} // Blue → Purple → Green flow
                       className="text-center"
                     >
-                      {/* Step Number */}
+                      {/* Step Number - Progressive flow: Blue (start) → Purple (middle) → Green (completion) */}
                       <div 
                         className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center font-bold"
                         style={{
                           backgroundColor: index === 0 
                             ? "var(--mkt-primary)" 
                             : index === 1
-                            ? "var(--mkt-card-purple)"
-                            : "var(--mkt-card-green)",
+                            ? "var(--mkt-card-secondary)"
+                            : "var(--mkt-card-accent)", /* Green for completion */
                           color: "white",
                           fontFamily: "var(--font-family)",
                           fontSize: "var(--font-size-xl)",

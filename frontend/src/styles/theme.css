@@ -119,11 +119,10 @@
   --mkt-divider: #e2e8f0;
   --mkt-card-shadow: 0 2px 12px rgba(0,0,0,0.06); /* Tighter shadow */
   --mkt-layer-shadow: 0 12px 40px -8px rgba(0,0,0,0.12); /* Tighter shadow */
-  --mkt-card-blue: #eff6ff;
-  --mkt-card-green: #ecfdf5;
-  --mkt-card-orange: #fff7ed;
-  --mkt-card-purple: #f3e8ff;
-  --mkt-card-yellow: #fefce8;
+  --mkt-card-primary: #eff6ff;      /* Primary blue tint - main card color */
+  --mkt-card-secondary: #f3e8ff;     /* Secondary purple tint - accent cards */
+  --mkt-card-accent: #ecfdf5;       /* Accent green tint - for variety and success states */
+  /* Removed: orange, yellow - use primary, secondary, accent only */
   --mkt-paragraph: var(--mkt-text-dim);
   --mkt-shadow: 0 4px 18px rgba(0,0,0,0.06);
   
@@ -222,11 +221,10 @@
   --mkt-divider: #e2e8f0;
   --mkt-card-shadow: 0 2px 12px rgba(0,0,0,0.06); /* Tighter shadow */
   --mkt-layer-shadow: 0 12px 40px -8px rgba(0,0,0,0.12); /* Tighter shadow */
-  --mkt-card-blue: #eff6ff;
-  --mkt-card-green: #ecfdf5;
-  --mkt-card-orange: #fff7ed;
-  --mkt-card-purple: #f3e8ff;
-  --mkt-card-yellow: #fefce8;
+  --mkt-card-primary: #eff6ff;      /* Primary blue tint - main card color */
+  --mkt-card-secondary: #f3e8ff;     /* Secondary purple tint - accent cards */
+  --mkt-card-accent: #ecfdf5;       /* Accent green tint - for variety and success states */
+  /* Removed: orange, yellow - use primary, secondary, accent only */
   --mkt-paragraph: var(--mkt-text-dim);
   --mkt-shadow: 0 4px 18px rgba(0,0,0,0.06);
   
@@ -331,11 +329,10 @@
   --mkt-divider: #334155;
   --mkt-card-shadow: 0 2px 12px rgba(0,0,0,0.3); /* Tighter shadow */
   --mkt-layer-shadow: 0 12px 40px -8px rgba(0,0,0,0.4); /* Tighter shadow */
-  --mkt-card-blue: rgba(59, 130, 246, 0.1);
-  --mkt-card-green: rgba(34, 197, 94, 0.1);
-  --mkt-card-orange: rgba(249, 115, 22, 0.1);
-  --mkt-card-purple: rgba(139, 92, 246, 0.1);
-  --mkt-card-yellow: rgba(234, 179, 8, 0.1);
+  --mkt-card-primary: rgba(59, 130, 246, 0.1);      /* Primary blue tint - main card color */
+  --mkt-card-secondary: rgba(139, 92, 246, 0.1);     /* Secondary purple tint - accent cards */
+  --mkt-card-accent: rgba(34, 197, 94, 0.1);       /* Accent green tint - for variety and success states */
+  /* Removed: orange, yellow - use primary, secondary, accent only */
   --mkt-paragraph: var(--mkt-text-dim);
   --mkt-shadow: 0 4px 18px rgba(0,0,0,0.3);
   
@@ -775,27 +772,29 @@ body {
 
 /* Section gradient utilities */
 .mkt-section-gradient-blue {
-  background: linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-surface));
+  background: linear-gradient(135deg, var(--mkt-card-primary), var(--mkt-surface));
 }
 
 .mkt-section-gradient-purple {
-  background: linear-gradient(135deg, var(--mkt-card-purple), var(--mkt-surface));
+  background: linear-gradient(135deg, var(--mkt-card-secondary), var(--mkt-surface));
 }
 
 .mkt-section-gradient-orange {
-  background: linear-gradient(135deg, var(--mkt-card-orange), var(--mkt-surface));
+  background: linear-gradient(135deg, var(--mkt-card-secondary), var(--mkt-surface)); /* Replaced with secondary */
 }
 
 .mkt-section-gradient-green {
-  background: linear-gradient(135deg, var(--mkt-card-green), var(--mkt-surface));
+  background: linear-gradient(135deg, var(--mkt-card-accent), var(--mkt-surface)); /* Green accent for variety */
 }
 
 /* Card tint utilities */
-.card-tint-blue { background: var(--mkt-card-blue); }
-.card-tint-green { background: var(--mkt-card-green); }
-.card-tint-orange { background: var(--mkt-card-orange); }
-.card-tint-purple { background: var(--mkt-card-purple); }
-.card-tint-yellow { background: var(--mkt-card-yellow); }
+.card-tint-blue,
+.card-tint-primary { background: var(--mkt-card-primary); }
+.card-tint-purple,
+.card-tint-secondary { background: var(--mkt-card-secondary); }
+.card-tint-green,
+.card-tint-accent { background: var(--mkt-card-accent); }
+/* Removed: orange, yellow card tints - use primary/secondary/accent only */
 
 /* Marketing card utilities */
 .mkt-card {
@@ -808,7 +807,7 @@ body {
 }
 
 .mkt-card--tinted {
-  background: var(--mkt-card-blue);
+  background: var(--mkt-card-primary);
   border-color: transparent;
 }
 
@@ -1123,7 +1122,7 @@ body {
   border-radius: 12px;
   font-size: 20px;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--mkt-primary), var(--mkt-card-purple));
+  background: linear-gradient(135deg, var(--mkt-primary), var(--mkt-card-secondary));
   color: white;
   box-shadow: 0 0 16px rgba(120, 100, 255, 0.4);
   border: 2px solid rgba(255, 255, 255, 0.2);
@@ -1135,7 +1134,7 @@ body {
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  background: linear-gradient(135deg, var(--mkt-primary), var(--mkt-card-purple));
+  background: linear-gradient(135deg, var(--mkt-primary), var(--mkt-card-secondary));
   opacity: 0.3;
   filter: blur(8px);
   z-index: -1;

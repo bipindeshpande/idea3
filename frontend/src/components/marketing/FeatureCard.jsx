@@ -26,20 +26,20 @@ export default function FeatureCard({
                          animate === "slide" ? " mkt-anim-slide" :
                          animate === "float" ? " mkt-anim-float" : "";
   const tintClasses = {
-    blue: "card-tint-blue",
-    green: "card-tint-green",
-    orange: "card-tint-orange",
-    purple: "card-tint-purple",
-    yellow: "card-tint-yellow",
+    blue: "card-tint-primary",
+    green: "card-tint-accent", // Use accent green for variety
+    orange: "card-tint-secondary", // Map to secondary
+    purple: "card-tint-secondary",
+    yellow: "card-tint-primary", // Map to primary
   };
 
-  // Split-color tints (diagonal gradient)
+  // Split-color tints (diagonal gradient) - Primary, secondary, and accent
   const splitGradients = {
-    blue: "linear-gradient(135deg, var(--mkt-card-blue) 0%, rgba(59, 130, 246, 0.1) 100%)",
-    green: "linear-gradient(135deg, var(--mkt-card-green) 0%, rgba(34, 197, 94, 0.1) 100%)",
-    orange: "linear-gradient(135deg, var(--mkt-card-orange) 0%, rgba(249, 115, 22, 0.1) 100%)",
-    purple: "linear-gradient(135deg, var(--mkt-card-purple) 0%, rgba(139, 92, 246, 0.1) 100%)",
-    yellow: "linear-gradient(135deg, var(--mkt-card-yellow) 0%, rgba(234, 179, 8, 0.1) 100%)",
+    blue: "linear-gradient(135deg, var(--mkt-card-primary) 0%, rgba(59, 130, 246, 0.1) 100%)",
+    green: "linear-gradient(135deg, var(--mkt-card-accent) 0%, rgba(34, 197, 94, 0.1) 100%)", // Use accent green
+    orange: "linear-gradient(135deg, var(--mkt-card-secondary) 0%, rgba(139, 92, 246, 0.1) 100%)", // Map to secondary
+    purple: "linear-gradient(135deg, var(--mkt-card-secondary) 0%, rgba(139, 92, 246, 0.1) 100%)",
+    yellow: "linear-gradient(135deg, var(--mkt-card-primary) 0%, rgba(59, 130, 246, 0.1) 100%)", // Map to primary
   };
 
   const cardContent = (
@@ -87,7 +87,7 @@ export default function FeatureCard({
           className="absolute inset-0 rounded-xl animate-mkt-glowPulse"
           style={{
             padding: "1px",
-            background: "linear-gradient(135deg, var(--mkt-primary), var(--mkt-card-purple))",
+            background: "linear-gradient(135deg, var(--mkt-primary), var(--mkt-card-secondary))",
             WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
             WebkitMaskComposite: "xor",
             maskComposite: "exclude",

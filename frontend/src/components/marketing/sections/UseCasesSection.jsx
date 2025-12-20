@@ -85,10 +85,10 @@ export default function UseCasesSection({
                     justifyContent: "center",
                     borderRadius: "var(--radius-lg)",
                     backgroundColor: accent === "primary" 
-                      ? "var(--mkt-card-blue)" 
+                      ? "var(--mkt-card-primary)" 
                       : accent === "accent-1"
-                      ? "var(--mkt-card-purple)"
-                      : "var(--mkt-card-green)",
+                      ? "var(--mkt-card-secondary)"
+                      : "var(--mkt-card-accent)", /* Use accent green for variety */
                   }}
                 >
                   {useCase.icon}

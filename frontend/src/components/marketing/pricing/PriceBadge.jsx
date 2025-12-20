@@ -9,9 +9,9 @@ export default function PriceBadge({ variant = "best", tierId }) {
 
   const getBadgeColor = () => {
     if (tierId === "pro") {
-      return "linear-gradient(135deg, #F97316 0%, #EA580C 100%)"; // Orange gradient for Pro
+      return "linear-gradient(135deg, var(--warning) 0%, var(--warning) 100%)"; // Orange gradient for Pro (premium distinction)
     }
-    return "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)"; // Blue gradient for Starter
+    return "linear-gradient(135deg, var(--mkt-primary) 0%, var(--mkt-primary-hover) 100%)"; // Blue gradient for Starter
   };
 
   return (

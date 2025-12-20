@@ -42,45 +42,43 @@
 }
 
 /* Marketing card tints - Use theme variables (dark mode handled by CSS variables) */
-.marketing-card-blue {
-  background: var(--mkt-card-blue);
+.marketing-card-blue,
+.marketing-card-primary {
+  background: var(--mkt-card-primary);
   border-color: rgba(37, 99, 235, 0.2);
   color: var(--mkt-text);
 }
 
-.marketing-card-blue .text-primary {
+.marketing-card-blue .text-primary,
+.marketing-card-primary .text-primary {
   color: var(--mkt-text);
 }
 
-.marketing-card-green {
-  background: var(--mkt-card-green);
-  border-color: rgba(20, 184, 166, 0.2);
-  color: var(--mkt-text);
-}
-
-.marketing-card-green .text-primary {
-  color: var(--mkt-text);
-}
-
-.marketing-card-orange {
-  background: var(--mkt-card-orange);
-  border-color: rgba(249, 115, 22, 0.2);
-  color: var(--mkt-text);
-}
-
-.marketing-card-orange .text-primary {
-  color: var(--mkt-text);
-}
-
-.marketing-card-purple {
-  background: var(--mkt-card-purple);
+.marketing-card-purple,
+.marketing-card-secondary {
+  background: var(--mkt-card-secondary);
   border-color: rgba(139, 92, 246, 0.2);
   color: var(--mkt-text);
 }
 
-.marketing-card-purple .text-primary {
+.marketing-card-purple .text-primary,
+.marketing-card-secondary .text-primary {
   color: var(--mkt-text);
 }
+
+.marketing-card-green,
+.marketing-card-accent {
+  background: var(--mkt-card-accent);
+  border-color: rgba(34, 197, 94, 0.2);
+  color: var(--mkt-text);
+}
+
+.marketing-card-green .text-primary,
+.marketing-card-accent .text-primary {
+  color: var(--mkt-text);
+}
+
+/* Removed: orange, yellow card classes - use primary/secondary/accent only */
 
 .marketing-card-gray {
   background: var(--surface-muted);
@@ -88,8 +86,8 @@
 }
 
 .marketing-card-teal {
-  background: var(--mkt-card-green);
-  border-color: rgba(20, 184, 166, 0.2);
+  background: var(--mkt-card-accent); /* Map teal to accent green */
+  border-color: rgba(34, 197, 94, 0.2);
   color: var(--mkt-text);
 }
 

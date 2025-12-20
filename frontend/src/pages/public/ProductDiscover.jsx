@@ -107,10 +107,14 @@ export default function ProductDiscoverPage() {
                 <div 
                   className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 text-xl font-bold"
                   style={{
-                    background: "var(--mkt-surface)",
-                    color: "var(--mkt-primary)",
+                    background: index === 0 
+                      ? "var(--mkt-primary)" 
+                      : index === 1
+                      ? "var(--mkt-card-secondary)"
+                      : "var(--mkt-card-accent)", /* Green for completion */
+                    color: "white",
                     boxShadow: "var(--mkt-card-shadow)",
-                    border: "2px solid var(--mkt-primary)",
+                    border: "2px solid transparent",
                   }}
                 >
                   {step.step}

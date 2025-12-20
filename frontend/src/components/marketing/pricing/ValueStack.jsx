@@ -27,7 +27,7 @@ export default function ValueStack({ items = [] }) {
             <div
               className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
               style={{
-                background: "linear-gradient(135deg, #2563EB, #3B82F6)",
+                background: "linear-gradient(135deg, var(--mkt-primary), var(--mkt-primary-hover))",
                 color: "white",
                 fontSize: "10px",
                 fontWeight: "var(--font-weight-semibold)",

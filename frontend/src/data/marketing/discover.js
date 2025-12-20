@@ -34,7 +34,7 @@ export const heroData = {
   credibilityMicrocopy: "Trusted by founders in 20+ countries.",
   split: "right",
   illustration: {
-    gradient: "linear-gradient(45deg, var(--mkt-card-purple), var(--mkt-card-orange))",
+    gradient: "linear-gradient(45deg, var(--mkt-card-secondary), var(--mkt-card-primary))", /* Replaced orange */
     caption: "Live Preview — Discover Dashboard"
   }
 };
@@ -85,8 +85,8 @@ export const mockupData = {
   caption: "Live Preview — Discover Dashboard",
   badges: [
     { label: "Founder Fit Score", value: "92%", color: "var(--mkt-primary)" },
-    { label: "Difficulty", value: "Medium", color: "var(--mkt-card-orange)" },
-    { label: "Market Freshness", value: "High", color: "var(--mkt-card-green)" }
+    { label: "Difficulty", value: "Medium", color: "var(--mkt-card-secondary)" }, /* Replaced orange */
+    { label: "Market Freshness", value: "High", color: "var(--mkt-card-accent)" } /* Accent green */
   ]
 };
 
@@ -139,21 +139,21 @@ export const whyUsFeatures = [
   {
     title: "Clarity vs guesswork",
     description: "Get objective scoring and data-driven insights instead of guessing which idea to pursue.",
-    tint: "blue",
+    tint: "blue", // Primary benefit - most important
     eyebrow: "Data-Driven",
     microBenefit: "No more decision paralysis"
   },
   {
     title: "Founder personalization",
     description: "Every recommendation is tailored to YOUR skills, time, budget, and goals—not generic advice.",
-    tint: "purple",
+    tint: "purple", // Secondary benefit - supporting
     eyebrow: "Personalized",
     microBenefit: "Ideas that actually fit your life"
   },
   {
     title: "Structured, repeatable insights",
     description: "Use the same frameworks that successful founders use—YC, Lean Startup, and Product Discovery principles.",
-    tint: "orange",
+    tint: "green", // Success/proven - completion
     eyebrow: "Proven Frameworks",
     microBenefit: "Learn while you build"
   }
@@ -191,25 +191,25 @@ export const features = [
     icon: "🎯",
     title: "Personalized Profile Matching",
     description: "Our AI analyzes your goals, time, budget, skills, and work style to find ideas that truly fit you.",
-    tint: "blue",
+    tint: "blue", // Primary - most important feature
   },
   {
     icon: "📊",
     title: "Ranked Recommendations",
     description: "Get top 3 ideas with detailed scoring across goal fit, time fit, budget fit, and skill fit.",
-    tint: "purple",
+    tint: "purple", // Secondary - supporting feature
   },
   {
     icon: "💰",
     title: "Financial Analysis",
     description: "Understand startup costs, revenue potential, and breakeven timelines for each idea.",
-    tint: "orange",
+    tint: "green", // Success/positive - financial viability is positive
   },
   {
     icon: "⚠️",
     title: "Risk Assessment",
     description: "See potential risks and mitigation strategies before you commit to building.",
-    tint: "green",
+    tint: "blue", // Important - critical for decision making
   },
 ];
 
@@ -217,12 +217,12 @@ export const contentBlocks = [
   {
     title: "Market Research",
     description: "Our AI analyzes market trends, competitor landscapes, and growth opportunities to identify viable ideas that match your profile.",
-    gradient: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-green))",
+    gradient: "linear-gradient(135deg, var(--mkt-card-primary), var(--mkt-card-accent))", /* Primary to accent green */
   },
   {
     title: "Financial Modeling",
     description: "Each idea includes detailed financial projections, startup costs, revenue models, and breakeven analysis tailored to your budget.",
-    gradient: "linear-gradient(135deg, var(--mkt-card-orange), var(--mkt-card-yellow))",
+    gradient: "linear-gradient(135deg, var(--mkt-card-secondary), var(--mkt-card-primary))", /* Replaced orange/yellow */
     reverse: true
   }
 ];

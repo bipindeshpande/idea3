@@ -18,7 +18,7 @@ export const heroData = {
   microcopy: "Takes 60 seconds. Based on your answers.",
   credibilityMicrocopy: "Trusted by founders in 20+ countries.",
   illustration: {
-    gradient: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-purple))"
+    gradient: "linear-gradient(135deg, var(--mkt-card-primary), var(--mkt-card-secondary))"
   }
 };
 
@@ -39,19 +39,19 @@ export const features = [
     icon: "💰",
     title: "Financial Outlook",
     description: "Realistic startup costs, revenue projections, and breakeven timelines that respect your budget constraints.",
-    tint: "orange",
+    tint: "green", // Success/positive - financial viability is positive
   },
   {
     icon: "⚠️",
     title: "Risk Radar",
     description: "Identified risks with severity ratings and actionable mitigation strategies for each recommendation.",
-    tint: "green",
+    tint: "blue", // Important - critical for decision making
   },
   {
     icon: "🔍",
     title: "Validation Questions",
     description: "Customer discovery scripts with guidance on what to listen for and how to act on responses.",
-    tint: "yellow",
+    tint: "purple", // Secondary - supporting feature
   },
 ];
 
@@ -181,13 +181,13 @@ export const seeInActionBlocks = [
   {
     title: "Validation Reports",
     description: "Get comprehensive validation across 10 critical parameters. See detailed scores, risk assessments, and actionable insights in a beautifully formatted report.",
-    gradient: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-green))",
+    gradient: "linear-gradient(135deg, var(--mkt-card-primary), var(--mkt-card-accent))", /* Primary to accent green */
     icon: "📊"
   },
   {
     title: "Idea Discovery",
     description: "Discover personalized startup ideas tailored to your unique profile. Each idea includes financial projections, market analysis, and a 30/60/90 day roadmap.",
-    gradient: "linear-gradient(135deg, var(--mkt-card-purple), var(--mkt-card-orange))",
+    gradient: "linear-gradient(135deg, var(--mkt-card-secondary), var(--mkt-card-primary))", /* Replaced orange */
     icon: "💡",
     reverse: true
   }
@@ -210,7 +210,7 @@ export const whatYouGetItems = [
     title: "Complete PDF Report",
     description: "Download a comprehensive PDF combining profile analysis, recommendations, and full report sections.",
     icon: "📄",
-    tint: "orange",
+    tint: "purple", // Secondary - supporting deliverable
   },
 ];
 

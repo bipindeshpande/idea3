@@ -53,7 +53,7 @@ export default function ProductValidatePage() {
             <div 
               className="w-full h-96 rounded-2xl mb-8"
               style={{
-                background: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-purple))"
+                background: "linear-gradient(135deg, var(--mkt-card-primary), var(--mkt-card-secondary))"
               }}
             />
             <div className="space-y-4">
@@ -88,10 +88,14 @@ export default function ProductValidatePage() {
                 <div 
                   className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 text-xl font-bold"
                   style={{
-                    background: "var(--mkt-surface)",
-                    color: "var(--mkt-primary)",
+                    background: index === 0 
+                      ? "var(--mkt-primary)" 
+                      : index === 1
+                      ? "var(--mkt-card-secondary)"
+                      : "var(--mkt-card-accent)", /* Accent green for variety */
+                    color: "white",
                     boxShadow: "var(--mkt-card-shadow)",
-                    border: "2px solid var(--mkt-primary)",
+                    border: "2px solid transparent",
                   }}
                 >
                   {step.step}
