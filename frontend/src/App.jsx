@@ -118,7 +118,7 @@ export default function App() {
  <Route path="/product/validate" element={<ProductValidatePage />} />
  <Route path="/product/network" element={<ProductNetworkPage />} />
  <Route path="/pricing" element={<PricingPage />} />
- <Route path="/resources" element={<ResourcesPage />} />
+ <Route path="/resources" element={<Navigate to="/resources/templates" replace />} />
  <Route path="/resources/templates" element={<ResourceTemplatesPage />} />
  <Route path="/resources/frameworks" element={<FrameworksPage />} />
  <Route path="/advisor-resources" element={<AdvisorResourcesPage />} />

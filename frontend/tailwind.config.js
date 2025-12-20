@@ -12,7 +12,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        // Workspace font - SOURCE OF TRUTH: --font-sans in theme.css
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+        // Marketing font - SOURCE OF TRUTH: --font-family in marketing-tokens.css
+        marketing: ['DM Sans', 'sans-serif'],
       },
       fontSize: {
         "ui-h1": "clamp(28px, 4vw, 36px)",
@@ -21,13 +24,77 @@ export default {
         "ui-body": "16px",
         "ui-small": "14px",
         "ui-xs": "12px",
+        // Marketing tokens (consumes CSS variables)
+        "mkt-xs": "var(--font-size-xs)",
+        "mkt-sm": "var(--font-size-sm)",
+        "mkt-base": "var(--font-size-base)",
+        "mkt-lg": "var(--font-size-lg)",
+        "mkt-xl": "var(--font-size-xl)",
+        "mkt-2xl": "var(--font-size-2xl)",
+        "mkt-3xl": "var(--font-size-3xl)",
+        "mkt-4xl": "var(--font-size-4xl)",
+        "mkt-5xl": "var(--font-size-5xl)",
       },
       lineHeight: {
         "ui-tight": "1.15",
         "ui-normal": "1.35",
         "ui-relaxed": "1.5",
+        // Marketing tokens
+        "mkt-tight": "var(--line-height-tight)",
+        "mkt-normal": "var(--line-height-normal)",
+        "mkt-relaxed": "var(--line-height-relaxed)",
+      },
+      spacing: {
+        // Marketing spacing tokens (4px base)
+        "mkt-1": "var(--space-1)",
+        "mkt-2": "var(--space-2)",
+        "mkt-3": "var(--space-3)",
+        "mkt-4": "var(--space-4)",
+        "mkt-5": "var(--space-5)",
+        "mkt-6": "var(--space-6)",
+        "mkt-8": "var(--space-8)",
+        "mkt-10": "var(--space-10)",
+        "mkt-12": "var(--space-12)",
+        "mkt-16": "var(--space-16)",
+        "mkt-20": "var(--space-20)",
+      },
+      borderRadius: {
+        // Marketing radius tokens
+        "mkt-sm": "var(--radius-sm)",
+        "mkt-md": "var(--radius-md)",
+        "mkt-lg": "var(--radius-lg)",
+        "mkt-xl": "var(--radius-xl)",
+        "mkt-2xl": "var(--radius-2xl)",
+      },
+      boxShadow: {
+        soft: "0 28px 70px -50px rgba(15,23,42,0.45)",
+        // Marketing shadow tokens
+        "mkt-sm": "var(--shadow-sm)",
+        "mkt-md": "var(--shadow-md)",
+        "mkt-lg": "var(--shadow-lg)",
+        "mkt-xl": "var(--shadow-xl)",
       },
       colors: {
+        // Marketing color tokens (consumes CSS variables)
+        marketing: {
+          primary: "var(--color-primary)",
+          "primary-hover": "var(--color-primary-hover)",
+          "primary-light": "var(--color-primary-light)",
+          "primary-dark": "var(--color-primary-dark)",
+          accent1: "var(--color-accent-1)",
+          accent2: "var(--color-accent-2)",
+          bg: "var(--color-bg)",
+          surface: "var(--color-surface)",
+          "surface-muted": "var(--color-surface-muted)",
+          border: "var(--color-border)",
+          text: "var(--color-text)",
+          "text-secondary": "var(--color-text-secondary)",
+          "text-muted": "var(--color-text-muted)",
+          success: "var(--color-success)",
+          warning: "var(--color-warning)",
+          error: "var(--color-error)",
+          info: "var(--color-info)",
+        },
         brand: {
           50: "#E8ECF7",
           100: "#D0D9F0",

@@ -3,10 +3,8 @@ import Seo from "../../components/common/Seo.jsx";
 import { HeroSection } from "../../sections/marketing/product";
 import FeatureCard from "../../components/marketing/FeatureCard.jsx";
 import SectionTitle from "../../components/marketing/SectionTitle.jsx";
-import ContentBlock from "../../components/marketing/ContentBlock.jsx";
 import CTASection from "../../components/marketing/CTASection.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
-import MockupBrowser from "../../components/marketing/mockups/MockupBrowser.jsx";
 
 // SEO metadata
 export const seo = {
@@ -100,47 +98,16 @@ export default function ProductPage() {
         structuredData={seo.structuredData}
       />
 
-      {/* Hero Section - V8: Persuasion Edition */}
+      {/* Hero Section */}
       <HeroSection
         data={{
-          eyebrow: "Founders struggle with clarity",
-          title: "Find the startup you were meant to build.",
-          subheadline: "AI analyzes your skills, pace, constraints, and goals to recommend ideas that fit your real life—not someone else's.",
-          identity: "If you're the kind of founder who wants clarity instead of chaos, you're in the right place.",
-          loss: "Most founders give up because they choose the wrong idea, not because they lacked motivation.",
-          urgency: "Every founder's journey starts with a small step.",
-          primaryCTA: { to: "/advisor", label: "Find My Startup Idea" },
-          secondaryCTA: { to: "/product", label: "See Example Outputs" },
-          microcopy: "Free forever plan included. No credit card required.",
-          illustration: {
-            gradient: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-purple))"
-          }
+          eyebrow: "Product Overview",
+          title: "Everything you need to find and validate your startup idea.",
+          subheadline: "AI-powered tools for idea discovery, validation, and founder networking. Get comprehensive analysis, ranked recommendations, and actionable insights tailored to your profile.",
+          primaryCTA: { to: "/advisor", label: "Get Started" },
+          secondaryCTA: { to: "/pricing", label: "See Pricing" },
         }}
-        animate="fade"
       />
-
-      {/* Screenshot Mockup Block */}
-      <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            title="See It In Action"
-            subtitle="Experience our platform with a live preview"
-            center
-            animate="slide"
-          />
-          <div className="max-w-5xl mx-auto mt-12 scroll-reveal">
-            <MockupBrowser url="https://app.startupideaadvisor.com/dashboard">
-              <div 
-                className="w-full h-80 rounded-lg"
-                style={{ 
-                  background: "linear-gradient(135deg, #e5e7eb, #d1d5db)",
-                  border: "1px solid var(--mkt-outline)"
-                }}
-              />
-            </MockupBrowser>
-          </div>
-        </div>
-      </section>
 
       {/* V7: Why Us Section */}
       <section className="mkt-pad-section mkt-section-gradient-blue">
@@ -249,34 +216,6 @@ export default function ProductPage() {
               See How Validation Works →
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* Product Features - Deep Dive */}
-      <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6 space-y-20">
-          <ContentBlock
-            title="Discover Ideas"
-            description="Let our AI discover personalized startup opportunities tailored to your unique profile, goals, and constraints. Get ranked recommendations with detailed fit analysis, financial projections, and actionable roadmaps."
-            visual={{
-              gradient: "linear-gradient(135deg, var(--mkt-card-purple), var(--mkt-card-orange))",
-            }}
-          />
-          <ContentBlock
-            title="Validate Ideas"
-            description="Get comprehensive validation across 10 critical parameters. Know if your startup idea is worth pursuing before you build. Includes market analysis, financial viability, risk assessment, and more."
-            visual={{
-              gradient: "linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-card-green))",
-            }}
-            reverse
-          />
-          <ContentBlock
-            title="Founder Network"
-            description="Connect with other founders to find co-founders, collaborators, and build your startup team. Privacy-first networking designed for entrepreneurs with anonymized profiles until mutual acceptance."
-            visual={{
-              gradient: "linear-gradient(135deg, var(--mkt-card-green), var(--mkt-card-blue))",
-            }}
-          />
         </div>
       </section>
 
@@ -391,87 +330,6 @@ export default function ProductPage() {
                 />
               </Link>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works - 3-Step Section */}
-      <section className="mkt-pad-section mkt-section-gradient-purple">
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            title="How It Works"
-            subtitle="Get started in three simple steps"
-            center
-            animate="slide"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 relative">
-            {[
-              {
-                step: "1",
-                title: "Choose Your Path",
-                description: "Validate an existing idea or discover new opportunities. Tell us about your goals, constraints, and experience.",
-                icon: "🎯",
-              },
-              {
-                step: "2",
-                title: "AI Analysis",
-                description: "Our AI system researches markets, analyzes financials, assesses risks, and generates personalized recommendations.",
-                icon: "🤖",
-              },
-              {
-                step: "3",
-                title: "Get Your Reports",
-                description: "Receive comprehensive analysis, ranked recommendations, financial projections, and actionable next steps.",
-                icon: "📊",
-              },
-            ].map((step, index) => (
-              <div 
-                key={index}
-                className="text-center scroll-reveal relative"
-                style={{
-                  marginTop: index === 1 ? "16px" : "0" // V6: Rhythm spacing
-                }}
-              >
-                {/* V6: Dotted connector between steps */}
-                {index < 2 && (
-                  <div 
-                    className="hidden md:block absolute top-6 left-full w-full mkt-dotted-connector"
-                    style={{ 
-                      width: "calc(100% - 48px)",
-                      marginLeft: "24px"
-                    }}
-                  />
-                )}
-                
-                {/* V6: Premium step badge */}
-                <div className="mkt-step-badge mx-auto mb-4">
-                  {step.step}
-                </div>
-                
-                <h3 
-                  className="mkt-h3 mb-3"
-                  style={{ color: "var(--mkt-heading)" }}
-                >
-                  {step.title}
-                </h3>
-                <p 
-                  className="mkt-body"
-                  style={{ color: "var(--mkt-paragraph)" }}
-                >
-                  {step.description}
-                </p>
-              </div>
-            ))}
-          </div>
-          {/* V6: Ending CTA */}
-          <div className="text-center mt-8">
-            <Link 
-              to="/product" 
-              className="inline-flex items-center gap-2 text-sm font-semibold hover:gap-3 transition-all"
-              style={{ color: "var(--mkt-primary)" }}
-            >
-              Learn how it works →
-            </Link>
           </div>
         </div>
       </section>

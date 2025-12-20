@@ -1,0 +1,111 @@
+/* ============================================================
+   MARKETING TYPOGRAPHY SYSTEM - PLUS JAKARTA SANS
+   ============================================================
+   All typography styles use tokens from marketing-tokens.css
+   Change font by updating --font-family in tokens.css
+   ============================================================ */
+
+/* ============================================================
+   BASE TYPOGRAPHY
+   ============================================================ */
+.marketing-base {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  color: var(--mkt-heading);
+}
+
+/* ============================================================
+   HEADING SCALE
+   ============================================================ */
+.marketing-h1 {
+  font-family: var(--font-family);
+  font-size: var(--font-size-4xl);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--mkt-heading);
+}
+
+.marketing-h2 {
+  font-family: var(--font-family);
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--mkt-heading);
+}
+
+.marketing-h3 {
+  font-family: var(--font-family);
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-semibold);
+  color: var(--mkt-heading);
+}
+
+.marketing-h4 {
+  font-family: var(--font-family);
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-semibold);
+  color: var(--mkt-heading);
+}
+
+/* ============================================================
+   BODY TEXT
+   ============================================================ */
+.marketing-body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  color: var(--mkt-heading);
+}
+
+.marketing-body-lg {
+  font-family: var(--font-family);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  font-weight: var(--font-weight-normal);
+  color: var(--mkt-heading);
+}
+
+.marketing-body-sm {
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  color: var(--mkt-text-dim);
+}
+
+/* ============================================================
+   UTILITY TEXT
+   ============================================================ */
+.marketing-eyebrow {
+  font-family: var(--font-family);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--mkt-text-dim);
+}
+
+.marketing-lead {
+  font-family: var(--font-family);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  font-weight: var(--font-weight-normal);
+  color: var(--mkt-text-dim);
+}
+
+.marketing-caption {
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  color: var(--mkt-text-dim);
+}
+

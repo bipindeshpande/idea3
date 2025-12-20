@@ -3,7 +3,6 @@ import Seo from "../../components/common/Seo.jsx";
 import { HeroSection } from "../../sections/marketing/network";
 import FeatureCard from "../../components/marketing/FeatureCard.jsx";
 import SectionTitle from "../../components/marketing/SectionTitle.jsx";
-import ContentBlock from "../../components/marketing/ContentBlock.jsx";
 import CTASection from "../../components/marketing/CTASection.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
 import MockupBrowser from "../../components/marketing/mockups/MockupBrowser.jsx";
@@ -160,27 +159,6 @@ export default function ProductNetworkPage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Value Propositions */}
-      <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6 space-y-20">
-          <ContentBlock
-            title="Anonymized Profiles"
-            description="Browse founder profiles and idea listings without seeing identities. Only reveal your identity after mutual acceptance."
-            visual={{
-              gradient: "linear-gradient(135deg, var(--mkt-card-purple), var(--mkt-card-blue))",
-            }}
-          />
-          <ContentBlock
-            title="Credit-Based System"
-            description="Free plan: 3 connections/month. Starter: 15/month. Pro: Unlimited. Pay only for what you use."
-            visual={{
-              gradient: "linear-gradient(135deg, var(--mkt-card-orange), var(--mkt-card-yellow))",
-            }}
-            reverse
-          />
         </div>
       </section>
 

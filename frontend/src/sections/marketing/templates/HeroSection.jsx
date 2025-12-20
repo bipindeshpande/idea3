@@ -1,10 +1,14 @@
-import Hero from "../../../components/marketing/Hero.jsx";
+import HeroSection from "../../../components/marketing/sections/HeroSection.jsx";
 
 export default function TemplatesHeroSection({ data, ...props }) {
   return (
-    <section className="mkt-section-lg" style={{ background: "var(--mkt-surface)" }}>
-      <Hero {...data} {...props} className="mb-0" />
-    </section>
+    <HeroSection
+      data={data}
+      wrapperClassName="mkt-section-lg"
+      wrapperStyle={{ background: "var(--mkt-surface)" }}
+      className="mb-0"
+      {...props}
+    />
   );
 }
 

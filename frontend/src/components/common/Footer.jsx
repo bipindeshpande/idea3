@@ -9,7 +9,7 @@ const footerLinks = {
  ],
  "Resources": [
  { label: "Startup Frameworks", to: "/frameworks" },
- { label: "Resources Library", to: "/resources" },
+ { label: "Templates & Resources", to: "/resources/templates" },
  { label: "Blog & Playbooks", to: "/blog" },
  ],
  "Company": [

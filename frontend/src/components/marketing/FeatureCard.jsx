@@ -44,13 +44,14 @@ export default function FeatureCard({
 
   const cardContent = (
     <div 
-      className={`rounded-xl p-5 border transition-all duration-300 card-floating card-3d ${tintClasses[tint]} ${animationClass || ""} ${className}`}
+      className={`rounded-xl p-5 border transition-all duration-300 card-floating card-3d ${tintClasses[tint]} ${animationClass || ""} ${className} ${!className.includes('flex') ? '' : 'flex flex-col'}`}
       style={{
         borderColor: "var(--mkt-outline)",
         background: splitGradients[tint],
         position: "relative",
         overflow: "hidden",
         transform: `translateZ(0) scale(${scale})`,
+        ...(className.includes('flex') ? { height: '100%' } : {})
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = `translateZ(0) scale(${scale * 1.02}) rotate(0.5deg)`;
@@ -121,27 +122,31 @@ export default function FeatureCard({
       >
         {title}
       </h3>
-      {description && (
-        <p 
-          className="mkt-body leading-relaxed mb-2"
-          style={{ color: "var(--mkt-paragraph)" }}
-        >
-          {description}
-        </p>
-      )}
-      {/* V6: Micro-benefit line */}
-      {microBenefit && (
-        <p className="text-xs opacity-70 mt-2" style={{ color: "var(--mkt-text-dim)" }}>
-          {microBenefit}
-        </p>
-      )}
-      {/* V8: Identity mirroring microcopy */}
-      {identity && (
-        <p className="mkt-identity mt-2">
-          {identity}
-        </p>
-      )}
-      {children}
+      <div className={className.includes('flex') ? 'flex-grow flex flex-col' : ''}>
+        {description && (
+          <p 
+            className="mkt-body leading-relaxed mb-2"
+            style={{ color: "var(--mkt-paragraph)" }}
+          >
+            {description}
+          </p>
+        )}
+        {/* V6: Micro-benefit line */}
+        {microBenefit && (
+          <p className="text-xs opacity-70 mt-2" style={{ color: "var(--mkt-text-dim)" }}>
+            {microBenefit}
+          </p>
+        )}
+        {/* V8: Identity mirroring microcopy */}
+        {identity && (
+          <p className="mkt-identity mt-2">
+            {identity}
+          </p>
+        )}
+      </div>
+      <div className={className.includes('flex') ? 'mt-auto' : ''}>
+        {children}
+      </div>
     </div>
   );
 

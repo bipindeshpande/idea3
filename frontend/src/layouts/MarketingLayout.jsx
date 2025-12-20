@@ -1,3 +1,14 @@
+/**
+ * MarketingLayout - Grid-based, consistent layout
+ * 
+ * Rules:
+ * - Footer always present
+ * - Grid-based layout
+ * - Symmetrical alignment
+ * - Uses tokens only
+ * - Lightweight scroll reveal only
+ */
+
 import { useEffect, useState } from "react";
 import Navigation from "../components/common/Navigation.jsx";
 import Footer from "../components/common/Footer.jsx";
@@ -5,6 +16,7 @@ import Footer from "../components/common/Footer.jsx";
 export default function MarketingLayout({ children, fullWidth = false }) {
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // Scroll detection for navigation styling
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -14,7 +26,7 @@ export default function MarketingLayout({ children, fullWidth = false }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Scroll reveal observer (V4) - ONLY for MarketingLayout
+  // Lightweight scroll reveal (opacity + transform only)
   useEffect(() => {
     const revealElements = document.querySelectorAll('.scroll-reveal');
     
@@ -23,7 +35,8 @@ export default function MarketingLayout({ children, fullWidth = false }) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
         }
       });
     }, {
@@ -31,54 +44,52 @@ export default function MarketingLayout({ children, fullWidth = false }) {
       rootMargin: '0px 0px -50px 0px'
     });
 
-    revealElements.forEach(el => observer.observe(el));
+    revealElements.forEach(el => {
+      // Set initial state
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
 
     return () => {
       revealElements.forEach(el => observer.unobserve(el));
     };
   }, [children]);
 
-  // V9: Behavioral sequencing reveal observer for .mkt-reveal components
-  useEffect(() => {
-    const mktRevealElements = document.querySelectorAll('.mkt-reveal');
-    
-    if (mktRevealElements.length === 0) return;
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    });
-
-    mktRevealElements.forEach(el => observer.observe(el));
-
-    return () => {
-      mktRevealElements.forEach(el => observer.unobserve(el));
-    };
-  }, [children]);
-
   return (
-    <div className="app-shell bg-app text-primary font-sans">
-      {/* Navigation with scroll-based styling */}
-      <div
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-surface backdrop-blur-md shadow-sm"
-            : "bg-transparent"
-        }`}
+    <div 
+      className="min-h-screen"
+      style={{
+        fontFamily: "var(--font-family)",
+        backgroundColor: "var(--mkt-surface)",
+        color: "var(--mkt-heading)",
+      }}
+    >
+      {/* Navigation - Sticky, uses tokens */}
+      <nav
+        className="sticky top-0 z-50 transition-all duration-200"
+        style={{
+          backgroundColor: isScrolled ? "var(--mkt-surface)" : "transparent",
+          backdropFilter: isScrolled ? "blur(8px)" : "none",
+          boxShadow: isScrolled ? "var(--mkt-card-shadow)" : "none",
+          borderBottom: isScrolled ? "1px solid var(--mkt-outline)" : "none",
+        }}
       >
         <Navigation />
-      </div>
+      </nav>
       
-      <main className={fullWidth ? "w-full" : "page-wrap"}>
+      {/* Main Content - Grid-based, consistent */}
+      <main 
+        className={fullWidth ? "w-full" : "container"}
+        style={{
+          minHeight: "calc(100vh - 200px)", // Account for nav + footer
+        }}
+      >
         {children}
       </main>
       
+      {/* Footer - Always present */}
       <Footer />
     </div>
   );

@@ -20,9 +20,6 @@ import { markdownToDocx } from "../../utils/markdownToDocx.js";
 // All templates are stored in separate .md files in frontend/src/templates/
 
 export default function ResourcesPage() {
- // Find the flagship resource (Problem Validation Checklist)
- const flagshipFramework = frameworks.find(f => f.id === 1) || frameworks[0];
- 
  // State for template preview modal
  const [previewTemplate, setPreviewTemplate] = useState(null);
  const [previewContent, setPreviewContent] = useState(null);
@@ -43,9 +40,6 @@ export default function ResourcesPage() {
  secondaryCTA={{ to: "/blog", label: "Read Guides" }}
  className="mb-20"
  />
-
- {/* Section Divider */}
- <div className="marketing-divider my-16" />
 
  {/* Start Here Section */}
  <section className="relative py-12 mb-16">
@@ -85,47 +79,6 @@ export default function ResourcesPage() {
  </div>
  </Card>
  </section>
-
- {/* Flagship Resource */}
- <section className="relative py-12 mb-16">
- <Blob size="small" position="top-right" />
- <div className="mb-4">
- <span className="ui-badge ui-badge--info">Most Popular</span>
- </div>
- <Card className="marketing-card-red relative overflow-hidden">
- <div className="relative z-10 flex flex-col md:flex-row gap-6">
- <div className="marketing-icon-circle flex-shrink-0">
- <span className="text-4xl">{flagshipFramework.icon}</span>
- </div>
- <div className="flex-1">
- <UIHeading level="h2" className="marketing-section-title text-primary mb-2">{flagshipFramework.title}</UIHeading>
- <p className="text-base text-accent mb-3 font-medium">Use this first if you haven't validated your problem yet</p>
- <p className="text-base text-secondary mb-6">{flagshipFramework.description}</p>
- <div className="flex flex-wrap gap-4 mb-6">
- <Link
- to="/blog/complete-guide-to-problem-validation"
- className="text-base text-accent hover:text-accent-hover font-medium"
- >
- Use with: Problem Validation Guide →
- </Link>
- </div>
- <UIButton
- variant="primary"
- onClick={() => {
- setPreviewTemplate({ title: flagshipFramework.title, downloadName: `${flagshipFramework.title.toLowerCase().replace(/\s+/g, "-")}.docx` });
- setPreviewContent(flagshipFramework.content);
- }}
- className="marketing-btn-primary"
- >
- Download checklist
- </UIButton>
- </div>
- </div>
- </Card>
- </section>
-
- {/* Section Divider */}
- <div className="marketing-divider my-16" />
 
  {/* Templates Section */}
  <section className="relative py-12 mb-16">
@@ -176,9 +129,6 @@ export default function ResourcesPage() {
  })}
  </div>
  </section>
-
- {/* Section Divider */}
- <div className="marketing-divider my-16" />
 
  {/* Frameworks & Templates Section */}
  <section className="relative py-12 mb-16">

@@ -7,6 +7,12 @@ import landingPageTestFramework from "./landing-page-test-framework.md?raw";
 import pricingValidationMethod from "./pricing-validation-method.md?raw";
 import mvpPrioritizationMatrix from "./mvp-prioritization-matrix.md?raw";
 import competitiveAnalysisTemplate from "./competitive-analysis-template.md?raw";
+import userPersonaTemplate from "./user-persona-template.md?raw";
+import valuePropositionCanvas from "./value-proposition-canvas.md?raw";
+import leanCanvasTemplate from "./lean-canvas-template.md?raw";
+import customerJourneyMap from "./customer-journey-map.md?raw";
+import featurePrioritizationFramework from "./feature-prioritization-framework.md?raw";
+import goToMarketStrategyTemplate from "./go-to-market-strategy-template.md?raw";
 
 export const frameworks = [
  {
@@ -62,6 +68,60 @@ export const frameworks = [
  icon: "🔍",
  download: true,
  content: competitiveAnalysisTemplate,
+ },
+ {
+ id: 7,
+ title: "User Persona Template",
+ description: "Create detailed customer personas to guide product decisions and marketing strategies.",
+ category: "Discovery",
+ icon: "👤",
+ download: true,
+ content: userPersonaTemplate,
+ },
+ {
+ id: 8,
+ title: "Value Proposition Canvas",
+ description: "Design products that customers want by mapping customer needs to your solution.",
+ category: "Planning",
+ icon: "💎",
+ download: true,
+ content: valuePropositionCanvas,
+ },
+ {
+ id: 9,
+ title: "Lean Canvas Template",
+ description: "One-page business plan to quickly document and validate your business model.",
+ category: "Planning",
+ icon: "📋",
+ download: true,
+ content: leanCanvasTemplate,
+ },
+ {
+ id: 10,
+ title: "Customer Journey Map",
+ description: "Visualize the complete customer experience from awareness to advocacy.",
+ category: "Discovery",
+ icon: "🗺️",
+ download: true,
+ content: customerJourneyMap,
+ },
+ {
+ id: 11,
+ title: "Feature Prioritization Framework",
+ description: "Data-driven framework to decide which features to build first.",
+ category: "MVP",
+ icon: "⚡",
+ download: true,
+ content: featurePrioritizationFramework,
+ },
+ {
+ id: 12,
+ title: "Go-to-Market Strategy Template",
+ description: "Comprehensive plan for launching and scaling your startup product.",
+ category: "Market",
+ icon: "🚀",
+ download: true,
+ content: goToMarketStrategyTemplate,
  },
 ];
 

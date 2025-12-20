@@ -1,124 +1,93 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
-import SocialProof from "../../components/marketing/SocialProof.jsx";
-import PersonaGrid from "../../components/marketing/credibility/PersonaGrid.jsx";
-import LogoStrip from "../../components/marketing/credibility/LogoStrip.jsx";
-import NeuroProof from "../../components/marketing/NeuroProof.jsx";
-import MiniFlow from "../../components/marketing/behavior/MiniFlow.jsx";
 import SectionTitle from "../../components/marketing/SectionTitle.jsx";
 import FeatureCard from "../../components/marketing/FeatureCard.jsx";
 import CTASection from "../../components/marketing/CTASection.jsx";
 import { HeroSection } from "../../sections/marketing/templates";
-import UIInput from "../../components/ui/ui-input.jsx";
+import UIButton from "../../components/ui/ui-button.jsx";
+import TemplatePreviewModal from "../../components/resources/TemplatePreviewModal.jsx";
+import { markdownToDocx } from "../../utils/markdownToDocx.js";
+import { frameworks } from "../../templates/frameworksConfig.js";
+import { templates as traditionalTemplates } from "../../templates/templatesConfig.js";
 import {
   seo,
   heroData,
-  personas,
-  persuasionHeader,
-  identityPriming,
-  neuroProofData,
-  templateNavigatorFlowData,
-  filterCategories,
-  templates,
   whyTemplatesMatter,
   howToUseSteps,
   ctaData
 } from "../../data/marketing/templates.js";
 
 export default function ResourceTemplatesPage() {
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [previewTemplate, setPreviewTemplate] = useState(null);
+  const [previewContent, setPreviewContent] = useState(null);
+
+  // Map categories to tint colors for consistent theming
+  const categoryTintMap = {
+    "Validation": "blue",
+    "Interviews": "green",
+    "Testing": "orange",
+    "Pricing": "purple",
+    "MVP": "yellow",
+    "Strategy": "blue",
+    "Planning": "green",
+    "Discovery": "orange",
+    "Market": "purple",
+  };
+
+  // Map frameworks to relevant blog articles
+  const blogLinks = {
+    1: { text: "Problem Validation Guide", slug: "complete-guide-to-problem-validation" },
+    2: { text: "Customer Interview Best Practices", slug: "customer-interview-best-practices" },
+    3: { text: "Validate in 60 Minutes", slug: "validate-a-startup-idea-in-60-minutes" },
+    4: { text: "Test Willingness to Pay", slug: "how-to-test-willingness-to-pay" },
+  };
+
+  // Combine frameworks and traditional templates into one list
+  const allTemplates = [
+    ...frameworks.map(f => ({
+      ...f,
+      type: "framework",
+      downloadName: `${f.title.toLowerCase().replace(/\s+/g, "-")}.docx`,
+      tint: categoryTintMap[f.category] || "blue",
+      blogLink: blogLinks[f.id]
+    })),
+    ...traditionalTemplates.map(t => ({
+      ...t,
+      type: "template",
+      tint: categoryTintMap[t.category] || "purple"
+    }))
+  ];
+
+  // Get unique categories from all templates
+  const allCategories = ["All", ...new Set(allTemplates.map(t => t.category).filter(Boolean))];
+
+  const filteredTemplates = selectedCategory === "All" 
+    ? allTemplates 
+    : allTemplates.filter(template => template.category === selectedCategory);
   return (
     <MarketingLayout>
       <Seo {...seo} />
 
       <HeroSection data={heroData} />
 
-      <section className="mkt-section-sm" style={{ background: "var(--mkt-surface)" }}>
+      <section id="templates" className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
         <div className="max-w-7xl mx-auto px-6">
-          <SocialProof showLogos={true} showTestimonials={true} />
-        </div>
-      </section>
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <PersonaGrid personas={personas} />
-      </section>
-
-      <section className="mkt-section-sm" style={{ background: "var(--mkt-surface)" }}>
-        <LogoStrip count={8} />
-      </section>
-
-      <section className="mkt-section-sm" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-2xl font-bold" style={{ color: "var(--mkt-heading)" }}>{persuasionHeader.title}</h2>
-          <p className="text-sm opacity-80" style={{ color: "var(--mkt-paragraph)" }}>{persuasionHeader.subtitle}</p>
-        </div>
-      </section>
-
-      <section className="mkt-section-sm" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <p className="mkt-preheadline">{identityPriming.headline}</p>
-          <p className="text-sm opacity-80 mkt-cognitive-ease" style={{ color: "var(--mkt-paragraph)" }}>{identityPriming.description}</p>
-        </div>
-      </section>
-
-      <section className="mkt-section-sm" style={{ background: "var(--mkt-surface)" }}>
-        <NeuroProof {...neuroProofData} />
-      </section>
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-2xl mx-auto px-6">
-          <h3 className="text-2xl font-bold text-center" style={{ color: "var(--mkt-heading)" }}>{templateNavigatorFlowData.title}</h3>
-          <MiniFlow {...templateNavigatorFlowData} />
-        </div>
-      </section>
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-3xl mx-auto px-6">
-          <UIInput
-            type="search"
-            placeholder="Search templates..."
-            className="w-full"
-            style={{
-              background: "var(--mkt-surface)",
-              borderColor: "var(--mkt-outline)",
-              fontSize: "var(--mkt-body)"
-            }}
-          />
-          <p className="text-sm text-center opacity-70" style={{ color: "var(--mkt-text-dim)" }}>
-            Find templates for planning, validation, research, and modeling.
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {filterCategories.map((category) => (
-              <button
-                key={category}
-                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
-                style={{
-                  background: "var(--mkt-surface-muted)",
-                  color: "var(--mkt-heading)",
-                  border: "1px solid var(--mkt-outline)"
-                }}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle title="Free Templates" subtitle="Professional templates to help you build your startup" center />
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="hidden lg:block w-64 flex-shrink-0">
               <div className="sticky top-24">
                 <h3 className="text-sm font-semibold mb-4" style={{ color: "var(--mkt-heading)" }}>Filter by Category</h3>
                 <div className="space-y-2">
-                  {["All", ...filterCategories].map((category) => (
+                  {allCategories.map((category) => (
                     <button
                       key={category}
+                      onClick={() => setSelectedCategory(category)}
                       className="w-full text-left px-4 py-2 rounded-lg text-sm transition-all hover:bg-opacity-50"
                       style={{
-                        background: category === "All" ? "var(--mkt-primary)" : "var(--mkt-surface-muted)",
-                        color: category === "All" ? "white" : "var(--mkt-heading)"
+                        background: category === selectedCategory ? "var(--mkt-primary)" : "var(--mkt-surface-muted)",
+                        color: category === selectedCategory ? "white" : "var(--mkt-heading)"
                       }}
                     >
                       {category}
@@ -128,17 +97,66 @@ export default function ResourceTemplatesPage() {
               </div>
             </div>
             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-              {templates.map((template, index) => (
-                <FeatureCard
-                  key={index}
-                  icon={template.icon}
-                  title={template.title}
-                  description={template.description}
-                  tint={template.tint}
-                  eyebrow={template.eyebrow || template.category}
-                  accentBorder
-                />
-              ))}
+              {filteredTemplates.length > 0 ? (
+                filteredTemplates.map((template, index) => (
+                  <div
+                    key={template.id || index}
+                    onClick={() => {
+                      setPreviewTemplate({
+                        title: template.title,
+                        downloadName: template.downloadName || `${template.title.toLowerCase().replace(/\s+/g, "-")}.docx`
+                      });
+                      setPreviewContent(template.content);
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <FeatureCard
+                      icon={template.icon}
+                      title={template.title}
+                      description={template.description}
+                      tint={template.tint || "blue"}
+                      eyebrow={template.category}
+                      accentBorder
+                    >
+                      {template.blogLink && (
+                        <div className="mb-4">
+                          <Link
+                            to={`/blog/${template.blogLink.slug}`}
+                            className="text-sm text-accent hover:text-accent-hover font-medium"
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ color: "var(--mkt-primary)" }}
+                          >
+                            Use with: {template.blogLink.text} →
+                          </Link>
+                        </div>
+                      )}
+                      <UIButton
+                        variant="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPreviewTemplate({
+                            title: template.title,
+                            downloadName: template.downloadName || `${template.title.toLowerCase().replace(/\s+/g, "-")}.docx`
+                          });
+                          setPreviewContent(template.content);
+                        }}
+                        className="w-full mt-4"
+                        style={{
+                          background: "var(--mkt-surface)",
+                          color: "var(--mkt-heading)",
+                          border: "1px solid var(--mkt-outline)"
+                        }}
+                      >
+                        Download Template
+                      </UIButton>
+                    </FeatureCard>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-2 text-center py-8">
+                  <p style={{ color: "var(--mkt-paragraph)" }}>No templates found in this category.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -183,6 +201,35 @@ export default function ResourceTemplatesPage() {
       <section className="mkt-section-lg" style={{ background: "var(--mkt-surface)" }}>
         <CTASection {...ctaData} gradient />
       </section>
+
+      {/* Template Preview Modal */}
+      {previewTemplate && (
+        <TemplatePreviewModal
+          template={previewTemplate}
+          content={previewContent}
+          onClose={() => {
+            setPreviewTemplate(null);
+            setPreviewContent(null);
+          }}
+          onDownload={async (fetchedContent) => {
+            const contentToDownload = fetchedContent || previewContent;
+            
+            try {
+              const docxBlob = await markdownToDocx(contentToDownload, previewTemplate.title);
+              const url = URL.createObjectURL(docxBlob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = previewTemplate.downloadName;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            } catch (err) {
+              console.error("Failed to generate DOCX:", err);
+            }
+          }}
+        />
+      )}
     </MarketingLayout>
   );
 }

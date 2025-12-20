@@ -45,21 +45,41 @@
 .marketing-card-blue {
   background: var(--mkt-card-blue);
   border-color: rgba(37, 99, 235, 0.2);
+  color: var(--mkt-text);
+}
+
+.marketing-card-blue .text-primary {
+  color: var(--mkt-text);
 }
 
 .marketing-card-green {
   background: var(--mkt-card-green);
   border-color: rgba(20, 184, 166, 0.2);
+  color: var(--mkt-text);
+}
+
+.marketing-card-green .text-primary {
+  color: var(--mkt-text);
 }
 
 .marketing-card-orange {
   background: var(--mkt-card-orange);
   border-color: rgba(249, 115, 22, 0.2);
+  color: var(--mkt-text);
+}
+
+.marketing-card-orange .text-primary {
+  color: var(--mkt-text);
 }
 
 .marketing-card-purple {
   background: var(--mkt-card-purple);
   border-color: rgba(139, 92, 246, 0.2);
+  color: var(--mkt-text);
+}
+
+.marketing-card-purple .text-primary {
+  color: var(--mkt-text);
 }
 
 .marketing-card-gray {
@@ -70,6 +90,11 @@
 .marketing-card-teal {
   background: var(--mkt-card-green);
   border-color: rgba(20, 184, 166, 0.2);
+  color: var(--mkt-text);
+}
+
+.marketing-card-teal .text-primary {
+  color: var(--mkt-text);
 }
 
 .marketing-card-red {
@@ -81,7 +106,7 @@
 .marketing-hero {
   position: relative;
   overflow: hidden;
-  padding: 5rem 0;
+  padding: 4rem 0; /* Reduced by 20% from 5rem (80px to 64px) */
   background: linear-gradient(135deg, var(--mkt-hero-start), var(--mkt-hero-end));
 }
 

@@ -1,27 +1,14 @@
 import Seo from "../../components/common/Seo.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
-import SocialProof from "../../components/marketing/SocialProof.jsx";
-import MiniFlow from "../../components/marketing/behavior/MiniFlow.jsx";
-import AuthorityStrip from "../../components/marketing/credibility/AuthorityStrip.jsx";
-import FounderStory from "../../components/marketing/credibility/FounderStory.jsx";
 import SectionTitle from "../../components/marketing/SectionTitle.jsx";
 import FeatureCard from "../../components/marketing/FeatureCard.jsx";
-import ContentBlock from "../../components/marketing/ContentBlock.jsx";
 import CTASection from "../../components/marketing/CTASection.jsx";
-import { HeroSection, MockupSection, FearReliefSection } from "../../sections/marketing/validate";
+import { HeroSection } from "../../sections/marketing/validate";
 import {
   seo,
   heroData,
-  mockupData,
-  riskAwarenessFlowData,
-  fearReliefData,
-  authorityStripItems,
-  founderStoryData,
-  noValidationItems,
-  validationLogicItems,
   whyUsFeatures,
   validationFeatures,
-  scorecards,
   howItWorksSteps,
   deliverables,
   ctaData
@@ -41,66 +28,6 @@ export default function ProductValidatePage() {
       />
 
       <HeroSection data={heroData} />
-
-      <section className="mkt-section-sm" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <SocialProof showLogos={false} showTestimonials={true} />
-        </div>
-      </section>
-
-      <MockupSection data={mockupData} />
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-2xl mx-auto px-6">
-          <h3 className="text-2xl font-bold text-center" style={{ color: "var(--mkt-heading)" }}>
-            {riskAwarenessFlowData.title}
-          </h3>
-          <MiniFlow {...riskAwarenessFlowData} />
-        </div>
-      </section>
-
-      <FearReliefSection data={fearReliefData} />
-
-      <section className="mkt-section-sm" style={{ background: "var(--mkt-surface)" }}>
-        <AuthorityStrip items={authorityStripItems} />
-      </section>
-
-      <section className="mkt-section-sm" style={{ background: "var(--mkt-surface)" }}>
-        <FounderStory {...founderStoryData} />
-      </section>
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-4xl mx-auto px-6">
-          <SectionTitle title="What happens without validation?" subtitle="The hidden costs of building blind" center />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            {noValidationItems.map((item, i) => (
-              <div key={i} className="p-5 rounded-xl" style={{ background: "var(--mkt-surface-muted)", border: "1px solid var(--mkt-outline)" }}>
-                <h4 className="font-semibold mb-3 text-sm" style={{ color: "var(--mkt-heading)" }}>{item.title}</h4>
-                <p className="text-xs" style={{ color: "var(--mkt-paragraph)" }}>{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-4xl mx-auto px-6">
-          <SectionTitle title="Validate your idea with market-grade logic" subtitle="Comprehensive analysis across critical factors" center />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-            {validationLogicItems.map((item, i) => (
-              <div key={i} className="p-4 rounded-lg" style={{ background: "var(--mkt-surface-muted)", border: "1px solid var(--mkt-outline)" }}>
-                <h4 className="font-semibold mb-2 text-sm" style={{ color: "var(--mkt-heading)" }}>{item.title}</h4>
-                <p className="text-xs" style={{ color: "var(--mkt-paragraph)" }}>{item.desc}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 p-4 rounded-lg text-center" style={{ background: "var(--mkt-surface-muted)", border: "1px solid var(--mkt-outline)" }}>
-            <p className="text-sm font-semibold" style={{ color: "var(--mkt-heading)" }}>
-              Used by product managers, engineers, creators, and first-time founders.
-            </p>
-          </div>
-        </div>
-      </section>
 
       <section className="mkt-section mkt-section-gradient-blue">
         <div className="max-w-7xl mx-auto px-6">
@@ -147,17 +74,6 @@ export default function ProductValidatePage() {
               <div key={index} className="animate-mkt-fadeUp" style={{ animationDelay: `${index * 0.1}s` }}>
                 <FeatureCard {...feature} />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle title="Detailed Scorecards" subtitle="Get insights across every dimension" center />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {scorecards.map((block, i) => (
-              <ContentBlock key={i} {...block} />
             ))}
           </div>
         </div>

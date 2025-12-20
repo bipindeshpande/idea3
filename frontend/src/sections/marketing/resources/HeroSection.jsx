@@ -1,16 +1,15 @@
-import HeroSection from "../../../components/marketing/HeroSection.jsx";
+import HeroSection from "../../../components/marketing/sections/HeroSection.jsx";
 
-export default function ResourcesHeroSection({ title, subtitle, primaryCTA, secondaryCTA, className = "" }) {
+export default function ResourcesHeroSection({ title, subtitle, primaryCTA, secondaryCTA, className = "", ...props }) {
   return (
-    <section className="mkt-section-lg" style={{ background: "var(--mkt-surface)" }}>
-      <HeroSection
-        title={title}
-        subtitle={subtitle}
-        primaryCTA={primaryCTA}
-        secondaryCTA={secondaryCTA}
-        className={className}
-      />
-    </section>
+    <HeroSection
+      title={title}
+      subheadline={subtitle}
+      primaryCTA={primaryCTA}
+      secondaryCTA={secondaryCTA}
+      className={className}
+      {...props}
+    />
   );
 }
 

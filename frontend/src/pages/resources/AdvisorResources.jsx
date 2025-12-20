@@ -13,7 +13,7 @@ export default function AdvisorResourcesPage() {
 
  // Redirect to public resources if not logged in
  if (!isAuthenticated) {
- return <Navigate to="/resources" replace />;
+ return <Navigate to="/resources/templates" replace />;
  }
 
  return (
@@ -151,7 +151,7 @@ export default function AdvisorResourcesPage() {
  solution fit, market size, and customer willingness to pay.
  </p>
  <Link
- to="/resources"
+ to="/resources/templates"
  className="inline-block text-base font-medium text-accent hover:text-accent transition"
  >
  View validation frameworks →
@@ -165,7 +165,7 @@ export default function AdvisorResourcesPage() {
  to validate problems and solutions without leading the conversation.
  </p>
  <Link
- to="/resources"
+ to="/resources/templates"
  className="inline-block text-base font-medium text-accent hover:text-accent transition"
  >
  View interview templates →
@@ -179,7 +179,7 @@ export default function AdvisorResourcesPage() {
  that tests your core assumption.
  </p>
  <Link
- to="/resources"
+ to="/resources/templates"
  className="inline-block text-base font-medium text-accent hover:text-accent transition"
  >
  View MVP frameworks →
@@ -193,7 +193,7 @@ export default function AdvisorResourcesPage() {
  pricing experiments, and demand validation methods.
  </p>
  <Link
- to="/resources"
+ to="/resources/templates"
  className="inline-block text-base font-medium text-accent hover:text-accent transition"
  >
  View experiment templates →

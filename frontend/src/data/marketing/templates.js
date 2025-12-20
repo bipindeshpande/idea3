@@ -7,10 +7,9 @@ export const seo = {
 };
 
 export const heroData = {
-  title: "Startup Templates",
-  subheadline: "Download free templates for validation, customer discovery, business planning, and more. Professional templates designed for entrepreneurs.",
-  primaryCTA: { to: "/register", label: "Get Access" },
-  secondaryCTA: { to: "/resources", label: "View All Resources" },
+  title: "Free Startup Templates",
+  subheadline: "Download free templates for validation, customer discovery, business planning, and more. All templates are available to everyone—no sign-up required.",
+  primaryCTA: { to: "#templates", label: "Browse Templates" },
   illustration: {
     gradient: "linear-gradient(135deg, var(--mkt-card-orange), var(--mkt-card-yellow))"
   }
@@ -172,10 +171,10 @@ export const howToUseSteps = [
 ];
 
 export const ctaData = {
-  title: "Ready to use these templates?",
-  description: "Get access to all templates and more resources. Free account includes template downloads.",
-  primaryCTA: { to: "/register", label: "Sign Up Free" },
+  title: "Need more help with your startup?",
+  description: "Get AI-powered recommendations and personalized guidance for your startup journey.",
+  primaryCTA: { to: "/advisor", label: "Get Started" },
   secondaryCTA: { to: "/resources", label: "View All Resources" },
-  credibilityMicrocopy: "No commitment. Just clarity."
+  credibilityMicrocopy: "Free templates. No sign-up required."
 };
 

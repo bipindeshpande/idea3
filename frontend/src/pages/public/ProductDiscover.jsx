@@ -1,26 +1,17 @@
 import { Link } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
-import SocialProof from "../../components/marketing/SocialProof.jsx";
-import MiniFlow from "../../components/marketing/behavior/MiniFlow.jsx";
-import UseCaseList from "../../components/marketing/credibility/UseCaseList.jsx";
 import CTASection from "../../components/marketing/CTASection.jsx";
 import SectionTitle from "../../components/marketing/SectionTitle.jsx";
 import FeatureCard from "../../components/marketing/FeatureCard.jsx";
-import ContentBlock from "../../components/marketing/ContentBlock.jsx";
-import { HeroSection, MockupSection } from "../../sections/marketing/discover";
+import { HeroSection } from "../../sections/marketing/discover";
 import {
   seo,
   heroData,
-  miniFlowData,
-  mockupData,
-  useCaseItems,
-  predictiveExpectationData,
   wrongChoiceItems,
   whyUsFeatures,
   exampleIdeas,
   features,
-  contentBlocks,
   howItWorksSteps,
   deliverables,
   ctaData
@@ -40,68 +31,6 @@ export default function ProductDiscoverPage() {
       />
 
       <HeroSection data={heroData} />
-      
-      <section className="mkt-section-sm" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <SocialProof showLogos={true} showTestimonials={true} />
-        </div>
-      </section>
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-2xl mx-auto px-6">
-          <h3 className="text-2xl font-bold text-center" style={{ color: "var(--mkt-heading)" }}>
-            {miniFlowData.title}
-          </h3>
-          <MiniFlow {...miniFlowData} />
-        </div>
-      </section>
-
-      <MockupSection data={mockupData} />
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <UseCaseList items={useCaseItems} ctaText="See how the product handles this →" ctaTo="/product/discover" />
-      </section>
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-4xl mx-auto px-6">
-          <h3 className="text-2xl font-bold text-center" style={{ color: "var(--mkt-heading)" }}>
-            Here's what your brain expects — and why Discover exceeds it
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-6 rounded-xl" style={{ background: "var(--mkt-surface-muted)", border: "1px solid var(--mkt-outline)" }}>
-              <h4 className="font-semibold mb-4 text-sm" style={{ color: "var(--mkt-heading)" }}>{predictiveExpectationData.expected.title}</h4>
-              <ul className="space-y-2">
-                {predictiveExpectationData.expected.items.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs" style={{ color: "var(--mkt-paragraph)" }}>
-                    <span className="text-gray-400 mt-0.5">○</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="p-6 rounded-xl mkt-anchor">
-              <h4 className="font-semibold mb-4 text-sm" style={{ color: "var(--mkt-heading)" }}>{predictiveExpectationData.actual.title}</h4>
-              <ul className="space-y-2">
-                {predictiveExpectationData.actual.items.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs" style={{ color: "var(--mkt-paragraph)" }}>
-                    <span className="text-green-500 mt-0.5">✓</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="text-center mt-8">
-            <Link 
-              to="/product/discover" 
-              className="inline-flex items-center gap-2 text-sm font-semibold hover:gap-3 transition-all"
-              style={{ color: "var(--mkt-primary)" }}
-            >
-              Show me ideas that match me →
-            </Link>
-          </div>
-        </div>
-      </section>
 
       <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
         <div className="max-w-4xl mx-auto px-6">
@@ -166,14 +95,6 @@ export default function ProductDiscoverPage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6 space-y-20">
-          {contentBlocks.map((block, i) => (
-            <ContentBlock key={i} {...block} />
-          ))}
         </div>
       </section>
 

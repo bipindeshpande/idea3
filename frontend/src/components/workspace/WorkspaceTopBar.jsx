@@ -12,7 +12,7 @@ export default function WorkspaceTopBar({ title, subtitle }) {
  {subtitle && <p className="mt-1.5 text-base text-secondary">{subtitle}</p>}
  </div>
  <div className="flex items-center gap-4 ml-8">
- <Link to="/resources">
+ <Link to="/resources/templates">
  <UIButton variant="ghost">
  Resources
  </UIButton>

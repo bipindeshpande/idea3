@@ -10,6 +10,8 @@ import { ThemeProvider } from "./context/ThemeContext.jsx";
 import "./styles/theme.css";
 import "./styles.css";
 import "./styles/marketing.css";
+import "./styles/marketing-tokens.css"; // Marketing design tokens - single source of truth
+import "./styles/marketing-typography.css"; // Marketing typography system
 
 const GA_ID = import.meta.env.VITE_GA_ID;
 

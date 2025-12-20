@@ -1,10 +1,10 @@
-import Hero from "../../../components/marketing/Hero.jsx";
+/**
+ * HeroSection - Home page hero
+ * Uses standardized HeroSection wrapper
+ */
 
-export default function HeroSection({ data }) {
-  return (
-    <section className="mkt-section-lg" style={{ background: "var(--mkt-surface)" }}>
-      <Hero {...data} className="mb-0" animate="fade" />
-    </section>
-  );
+import HeroSection from "../../../components/marketing/sections/HeroSection.jsx";
+
+export default function HomeHeroSection({ data, ...props }) {
+  return <HeroSection data={data} {...props} />;
 }
-

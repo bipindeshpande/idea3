@@ -236,3 +236,4 @@
 - **Footer** → `components/common/Footer.jsx`
 - **Seo** → `components/common/Seo.jsx`
 
+

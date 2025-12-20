@@ -1,21 +1,54 @@
-import Card from "../../../components/ui/Card.jsx";
 import SectionHeader from "../../../components/marketing/SectionHeader.jsx";
-import UIHeading from "../../../components/ui/ui-heading.jsx";
 
 export default function FAQSection({ faqs }) {
   return (
-    <section className="relative py-12">
-      <Card className="marketing-card-blue">
-        <SectionHeader title="Frequently Asked Questions" center className="mb-8" />
-        <div className="space-y-6">
+    <section className="section-padding" style={{ background: "var(--mkt-surface)" }}>
+      <div className="container">
+        <SectionHeader 
+          title="Frequently Asked Questions" 
+          center 
+          className="mb-12" 
+        />
+        <div className="max-w-3xl mx-auto space-y-4">
           {faqs.map((faq, i) => (
-            <div key={i}>
-              <UIHeading level="h3" className="marketing-card-title text-primary mb-2">{faq.question}</UIHeading>
-              <p className="mkt-body text-secondary">{faq.answer}</p>
+            <div 
+              key={i}
+              className="group rounded-xl border transition-all duration-200 hover:shadow-md"
+              style={{ 
+                background: 'var(--mkt-surface)',
+                borderColor: 'var(--mkt-outline)',
+                padding: 'var(--space-24)',
+              }}
+            >
+              <div className="mb-4">
+                <h3 
+                  className="text-lg font-semibold"
+                  style={{
+                    fontFamily: "var(--font-family)",
+                    color: "var(--mkt-heading)",
+                    lineHeight: "var(--line-height-tight)",
+                  }}
+                >
+                  {faq.question}
+                </h3>
+              </div>
+              <div className="pl-0">
+                <p 
+                  className="leading-relaxed"
+                  style={{
+                    fontFamily: "var(--font-family)",
+                    fontSize: "var(--font-size-base)",
+                    color: "var(--mkt-text-dim)",
+                    lineHeight: "var(--line-height-relaxed)",
+                  }}
+                >
+                  {faq.answer}
+                </p>
+              </div>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </section>
   );
 }

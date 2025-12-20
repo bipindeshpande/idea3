@@ -40,8 +40,8 @@ export const tiers = [
     period: "forever",
     description: "Perfect for trying out the service. No credit card required.",
     features: [
-      "2 idea validations (lifetime)",
-      "4 idea discoveries (lifetime)",
+      "2 idea validations (included)",
+      "4 idea discoveries (included)",
       "3 founder connections/month",
       "Full reports",
       "PDF downloads",
@@ -138,7 +138,7 @@ export const purchaseUseCases = [
 export const faqs = [
   {
     question: "What's included in the free plan?",
-    answer: "The free plan includes 2 idea validations and 4 idea discoveries (lifetime), plus 3 founder connections per month. Full reports and PDF downloads are included."
+    answer: "The free plan includes 2 idea validations and 4 idea discoveries, plus 3 founder connections per month. Full reports and PDF downloads are included."
   },
   {
     question: "Can I cancel anytime?",

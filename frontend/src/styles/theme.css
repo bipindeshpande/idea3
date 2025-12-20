@@ -2,6 +2,9 @@
    THEME TOKENS (final, clean, dark-mode-safe)
 --------------------------------------------------- */
 
+/* Import Inter font for workspace/app pages */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
   /* IDEA theme tokens (light) */
   --bg: #F9FAFB;
@@ -107,9 +110,9 @@
   --mkt-surface-hover: #f8fafc;
   --mkt-surface-muted: #f8fafc;
   --mkt-text: #1e293b;
-  --mkt-text-dim: #64748b;
+  --mkt-text-dim: #475569;
   --mkt-heading: #0f172a;
-  --mkt-subheading: #475569;
+  --mkt-subheading: #334155;
   --mkt-primary: #2563eb;
   --mkt-primary-hover: #1d4ed8;
   --mkt-outline: #e2e8f0;
@@ -210,9 +213,9 @@
   --mkt-surface-hover: #f8fafc;
   --mkt-surface-muted: #f8fafc;
   --mkt-text: #1e293b;
-  --mkt-text-dim: #64748b;
+  --mkt-text-dim: #475569;
   --mkt-heading: #0f172a;
-  --mkt-subheading: #475569;
+  --mkt-subheading: #334155;
   --mkt-primary: #2563eb;
   --mkt-primary-hover: #1d4ed8;
   --mkt-outline: #e2e8f0;
@@ -319,7 +322,7 @@
   --mkt-surface-hover: #24324a;
   --mkt-surface-muted: #0f172a;
   --mkt-text: #f1f5f9;
-  --mkt-text-dim: #94a3b8;
+  --mkt-text-dim: #CBD5E1;
   --mkt-heading: #f8fafc;
   --mkt-subheading: #cbd5e1;
   --mkt-primary: #3b82f6;
@@ -772,19 +775,19 @@ body {
 
 /* Section gradient utilities */
 .mkt-section-gradient-blue {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.05));
+  background: linear-gradient(135deg, var(--mkt-card-blue), var(--mkt-surface));
 }
 
 .mkt-section-gradient-purple {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.05));
+  background: linear-gradient(135deg, var(--mkt-card-purple), var(--mkt-surface));
 }
 
 .mkt-section-gradient-orange {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(251, 146, 60, 0.05));
+  background: linear-gradient(135deg, var(--mkt-card-orange), var(--mkt-surface));
 }
 
 .mkt-section-gradient-green {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(74, 222, 128, 0.05));
+  background: linear-gradient(135deg, var(--mkt-card-green), var(--mkt-surface));
 }
 
 /* Card tint utilities */
