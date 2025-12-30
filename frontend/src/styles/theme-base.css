@@ -1,0 +1,12 @@
+/* ---------------------------------------------------
+   BASE ELEMENT STYLES
+--------------------------------------------------- */
+
+/* Base */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Link, Navigate, useLocation, useParams, useNavigate } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
 import Seo from "../../components/common/Seo.jsx";
 import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -9,180 +8,25 @@ import OpenForCollaboratorsButton from "../../components/founder/OpenForCollabor
 import CollapsibleSection from "../../components/ui/CollapsibleSection.jsx";
 import { parseStructuredIdeas, trimFromHeading } from "../../utils/streamingParser.js";
 import {
- splitIdeaSections,
- extractWhyFit,
- buildExecutionSteps,
- buildFinancialSnapshots,
- parseRiskRows,
- buildValidationQuestions,
- extractValidationQuestions,
- extractOtherSection,
- personalizeCopy,
- formatSectionHeading,
- cleanNarrativeMarkdown,
- extractTimelineSlice,
- dedupeStrings,
+  splitIdeaSections,
+  extractWhyFit,
+  buildExecutionSteps,
+  buildFinancialSnapshots,
+  parseRiskRows,
+  buildValidationQuestions,
+  extractValidationQuestions,
+  personalizeCopy,
+  dedupeStrings,
 } from "../../utils/formatters/recommendationFormatters.js";
 import { logToFile, logSectionToFile, downloadLogFile, getLogBufferSize } from "../../utils/fileLogger.js";
+// Import extracted modules
+import { SECTION_ORDER, SECTION_LABELS, DEFAULT_SECTIONS, getSectionToggleId, getSectionDescription } from "../../components/recommendations/utils/sectionConstants.js";
+import { getSectionTheme } from "../../components/recommendations/utils/sectionThemes.js";
+import { useSectionToggle } from "../../components/recommendations/hooks/useSectionToggle.js";
+import RecommendationSections from "../../components/recommendations/RecommendationSections.jsx";
 
 function useQuery() {
- return new URLSearchParams(useLocation().search);
-}
-
-// Section order - single source of truth for section rendering (UX-optimized order)
-export const SECTION_ORDER = [
- "why_fits",
- "financial_snapshot",
- "execution_path",
- "immediate_experiments",
- "timeline_effort",
- "customer_persona",
- "market_opportunity",
- "key_risks",
- "validation_questions",
- "immediate_next_steps",
- "decision_checklist",
- "additional_insights",
-];
-
-// Section labels mapping
-const SECTION_LABELS = {
- why_fits: "Why this Idea Fits You",
- financial_snapshot: "Financial snapshot",
- execution_path: "Execution Path",
- immediate_experiments: "Immediate Experiments",
- timeline_effort: "Timeline & Effort",
- customer_persona: "Customer Persona",
- market_opportunity: "Market Opportunity",
- key_risks: "Key Risks & Mitigations",
- validation_questions: "Validation Questions",
- immediate_next_steps: "Immediate Next Steps",
- decision_checklist: "Decision Checklist",
- additional_insights: "Additional Insights",
-};
-
-// Default sections - all sections must always be present
-const DEFAULT_SECTIONS = {
- intro: "",
- why_fits: "",
- financial_snapshot: "",
- execution_path: "",
- customer_persona: "",
- market_opportunity: "",
- key_risks: "",
- validation_questions: "",
- immediate_experiments: "",
- immediate_next_steps: "",
- timeline_effort: "",
- decision_checklist: "",
- additional_insights: "",
-};
-
-// Get theme for different sections (works with normalized headings)
-function getSectionTheme(sectionTitle) {
- const lowerTitle = sectionTitle.toLowerCase();
-  const base = {
-    border: "border-default",
-    bg: "bg-surface",
-    headerBg: "bg-surface",
-    text: "text-primary",
-    borderColor: "var(--border)",
-    bgColor: "var(--surface)",
-    headerBgColor: "var(--surface)",
-    textColor: "var(--text)",
-  };
- 
- if (lowerTitle.includes("financial") || lowerTitle.includes("snapshot")) {
- return {
- icon: "💰",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--warning)",
-      bgColor: "var(--surface-muted)",
- };
- }
- 
- if (lowerTitle.includes("execution") || lowerTitle.includes("roadmap")) {
- return {
- icon: "🗺️",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--accent)",
-      bgColor: "var(--surface-muted)",
- };
- }
- 
- if (lowerTitle.includes("risk") || lowerTitle.includes("radar")) {
- return {
- icon: "⚠️",
-      ...base,
-      text: "text-danger",
-      borderColor: "var(--danger)",
-      bgColor: "var(--surface-muted)",
- };
- }
- 
- if (lowerTitle.includes("market") || lowerTitle.includes("signal")) {
- return {
- icon: "📈",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--accent)",
-      bgColor: "var(--surface-muted)",
- };
- }
- 
- if (lowerTitle.includes("customer") || lowerTitle.includes("persona")) {
- return {
- icon: "👤",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--accent)",
-      bgColor: "var(--surface-muted)",
- };
- }
- 
- if (lowerTitle.includes("validation") || lowerTitle.includes("question")) {
- return {
- icon: "❓",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--accent)",
-      bgColor: "var(--surface-muted)",
- };
- }
- 
- if (lowerTitle.includes("experiment") || lowerTitle.includes("next")) {
- return {
- icon: "🧪",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--warning)",
-      bgColor: "var(--surface-muted)",
- };
- }
- 
- if (lowerTitle.includes("decision") || lowerTitle.includes("checkpoint")) {
- return {
- icon: "✅",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--success)",
-      bgColor: "var(--surface-muted)",
- };
- }
- 
- if (lowerTitle.includes("30") || lowerTitle.includes("60") || lowerTitle.includes("90") || lowerTitle.includes("outlook")) {
- return {
- icon: "📅",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--accent)",
-      bgColor: "var(--surface-muted)",
- };
- }
- 
-  return { icon: "📋", ...base, bg: "bg-app", headerBg: "bg-app", bgColor: "var(--bg)" };
+  return new URLSearchParams(useLocation().search);
 }
 
 
@@ -212,9 +56,9 @@ export default function RecommendationDetail() {
  // FIX #1: Industry extraction must be consistent
  const industry = inputs?.industry_interest || "";
  
- // FIX #8: Freeze reports to prevent reloading discovery - freeze on first render only
- const stableReports = useMemo(() => reports, []);
- const [openSections, setOpenSections] = useState(new Set());
+  // FIX #8: Freeze reports to prevent reloading discovery - freeze on first render only
+  const stableReports = useMemo(() => reports, []);
+  const { openSections, toggleSection } = useSectionToggle();
  const [actions, setActions] = useState([]);
  const [notes, setNotes] = useState([]);
  const [loadingActions, setLoadingActions] = useState(false);
@@ -1001,45 +845,10 @@ export default function RecommendationDetail() {
  return { merged, orderedSections };
  }, [enrichedBody, activeIdeaState, activeIdea]);
  
- // Extract merged sections and orderedSections from sections useMemo result
- const parsedSections = useMemo(() => sections.merged || DEFAULT_SECTIONS, [sections]);
- const orderedSections = useMemo(() => 
- SECTION_ORDER.map(key => ({
- key,
- title: SECTION_LABELS[key],
- content: parsedSections[key] || ""
- })),
- [parsedSections]
- );
+// Extract merged sections and orderedSections from sections useMemo result
+const parsedSections = useMemo(() => sections.merged || DEFAULT_SECTIONS, [sections]);
+const orderedSections = sections.orderedSections;
 
- // Section toggle IDs mapping
- const getSectionToggleId = (key) => {
- const mapping = {
- why_fits: "why-fits",
- financial_snapshot: "financial",
- execution_path: "execution",
- immediate_experiments: "experiments",
- timeline_effort: "roadmap",
- customer_persona: "persona-validation",
- market_opportunity: "market",
- key_risks: "risk",
- validation_questions: "validation",
- immediate_next_steps: "next-steps",
- decision_checklist: "decision",
- additional_insights: "additional",
- };
- return mapping[key] || key;
- };
-
- // Section descriptions mapping
- const getSectionDescription = (key) => {
- const descriptions = {
- execution_path: "Move from validation to scale with focused sprints that match your capacity.",
- market_opportunity: "Trends and proof points worth validating as you move forward.",
- customer_persona: "Understand your ideal customer profile and use these validation questions to confirm demand and buying triggers.",
- };
- return descriptions[key] || null;
- };
 
  const whyFit = useMemo(() => extractWhyFit(parsedSections.intro || ""), [parsedSections]);
  
@@ -1193,476 +1002,13 @@ export default function RecommendationDetail() {
  [parsedSections]
  );
 
- // All sections are now always visible - no filtering needed
-
- // Function to render section content based on key
- const renderSectionContent = useCallback((sectionKey, content) => {
- // Skip rendering if enrichment is loading and content is empty
- if (isEnriching && !content?.trim()) {
- return <p className="text-sm text-primary text-primary italic">Content loading...</p>;
- }
-
- switch (sectionKey) {
- case "why_fits":
- if (!fitNarrativeMarkdown) {
- return <p className="text-sm text-primary text-primary italic">No content available yet.</p>;
- }
- return (
- <div className="mt-6 text-primary">
- <style>{`
- .fit-narrative-content ul {
- list-style-type: disc;
- margin-left: 1.5rem;
- margin-top: 0.75rem;
- margin-bottom: 0.75rem;
- padding-left: 0;
- }
- .fit-narrative-content ul ul {
- list-style-type: circle;
- margin-left: 2rem;
- margin-top: 0.5rem;
- margin-bottom: 0.5rem;
- }
- .fit-narrative-content ul ul ul {
- list-style-type: square;
- margin-left: 2rem;
- }
- .fit-narrative-content ol {
- list-style-type: decimal;
- margin-left: 1.5rem;
- margin-top: 0.75rem;
- margin-bottom: 0.75rem;
- }
- .fit-narrative-content ol ol {
- list-style-type: lower-alpha;
- margin-left: 2rem;
- }
- .fit-narrative-content li {
- margin-top: 0.5rem;
- margin-bottom: 0.5rem;
- line-height: 1.7;
- padding-left: 0.25rem;
- }
- .fit-narrative-content li > p {
- margin: 0;
- display: inline;
- }
- .fit-narrative-content p {
- margin-bottom: 1rem;
- line-height: 1.7;
- }
- .fit-narrative-content strong {
- font-weight: 600;
- color: #1e293b;
- }
- `}</style>
- <div className="fit-narrative-content">
- <ReactMarkdown
- components={{
- p: ({ node, ...props }) => (
- <p className="leading-relaxed mb-4" {...props} />
- ),
- ul: ({ node, ...props }) => (
- <ul {...props} />
- ),
- ol: ({ node, ...props }) => (
- <ol {...props} />
- ),
- li: ({ node, children, ...props }) => (
- <li className="leading-relaxed" {...props}>
- {children}
- </li>
- ),
- strong: ({ node, ...props }) => (
- <strong className="font-semibold text-primary" {...props} />
- ),
- em: ({ node, ...props }) => (
- <em className="italic text-secondary" {...props} />
- ),
- }}
- >
- {fitNarrativeMarkdown}
- </ReactMarkdown>
- </div>
- </div>
- );
-
- case "financial_snapshot":
- if (financialSnapshot.length > 0) {
- return (
- <div className="overflow-hidden ui-card2 ui-radius-card">
- <table className="min-w-full text-sm">
- <thead className="bg-surface text-left uppercase tracking-wide text-primary">
- <tr>
- <th className="px-4 py-3 w-10"></th>
- <th className="px-4 py-3">Focus</th>
- <th className="px-4 py-3">Estimate</th>
- <th className="px-4 py-3 text-right">Benchmark</th>
- </tr>
- </thead>
- <tbody className="text-primary">
- {financialSnapshot.map(({ focus, estimate, metric }, index) => (
- <tr key={`${focus}-${index}`}>
- <td className="px-4 py-3 text-primary">✓</td>
- <td className="px-4 py-3 font-semibold text-primary">{focus}</td>
- <td className="px-4 py-3">{estimate}</td>
- <td className="px-4 py-3 text-right font-semibold text-primary">{metric}</td>
- </tr>
- ))}
- </tbody>
- </table>
- </div>
- );
- }
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No financial snapshot available yet.</p>
- );
-
- case "execution_path":
- if (executionPhaseCards.length > 0) {
- return (
- <div className="grid gap-4 md:grid-cols-2">
- {executionPhaseCards.map((phase) => (
- <div key={phase.title} className="ui-card2 ui-pad-md ui-radius-card shadow-card">
- <h3 className="text-sm font-semibold uppercase tracking-wide text-primary">{phase.title}</h3>
- <ol className="mt-3 space-y-2 text-sm text-primary">
- {phase.items.map((item) => (
- <li key={item.index} className="flex gap-3">
- <span className="min-w-[2.25rem] rounded-full bg-surface px-2 py-1 text-center font-semibold text-primary">
- {item.index}
- </span>
- <span>{item.text}</span>
- </li>
- ))}
- </ol>
- </div>
- ))}
- </div>
- );
- }
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No execution path available yet.</p>
- );
-
- case "immediate_experiments":
- if (immediateExperimentsList.length > 0) {
- return (
- <ul className="space-y-2 text-sm text-primary text-primary">
- {immediateExperimentsList.map((item, index) => (
- <li key={index} className="flex gap-2">
- <span className="mt-1 text-primary text-primary">•</span>
- <span>{item}</span>
- </li>
- ))}
- </ul>
- );
- }
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No experiments available yet.</p>
- );
-
- case "timeline_effort":
- if (roadmapMarkdown) {
- const hasBullets = /^[-*]\s+/m.test(roadmapMarkdown);
- if (hasBullets) {
- return (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{roadmapMarkdown}</ReactMarkdown>
- </div>
- );
- }
- return (
- <div className="grid gap-4 md:grid-cols-3">
- {["0-30 Days", "30-60 Days", "60-90 Days"].map((window, index) => {
- const segmentContent = extractTimelineSlice(roadmapMarkdown, index);
- return (
- <div key={window} className="ui-card2 ui-pad-md ui-radius-card shadow-card">
- <p className="text-xs uppercase tracking-wide text-primary">{window}</p>
- <div className="mt-2 text-sm text-primary">
- <ReactMarkdown>{segmentContent}</ReactMarkdown>
- </div>
- </div>
- );
- })}
- </div>
- );
- }
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No timeline information available yet.</p>
- );
-
- case "customer_persona":
- return (
- <div className="space-y-6">
- {personaMarkdown && (
- <div className="mt-6 pb-6 border-b border-default border-default">
- <h3 className="text-lg font-semibold text-primary text-primary mb-2 border-l-4 border-default border-default pl-3">Customer Persona</h3>
- <p className="text-sm text-primary text-primary mb-3">
- A detailed profile of your ideal customer—their demographics, pain points, goals, and buying behavior.
- </p>
- <div className="ui-card2 ui-pad-md ui-radius-card shadow-card">
- <ReactMarkdown
- components={{
- p: ({ node, ...props }) => (
- <p className="text-primary leading-relaxed mb-3" {...props} />
- ),
- strong: ({ node, ...props }) => (
- <strong className="font-semibold text-primary" {...props} />
- ),
- ul: ({ node, ...props }) => (
- <ul className="list-disc list-outside space-y-2 text-primary mb-3 ml-5" {...props} />
- ),
- li: ({ node, ...props }) => (
- <li className="leading-relaxed" {...props} />
- ),
- }}
- >
- {cleanNarrativeMarkdown(personaMarkdown)}
- </ReactMarkdown>
- </div>
- </div>
- )}
- {validationQuestions.length > 0 && (
- <div className="mt-0">
- <h3 className="text-lg font-semibold text-primary text-primary mb-2 border-l-4 border-default border-default pl-3">Validation Questions</h3>
- <p className="text-sm text-primary text-primary mb-3">
- Ask these during discovery interviews, quick surveys, or pilot onboarding to confirm demand, willingness to pay, and whether the idea solves the right pain.
- </p>
- <div className="grid gap-4 md:grid-cols-2">
- {validationQuestions.map(({ question, listenFor, actOn }, index) => (
- <div
- key={index}
- className="ui-card2 ui-pad-md ui-radius-card shadow-card text-sm"
- >
- <p className="font-semibold text-primary">Question {index + 1}</p>
- <p className="mt-2 text-sm text-primary">{question}</p>
- <p className="mt-3 text-xs text-primary">
- <strong>What to listen for:</strong> {listenFor}
- </p>
- <p className="mt-2 text-xs text-primary">
- <strong>Act on it:</strong> {actOn}
- </p>
- </div>
- ))}
- </div>
- </div>
- )}
- {!personaMarkdown && validationQuestions.length === 0 && (
- <p className="text-sm text-primary text-primary italic">No customer persona information available yet.</p>
- )}
- </div>
- );
-
- case "market_opportunity":
- if (marketInsights.length > 0) {
- return (
- <ul className="space-y-3 text-sm text-primary text-primary">
- {marketInsights.map((insight, index) => (
- <li key={index} className="flex gap-3 ui-card2 ui-pad-sm ui-radius-card shadow-card">
- <span className="mt-1 text-primary">📈</span>
- <span>{insight}</span>
- </li>
- ))}
- </ul>
- );
- }
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No market opportunity information available yet.</p>
- );
-
- case "key_risks":
- if (riskRows.length > 0) {
- return (
- <div className="overflow-hidden ui-card2 ui-radius-card">
- <table className="min-w-full text-sm">
- <thead className="bg-surface text-left uppercase tracking-wide text-primary">
- <tr>
- <th className="px-4 py-3">Risk</th>
- <th className="px-4 py-3 w-32">Severity</th>
- <th className="px-4 py-3">Early mitigation</th>
- </tr>
- </thead>
- <tbody>
- {riskRows.map((row, index) => (
- <tr key={index}>
- <td className="px-4 py-3 text-primary">{row.risk}</td>
- <td className="px-4 py-3 font-semibold text-primary">{row.severity}</td>
- <td className="px-4 py-3 text-primary">{row.mitigation}</td>
- </tr>
- ))}
- </tbody>
- </table>
- </div>
- );
- }
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No risk information available yet.</p>
- );
-
- case "validation_questions":
- if (validationQuestions.length > 0) {
- return (
- <div className="grid gap-4 md:grid-cols-2">
- {validationQuestions.map(({ question, listenFor, actOn }, index) => (
- <div
- key={index}
- className="ui-card2 ui-pad-md ui-radius-card shadow-card text-sm"
- >
- <p className="font-semibold text-primary">Question {index + 1}</p>
- <p className="mt-2 text-sm text-primary text-primary">{question}</p>
- <p className="mt-3 text-xs text-primary text-primary">
- <strong>What to listen for:</strong> {listenFor}
- </p>
- <p className="mt-2 text-xs text-primary text-primary">
- <strong>Act on it:</strong> {actOn}
- </p>
- </div>
- ))}
- </div>
- );
- }
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No validation questions available yet.</p>
- );
-
- case "immediate_next_steps":
- if (discoveryNextSteps) {
- return (
- <div className="prose prose-slate max-w-none">
- <ReactMarkdown
- components={{
- ul: ({ node, ...props }) => (
- <ul className="space-y-2 text-sm text-primary text-primary list-disc list-inside" {...props} />
- ),
- li: ({ node, ...props }) => (
- <li className="leading-relaxed" {...props} />
- ),
- }}
- >
- {discoveryNextSteps}
- </ReactMarkdown>
- </div>
- );
- }
- if (immediateNextSteps.length > 0) {
- return (
- <ul className="space-y-2 text-sm text-primary text-primary">
- {immediateNextSteps.map((item, index) => (
- <li key={index} className="flex gap-2">
- <span className="mt-1 text-primary text-primary">•</span>
- <span>{item}</span>
- </li>
- ))}
- </ul>
- );
- }
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No next steps available yet.</p>
- );
-
- case "decision_checklist":
- if (decisionChecklist.length > 0) {
- return (
- <ul className="space-y-2 text-sm text-primary text-primary">
- {decisionChecklist.map((item, index) => (
- <li key={index} className="flex gap-2">
- <span className="mt-1 text-primary text-primary">•</span>
- <span>{item}</span>
- </li>
- ))}
- </ul>
- );
- }
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No decision checklist available yet.</p>
- );
-
- case "additional_insights":
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No additional insights available yet.</p>
- );
-
- default:
- return content?.trim() ? (
- <div className="prose prose-slate max-w-none text-primary text-primary">
- <ReactMarkdown>{content}</ReactMarkdown>
- </div>
- ) : (
- <p className="text-sm text-primary text-primary italic">No content available yet.</p>
- );
- }
- }, [
- isEnriching,
- fitNarrativeMarkdown,
- financialSnapshot,
- executionPhaseCards,
- immediateExperimentsList,
- roadmapMarkdown,
- personaMarkdown,
- validationQuestions,
- marketInsights,
- riskRows,
- discoveryNextSteps,
- immediateNextSteps,
- decisionChecklist,
- ]);
+// All sections are now always visible - no filtering needed
 
  const otherIdeas = useMemo(
  () => ideas.filter((idea) => activeIdea && idea.index !== activeIdea.index),
  [ideas, activeIdea]
  );
 
- const toggleSection = (sectionKey) => {
- setOpenSections((prev) => {
- const next = new Set(prev);
- if (next.has(sectionKey)) {
- next.delete(sectionKey);
- } else {
- next.add(sectionKey);
- }
- return next;
- });
- };
 
  // Redirect if we have stage2Markdown but the idea index doesn't match
  if (stage2Markdown && !activeIdea && ideas.length > 0) {
@@ -1969,7 +1315,23 @@ export default function RecommendationDetail() {
  isOpen={openSections.has(toggleId)}
  onToggle={() => toggleSection(toggleId)}
  >
- {renderSectionContent(section.key, section.content)}
+          <RecommendationSections
+            sectionKey={section.key}
+            content={section.content}
+            isEnriching={isEnriching}
+            fitNarrativeMarkdown={fitNarrativeMarkdown}
+            financialSnapshot={financialSnapshot}
+            executionPhaseCards={executionPhaseCards}
+            riskRows={riskRows}
+            validationQuestions={validationQuestions}
+            roadmapMarkdown={roadmapMarkdown}
+            personaMarkdown={personaMarkdown}
+            marketInsights={marketInsights}
+            immediateExperimentsList={immediateExperimentsList}
+            discoveryNextSteps={discoveryNextSteps}
+            immediateNextSteps={immediateNextSteps}
+            decisionChecklist={decisionChecklist}
+          />
  </CollapsibleSection>
  );
  })}

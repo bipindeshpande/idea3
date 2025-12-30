@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
+import apiClient, { ApiError } from "../utils/apiClient.js";
 
 const ValidationContext = createContext(null);
 const STORAGE_KEY = "sia_validations";
@@ -26,7 +27,7 @@ export function ValidationProvider({ children }) {
  const [ideaExplanation, setIdeaExplanationState] = useState("");
  const [loading, setLoading] = useState(false);
  const [error, setError] = useState("");
- const { getAuthHeaders, isAuthenticated } = useAuth();
+ const { isAuthenticated } = useAuth();
 
  const setCategoryAnswers = useCallback((valueOrUpdater) => {
  if (typeof valueOrUpdater === "function") {
@@ -53,10 +54,6 @@ export function ValidationProvider({ children }) {
  try {
  // Use PUT for editing, POST for creating new
  const isEdit = !!validationId;
- const url = isEdit 
- ? `/api/validate-idea/${validationId}`
- : "/api/validate-idea";
- const method = isEdit ? "PUT" : "POST";
 
  const requestBody = {
  category_answers: answers,
@@ -71,21 +68,12 @@ export function ValidationProvider({ children }) {
  requestBody.idea_metadata = ideaMetadata;
  }
 
- const response = await fetch(url, {
- method: method,
- headers: {
- "Content-Type": "application/json",
- ...getAuthHeaders(),
- },
- body: JSON.stringify(requestBody),
- });
-
- if (!response.ok) {
- const err = await response.json().catch(() => ({}));
- throw new Error(err.error || `Failed to ${isEdit ? 'update' : 'validate'} idea`);
+ let data;
+ if (isEdit) {
+ data = await apiClient.put(`/validate-idea/${validationId}`, requestBody);
+ } else {
+ data = await apiClient.post("/validate-idea", requestBody);
  }
-
- const data = await response.json();
  
  // Only save if we have valid validation data
  if (!data.validation || typeof data.validation !== 'object') {
@@ -105,12 +93,13 @@ export function ValidationProvider({ children }) {
  setCurrentValidation(validation);
  return { success: true, validation };
  } catch (err) {
- setError(err.message || "Unexpected error");
- return { success: false, error: err.message };
+ const errorMessage = err instanceof ApiError ? err.message : (err.message || "Unexpected error");
+ setError(errorMessage);
+ return { success: false, error: errorMessage };
  } finally {
  setLoading(false);
  }
- }, [getAuthHeaders]);
+ }, []);
 
  const loadValidationById = useCallback(async (validationId) => {
  // Strip "val_" prefix if present
@@ -118,14 +107,9 @@ export function ValidationProvider({ children }) {
  
  // Try to load directly from GET /api/validate-idea/{id} first
  try {
- const response = await fetch(`/api/validate-idea/${cleanId}`, {
- headers: getAuthHeaders(),
- });
- 
- if (response.ok) {
- const data = await response.json();
+ const data = await apiClient.get(`/validate-idea/${cleanId}`);
  const validationResult = data.validation_result || data.validation || {};
- 
+
  const validationData = {
  id: data.validation_id || data.id || cleanId,
  validation_id: data.validation_id || data.id,
@@ -134,27 +118,24 @@ export function ValidationProvider({ children }) {
  ideaExplanation: data.idea_explanation || "",
  validation: validationResult,
  };
- 
+
  setCurrentValidation(validationData);
  setCategoryAnswers(data.category_answers || {});
  setIdeaExplanation(data.idea_explanation || "");
  return validationData;
- } else if (response.status === 404 && isAuthenticated) {
- // If not found and user is authenticated, try user/activity as fallback
- const activityResponse = await fetch('/api/user/activity', {
- headers: getAuthHeaders(),
- });
- 
- if (activityResponse.ok) {
- const activityData = await activityResponse.json();
+ } catch (error) {
+ // If 404 and user is authenticated, try user/activity as fallback
+ if (error instanceof ApiError && error.status === 404 && isAuthenticated) {
+ try {
+ const activityData = await apiClient.get('/user/activity');
  const validations = activityData.activity?.validations || activityData.validations || [];
- 
+
  const validation = validations.find(v => {
  const vid = v.validation_id || v.id;
  const vidStr = String(vid).replace(/^val_/, '');
  return vidStr === cleanId || String(vid) === cleanId;
  });
- 
+
  if (validation) {
  const validationResult = validation.validation_result || {};
  const validationData = {
@@ -165,16 +146,18 @@ export function ValidationProvider({ children }) {
  ideaExplanation: validation.idea_explanation || "",
  validation: validationResult,
  };
- 
+
  setCurrentValidation(validationData);
  setCategoryAnswers(validation.category_answers || {});
  setIdeaExplanation(validation.idea_explanation || "");
  return validationData;
  }
+ } catch (fallbackError) {
+ console.error("Failed to load validation from activity fallback:", fallbackError);
  }
- }
- } catch (error) {
+ } else {
  console.error("Failed to load validation from API:", error);
+ }
  }
  
  // Fallback to localStorage
@@ -193,7 +176,7 @@ export function ValidationProvider({ children }) {
  }
  
  return null;
- }, [isAuthenticated, getAuthHeaders]);
+ }, [isAuthenticated]);
 
  const getSavedValidations = useCallback(() => {
  return loadSavedValidations();

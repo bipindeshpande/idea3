@@ -1,0 +1,388 @@
+/* ---------------------------------------------------
+   UTILITY CLASSES
+--------------------------------------------------- */
+
+/* UI primitives (CSS-variable driven) */
+.bg-app { background: var(--bg); }
+.bg-surface { background: var(--surface); }
+.bg-surface-muted { background: var(--surface-muted); }
+.bg-overlay-light { background: var(--overlay-light); }
+.bg-accent { background: var(--accent); }
+.bg-success { background: var(--success); }
+.bg-warning { background: var(--warning); }
+.bg-danger { background: var(--danger); }
+.text-primary { color: var(--text); }
+.text-secondary { color: var(--text-light); }
+.text-accent { color: var(--accent); }
+.text-on-accent { color: var(--on-accent); }
+.text-danger { color: var(--danger); }
+.border-default { border-color: var(--border); }
+.border-accent { border-color: var(--accent); }
+.border-danger { border-color: var(--danger); }
+.hover-surface:hover { background: var(--surface-hover); }
+
+.shadow-card { box-shadow: var(--shadow-card); }
+.shadow-card-lg { box-shadow: var(--shadow-card-lg); }
+
+/* Tailwind-variant-compatible helpers (so JSX can use these without custom logic) */
+.hover\:bg-surface-hover:hover { background: var(--surface-hover); }
+.hover\:bg-surface-muted:hover { background: var(--surface-muted); }
+.hover\:text-accent-hover:hover { color: var(--accent-hover); }
+.focus-visible\:outline-accent:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ui-card {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+}
+
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  border-radius: var(--radius-btn);
+  padding: 10px 18px;
+  font-family: var(--ui-font);
+  font-size: var(--ui-body);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
+}
+.ui-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.ui-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ui-btn-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  border: 1px solid transparent;
+}
+.ui-btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.ui-btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.ui-btn-secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+/* ---------------------------------------------------
+   Canonical UI primitives (design-system level)
+   NOTE: these are used by src/components/ui/ui-*.jsx
+--------------------------------------------------- */
+/* Legacy .ui-button system - maps to consolidated .ui-btn for backward compatibility */
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  border-radius: var(--radius-btn);
+  padding: 10px 18px;
+  font-family: var(--ui-font);
+  font-size: var(--ui-body);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
+}
+.ui-button:disabled { opacity: 0.6; cursor: not-allowed; }
+.ui-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.ui-button--primary { background: var(--accent); color: var(--on-accent); border: 1px solid transparent; }
+.ui-button--primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+.ui-button--secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.ui-button--secondary:hover:not(:disabled) { background: var(--surface-hover); }
+
+.ui-button--ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.ui-button--ghost:hover:not(:disabled) { background: var(--surface-hover); }
+
+.ui-button--danger { background: var(--danger); color: var(--on-accent); border: 1px solid transparent; }
+.ui-button--danger:hover:not(:disabled) { filter: brightness(0.95); }
+
+.ui-control {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.ui-control:focus { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); outline: none; }
+.ui-control:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ui-control::placeholder { color: var(--text-secondary); }
+
+.ui-card2 {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-card);
+}
+.ui-card2--muted { background: var(--surface-muted); }
+.ui-card2--elevated { box-shadow: var(--shadow-card-lg); }
+
+/* Canonical spacing helpers (component-level, token-driven) */
+.ui-pad-sm { padding: var(--space-16); }
+.ui-pad-md { padding: var(--space-24); }
+.ui-pad-lg { padding: var(--space-32); }
+
+/* Canonical radii helpers */
+.ui-radius-page { border-radius: var(--radius-page); }
+.ui-radius-card { border-radius: var(--radius-card); }
+.ui-radius-input { border-radius: var(--radius-input); }
+.ui-radius-btn { border-radius: var(--radius-btn); }
+
+.ui-heading {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+.ui-heading--h1 { 
+  font-size: var(--ui-h1); 
+  font-weight: 600; 
+  line-height: var(--ui-lh-tight); 
+  letter-spacing: -0.02em;
+}
+.ui-heading--h2 { 
+  font-size: var(--ui-h2); 
+  font-weight: 600; 
+  line-height: var(--ui-lh-tight); 
+  letter-spacing: -0.01em;
+}
+.ui-heading--h3 { 
+  font-size: var(--ui-h3); 
+  font-weight: 600; 
+  line-height: var(--ui-lh-normal); 
+}
+
+/* Semantic Typography Utilities */
+.ui-h1 {
+  font-size: var(--ui-h1);
+  line-height: var(--ui-lh-tight);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+
+.ui-h2 {
+  font-size: var(--ui-h2);
+  line-height: var(--ui-lh-tight);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+
+.ui-h3 {
+  font-size: var(--ui-h3);
+  line-height: var(--ui-lh-normal);
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+
+.ui-body {
+  font-size: var(--ui-body);
+  line-height: var(--ui-lh-relaxed);
+  font-weight: 400;
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+
+.ui-small {
+  font-size: var(--ui-small);
+  line-height: var(--ui-lh-normal);
+  color: var(--text);
+  font-family: var(--ui-font);
+}
+
+.ui-xs {
+  font-size: var(--ui-xs);
+  line-height: var(--ui-lh-normal);
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  font-family: var(--ui-font);
+}
+
+.ui-section { display: grid; gap: var(--space-16); }
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--text);
+}
+.ui-badge--success { background: var(--badge-success-bg); color: var(--badge-success-text); border-color: var(--badge-success-border); }
+.ui-badge--warning { background: var(--badge-warning-bg); color: var(--badge-warning-text); border-color: var(--badge-warning-border); }
+.ui-badge--danger { background: var(--badge-danger-bg); color: var(--badge-danger-text); border-color: var(--badge-danger-border); }
+.ui-badge--info { background: var(--badge-info-bg); color: var(--badge-info-text); border-color: var(--badge-info-border); }
+
+.ui-divider { height: 1px; width: 100%; background: var(--border); }
+
+/* Stepper (token-driven; no hardcoded gradients) */
+.ui-stepper { width: 100%; }
+.ui-stepper__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-light);
+}
+.ui-stepper__bar {
+  margin-top: 8px;
+  height: 8px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.ui-stepper__fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--accent);
+}
+
+.ui-field,
+.ui-input,
+.ui-select,
+.ui-textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+}
+
+/* Focus styling (no Tailwind color tokens) */
+.ui-field:focus,
+.ui-input:focus,
+.ui-select:focus,
+.ui-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* Semantic badges */
+.badge-success {
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
+  border: 1px solid var(--badge-success-border);
+}
+.badge-info {
+  background: var(--badge-info-bg);
+  color: var(--badge-info-text);
+  border: 1px solid var(--badge-info-border);
+}
+.badge-warning {
+  background: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
+  border: 1px solid var(--badge-warning-border);
+}
+.badge-danger {
+  background: var(--badge-danger-bg);
+  color: var(--badge-danger-text);
+  border: 1px solid var(--badge-danger-border);
+}
+
+/* Existing utility classes used across the app */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-24);
+}
+
+/* Legacy .button-primary / .button-secondary - maps to .ui-btn for backward compatibility */
+.button-primary,
+.primary-btn {
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: 10px 18px;
+  border-radius: var(--radius-btn);
+  font-family: var(--ui-font);
+  font-size: var(--ui-body);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.button-primary:hover:not(:disabled),
+.primary-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.button-secondary,
+.secondary-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 10px 18px;
+  border-radius: var(--radius-btn);
+  color: var(--text);
+  font-family: var(--ui-font);
+  font-size: var(--ui-body);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.button-secondary:hover:not(:disabled),
+.secondary-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--radius-input);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+

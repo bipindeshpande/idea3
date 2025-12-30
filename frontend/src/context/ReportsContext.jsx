@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useState, useEffect } 
 import { useAuth } from "./AuthContext.jsx";
 import { runDiscovery } from "../utils/discovery.js";
 import { splitProfileAndRecommendations } from "../utils/streamingParser.js";
+import apiClient, { ApiError } from "../utils/apiClient.js";
 
 const ReportsContext = createContext(null);
 const STORAGE_KEY = "sia_saved_runs";
@@ -114,7 +115,6 @@ export function ReportsProvider({ children }) {
  const [requestDuration, setRequestDuration] = useState(null);
  // Enrichment cache: Map<ideaId, enrichmentBody>
  const [enrichmentCache, setEnrichmentCache] = useState(new Map());
- const { getAuthHeaders } = useAuth();
 
  const setInputs = useCallback((nextInputs) => {
  setInputsState(normalizeInputs(nextInputs));
@@ -266,11 +266,11 @@ export function ReportsProvider({ children }) {
  setLoading(false);
  reject(err);
  });
- }).catch((err) => {
- // Handle rejection and return failure
- return { success: false };
- });
- }, [getAuthHeaders]);
+  }).catch((err) => {
+    // Handle rejection and return failure
+    return { success: false };
+  });
+}, []);
 
  const loadRunById = useCallback(async (runId) => {
  if (!runId) return null;
@@ -289,14 +289,10 @@ export function ReportsProvider({ children }) {
  // The API endpoint handles both "run_123" and "123" formats
  try {
  setLoading(true);
- const headers = getAuthHeaders();
  // Remove 'run_' prefix if present, API will handle normalization
  const apiRunId = runId.startsWith('run_') ? runId.substring(4) : runId;
- const response = await fetch(`/api/user/run/${encodeURIComponent(apiRunId)}`, {
- headers: headers,
- });
- if (response.ok) {
- const data = await response.json();
+ const data = await apiClient.get(`/user/run/${encodeURIComponent(apiRunId)}`);
+ 
  if (data.success && data.run) {
  setCurrentRunId(data.run.run_id);
  setInputsState(normalizeInputs(data.run.inputs || {}));
@@ -305,7 +301,7 @@ export function ReportsProvider({ children }) {
  const reports = typeof data.run.reports === 'string' 
  ? JSON.parse(data.run.reports) 
  : (data.run.reports || {});
- 
+
  // Ensure reports structure includes outputs format expected by frontend
  const formattedReports = {
  profile_analysis: data.run.profile_analysis || reports.profile_analysis || "",
@@ -313,7 +309,7 @@ export function ReportsProvider({ children }) {
  recommendations_structured: reports.recommendations_structured || null, // Include structured recommendations if available
  ...reports // Include any other report fields
  };
- 
+
  setReports(formattedReports);
  } catch (e) {
  console.error("Failed to parse reports:", e);
@@ -326,22 +322,13 @@ export function ReportsProvider({ children }) {
  from_api: true,
  };
  }
- } else if (response.status === 401) {
- // Auth failed - throw a specific error that won't trigger error state
- // The ProtectedRoute will handle the redirect
- setLoading(false);
- const error = new Error("Authentication required");
- error.status = 401;
- throw error;
- } else {
- const errorData = await response.json().catch(() => ({}));
- console.error("Failed to load run from API:", errorData.error || "Unknown error");
- }
  } catch (error) {
  // Re-throw 401 errors so ProtectedRoute can handle them
- if (error.status === 401) {
+ if (error instanceof ApiError && error.status === 401) {
  setLoading(false);
- throw error;
+ const authError = new Error("Authentication required");
+ authError.status = 401;
+ throw authError;
  }
  console.error("Failed to load run from API:", error);
  } finally {
@@ -349,7 +336,7 @@ export function ReportsProvider({ children }) {
  }
  
  return null;
- }, [getAuthHeaders]);
+ }, []);
 
  const deleteRun = useCallback((runId) => {
  const runs = loadSavedRuns();

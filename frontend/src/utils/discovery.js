@@ -2,17 +2,7 @@
  * Discovery API helper with streaming support using Server-Sent Events (SSE)
  */
 import { cleanStreamedText } from './streamingParser.js';
-
-/**
- * Get authentication headers from localStorage
- */
-function getAuthHeaders() {
- const sessionToken = localStorage.getItem('session_token');
- if (!sessionToken) return {};
- return {
- 'Authorization': `Bearer ${sessionToken}`
- };
-}
+import apiClient from './apiClient.js';
 
 /**
  * Run discovery with streaming support using EventSource (SSE)
@@ -59,15 +49,12 @@ async function runDiscoverySSE(payload, onChunk, onComplete, onError, timeout) {
  }, timeout);
  }
 
- const authHeaders = getAuthHeaders();
- const response = await fetch("/api/discovery?format=sse", {
+ // Use API client stream method for SSE
+ const response = await apiClient.stream("/discovery?format=sse", {
  method: "POST",
- headers: {
- "Content-Type": "application/json",
- ...authHeaders
- },
- body: JSON.stringify(payload),
- signal: controller.signal
+ body: payload,
+ timeout: timeout,
+ signal: controller.signal,
  });
 
  if (!response.ok) {
@@ -225,15 +212,12 @@ async function runDiscoveryPlain(payload, onChunk, onComplete, onError, timeout)
  }, timeout);
  }
 
- const authHeaders = getAuthHeaders();
- const response = await fetch("/api/discovery?format=plain", {
+ // Use API client stream method for plain text streaming
+ const response = await apiClient.stream("/discovery?format=plain", {
  method: "POST",
- headers: {
- "Content-Type": "application/json",
- ...authHeaders
- },
- body: JSON.stringify(payload),
- signal: controller.signal
+ body: payload,
+ timeout: timeout,
+ signal: controller.signal,
  });
 
  if (!response.ok) {

@@ -1,0 +1,366 @@
+/* ---------------------------------------------------
+   THEME TOKENS (final, clean, dark-mode-safe)
+--------------------------------------------------- */
+
+/* Import Inter font for workspace/app pages */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* IDEA theme tokens (light) */
+  --bg: #F9FAFB;
+  --surface: #FFFFFF;
+  --surface-muted: #F3F4F6;
+  --text: #1A1A1A;
+  --text-secondary: #6B7280;
+  --text-light: var(--text-secondary);
+  --border: #E5E7EB;
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --on-accent: #FFFFFF;
+  --surface-hover: #F3F4F6;
+  --overlay-light: rgba(15, 23, 42, 0.55);
+
+  /* Semantic */
+  --success: #16A34A;
+  --warning: #D97706;
+  --danger: #DC2626;
+
+  /* Prose / rich text */
+  --prose-heading: var(--text);
+  --prose-body: var(--text);
+  --prose-table-border: rgba(21, 50, 116, 0.08);
+  --prose-marker: var(--accent);
+
+  /* Chips / badges */
+  --chip-bg: rgba(255, 255, 255, 0.75);
+  --chip-text: #0f2456;
+  --chip-shadow: 0 6px 24px -16px rgba(15, 36, 74, 0.35);
+
+  /* Semantic badges (soft) */
+  --badge-success-bg: #DCFCE7;
+  --badge-success-text: #15803D;
+  --badge-success-border: #86EFAC;
+  --badge-info-bg: #E0E7FF;
+  --badge-info-text: #4338CA;
+  --badge-info-border: #A5B4FC;
+  --badge-warning-bg: #FFE4E6;
+  --badge-warning-text: #9F1239;
+  --badge-warning-border: #FDA4AF;
+  --badge-danger-bg: #FEE2E2;
+  --badge-danger-text: #B91C1C;
+  --badge-danger-border: #FCA5A5;
+
+  /* Typography */
+  --font-sans: Inter, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --ui-font: Inter, system-ui, sans-serif;
+
+  /* UI Typography Scale */
+  --ui-h1: clamp(28px, 4vw, 36px);
+  --ui-h2: clamp(22px, 3vw, 28px);
+  --ui-h3: 20px;
+  --ui-body: 16px;
+  --ui-small: 14px;
+  --ui-xs: 12px;
+
+  /* Line Heights */
+  --ui-lh-tight: 1.15;
+  --ui-lh-normal: 1.35;
+  --ui-lh-relaxed: 1.5;
+
+  /* Spacing + radii (8px scale) */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+
+  --radius-page: 24px;
+  --radius-card: 16px;
+  --radius-btn: 10px;
+  --radius-input: 8px;
+
+  /* Shadows */
+  --shadow-soft: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card-lg: 0 18px 60px -34px rgba(15, 23, 42, 0.25);
+
+  /* Backwards-compatible aliases (existing app uses these) */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-light: var(--text-light);
+  --color-primary: var(--accent);
+  --color-primary-hover: var(--accent-hover);
+  --color-radius-large: var(--radius-page);
+  --color-radius-medium: var(--radius-card);
+  --color-radius-small: var(--radius-input);
+  --primary: var(--accent);
+  --primary-hover: var(--accent-hover);
+
+  /* Marketing-only tokens (for public pages only) */
+  --mkt-hero-start: #eef2ff;
+  --mkt-hero-end: #dbeafe;
+  --mkt-surface: #ffffff;
+  --mkt-surface-hover: #f8fafc;
+  --mkt-surface-muted: #f8fafc;
+  --mkt-text: #1e293b;
+  --mkt-text-dim: #475569;
+  --mkt-heading: #0f172a;
+  --mkt-subheading: #334155;
+  --mkt-primary: #2563eb;
+  --mkt-primary-hover: #1d4ed8;
+  --mkt-outline: #e2e8f0;
+  --mkt-divider: #e2e8f0;
+  --mkt-card-shadow: 0 2px 12px rgba(0,0,0,0.06); /* Tighter shadow */
+  --mkt-layer-shadow: 0 12px 40px -8px rgba(0,0,0,0.12); /* Tighter shadow */
+  --mkt-card-primary: #eff6ff;      /* Primary blue tint - main card color */
+  --mkt-card-secondary: #f3e8ff;     /* Secondary purple tint - accent cards */
+  --mkt-card-accent: #ecfdf5;       /* Accent green tint - for variety and success states */
+  /* Removed: orange, yellow - use primary, secondary, accent only */
+  --mkt-paragraph: var(--mkt-text-dim);
+  --mkt-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  
+  /* Marketing typographic scale - Tightened for premium density */
+  --mkt-h1: 40px;
+  --mkt-h2: 32px;
+  --mkt-h3: 22px; /* Card titles: ~18px equivalent */
+  --mkt-body: 15px; /* Body text: 14-15px */
+  
+  /* Marketing typography tokens (V3) - Tightened for premium density */
+  --mkt-display: clamp(30px, 4.2vw, 48px);
+  --mkt-eyebrow: 12px;
+  --mkt-lead: 16px;
+  
+  /* Marketing gradient tokens (V3) */
+  --mkt-blob-purple: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  --mkt-blob-blue: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+  --mkt-blob-green: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+  --mkt-card-glow: 0 0 40px rgba(59, 130, 246, 0.2);
+  --mkt-glass-bg: rgba(255, 255, 255, 0.7);
+  --mkt-glass-border: rgba(255, 255, 255, 0.2);
+  
+  /* V5: 3D + Glass tokens */
+  --mkt-card-3d-shadow: 0 4px 16px rgba(0,0,0,0.1); /* Tighter 3D shadow */
+  --mkt-glow-primary: rgba(120, 100, 255, 0.6);
+  
+  /* Marketing spacing scale - Optimized for better density */
+  --mkt-pad-section: 40px; /* Reduced by 20% from 50px */
+  --mkt-pad-block: 30px; /* Reduced from 40px (~25%) */
+}
+
+/* Explicit light mode selector - ensures light tokens apply when data-theme="light" */
+[data-theme="light"] {
+  /* IDEA theme tokens (light) - explicitly set for light mode */
+  --bg: #F9FAFB;
+  --surface: #FFFFFF;
+  --surface-muted: #F3F4F6;
+  --text: #1A1A1A;
+  --text-secondary: #6B7280;
+  --text-light: var(--text-secondary);
+  --border: #E5E7EB;
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --on-accent: #FFFFFF;
+  --surface-hover: #F3F4F6;
+  --overlay-light: rgba(15, 23, 42, 0.55);
+
+  /* Semantic */
+  --success: #16A34A;
+  --warning: #D97706;
+  --danger: #DC2626;
+
+  /* Prose / rich text */
+  --prose-heading: var(--text);
+  --prose-body: var(--text);
+  --prose-table-border: rgba(21, 50, 116, 0.08);
+  --prose-marker: var(--accent);
+
+  /* Chips / badges */
+  --chip-bg: rgba(255, 255, 255, 0.75);
+  --chip-text: #0f2456;
+  --chip-shadow: 0 6px 24px -16px rgba(15, 36, 74, 0.35);
+
+  /* Semantic badges (soft) */
+  --badge-success-bg: #DCFCE7;
+  --badge-success-text: #15803D;
+  --badge-success-border: #86EFAC;
+  --badge-info-bg: #E0E7FF;
+  --badge-info-text: #4338CA;
+  --badge-info-border: #A5B4FC;
+  --badge-warning-bg: #FFE4E6;
+  --badge-warning-text: #9F1239;
+  --badge-warning-border: #FDA4AF;
+  --badge-danger-bg: #FEE2E2;
+  --badge-danger-text: #B91C1C;
+  --badge-danger-border: #FCA5A5;
+
+  /* Shadows */
+  --shadow-soft: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card-lg: 0 18px 60px -34px rgba(15, 23, 42, 0.25);
+
+  /* Marketing-only tokens (for public pages only) */
+  --mkt-hero-start: #eef2ff;
+  --mkt-hero-end: #dbeafe;
+  --mkt-surface: #ffffff;
+  --mkt-surface-hover: #f8fafc;
+  --mkt-surface-muted: #f8fafc;
+  --mkt-text: #1e293b;
+  --mkt-text-dim: #475569;
+  --mkt-heading: #0f172a;
+  --mkt-subheading: #334155;
+  --mkt-primary: #2563eb;
+  --mkt-primary-hover: #1d4ed8;
+  --mkt-outline: #e2e8f0;
+  --mkt-divider: #e2e8f0;
+  --mkt-card-shadow: 0 2px 12px rgba(0,0,0,0.06); /* Tighter shadow */
+  --mkt-layer-shadow: 0 12px 40px -8px rgba(0,0,0,0.12); /* Tighter shadow */
+  --mkt-card-primary: #eff6ff;      /* Primary blue tint - main card color */
+  --mkt-card-secondary: #f3e8ff;     /* Secondary purple tint - accent cards */
+  --mkt-card-accent: #ecfdf5;       /* Accent green tint - for variety and success states */
+  /* Removed: orange, yellow - use primary, secondary, accent only */
+  --mkt-paragraph: var(--mkt-text-dim);
+  --mkt-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  
+  /* Marketing typographic scale - Tightened for premium density */
+  --mkt-h1: 40px;
+  --mkt-h2: 32px;
+  --mkt-h3: 22px; /* Card titles: ~18px equivalent */
+  --mkt-body: 15px; /* Body text: 14-15px */
+  
+  /* Marketing typography tokens (V3) - Tightened for premium density */
+  --mkt-display: clamp(30px, 4.2vw, 48px);
+  --mkt-eyebrow: 12px;
+  --mkt-lead: 16px;
+  
+  /* Marketing gradient tokens (V3) */
+  --mkt-blob-purple: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  --mkt-blob-blue: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+  --mkt-blob-green: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+  --mkt-card-glow: 0 0 40px rgba(59, 130, 246, 0.2);
+  --mkt-glass-bg: rgba(255, 255, 255, 0.7);
+  --mkt-glass-border: rgba(255, 255, 255, 0.2);
+  
+  /* Marketing spacing scale - Optimized for better density */
+  --mkt-pad-section: 40px; /* Reduced by 20% from 50px */
+  --mkt-pad-block: 30px; /* Reduced from 40px (~25%) */
+}
+
+[data-theme="dark"] {
+  /* IDEA theme tokens (dark) */
+  --bg: #0F172A;
+  --surface: #1E293B;
+  --surface-muted: #24324a;
+  --text: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-light: var(--text-secondary);
+  --border: #334155;
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+  --on-accent: #FFFFFF;
+  --surface-hover: #24324a;
+  --overlay-light: rgba(2, 6, 23, 0.66);
+
+  /* UI Typography tokens (same sizes, colors adapt via --text variables) */
+  --ui-font: Inter, system-ui, sans-serif;
+  --ui-h1: clamp(28px, 4vw, 36px);
+  --ui-h2: clamp(22px, 3vw, 28px);
+  --ui-h3: 20px;
+  --ui-body: 16px;
+  --ui-small: 14px;
+  --ui-xs: 12px;
+  --ui-lh-tight: 1.15;
+  --ui-lh-normal: 1.35;
+  --ui-lh-relaxed: 1.5;
+
+  /* Semantic */
+  --success: #4ADE80;
+  --warning: #FBBF24;
+  --danger: #F87171;
+
+  --shadow-soft: 0 1px 2px rgba(0,0,0,0.28);
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.28);
+  --shadow-card-lg: 0 22px 70px -40px rgba(0, 0, 0, 0.55);
+
+  /* Prose / rich text */
+  --prose-heading: #E2E8F0;
+  --prose-body: #CBD5E1;
+  --prose-table-border: rgba(148, 163, 184, 0.2);
+  --prose-marker: #60A5FA;
+
+  /* Chips / badges */
+  --chip-bg: rgba(15, 23, 42, 0.6);
+  --chip-text: #E2E8F0;
+  --chip-shadow: 0 6px 24px -16px rgba(0, 0, 0, 0.5);
+
+  /* Semantic badges (soft) */
+  --badge-success-bg: rgba(34, 197, 94, 0.18);
+  --badge-success-text: #4ADE80;
+  --badge-success-border: rgba(34, 197, 94, 0.35);
+  --badge-info-bg: rgba(99, 102, 241, 0.20);
+  --badge-info-text: #C7D2FE;
+  --badge-info-border: rgba(99, 102, 241, 0.35);
+  --badge-warning-bg: rgba(244, 63, 94, 0.18);
+  --badge-warning-text: #FDA4AF;
+  --badge-warning-border: rgba(244, 63, 94, 0.35);
+  --badge-danger-bg: rgba(239, 68, 68, 0.18);
+  --badge-danger-text: #FCA5A5;
+  --badge-danger-border: rgba(239, 68, 68, 0.35);
+
+  /* Marketing-only tokens (for public pages only) */
+  --mkt-hero-start: rgba(30, 41, 59, 0.3);
+  --mkt-hero-end: rgba(51, 65, 85, 0.3);
+  --mkt-surface: #1e293b;
+  --mkt-surface-hover: #24324a;
+  --mkt-surface-muted: #0f172a;
+  --mkt-text: #f1f5f9;
+  --mkt-text-dim: #CBD5E1;
+  --mkt-heading: #f8fafc;
+  --mkt-subheading: #cbd5e1;
+  --mkt-primary: #3b82f6;
+  --mkt-primary-hover: #2563eb;
+  --mkt-outline: #334155;
+  --mkt-divider: #334155;
+  --mkt-card-shadow: 0 2px 12px rgba(0,0,0,0.3); /* Tighter shadow */
+  --mkt-layer-shadow: 0 12px 40px -8px rgba(0,0,0,0.4); /* Tighter shadow */
+  --mkt-card-primary: rgba(59, 130, 246, 0.1);      /* Primary blue tint - main card color */
+  --mkt-card-secondary: rgba(139, 92, 246, 0.1);     /* Secondary purple tint - accent cards */
+  --mkt-card-accent: rgba(34, 197, 94, 0.1);       /* Accent green tint - for variety and success states */
+  /* Removed: orange, yellow - use primary, secondary, accent only */
+  --mkt-paragraph: var(--mkt-text-dim);
+  --mkt-shadow: 0 4px 18px rgba(0,0,0,0.3);
+  
+  /* Marketing typographic scale - Tightened for premium density */
+  --mkt-h1: 40px;
+  --mkt-h2: 32px;
+  --mkt-h3: 22px; /* Card titles: ~18px equivalent */
+  --mkt-body: 15px; /* Body text: 14-15px */
+  
+  /* Marketing typography tokens (V3) - Tightened for premium density */
+  --mkt-display: clamp(30px, 4.2vw, 48px);
+  --mkt-eyebrow: 12px;
+  --mkt-lead: 16px;
+  
+  /* Marketing gradient tokens (V3) */
+  --mkt-blob-purple: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%);
+  --mkt-blob-blue: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+  --mkt-blob-green: radial-gradient(circle, rgba(34, 197, 94, 0.25) 0%, transparent 70%);
+  --mkt-card-glow: 0 0 40px rgba(59, 130, 246, 0.3);
+  --mkt-glass-bg: rgba(30, 41, 59, 0.6);
+  --mkt-glass-border: rgba(255, 255, 255, 0.1);
+  
+  /* V5: 3D + Glass tokens (dark mode) */
+  --mkt-card-3d-shadow: 0 4px 20px rgba(0,0,0,0.4); /* Tighter 3D shadow */
+  --mkt-glow-primary: rgba(120, 100, 255, 0.8);
+  
+  /* Marketing spacing scale - Optimized for better density */
+  --mkt-pad-section: 40px; /* Reduced by 20% from 50px */
+  --mkt-pad-block: 30px; /* Reduced from 40px (~25%) */
+}
+

@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import apiClient, { ApiError } from "../utils/apiClient.js";
 
 const AuthContext = createContext(null);
 const SESSION_TOKEN_KEY = "sia_session_token";
@@ -8,17 +9,16 @@ export function AuthProvider({ children }) {
  const [sessionToken, setSessionToken] = useState(localStorage.getItem(SESSION_TOKEN_KEY));
  const [loading, setLoading] = useState(true);
  const [subscription, setSubscription] = useState(null);
- const [lastActivity, setLastActivity] = useState(Date.now());
+ const lastActivityRef = useRef(Date.now());
 
  // Track user activity for inactivity timeout
  useEffect(() => {
  if (!sessionToken) return;
 
  const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
- let inactivityTimer;
 
  const updateActivity = () => {
- setLastActivity(Date.now());
+ lastActivityRef.current = Date.now();
  };
 
  const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
@@ -26,32 +26,25 @@ export function AuthProvider({ children }) {
  document.addEventListener(event, updateActivity, true);
  });
 
- const checkInactivity = () => {
- const timeSinceActivity = Date.now() - lastActivity;
+ // Use setInterval instead of recursive setTimeout for simpler cleanup
+ const intervalId = setInterval(() => {
+ const timeSinceActivity = Date.now() - lastActivityRef.current;
  if (timeSinceActivity >= INACTIVITY_TIMEOUT) {
  // Session expired due to inactivity
  localStorage.removeItem(SESSION_TOKEN_KEY);
  setSessionToken(null);
  setUser(null);
  setSubscription(null);
- // Clean up event listeners
- events.forEach(event => {
- document.removeEventListener(event, updateActivity, true);
- });
- return;
  }
- inactivityTimer = setTimeout(checkInactivity, 60000); // Check every minute
- };
-
- inactivityTimer = setTimeout(checkInactivity, 60000);
+ }, 60000); // Check every minute
 
  return () => {
- clearTimeout(inactivityTimer);
+ clearInterval(intervalId);
  events.forEach(event => {
  document.removeEventListener(event, updateActivity, true);
  });
  };
- }, [sessionToken, lastActivity]);
+ }, [sessionToken]);
 
  // Load user on mount
  useEffect(() => {
@@ -71,39 +64,26 @@ export function AuthProvider({ children }) {
  }
 
  try {
- const response = await fetch("/api/auth/me", {
- headers: {
- Authorization: `Bearer ${sessionToken}`,
- },
- });
-
- if (response.ok) {
- const data = await response.json();
+ // Use API client but handle 401 silently (don't redirect during auth check)
+ const data = await apiClient.get("/auth/me", { skipAuthRedirect: true });
  setUser(data.user);
  await checkSubscription();
- } else if (response.status === 401) {
- // Invalid or expired session - silently clear it
+ } catch (error) {
+ // Handle 401 silently (session expired/invalid)
+ if (error instanceof ApiError && error.status === 401) {
+ // Silently clear session - this is expected behavior
  localStorage.removeItem(SESSION_TOKEN_KEY);
  setSessionToken(null);
  setUser(null);
  setSubscription(null);
  } else {
- // Other error - log it
- console.error("Auth check failed with status:", response.status);
- localStorage.removeItem(SESSION_TOKEN_KEY);
- setSessionToken(null);
- setUser(null);
- setSubscription(null);
- }
- } catch (error) {
- // Only log network errors, not expected 401s
- if (error.name !== 'TypeError' || !error.message.includes('fetch')) {
+ // Log other errors but still clear session
  console.error("Auth check failed:", error);
- }
  localStorage.removeItem(SESSION_TOKEN_KEY);
  setSessionToken(null);
  setUser(null);
  setSubscription(null);
+ }
  } finally {
  setLoading(false);
  }
@@ -113,44 +93,25 @@ export function AuthProvider({ children }) {
  if (!sessionToken) return;
 
  try {
- const response = await fetch("/api/subscription/status", {
- headers: {
- Authorization: `Bearer ${sessionToken}`,
- },
- });
-
- if (response.ok) {
- const data = await response.json();
+ const data = await apiClient.get("/subscription/status");
  setSubscription(data.subscription);
- }
  } catch (error) {
+ // Silently fail subscription check - don't disrupt user experience
+ if (process.env.NODE_ENV === 'development') {
  console.error("Subscription check failed:", error);
+ }
  }
  }, [sessionToken]);
 
  const register = useCallback(async (email, password) => {
  try {
- const response = await fetch("/api/auth/register", {
- method: "POST",
- headers: {
- "Content-Type": "application/json",
- },
- body: JSON.stringify({ email, password }),
- });
-
- if (!response.ok) {
- const errorText = await response.text();
- let errorData;
- try {
- errorData = JSON.parse(errorText);
- } catch {
- return { success: false, error: `Server error: ${response.status}` };
- }
- return { success: false, error: errorData.error || "Registration failed" };
- }
-
- const data = await response.json();
+ const data = await apiClient.post("/auth/register", { email, password });
+ 
  if (data.success) {
+ if (!data.session_token) {
+ console.error('No session_token in response:', data);
+ return { success: false, error: "Registration succeeded but no session token received" };
+ }
  localStorage.setItem(SESSION_TOKEN_KEY, data.session_token);
  setSessionToken(data.session_token);
  setUser(data.user);
@@ -160,6 +121,9 @@ export function AuthProvider({ children }) {
  return { success: false, error: data.error || "Registration failed" };
  }
  } catch (error) {
+ if (error instanceof ApiError) {
+ return { success: false, error: error.message };
+ }
  console.error("Registration error:", error);
  return { success: false, error: error.message || "Network error" };
  }
@@ -167,28 +131,7 @@ export function AuthProvider({ children }) {
 
  const login = useCallback(async (email, password) => {
  try {
- const response = await fetch("/api/auth/login", {
- method: "POST",
- headers: {
- "Content-Type": "application/json",
- },
- body: JSON.stringify({ email, password }),
- });
-
- if (!response.ok) {
- const errorText = await response.text();
- let errorData;
- try {
- errorData = JSON.parse(errorText);
- } catch {
- console.error('Failed to parse error response:', errorText);
- return { success: false, error: `Server error: ${response.status}` };
- }
- console.error('Login failed:', errorData);
- return { success: false, error: errorData.error || "Login failed" };
- }
-
- const data = await response.json();
+ const data = await apiClient.post("/auth/login", { email, password });
  
  if (data.success) {
  if (!data.session_token) {
@@ -201,10 +144,12 @@ export function AuthProvider({ children }) {
  await checkSubscription();
  return { success: true };
  } else {
- console.error('Login response indicates failure:', data);
  return { success: false, error: data.error || "Login failed" };
  }
  } catch (error) {
+ if (error instanceof ApiError) {
+ return { success: false, error: error.message };
+ }
  console.error("Login exception:", error);
  return { success: false, error: error.message || "Network error" };
  }
@@ -213,15 +158,13 @@ export function AuthProvider({ children }) {
  const logout = useCallback(async () => {
  try {
  if (sessionToken) {
- await fetch("/api/auth/logout", {
- method: "POST",
- headers: {
- Authorization: `Bearer ${sessionToken}`,
- },
- });
+ await apiClient.post("/auth/logout");
  }
  } catch (error) {
+ // Silently fail logout on backend - still clear local state
+ if (process.env.NODE_ENV === 'development') {
  console.error("Logout failed:", error);
+ }
  } finally {
  localStorage.removeItem(SESSION_TOKEN_KEY);
  setSessionToken(null);
@@ -232,35 +175,25 @@ export function AuthProvider({ children }) {
 
  const forgotPassword = useCallback(async (email) => {
  try {
- const response = await fetch("/api/auth/forgot-password", {
- method: "POST",
- headers: {
- "Content-Type": "application/json",
- },
- body: JSON.stringify({ email }),
- });
-
- const data = await response.json();
+ const data = await apiClient.post("/auth/forgot-password", { email });
  return { success: data.success, message: data.message, reset_link: data.reset_link };
  } catch (error) {
+ if (error instanceof ApiError) {
  return { success: false, error: error.message };
+ }
+ return { success: false, error: error.message || "Network error" };
  }
  }, []);
 
  const resetPassword = useCallback(async (token, password) => {
  try {
- const response = await fetch("/api/auth/reset-password", {
- method: "POST",
- headers: {
- "Content-Type": "application/json",
- },
- body: JSON.stringify({ token, password }),
- });
-
- const data = await response.json();
+ const data = await apiClient.post("/auth/reset-password", { token, password });
  return { success: data.success, error: data.error, message: data.message };
  } catch (error) {
+ if (error instanceof ApiError) {
  return { success: false, error: error.message };
+ }
+ return { success: false, error: error.message || "Network error" };
  }
  }, []);
 
@@ -270,19 +203,16 @@ export function AuthProvider({ children }) {
  }
 
  try {
- const response = await fetch("/api/auth/change-password", {
- method: "POST",
- headers: {
- "Content-Type": "application/json",
- Authorization: `Bearer ${sessionToken}`,
- },
- body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+ const data = await apiClient.post("/auth/change-password", {
+ current_password: currentPassword,
+ new_password: newPassword,
  });
-
- const data = await response.json();
  return { success: data.success, error: data.error, message: data.message };
  } catch (error) {
+ if (error instanceof ApiError) {
  return { success: false, error: error.message };
+ }
+ return { success: false, error: error.message || "Network error" };
  }
  }, [sessionToken]);
 

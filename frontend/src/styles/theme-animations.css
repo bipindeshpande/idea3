@@ -1,0 +1,88 @@
+/* ---------------------------------------------------
+   ANIMATIONS AND KEYFRAMES
+--------------------------------------------------- */
+
+/* Marketing animations - V4 */
+@keyframes mkt-fadeUp {
+  0% { 
+    opacity: 0; 
+    transform: translateY(16px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes mkt-slideIn {
+  0% { 
+    opacity: 0; 
+    transform: translateX(24px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+@keyframes mkt-float {
+  0%, 100% { 
+    transform: translateY(0); 
+  }
+  50% { 
+    transform: translateY(-6px); 
+  }
+}
+
+@keyframes mkt-glowPulse {
+  0% { 
+    box-shadow: 0 0 0px var(--mkt-glow-primary); 
+  }
+  50% { 
+    box-shadow: 0 0 16px var(--mkt-glow-primary); 
+  }
+  100% { 
+    box-shadow: 0 0 0px var(--mkt-glow-primary); 
+  }
+}
+
+/* Animation utility classes */
+.mkt-anim-fade {
+  animation: mkt-fadeUp 0.8s ease forwards;
+}
+
+.mkt-anim-slide {
+  animation: mkt-slideIn 0.8s ease forwards;
+}
+
+.mkt-anim-float {
+  animation: mkt-float 4s ease-in-out infinite;
+}
+
+.mkt-anim-glow {
+  animation: mkt-glowPulse 3s ease-in-out infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mkt-anim-fade,
+  .mkt-anim-slide,
+  .mkt-anim-float,
+  .mkt-anim-glow {
+    animation: none !important;
+  }
+}
+
+/* Legacy animation classes (backward compatibility) */
+.animate-mkt-fadeUp {
+  animation: mkt-fadeUp 0.6s ease-out;
+}
+
+.animate-mkt-slideIn {
+  animation: mkt-slideIn 0.5s ease-out;
+}
+
+.animate-mkt-float {
+  animation: mkt-float 6s ease-in-out infinite;
+}
+
