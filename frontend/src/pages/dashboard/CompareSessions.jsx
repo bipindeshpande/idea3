@@ -4,6 +4,7 @@ import Seo from "../../components/common/Seo.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import LoadingIndicator from "../../components/common/LoadingIndicator.jsx";
 import { parseStructuredIdeas } from "../../utils/streamingParser.js";
+import UIButton from "../../components/ui/ui-button.jsx";
 
 export default function CompareSessionsPage() {
  const { getAuthHeaders, isAuthenticated } = useAuth();
@@ -166,19 +167,13 @@ export default function CompareSessionsPage() {
  <div className="mb-6">
  <div className="flex items-center justify-between">
  <div>
- <h1 className="text-2xl font-bold tracking-tight text-primary text-secondary md:text-3xl">
+ <h1 className="text-xl font-bold tracking-tight text-primary md:text-2xl">
  Compare Ideas
  </h1>
- <p className="mt-2 text-base text-secondary text-secondary">
+ <p className="mt-2 text-sm text-secondary">
  Select up to 5 ideas to compare side-by-side. See differences and patterns across your ideas.
  </p>
  </div>
- <Link
- to="/dashboard"
- className="px-4 py-2 bg-app bg-surface text-primary text-secondary rounded-lg hover:bg-surface hover:bg-surface transition text-sm font-medium"
- >
- ← Back to Dashboard
- </Link>
  </div>
  </div>
 
@@ -186,26 +181,26 @@ export default function CompareSessionsPage() {
  <div className="space-y-6">
  {/* Compare Button at Top */}
  <div className="flex justify-center">
- <button
+ <UIButton
+ variant="primary"
  onClick={handleCompare}
  disabled={comparing || selectedIdeas.size === 0}
-   className="ui-btn ui-btn-primary focus-visible:outline-accent disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {comparing ? "Comparing..." : `Compare ${selectedIdeas.size} Idea(s)`}
- </button>
+ </UIButton>
  </div>
 
  {/* Ideas List */}
  <section className="rounded-2xl border border-default bg-surface p-6 shadow-lg">
- <h2 className="mb-4 text-xl font-bold text-primary text-secondary">Select Ideas to Compare</h2>
+ <h2 className="mb-4 text-lg font-bold text-primary">Select Ideas to Compare</h2>
  {allIdeas.length === 0 ? (
- <p className="text-sm text-secondary text-secondary">No ideas found. Create some idea discovery sessions first.</p>
+ <p className="text-sm text-secondary">No ideas found. Create some idea discovery sessions first.</p>
  ) : (
  <div className="space-y-2">
  {allIdeas.map((idea) => (
  <label
  key={idea.id}
- className="flex cursor-pointer items-center gap-3 rounded-lg border border-default bg-surface p-4 transition hover:bg-surface hover:bg-surface"
+ className="flex cursor-pointer items-center gap-3 rounded-lg border border-default bg-surface p-4 transition hover:bg-surface"
  >
  <input
  type="checkbox"
@@ -214,13 +209,13 @@ export default function CompareSessionsPage() {
  className="h-4 w-4 rounded border-default text-accent "
  />
  <div className="flex-1">
- <p className="text-sm font-semibold text-primary text-secondary">
+ <p className="text-sm font-semibold text-primary">
  {idea.title}
  </p>
- <p className="text-xs text-secondary text-secondary mt-1">
+ <p className="text-xs text-secondary mt-1">
  {idea.summary}
  </p>
- <p className="text-xs text-secondary text-secondary mt-1">
+ <p className="text-xs text-secondary mt-1">
  {idea.runCreatedAt ? new Date(idea.runCreatedAt).toLocaleString() : "Unknown date"}
  </p>
  </div>
@@ -232,25 +227,25 @@ export default function CompareSessionsPage() {
 
  {/* Compare Button at Bottom */}
  <div className="flex justify-center">
- <button
+ <UIButton
+ variant="primary"
  onClick={handleCompare}
  disabled={comparing || selectedIdeas.size === 0}
- className="ui-btn ui-btn-primary focus-visible:outline-accent disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {comparing ? "Comparing..." : `Compare ${selectedIdeas.size} Idea(s)`}
- </button>
+ </UIButton>
  </div>
  </div>
  ) : (
  <div className="space-y-6">
  <div className="flex items-center justify-between">
- <h2 className="text-xl font-bold text-primary text-secondary">Comparison Results</h2>
+ <h2 className="text-lg font-bold text-primary">Comparison Results</h2>
  <button
  onClick={() => {
  setComparisonData(null);
  setSelectedIdeas(new Set());
  }}
- className="rounded-xl border border-default px-4 py-2 text-sm font-semibold text-primary text-secondary transition hover:bg-surface hover:bg-surface"
+ className="rounded-xl border border-default px-4 py-2 text-sm font-semibold text-primary transition hover:bg-surface"
  >
  Compare Different Ideas
  </button>

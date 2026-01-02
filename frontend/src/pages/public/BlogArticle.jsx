@@ -11,7 +11,7 @@ const blogArticles = {
   "how-to-validate-startup-idea": {
     slug: "how-to-validate-startup-idea",
     title: "How to Validate Your Startup Idea in 30 Days",
-    author: "Sarah Chen",
+    author: "Ideabunch",
     date: "2024-01-15",
     category: "Validation",
     image: null,
@@ -82,7 +82,7 @@ const relatedArticles = [
     slug: "how-to-validate-startup-idea",
     title: "How to Validate Your Startup Idea in 30 Days",
     excerpt: "A comprehensive guide to validating your idea quickly and effectively.",
-    author: "Sarah Chen",
+    author: "Ideabunch",
     date: "2024-01-15",
     category: "Validation",
   },

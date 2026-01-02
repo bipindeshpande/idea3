@@ -1,12 +1,14 @@
 import { NavLink } from "react-router-dom";
 
 const nav = [
- { to: "/dashboard", label: "Workspace" },
- { to: "/validate-idea", label: "Validate" },
- { to: "/advisor", label: "Discover" },
- { to: "/dashboard/runs", label: "History" },
+ { to: "/dashboard", label: "My Workspace" },
+ { to: "/validate-idea", label: "Validate Your Idea" },
+ { to: "/advisor", label: "Discover New Ideas" },
+ { to: "/dashboard/frameworks", label: "My Validation Frameworks" },
+ { to: "/resources/templates", label: "Browse Templates & Resources" },
+ { to: "/dashboard/runs", label: "View Run History" },
  { to: "/founder-connect", label: "Founder Network" },
- { to: "/account", label: "Account" },
+ { to: "/account", label: "Account Settings" },
 ];
 
 export default function Sidebar() {
@@ -25,7 +27,7 @@ export default function Sidebar() {
  to={item.to}
  className={({ isActive }) =>
  [
- "block ui-radius-btn px-3 py-2.5 text-base font-medium transition",
+ "block ui-radius-btn px-3 py-2.5 text-sm font-medium transition leading-tight",
             isActive
               ? "bg-surface-hover border border-accent text-primary"
               : "text-secondary hover:text-primary hover:bg-surface-hover",

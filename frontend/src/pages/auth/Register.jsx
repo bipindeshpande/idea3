@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
-import PageHeader from "../../components/layout/PageHeader.jsx";
 import PageContainer from "../../components/layout/PageContainer.jsx";
 import Card from "../../components/ui/Card.jsx";
 import UIButton from "../../components/ui/ui-button.jsx";
@@ -50,22 +49,22 @@ export default function Register() {
 
  return (
  <MarketingLayout>
- <PageContainer maxWidth="md">
- <Seo
- title="Create Account | Startup Idea Advisor"
- description="Create your account to get 3 days free access to startup idea recommendations and validation."
- path="/register"
- />
+      <PageContainer maxWidth="md" className="min-h-screen flex items-center justify-center py-12">
+        <Seo
+          title="Create Account | Startup Idea Advisor"
+          description="Create your account to get 3 days free access to startup idea recommendations and validation."
+          path="/register"
+        />
 
- <Card className="relative">
- <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-surface opacity-[0.09] blur-2xl pointer-events-none"></div>
- <div className="relative z-10">
- <PageHeader
- title="Create Account"
- description="Get 3 days free access to all features"
- />
+      <Card className="relative max-w-sm mx-auto w-full" padding="sm">
+        <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-surface opacity-[0.09] blur-2xl pointer-events-none"></div>
+        <div className="relative z-10">
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-primary mb-2">Create Account</h1>
+          <p className="text-sm text-secondary">Get 3 days free access to all features</p>
+        </div>
 
- <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
  <FormInput
  type="email"
  id="email"
@@ -117,14 +116,14 @@ export default function Register() {
  </UIButton>
  </form>
 
- <div className="mt-6 text-center text-sm text-secondary">
- Already have an account?{" "}
- <Link to="/login" className="font-semibold text-accent hover:text-accent transition-colors">
- Sign in
- </Link>
- </div>
+        <div className="mt-4 text-center text-sm text-secondary">
+          Already have an account?{" "}
+          <Link to="/login" className="font-semibold text-accent hover:text-accent transition-colors">
+            Sign in
+          </Link>
+        </div>
 
- <Card className="mt-6 text-center">
+        <Card className="mt-4 text-center">
  <p className="font-semibold text-primary">✨ 3 Days Free Trial</p>
  <p className="mt-1.5 text-primary text-primary leading-relaxed">Access all features for free. No credit card required.</p>
  </Card>

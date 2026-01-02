@@ -219,6 +219,8 @@ class LLMService(BaseService):
         schema: Optional[Dict[str, Any]] = None,
         provider: Optional[str] = None,
         model: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4000,
         run_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
@@ -230,6 +232,8 @@ class LLMService(BaseService):
             schema: JSON schema for structured output
             provider: LLM provider
             model: Model name
+            temperature: Temperature for generation (default: 0.7)
+            max_tokens: Maximum tokens to generate (default: 4000)
         
         Returns:
             Parsed JSON response
@@ -251,6 +255,8 @@ class LLMService(BaseService):
             system_prompt=system_prompt,
             provider=provider,
             model=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
             response_format=response_format,
             run_id=run_id,
         )

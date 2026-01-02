@@ -6,7 +6,7 @@ import ReactMarkdown from "react-markdown";
 export default function FinancialSnapshotSection({ financialSnapshot, content, isEnriching }) {
   if (financialSnapshot.length > 0) {
     return (
-      <div className="overflow-hidden ui-card2 ui-radius-card">
+      <div className="overflow-hidden rounded-xl">
         <table className="min-w-full text-sm">
           <thead className="bg-surface text-left uppercase tracking-wide text-primary">
             <tr>

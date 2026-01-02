@@ -44,6 +44,7 @@ class User(Base):
     psyche_profile = relationship("PsycheProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     founder_psychology = relationship("FounderPsychology", back_populates="user", uselist=False, cascade="all, delete-orphan")
     founder_profile = relationship("FounderProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    saved_frameworks = relationship("SavedFramework", back_populates="user", cascade="all, delete-orphan")
     
     def to_dict(self):
         """Convert to dictionary"""

@@ -1,10 +1,13 @@
 /**
  * Get theme configuration for different sections
+ * All cards now use consistent styling with only icon differences
  */
 export function getSectionTheme(sectionTitle) {
   const lowerTitle = sectionTitle.toLowerCase();
+  
+  // Consistent base theme for all cards
   const base = {
-    border: "border-default",
+    border: "border",
     bg: "bg-surface",
     headerBg: "bg-surface",
     text: "text-primary",
@@ -14,95 +17,40 @@ export function getSectionTheme(sectionTitle) {
     textColor: "var(--text)",
   };
 
-  if (lowerTitle.includes("financial") || lowerTitle.includes("snapshot")) {
-    return {
-      icon: "💰",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--warning)",
-      bgColor: "var(--surface-muted)",
-    };
+  // Icon mapping - keep icons for visual distinction
+  const iconMap = {
+    financial: "💰",
+    snapshot: "💰",
+    execution: "🗺️",
+    roadmap: "🗺️",
+    risk: "⚠️",
+    radar: "⚠️",
+    market: "📈",
+    signal: "📈",
+    customer: "👤",
+    persona: "👤",
+    validation: "❓",
+    question: "❓",
+    experiment: "🧪",
+    next: "🧪",
+    decision: "✅",
+    checkpoint: "✅",
+    why: "🎯",
+    fit: "🎯",
+  };
+
+  // Find matching icon
+  let icon = "📋"; // default
+  for (const [key, value] of Object.entries(iconMap)) {
+    if (lowerTitle.includes(key)) {
+      icon = value;
+      break;
+    }
   }
 
-  if (lowerTitle.includes("execution") || lowerTitle.includes("roadmap")) {
-    return {
-      icon: "🗺️",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--accent)",
-      bgColor: "var(--surface-muted)",
-    };
-  }
-
-  if (lowerTitle.includes("risk") || lowerTitle.includes("radar")) {
-    return {
-      icon: "⚠️",
-      ...base,
-      text: "text-danger",
-      borderColor: "var(--danger)",
-      bgColor: "var(--surface-muted)",
-    };
-  }
-
-  if (lowerTitle.includes("market") || lowerTitle.includes("signal")) {
-    return {
-      icon: "📈",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--accent)",
-      bgColor: "var(--surface-muted)",
-    };
-  }
-
-  if (lowerTitle.includes("customer") || lowerTitle.includes("persona")) {
-    return {
-      icon: "👤",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--accent)",
-      bgColor: "var(--surface-muted)",
-    };
-  }
-
-  if (lowerTitle.includes("validation") || lowerTitle.includes("question")) {
-    return {
-      icon: "❓",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--accent)",
-      bgColor: "var(--surface-muted)",
-    };
-  }
-
-  if (lowerTitle.includes("experiment") || lowerTitle.includes("next")) {
-    return {
-      icon: "🧪",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--warning)",
-      bgColor: "var(--surface-muted)",
-    };
-  }
-
-  if (lowerTitle.includes("decision") || lowerTitle.includes("checkpoint")) {
-    return {
-      icon: "✅",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--success)",
-      bgColor: "var(--surface-muted)",
-    };
-  }
-
-  if (lowerTitle.includes("30") || lowerTitle.includes("60") || lowerTitle.includes("90") || lowerTitle.includes("outlook")) {
-    return {
-      icon: "📅",
-      ...base,
-      text: "text-accent",
-      borderColor: "var(--accent)",
-      bgColor: "var(--surface-muted)",
-    };
-  }
-
-  return { icon: "📋", ...base, bg: "bg-app", headerBg: "bg-app", bgColor: "var(--bg)" };
+  // Return consistent styling for all cards
+  return {
+    icon,
+    ...base,
+  };
 }

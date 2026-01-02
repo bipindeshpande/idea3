@@ -13,6 +13,7 @@ from .founder import router as founder_router
 from .validation import router as validation_router
 from .psyche import router as psyche_router
 from .payment import router as payment_router
+from .frameworks import router as frameworks_router
 
 router = APIRouter()
 
@@ -38,6 +39,7 @@ router.include_router(founder_router, prefix="/founder", tags=["founder"])
 router.include_router(validation_router, prefix="", tags=["validation"])
 router.include_router(psyche_router)
 router.include_router(payment_router, prefix="/payment", tags=["payment"])
+router.include_router(frameworks_router, prefix="", tags=["frameworks"])
 
 
 # Contact endpoint (expected at /api/contact, not /api/public/contact)

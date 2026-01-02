@@ -34,6 +34,10 @@ class CompareSessionsRequest(BaseModel):
     validation_ids: List[str] = []
 
 
+class UpdatePreferencesRequest(BaseModel):
+    preferences: Dict[str, Any]
+
+
 @router.get("/dashboard", response_model=Dict[str, Any], status_code=status.HTTP_200_OK)
 async def get_user_dashboard(
     current_user: User = Depends(get_current_user),
@@ -385,6 +389,51 @@ async def delete_user_run(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete run: {str(e)}"
+        )
+
+
+@router.put("/preferences", response_model=Dict[str, Any], status_code=status.HTTP_200_OK)
+async def update_user_preferences(
+    request: UpdatePreferencesRequest = Body(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update user preferences
+    
+    Request Body:
+        - preferences: Dictionary of preferences to update
+    
+    Returns:
+        Updated user preferences
+    """
+    try:
+        user = db.query(User).filter(User.user_id == current_user.user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Merge with existing preferences
+        current_preferences = user.preferences or {}
+        updated_preferences = {**current_preferences, **request.preferences}
+        
+        user.preferences = updated_preferences
+        db.commit()
+        db.refresh(user)
+        
+        return {
+            "success": True,
+            "preferences": user.preferences
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update preferences: {str(e)}"
         )
 
 

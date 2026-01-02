@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useState, useEffect } 
 import { useAuth } from "./AuthContext.jsx";
 import { runDiscovery } from "../utils/discovery.js";
 import { splitProfileAndRecommendations } from "../utils/streamingParser.js";
+import { normalizeRunId } from "../utils/runs.js";
 import apiClient, { ApiError } from "../utils/apiClient.js";
 
 const ReportsContext = createContext(null);
@@ -338,19 +339,64 @@ export function ReportsProvider({ children }) {
  return null;
  }, []);
 
- const deleteRun = useCallback((runId) => {
- const runs = loadSavedRuns();
- const filtered = runs.filter((run) => run.id !== runId);
- localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+ const deleteRun = useCallback(async (runId, shouldUseAPI = false) => {
+  if (!runId) {
+   throw new Error("Cannot delete: runId is required");
+  }
+  
+  const normalizedRunId = normalizeRunId(runId);
+  if (!normalizedRunId) {
+   throw new Error("Cannot delete: invalid runId format");
+  }
+  
+  // If authenticated, delete via API
+  if (shouldUseAPI) {
+   try {
+    await apiClient.delete(`/user/run/${encodeURIComponent(normalizedRunId)}`);
+   } catch (error) {
+    throw error;
+   }
+  }
  
- // If deleting the current run, clear state
- if (currentRunId === runId) {
- setCurrentRunId(null);
- setReports(null);
- setInputsState(defaultInputs);
- }
+  // Also remove from localStorage - be very specific about matching
+  const runs = loadSavedRuns();
+  
+  const filtered = runs.filter((run) => {
+   const runIdToCompare = run.id || run.run_id;
+   if (!runIdToCompare) {
+    // Keep runs without IDs (shouldn't happen, but be safe)
+    return true;
+   }
+   
+   const normalizedCompare = normalizeRunId(runIdToCompare);
+   
+   // Only delete if it matches the target runId in ANY format
+   // Keep the run if it doesn't match any of these formats
+   const shouldDelete = 
+    normalizedCompare === normalizedRunId ||  // Normalized IDs match
+    runIdToCompare === runId ||               // Original IDs match
+    runIdToCompare === `run_${runId}` ||      // Format: run_<original>
+    runIdToCompare === `run_${normalizedRunId}` || // Format: run_<normalized>
+    normalizedCompare === runId ||             // Normalized matches original
+    runIdToCompare === normalizedRunId;       // Original matches normalized
+   
+   return !shouldDelete; // Keep if NOT shouldDelete
+  });
+  
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
  
- return filtered;
+  // If deleting the current run, clear state
+  const currentNormalized = normalizeRunId(currentRunId);
+  if (currentNormalized === normalizedRunId || 
+      currentRunId === runId || 
+      currentRunId === `run_${runId}` ||
+      currentRunId === normalizedRunId) {
+   setCurrentRunId(null);
+   setReports(null);
+   setInputsState(defaultInputs);
+  }
+ 
+  return filtered;
  }, [currentRunId]);
 
  const clearAllSavedRuns = useCallback(() => {

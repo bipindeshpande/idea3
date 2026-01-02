@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
+import UIButton from "../ui/ui-button.jsx";
 
 function SessionCard({ 
  session, 
@@ -76,11 +77,140 @@ function SessionCard({
  
  {isValidation ? (
  <>
- <h3 className="text-lg font-semibold text-primary mt-1">
- {session.idea_explanation || "Validation"}
- </h3>
- {session.overall_score !== undefined && (
+ <h4 className="text-sm font-semibold text-primary mt-1 mb-3">
+  {(() => {
+   // Priority 1: Use solution text from category_answers (this is what's displayed in the card body)
+   // This should be the full descriptive text, not a dropdown value
+   const solutionText = session.category_answers?.solution;
+   if (solutionText) {
+    const solution = String(solutionText).trim();
+    // Use it if it's meaningful (longer than 3 chars and not just numbers/spaces)
+    if (solution.length >= 3 && !/^[\d\s\-]+$/.test(solution)) {
+     // Extract first sentence or truncate
+     const firstSentence = solution.split(/[.!?]/)[0].trim();
+     if (firstSentence && firstSentence.length >= 3 && firstSentence.length <= 120) {
+      return firstSentence;
+     }
+     return solution.length > 100 ? solution.substring(0, 100) + "..." : solution;
+    }
+   }
+   
+   // Priority 2: Use problem text from category_answers
+   const problemText = session.category_answers?.problem;
+   if (problemText) {
+    const problem = String(problemText).trim();
+    if (problem.length >= 3 && !/^[\d\s\-]+$/.test(problem)) {
+     const firstSentence = problem.split(/[.!?]/)[0].trim();
+     if (firstSentence && firstSentence.length >= 3 && firstSentence.length <= 120) {
+      return firstSentence;
+     }
+     return problem.length > 100 ? problem.substring(0, 100) + "..." : problem;
+    }
+   }
+   
+   // Priority 3: Use idea_explanation (the full text description)
+   if (session.idea_explanation) {
+    const explanation = String(session.idea_explanation).trim();
+    if (explanation.length >= 3 && !/^[\d\s\-]+$/.test(explanation)) {
+     const firstSentence = explanation.split(/[.!?]/)[0].trim();
+     if (firstSentence && firstSentence.length >= 3 && firstSentence.length <= 120) {
+      return firstSentence;
+     }
+     return explanation.length > 100 ? explanation.substring(0, 100) + "..." : explanation;
+    }
+   }
+   
+   // Priority 4: Build descriptive title from dropdowns (solution_type + industry)
+   if (session.category_answers) {
+    const parts = [];
+    const solutionType = session.category_answers.solution_type;
+    const industry = session.category_answers.industry;
+    
+    // Use solution_type if it's meaningful text (not just "1")
+    if (solutionType) {
+     const st = String(solutionType).trim();
+     if (st.length >= 3 && !/^[\d]+$/.test(st)) {
+      parts.push(st);
+     }
+    }
+    // Use industry if available
+    if (industry) {
+     const ind = String(industry).trim();
+     if (ind.length >= 2 && !/^[\d]+$/.test(ind)) {
+      parts.push(ind);
+     }
+    }
+    if (parts.length > 0) {
+     return parts.join(" - ");
+    }
+   }
+   
+   // Priority 5: Try to get any meaningful text from validation_result.details
+   if (session.validation_result?.details && typeof session.validation_result.details === 'object') {
+    const details = session.validation_result.details;
+    // Look for any detail with substantial text content
+    for (const [key, value] of Object.entries(details)) {
+     if (typeof value === 'string') {
+      const text = value.trim();
+      if (text.length >= 20 && !/^[\d\s\-]+$/.test(text)) {
+       return text.length > 100 ? text.substring(0, 100) + "..." : text;
+      }
+     }
+    }
+   }
+   
+   // Last resort: Show validation ID (this should be unique)
+   const id = session.validation_id || session.id;
+   return id ? `Validation ${String(id).substring(0, 8)}` : "Idea Validation";
+  })()}
+ </h4>
+ {session.category_answers && Object.keys(session.category_answers).length > 0 && (
+ <div className="space-y-3 mt-3">
+ {session.category_answers.problem && (
+ <div>
+ <p className="text-xs font-semibold text-secondary mb-1">1. Problem:</p>
+ <p className="text-sm text-primary leading-relaxed">{session.category_answers.problem}</p>
+ </div>
+ )}
+ {session.category_answers.solution && (
+ <div>
+ <p className="text-xs font-semibold text-secondary mb-1">2. Solution:</p>
+ <p className="text-sm text-primary leading-relaxed">{session.category_answers.solution}</p>
+ </div>
+ )}
+ {session.category_answers.target_user && (
+ <div>
+ <p className="text-xs font-semibold text-secondary mb-1">3. User:</p>
+ <p className="text-sm text-primary leading-relaxed">{session.category_answers.target_user}</p>
+ </div>
+ )}
+ {session.category_answers.differentiation && (
+ <div>
+ <p className="text-xs font-semibold text-secondary mb-1">4. Differentiation:</p>
+ <p className="text-sm text-primary leading-relaxed">{session.category_answers.differentiation}</p>
+ </div>
+ )}
+ {session.category_answers.monetization && (
+ <div>
+ <p className="text-xs font-semibold text-secondary mb-1">5. Monetization:</p>
+ <p className="text-sm text-primary leading-relaxed">{session.category_answers.monetization}</p>
+ </div>
+ )}
+ {session.category_answers.scope && (
+ <div>
+ <p className="text-xs font-semibold text-secondary mb-1">6. Scope/Region:</p>
+ <p className="text-sm text-primary leading-relaxed">{session.category_answers.scope}</p>
+ </div>
+ )}
+ </div>
+ )}
+ {(!session.category_answers || Object.keys(session.category_answers).length === 0) && session.idea_explanation && (
  <div className="mt-2">
+ <p className="text-sm text-primary leading-relaxed">{session.idea_explanation}</p>
+ </div>
+ )}
+ {session.overall_score !== undefined && (
+ <div className="mt-3 pt-3 border-t border-default">
  <p className="text-secondary">
  <span className="font-medium">Score:</span> {session.overall_score.toFixed(1)}/10
  </p>
@@ -127,30 +257,40 @@ function SessionCard({
  
  <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
  {onEdit && (
- <button
+ <UIButton
+ variant="action"
+ size="sm"
  onClick={() => onEdit(session)}
- className="ui-btn ui-btn-secondary px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 whitespace-nowrap"
+ className="whitespace-nowrap"
  >
  Edit
- </button>
+ </UIButton>
  )}
  
  {isValidation ? (
- <Link
+ <UIButton
+ as={Link}
  to={`/validate-result?id=${session.validation_id || session.id}`}
- className="ui-btn ui-btn-secondary px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 whitespace-nowrap"
+ variant="action"
+ size="sm"
+ className="whitespace-nowrap"
  >
  View
- </Link>
+ </UIButton>
  ) : (
  <>
- <Link
+ <UIButton
+ as={Link}
  to={`/results/profile?id=${session.run_id || session.id}`}
- className="ui-btn ui-btn-secondary px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 whitespace-nowrap"
+ variant="action"
+ size="sm"
+ className="whitespace-nowrap"
  >
  View profile
- </Link>
- <button
+ </UIButton>
+ <UIButton
+ variant="action"
+ size="sm"
  onClick={() => {
  // Pass full run data through navigation state to prevent re-computation
  navigate("/results/recommendations", { 
@@ -160,20 +300,22 @@ function SessionCard({
  } 
  });
  }}
- className="ui-btn ui-btn-secondary px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 whitespace-nowrap"
+ className="whitespace-nowrap"
  >
  View recommendations
- </button>
+ </UIButton>
  </>
  )}
  
  {onDelete && (
- <button
+ <UIButton
+ variant="action"
+ size="sm"
  onClick={() => onDelete(session)}
- className="ui-btn ui-btn-secondary px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 whitespace-nowrap"
+ className="whitespace-nowrap"
  >
  Delete
- </button>
+ </UIButton>
  )}
  </div>
  </div>

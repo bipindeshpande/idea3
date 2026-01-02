@@ -1,6 +1,7 @@
 import { useState, memo } from "react";
 import { Link } from "react-router-dom";
 import SessionCard from "./SessionCard.jsx";
+import TabButton from "../ui/ui-tab-button.jsx";
 
 function DashboardSessionsTab({
  activeTab,
@@ -17,7 +18,7 @@ function DashboardSessionsTab({
  return (
  <>
  <div className="mb-6">
- <p className="text-primary text-primary leading-relaxed">
+ <p className="text-sm text-secondary leading-relaxed">
  Manage your idea discovery runs and validations - revisit previous recommendations or generate new ones.
  </p>
  </div>
@@ -25,32 +26,24 @@ function DashboardSessionsTab({
  {/* Tabs */}
  <div className="mb-6 border-b border-default">
  <nav className="flex gap-2" aria-label="Session tabs">
- <button
+ <TabButton
+ active={activeTab === "ideas"}
  onClick={() => setActiveTab("ideas")}
- className={`px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
- activeTab === "ideas"
- ? "border-default text-primary"
- : "border-transparent text-secondary hover:text-primary hover:border-default"
- }`}
  >
  Ideas Search ({filteredRuns.length})
- </button>
- <button
+ </TabButton>
+ <TabButton
+ active={activeTab === "validations"}
  onClick={() => setActiveTab("validations")}
- className={`px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2 ${
- activeTab === "validations"
- ? "border-default text-primary"
- : "border-transparent text-secondary hover:text-primary hover:border-default"
- }`}
  >
  Validations ({filteredValidations.length})
- </button>
+ </TabButton>
  </nav>
  </div>
  
  {loadingRuns ? (
  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <p className="text-primary text-primary leading-relaxed">Loading sessions...</p>
+ <p className="text-sm text-secondary leading-relaxed">Loading sessions...</p>
  </div>
  ) : (
  <>

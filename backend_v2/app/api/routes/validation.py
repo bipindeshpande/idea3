@@ -17,6 +17,7 @@ class ValidateIdeaRequest(BaseModel):
     idea_explanation: str
     idea_id: Optional[str] = None  # Optional: for validating recommendation ideas
     idea_metadata: Optional[Dict[str, Any]] = None  # Optional: idea title, summary, etc.
+    include_next_steps: Optional[bool] = True  # Optional: whether to generate next_steps (default: True)
 
 
 @router.post("/validate-idea", status_code=status.HTTP_200_OK)
@@ -46,7 +47,8 @@ async def validate_idea(
             category_answers=request.category_answers,
             idea_explanation=request.idea_explanation,
             idea_id=request.idea_id,
-            idea_metadata=request.idea_metadata
+            idea_metadata=request.idea_metadata,
+            include_next_steps=request.include_next_steps if request.include_next_steps is not None else True
         )
         
         return result

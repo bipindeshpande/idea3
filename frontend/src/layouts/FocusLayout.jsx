@@ -13,7 +13,7 @@ export default function FocusLayout({
 
  {/* Focus Mode layout canvas - reduced vertical space */}
  <main className="w-full">
- <div className="max-w-[820px] mx-auto px-4 py-6 md:py-8">
+ <div className="max-w-[1148px] mx-auto px-4 py-6 md:py-8">
  {/* Pages own their internal spacing; FocusLayout only centers the canvas */}
  {children}
  </div>

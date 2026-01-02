@@ -34,8 +34,6 @@ const tagTintMap = {
   "Product": "green",
   "Side business": "orange",
   "Playbook": "purple",
-  "Interviews": "green",
-  "Customer Research": "green",
 };
 
 const resourceLinks = {

@@ -10,7 +10,7 @@ export default function ValidationQuestionsSection({ validationQuestions, conten
         {validationQuestions.map(({ question, listenFor, actOn }, index) => (
           <div
             key={index}
-            className="ui-card2 ui-pad-md ui-radius-card shadow-card text-sm"
+            className="ui-card2 ui-pad-md rounded-xl shadow-card text-sm"
           >
             <p className="font-semibold text-primary">Question {index + 1}</p>
             <p className="mt-2 text-sm text-primary text-primary">{question}</p>

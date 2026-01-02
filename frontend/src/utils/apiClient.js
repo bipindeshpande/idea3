@@ -93,13 +93,42 @@ class ApiClient {
    * Parse successful response
    */
   async parseResponse(response) {
+    // Handle 204 No Content (common for DELETE requests)
+    if (response.status === 204 || response.status === 201) {
+      return null;
+    }
+    
+    // Check if response has content
+    const contentLength = response.headers.get("content-length");
+    if (contentLength === "0") {
+      return null;
+    }
+    
     const contentType = response.headers.get("content-type");
     
     if (contentType && contentType.includes("application/json")) {
-      return await response.json();
+      try {
+        return await response.json();
+      } catch (e) {
+        // If JSON parsing fails, return null for empty responses
+        if (response.status === 204) {
+          return null;
+        }
+        throw e;
+      }
     }
     
-    return await response.text();
+    // Try to get text, but handle empty responses
+    try {
+      const text = await response.text();
+      return text || null;
+    } catch (e) {
+      // If text parsing fails and it's a 204, that's expected
+      if (response.status === 204) {
+        return null;
+      }
+      throw e;
+    }
   }
 
   /**

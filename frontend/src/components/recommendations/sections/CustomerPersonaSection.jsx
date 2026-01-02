@@ -13,7 +13,7 @@ export default function CustomerPersonaSection({ personaMarkdown, validationQues
           <p className="text-sm text-primary text-primary mb-3">
             A detailed profile of your ideal customer—their demographics, pain points, goals, and buying behavior.
           </p>
-          <div className="ui-card2 ui-pad-md ui-radius-card shadow-card">
+          <div className="ui-card2 ui-pad-md rounded-xl shadow-card">
             <ReactMarkdown
               components={{
                 p: ({ node, ...props }) => (
@@ -45,7 +45,7 @@ export default function CustomerPersonaSection({ personaMarkdown, validationQues
             {validationQuestions.map(({ question, listenFor, actOn }, index) => (
               <div
                 key={index}
-                className="ui-card2 ui-pad-md ui-radius-card shadow-card text-sm"
+                className="ui-card2 ui-pad-md rounded-xl shadow-card text-sm"
               >
                 <p className="font-semibold text-primary">Question {index + 1}</p>
                 <p className="mt-2 text-sm text-primary">{question}</p>

@@ -8,8 +8,7 @@ const footerLinks = {
  { label: "Founder Connect", to: "/founder-connect" },
  ],
  "Resources": [
- { label: "Startup Frameworks", to: "/frameworks" },
- { label: "Templates & Resources", to: "/resources/templates" },
+ { label: "Templates & Frameworks", to: "/resources/templates" },
  { label: "Blog & Playbooks", to: "/blog" },
  ],
  "Company": [

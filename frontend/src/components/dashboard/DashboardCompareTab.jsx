@@ -104,7 +104,7 @@ function DashboardCompareTab({
  <div className="space-y-6">
  <div className="mb-6">
  <h3 className="text-lg font-semibold text-primary flex items-center gap-2 mb-2">Compare Ideas</h3>
- <p className="text-primary text-primary leading-relaxed">
+ <p className="text-sm text-secondary leading-relaxed">
  Compare your ideas side by side. Select up to 5 ideas to see their differences and similarities.
  </p>
  </div>
@@ -117,7 +117,7 @@ function DashboardCompareTab({
  <h4 className="text-lg font-semibold text-primary flex items-center gap-2">Select Ideas to Compare</h4>
  </div>
  {allIdeas.length === 0 ? (
- <p className="text-primary text-primary leading-relaxed">No ideas yet. These appear as you explore or validate ideas.</p>
+ <p className="text-sm text-secondary leading-relaxed">No ideas yet. These appear as you explore or validate ideas.</p>
  ) : (
  <div className="space-y-4">
  {allIdeas.map((idea) => {
@@ -155,7 +155,7 @@ function DashboardCompareTab({
  <p className="text-lg font-semibold text-primary">
  {idea.title}
  </p>
- <p className="text-primary text-primary leading-relaxed mt-1">
+ <p className="text-sm text-secondary leading-relaxed mt-1">
  {idea.summary}
  </p>
  <p className="text-sm text-secondary mt-1">

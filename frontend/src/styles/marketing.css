@@ -3,6 +3,14 @@
    Only used on public/marketing pages, not in app UI
 --------------------------------------------------- */
 
+/* Force DM Sans font for all marketing pages */
+.marketing-layout,
+.marketing-layout *,
+.marketing-layout *::before,
+.marketing-layout *::after {
+  font-family: var(--font-family) !important;
+}
+
 /* Gradient backgrounds - Updated per spec */
 .marketing-gradient {
   background: linear-gradient(135deg, var(--accent) 0%, #7C3AED 100%);

@@ -201,13 +201,6 @@ export default function AdvisorResourcesPage() {
  </Card>
  </div>
  </div>
-
- {/* Back to Dashboard */}
- <div className="mt-8 pt-6 border-t border-default">
- <UIButton as={Link} to="/dashboard" variant="secondary">
- ← Back to Dashboard
- </UIButton>
- </div>
  </PageContainer>
  );
 }

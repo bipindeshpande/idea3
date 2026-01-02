@@ -24,6 +24,7 @@ const productLinks = [
 
 const resourceLinks = [
   { label: "Templates", to: "/resources/templates" },
+  { label: "Validation Frameworks", to: "/resources/templates" },
   { label: "Blog", to: "/blog" },
 ];
 
@@ -179,7 +180,44 @@ export default function Navigation() {
             </>
           ) : (
             <>
+              <NavLink
+                to="/resources/templates"
+                onClick={closeAll}
+                className={({ isActive }) =>
+                  `px-3 py-2 text-base font-medium transition-colors`
+                }
+                style={({ isActive }) => ({
+                  fontFamily: "var(--font-family)",
+                  color: isActive ? "var(--mkt-primary)" : "var(--mkt-heading)",
+                })}
+              >
+                Resources
+              </NavLink>
+              <NavLink
+                to="/blog"
+                onClick={closeAll}
+                className={({ isActive }) =>
+                  `px-3 py-2 text-base font-medium transition-colors`
+                }
+                style={({ isActive }) => ({
+                  fontFamily: "var(--font-family)",
+                  color: isActive ? "var(--mkt-primary)" : "var(--mkt-heading)",
+                })}
+              >
+                Blog
+              </NavLink>
               <div className="flex-1" />
+              <NavLink
+                to="/dashboard"
+                onClick={closeAll}
+                className="px-3 py-2 text-base font-medium transition-colors"
+                style={{
+                  fontFamily: "var(--font-family)",
+                  color: "var(--mkt-heading)",
+                }}
+              >
+                Workspace
+              </NavLink>
               <UserMenu />
             </>
           )}
@@ -344,31 +382,75 @@ export default function Navigation() {
             </>
           ) : (
             <>
-              <NavLink
-                to="/founder-psychology"
-                onClick={closeAll}
-                className="block py-2 text-sm"
-                style={{
-                  fontFamily: "var(--font-family)",
-                  color: "var(--mkt-heading)",
-                }}
-              >
-                Founder Profile
-              </NavLink>
-              <NavLink
-                to="/psyche/questionnaire"
-                onClick={closeAll}
-                className="block py-2 text-sm"
-                style={{
-                  fontFamily: "var(--font-family)",
-                  color: "var(--mkt-heading)",
-                }}
-              >
-                Decision & Work Style
-              </NavLink>
+              <div className="pt-2">
+                <p className="text-xs font-semibold mb-2 uppercase" style={{ color: "var(--mkt-text-dim)" }}>
+                  Navigation
+                </p>
+                <NavLink
+                  to="/dashboard"
+                  onClick={closeAll}
+                  className="block py-2 text-sm"
+                  style={{
+                    fontFamily: "var(--font-family)",
+                    color: "var(--mkt-heading)",
+                  }}
+                >
+                  Workspace
+                </NavLink>
+                <NavLink
+                  to="/resources/templates"
+                  onClick={closeAll}
+                  className="block py-2 text-sm"
+                  style={{
+                    fontFamily: "var(--font-family)",
+                    color: "var(--mkt-heading)",
+                  }}
+                >
+                  Resources
+                </NavLink>
+                <NavLink
+                  to="/blog"
+                  onClick={closeAll}
+                  className="block py-2 text-sm"
+                  style={{
+                    fontFamily: "var(--font-family)",
+                    color: "var(--mkt-heading)",
+                  }}
+                >
+                  Blog
+                </NavLink>
+              </div>
+              <div className="pt-2">
+                <p className="text-xs font-semibold mb-2 uppercase" style={{ color: "var(--mkt-text-dim)" }}>
+                  Profile
+                </p>
+                <NavLink
+                  to="/founder-psychology"
+                  onClick={closeAll}
+                  className="block py-2 text-sm"
+                  style={{
+                    fontFamily: "var(--font-family)",
+                    color: "var(--mkt-heading)",
+                  }}
+                >
+                  Founder Profile
+                </NavLink>
+                <NavLink
+                  to="/psyche/questionnaire"
+                  onClick={closeAll}
+                  className="block py-2 text-sm"
+                  style={{
+                    fontFamily: "var(--font-family)",
+                    color: "var(--mkt-heading)",
+                  }}
+                >
+                  Decision & Work Style
+                </NavLink>
+              </div>
+              <div className="border-t border-default my-2"></div>
               <button
                 onClick={handleLogout}
-                className="block py-2 text-sm text-left"
+                className="block py-2 text-sm text-left w-full"
                 style={{
                   fontFamily: "var(--font-family)",
                   color: "var(--mkt-heading)",

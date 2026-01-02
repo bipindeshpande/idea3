@@ -6,7 +6,7 @@ export default function ParameterCard({ parameter, score, details }) {
  const percentage = Math.max(0, Math.min(100, (safeScore / 10) * 100));
  const assessment = formatDetails(details);
  return (
- <div className="flex h-full flex-col rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
+ <div className="flex flex-col rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
  <div className="mb-4 flex items-start justify-between gap-3">
  <div>
  <p className="text-lg font-semibold text-primary">{parameter}</p>
@@ -24,16 +24,8 @@ export default function ParameterCard({ parameter, score, details }) {
  />
  </div>
 
- <div className="flex-1">
- <p 
- className="text-primary text-primary leading-relaxed"
- style={{
- display: "-webkit-box",
- WebkitLineClamp: 4,
- WebkitBoxOrient: "vertical",
- overflow: "hidden",
- }}
- >
+ <div className="min-h-0">
+ <p className="text-primary text-primary leading-relaxed whitespace-pre-wrap break-words">
  {assessment}
  </p>
  </div>

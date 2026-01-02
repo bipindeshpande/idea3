@@ -1,5 +1,6 @@
 import { memo } from "react";
 import SessionCard from "./SessionCard.jsx";
+import UIButton from "../ui/ui-button.jsx";
 
 function DashboardValidationsTab({
  filteredValidations,
@@ -17,15 +18,9 @@ function DashboardValidationsTab({
 }) {
  return (
  <>
- <div className="mb-6">
- <p className="text-primary text-primary leading-relaxed">
- Validations you've already run.
- </p>
- </div>
- 
  {loadingRuns ? (
  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <p className="text-primary text-primary leading-relaxed">Loading validations...</p>
+ <p className="text-sm text-secondary leading-relaxed">Loading validations...</p>
  </div>
  ) : (
  <>
@@ -42,17 +37,18 @@ function DashboardValidationsTab({
  <>
  {selectedIdeas && selectedIdeas.size >= 2 && (
  <div className="mb-4 flex justify-end">
- <button
+ <UIButton
+ variant="primary"
  onClick={() => {
  // For validations, use validation IDs directly
  const selectedIds = Array.from(selectedIdeas);
  performComparison(new Set(selectedIds));
  }}
  disabled={comparing}
- className="px-4 py-2 rounded-lg bg-accent text-on-accent text-sm font-medium hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+ className="flex items-center gap-2"
  >
  {comparing ? "Comparing..." : `Compare selected validations (${selectedIdeas.size})`}
- </button>
+ </UIButton>
  </div>
  )}
  <div className="grid gap-4">

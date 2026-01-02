@@ -111,13 +111,9 @@ export default function DiscoveryLoadingIndicator({
  <p className="text-xs text-secondary">
  Time elapsed: {elapsedSeconds}s
  </p>
- {isComplete ? (
+ {isComplete && (
  <p className="text-xs font-medium text-success">
  ✓ Complete
- </p>
- ) : (
- <p className="text-xs font-medium text-accent">
- Generating recommendations...
  </p>
  )}
  </div>

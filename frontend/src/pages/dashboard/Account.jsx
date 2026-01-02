@@ -59,6 +59,8 @@ export default function AccountPage() {
  const [passwordSuccess, setPasswordSuccess] = useState("");
  const [psychologyData, setPsychologyData] = useState(null);
  const [loadingPsychology, setLoadingPsychology] = useState(true);
+ const [frameworkTrackingEnabled, setFrameworkTrackingEnabled] = useState(true);
+ const [savingPreferences, setSavingPreferences] = useState(false);
 
  const loadPsychology = useCallback(async () => {
  try {
@@ -81,19 +83,62 @@ export default function AccountPage() {
  } finally {
  setLoadingPsychology(false);
  }
- }, [getAuthHeaders]);
+  }, [getAuthHeaders]);
 
- useEffect(() => {
- if (!isAuthenticated) {
- navigate("/login", { state: { from: { pathname: "/account" } } });
- return;
- }
- // Clear any previous errors when component mounts
- setError("");
- setSuccess("");
- loadSubscription();
- loadPsychology();
- }, [isAuthenticated, navigate, loadPsychology]);
+  const loadPreferences = async () => {
+   if (!user?.preferences) {
+    setFrameworkTrackingEnabled(true); // Default to enabled
+    return;
+   }
+   setFrameworkTrackingEnabled(user.preferences.framework_tracking_enabled !== false);
+  };
+
+  const handleToggleFrameworkTracking = async (enabled) => {
+   setSavingPreferences(true);
+   try {
+    const response = await fetch("/api/user/preferences", {
+     method: "PUT",
+     headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+     },
+     body: JSON.stringify({
+      preferences: {
+       framework_tracking_enabled: enabled
+      }
+     }),
+    });
+
+    const data = await response.json();
+    if (data.success) {
+     setFrameworkTrackingEnabled(enabled);
+     setSuccess("Preferences updated successfully");
+     // Refresh user data
+     if (refreshSubscription) {
+      await refreshSubscription();
+     }
+    } else {
+     setError(data.error || "Failed to update preferences");
+    }
+   } catch (error) {
+    setError("Failed to update preferences. Please try again.");
+   } finally {
+    setSavingPreferences(false);
+   }
+  };
+
+  useEffect(() => {
+   if (!isAuthenticated) {
+    navigate("/login", { state: { from: { pathname: "/account" } } });
+    return;
+   }
+   // Clear any previous errors when component mounts
+   setError("");
+   setSuccess("");
+   loadSubscription();
+   loadPsychology();
+   loadPreferences();
+  }, [isAuthenticated, navigate, loadPsychology, user]);
 
  const loadSubscription = async () => {
  try {
@@ -350,27 +395,27 @@ export default function AccountPage() {
  <SectionHeader title="Account Information" className="mb-6" />
  <div className="grid gap-6 md:grid-cols-2">
  <div>
- <p className="text-sm text-secondary text-secondary uppercase tracking-wide">Email</p>
- <p className="mt-2 text-primary text-primary text-secondary leading-relaxed">{user?.email || "—"}</p>
+ <p className="text-sm text-secondary uppercase tracking-wide">Email</p>
+ <p className="mt-2 text-base text-primary leading-relaxed">{user?.email || "—"}</p>
  </div>
  <div>
- <p className="text-sm text-secondary text-secondary uppercase tracking-wide">Account Status</p>
- <p className="mt-2 text-primary text-primary text-secondary leading-relaxed">
+ <p className="text-sm text-secondary uppercase tracking-wide">Account Status</p>
+ <p className="mt-2 text-base text-primary leading-relaxed">
  {user?.is_active ? "Active" : "Inactive"}
  </p>
  </div>
  {user?.subscription_type && (
  <div>
- <p className="text-sm text-secondary text-secondary uppercase tracking-wide">Subscription Type</p>
- <p className="mt-2 text-primary text-primary text-secondary leading-relaxed capitalize">
+ <p className="text-sm text-secondary uppercase tracking-wide">Subscription Type</p>
+ <p className="mt-2 text-base text-primary leading-relaxed capitalize">
  {getPlanInfo(user.subscription_type).name}
  </p>
  </div>
  )}
  {user?.subscription_expires_at && (
  <div>
- <p className="text-sm text-secondary text-secondary uppercase tracking-wide">Subscription Expires</p>
- <p className="mt-2 text-primary text-primary text-secondary leading-relaxed">
+ <p className="text-sm text-secondary uppercase tracking-wide">Subscription Expires</p>
+ <p className="mt-2 text-base text-primary leading-relaxed">
  {new Date(user.subscription_expires_at).toLocaleDateString()}
  </p>
  </div>
@@ -391,17 +436,17 @@ export default function AccountPage() {
  <div className="flex items-center justify-between mb-3">
  <div>
  <SectionHeader title="Decision & Work Style" className="text-lg" />
- <p className="mt-1 text-primary text-primary text-secondary leading-relaxed">Used by the system to personalize and explain startup recommendations.</p>
+ <p className="mt-1 text-sm text-secondary leading-relaxed">Used by the system to personalize and explain startup recommendations.</p>
  </div>
  <UIButton as={Link} to="/psyche/questionnaire" variant="secondary" className="whitespace-nowrap">
  Complete Assessment
  </UIButton>
  </div>
  <div className="flex items-center justify-between">
- <p className="text-xs text-secondary text-secondary">Takes about 3–4 minutes</p>
+ <p className="text-xs text-secondary">Takes about 3–4 minutes</p>
  <Link
  to="/psyche/profile?details=true"
- className="text-xs text-secondary text-secondary hover:text-primary hover:text-primary transition"
+ className="text-xs text-secondary hover:text-primary transition"
  >
  View Details (Advanced)
  </Link>
@@ -413,18 +458,66 @@ export default function AccountPage() {
  <div className="flex items-center justify-between mb-3">
  <div>
  <SectionHeader title="Founder Profile" className="text-lg" />
- <p className="mt-1 text-primary text-primary text-secondary leading-relaxed">Helps other founders understand your background, interests, and goals.</p>
+ <p className="mt-1 text-sm text-secondary leading-relaxed">Helps other founders understand your background, interests, and goals.</p>
  </div>
  <UIButton as={Link} to="/founder-psychology" variant="secondary">
  {psychologyData?.archetype ? "Edit Profile" : "Add Profile"}
  </UIButton>
  </div>
- </Card>
- </Card>
+  </Card>
+  </Card>
 
- {/* Change Password */}
- <Card className="mt-10 md:mt-12">
- <SectionHeader title="Change Password" className="mb-6" />
+  {/* Framework Settings */}
+  <Card className="mt-10 md:mt-12">
+   <SectionHeader title="Framework Settings" className="mb-6" />
+   
+   <div className="flex items-center justify-between py-4 border-b border-default">
+    <div>
+     <p className="text-primary font-medium">Enable Framework Tracking</p>
+     <p className="mt-1 text-sm text-secondary">
+      When enabled, you can create and manage validation frameworks in your workspace.
+     </p>
+    </div>
+    <label className="relative inline-flex items-center cursor-pointer">
+     <input
+      type="checkbox"
+      checked={frameworkTrackingEnabled}
+      onChange={(e) => handleToggleFrameworkTracking(e.target.checked)}
+      disabled={savingPreferences}
+      className="sr-only peer"
+     />
+     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+    </label>
+   </div>
+  </Card>
+
+  {/* Framework Settings */}
+  <Card className="mt-10 md:mt-12">
+   <SectionHeader title="Framework Settings" className="mb-6" />
+   
+   <div className="flex items-center justify-between py-4 border-b border-default">
+    <div>
+     <p className="text-primary font-medium">Enable Framework Tracking</p>
+     <p className="mt-1 text-sm text-secondary">
+      When enabled, you can create and manage validation frameworks in your workspace.
+     </p>
+    </div>
+    <label className="relative inline-flex items-center cursor-pointer">
+     <input
+      type="checkbox"
+      checked={frameworkTrackingEnabled}
+      onChange={(e) => handleToggleFrameworkTracking(e.target.checked)}
+      disabled={savingPreferences}
+      className="sr-only peer"
+     />
+     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+    </label>
+   </div>
+  </Card>
+
+  {/* Change Password */}
+  <Card className="mt-10 md:mt-12">
+   <SectionHeader title="Change Password" className="mb-6" />
  
  {passwordError && (
  <Card className="mb-4 border-default border-default bg-surface bg-surface">
@@ -496,13 +589,13 @@ export default function AccountPage() {
 
  <div className="grid gap-6 md:grid-cols-2">
  <div>
- <p className="text-sm font-semibold text-secondary text-secondary uppercase tracking-wide">Plan</p>
- <p className="mt-2 text-2xl font-bold text-primary text-secondary">{planName}</p>
+ <p className="text-sm font-semibold text-secondary uppercase tracking-wide">Plan</p>
+ <p className="mt-2 text-xl font-bold text-primary">{planName}</p>
  <p className="mt-1 text-primary text-secondary">{planPrice}</p>
  </div>
  <div>
- <p className="text-sm font-semibold text-secondary text-secondary uppercase tracking-wide">Status</p>
- <p className="mt-2 text-lg font-semibold text-primary text-secondary capitalize">{subscriptionData.status}</p>
+ <p className="text-sm font-semibold text-secondary uppercase tracking-wide">Status</p>
+ <p className="mt-2 text-base font-semibold text-primary capitalize">{subscriptionData.status}</p>
  {subscriptionData.is_active && subscriptionData.days_remaining !== null && (
  <p className="mt-1 text-primary text-secondary">
  {subscriptionData.days_remaining} {subscriptionData.days_remaining === 1 ? "day" : "days"} remaining
@@ -511,16 +604,16 @@ export default function AccountPage() {
  </div>
  {subscriptionData.expires_at && (
  <div>
- <p className="text-sm font-semibold text-secondary text-secondary uppercase tracking-wide">Expires</p>
- <p className="mt-2 text-lg font-semibold text-primary text-secondary">
+ <p className="text-sm font-semibold text-secondary uppercase tracking-wide">Expires</p>
+ <p className="mt-2 text-base font-semibold text-primary">
  {new Date(subscriptionData.expires_at).toLocaleDateString()}
  </p>
  </div>
  )}
  {subscriptionData.started_at && (
  <div>
- <p className="text-sm font-semibold text-secondary text-secondary uppercase tracking-wide">Started</p>
- <p className="mt-2 text-lg font-semibold text-primary text-secondary">
+ <p className="text-sm font-semibold text-secondary uppercase tracking-wide">Started</p>
+ <p className="mt-2 text-base font-semibold text-primary">
  {new Date(subscriptionData.started_at).toLocaleDateString()}
  </p>
  </div>
@@ -531,7 +624,7 @@ export default function AccountPage() {
  {canChange && (
  <div className="mt-8 border-t border-default pt-6">
  <SectionHeader title="Change Plan" className="mb-4" />
- <p className="mb-4 text-sm text-primary text-secondary">
+ <p className="mb-4 text-sm text-secondary">
  Switch to a different plan. Your current plan will remain active until the end of the billing period.
  </p>
  <div className="flex flex-wrap gap-4">
@@ -579,7 +672,7 @@ export default function AccountPage() {
  {canCancel && (
  <div className="mt-6 border-t border-default pt-6">
  <SectionHeader title="Cancel Subscription" className="mb-4" />
- <p className="mb-4 text-sm text-primary text-secondary">
+ <p className="mb-4 text-sm text-secondary">
  You'll continue to have access to all features until your subscription expires on{" "}
  {subscriptionData.expires_at ? new Date(subscriptionData.expires_at).toLocaleDateString() : "the expiration date"}.
  </p>
@@ -614,31 +707,31 @@ export default function AccountPage() {
  {/* Payment History */}
  {paymentHistory.length > 0 && (
  <Card className="mt-10 md:mt-12">
- <SectionHeader title="Payment History" className="mb-6 text-2xl" />
+ <SectionHeader title="Payment History" className="mb-6 text-lg" />
  <div className="overflow-x-auto">
  <table className="w-full">
  <thead>
  <tr className="border-b border-default">
- <th className="px-4 py-3 text-left text-sm font-semibold text-primary text-secondary">Date</th>
- <th className="px-4 py-3 text-left text-sm font-semibold text-primary text-secondary">Amount</th>
- <th className="px-4 py-3 text-left text-sm font-semibold text-primary text-secondary">Plan</th>
- <th className="px-4 py-3 text-left text-sm font-semibold text-primary text-secondary">Status</th>
+ <th className="px-4 py-3 text-left text-sm font-semibold text-primary">Date</th>
+ <th className="px-4 py-3 text-left text-sm font-semibold text-primary">Amount</th>
+ <th className="px-4 py-3 text-left text-sm font-semibold text-primary">Plan</th>
+ <th className="px-4 py-3 text-left text-sm font-semibold text-primary">Status</th>
  </tr>
  </thead>
  <tbody>
  {paymentHistory.map((payment) => (
  <tr key={payment.id} className="border-b border-default">
- <td className="px-4 py-3 text-sm text-secondary text-secondary">
+ <td className="px-4 py-3 text-sm text-secondary">
  {payment.created_at ? new Date(payment.created_at).toLocaleDateString() : "—"}
  </td>
- <td className="px-4 py-3 text-sm font-semibold text-primary text-secondary">
+ <td className="px-4 py-3 text-sm font-semibold text-primary">
  {payment.amount != null && typeof payment.amount === 'number' 
  ? `$${payment.amount.toFixed(2)}` 
  : payment.amount != null 
  ? `$${Number(payment.amount).toFixed(2)}` 
  : "—"}
  </td>
- <td className="px-4 py-3 text-sm text-secondary text-secondary capitalize">{payment.subscription_type}</td>
+ <td className="px-4 py-3 text-sm text-secondary capitalize">{payment.subscription_type}</td>
  <td className="px-4 py-3">
  <span className="rounded-full bg-surface bg-surface px-3 py-1 text-xs font-semibold text-accent text-accent">
  Completed
@@ -685,7 +778,7 @@ export default function AccountPage() {
  <div className="mb-6">
  <label htmlFor="additional-comments" className="block text-sm font-semibold text-primary text-secondary mb-2">
  Additional Comments {selectedReason === "other" && <span className="text-accent">*</span>}
- {selectedReason && selectedReason !== "other" && <span className="text-secondary text-secondary text-xs font-normal">(Optional)</span>}
+ {selectedReason && selectedReason !== "other" && <span className="text-xs text-secondary font-normal">(Optional)</span>}
  </label>
  <textarea
  id="additional-comments"
@@ -697,7 +790,7 @@ export default function AccountPage() {
  required={selectedReason === "other"}
  maxLength={500}
  />
- <p className="mt-2 text-xs text-secondary text-secondary">
+ <p className="mt-2 text-xs text-secondary">
  {additionalComments.length}/500 characters
  </p>
  </div>

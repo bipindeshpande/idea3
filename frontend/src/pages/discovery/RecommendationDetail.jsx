@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Link, Navigate, useLocation, useParams, useNavigate } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
+import FocusLayout from "../../layouts/FocusLayout.jsx";
+import DiscoveryCard from "../../components/discovery/DiscoveryCard.jsx";
+import DiscoveryHeader from "../../components/discovery/DiscoveryHeader.jsx";
+import DiscoveryBadge from "../../components/discovery/DiscoveryBadge.jsx";
+import DiscoveryNavigation from "../../components/discovery/DiscoveryNavigation.jsx";
+import DiscoveryEmptyState from "../../components/discovery/DiscoveryEmptyState.jsx";
+import DiscoveryLoadingState from "../../components/discovery/DiscoveryLoadingState.jsx";
+import IdeaAttributes from "../../components/discovery/IdeaAttributes.jsx";
+import { DISCOVERY_SPACING, DISCOVERY_TYPOGRAPHY } from "../../components/discovery/DiscoveryTheme.js";
 import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useValidation } from "../../context/ValidationContext.jsx";
@@ -1015,20 +1024,16 @@ const orderedSections = sections.orderedSections;
  return <Navigate to={backPath} replace state={backState} />;
  }
 
- // Optional UI polish: Prevent confusing first empty parse
- if (!activeIdeaState?.body && !enrichedBody && !isEnriching && !activeIdea) {
- return null;
- }
-
  // Loading state: Show spinner when enriching and no body yet
  // Check all possible body sources: enrichedBody, activeIdeaState.body, currentActiveIdea.body
  const hasBody = !!(enrichedBody?.length > 0 || activeIdeaState?.body?.length > 0 || currentActiveIdea?.body?.length > 0);
  
  // Show loading indicator when:
- // 1. Loading from API
+ // 1. Loading from API (and we don't have cached data)
  // 2. Enriching and no body yet (but we have an activeIdea)
- // 3. No activeIdea but we have stage2Markdown (data is being parsed)
- const isLoadingPage = loading || (!hasBody && isEnriching && activeIdea) || (!activeIdea && stage2Markdown);
+ // 3. We have an activeIdea but no body and we're still loading/enriching
+ // Don't show loading if we have cached data but no activeIdea - show error instead
+ const isLoadingPage = (loading && !cachedIdea && !cachedRun) || (!hasBody && isEnriching && activeIdea) || (activeIdea && !hasBody && loading);
  
  // Loading steps for recommendation detail
  const detailSteps = [
@@ -1122,7 +1127,7 @@ const orderedSections = sections.orderedSections;
  }
 
  return (
- <section className="min-h-screen bg-app grid gap-6 py-6">
+ <FocusLayout>
  <Seo
  title={
  activeIdea
@@ -1133,22 +1138,13 @@ const orderedSections = sections.orderedSections;
  path={`/results/recommendations/${ideaIndex}`}
  />
 
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-3 text-sm">
- {isAuthenticated && (
- <Link
- to="/dashboard"
- className="ui-btn ui-btn-secondary focus-visible:outline-accent"
- >
- ← Back to Dashboard
- </Link>
- )}
- <button
- onClick={() => navigate(backPath, { state: backState })}
- className="inline-flex items-center gap-2 text-primary hover:text-accent-hover transition-colors"
- >
- <span aria-hidden="true">←</span> Back to recommendations
- </button>
+ <DiscoveryNavigation
+ backPath={backPath}
+ backLabel="Back to recommendations"
+ backState={backState}
+ showDashboard={isAuthenticated}
+ rightContent={
+ <>
  {process.env.NODE_ENV === 'development' && (
  <button
  onClick={() => {
@@ -1159,13 +1155,12 @@ const orderedSections = sections.orderedSections;
  alert("No logs collected yet. Logs will be collected as you interact with the page.");
  }
  }}
- className="ui-btn ui-btn-secondary focus-visible:outline-accent text-xs"
+ className="ui-btn ui-btn-secondary focus-visible:outline-accent text-xs mr-2"
  title={`Download all collected logs as mylog.log (${getLogBufferSize()} entries)`}
  >
  📥 Download Logs ({getLogBufferSize()})
  </button>
  )}
- </div>
  {activeIdea && runQuery && (
  <OpenForCollaboratorsButton
  runId={runQuery}
@@ -1176,123 +1171,88 @@ const orderedSections = sections.orderedSections;
  categoryAnswers={inputs}
  />
  )}
- </div>
+ </>
+ }
+ className="mb-6"
+ />
 
 
  {!loading && !stage2Markdown && (
- <div className="ui-card2 ui-radius-page ui-pad-md shadow-card">
- <h2 className="text-lg font-semibold text-primary">No report available</h2>
- <p className="mt-2 text-sm text-primary">
- We couldn't find a saved recommendation report. Return to the home page to run a new session.
- </p>
- </div>
+ <DiscoveryEmptyState
+ title="No report available"
+ message="We couldn't find a saved recommendation report. Return to the home page to run a new session."
+ primaryAction={{ to: "/advisor", label: "Generate New Report" }}
+ />
  )}
 
- {stage2Markdown && ideas.length > 0 && !activeIdea && (
- <div className="ui-card2 ui-radius-page ui-pad-md shadow-card">
- <h2 className="text-lg font-semibold text-primary">Idea not found</h2>
- <p className="mt-2 text-sm text-primary">
- Idea #{ideaIndex} not found in the recommendations. Available ideas: {ideas.map(i => i.index).join(", ")}
- </p>
- <button
- onClick={() => navigate(backPath, { state: backState })}
- className="mt-4 inline-block text-sm font-semibold text-primary hover:underline"
- >
- Back to recommendations
- </button>
- </div>
+ {!loading && !isEnriching && !activeIdea && !stage2Markdown && (
+ <DiscoveryEmptyState
+ title="Idea not found"
+ message="Could not find the requested recommendation. The idea may have been removed or the link may be invalid."
+ secondaryAction={{ onClick: () => navigate(backPath, { state: backState }), label: "Back to recommendations" }}
+ />
  )}
 
- {/* Only show sections when body exists - check all possible body sources */}
- {activeIdea && (enrichedBody?.length > 0 || activeIdeaState?.body?.length > 0 || currentActiveIdea?.body?.length > 0) && (
+ {/* Show idea information if we have an activeIdea, even if body is still loading */}
+ {activeIdea && (
  <>
- <article className="ui-card2 ui-radius-page shadow-card px-8 py-10">
- <div className="flex items-center justify-between mb-4 pb-4 border-b border-default border-default">
- <p className="text-xs uppercase tracking-wide text-primary">Idea #{activeIdea.index}</p>
+ <DiscoveryCard padding="lg">
+ <div className="flex items-center justify-between mb-3 pb-3 border-b border-default">
+ <DiscoveryBadge variant="muted" size="sm">
+ Idea #{activeIdea.index}
+ </DiscoveryBadge>
  {(actions.length > 0 || notes.length > 0) && (
- <div className="flex items-center gap-2">
+ <div className={`flex items-center ${DISCOVERY_SPACING.elementGapSmall}`}>
  {actions.length > 0 && (
- <span 
- className="inline-flex items-center gap-1 rounded-2xl bg-surface border border-default px-[10px] py-1 text-primary font-medium"
- title={`${actions.length} action item${actions.length !== 1 ? 's' : ''}`}
- >
+ <DiscoveryBadge
+ variant="default"
+ size="sm"
+ icon={
  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
  </svg>
+ }
+ title={`${actions.length} action item${actions.length !== 1 ? 's' : ''}`}
+ >
  {actions.length} Task{actions.length !== 1 ? 's' : ''}
- </span>
+ </DiscoveryBadge>
  )}
  {notes.length > 0 && (
- <span 
- className="inline-flex items-center gap-1 rounded-2xl bg-surface border border-default px-[10px] py-1 text-primary font-medium"
- title={`${notes.length} note${notes.length !== 1 ? 's' : ''}`}
- >
+ <DiscoveryBadge
+ variant="default"
+ size="sm"
+ icon={
  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
  </svg>
+ }
+ title={`${notes.length} note${notes.length !== 1 ? 's' : ''}`}
+ >
  {notes.length} Note{notes.length !== 1 ? 's' : ''}
- </span>
+ </DiscoveryBadge>
  )}
  </div>
  )}
  </div>
- <h1 className="text-primary font-semibold mb-2">{activeIdea.title}</h1>
- <p className="mt-4 max-w-3xl text-sm md:text-base text-primary">{heroStatement}</p>
+ <h1 className={`${DISCOVERY_TYPOGRAPHY.h1} mb-3`}>{activeIdea.title}</h1>
+ <p className={`max-w-3xl ${DISCOVERY_TYPOGRAPHY.body}`}>{heroStatement}</p>
  
  {/* Idea Attributes */}
- {activeIdea.timeline && (
- <div className="mt-0">
- <span className="text-xs font-medium text-primary mb-2 block">Timeline</span>
- <span className="inline-block rounded-full bg-surface px-4 py-2 text-sm font-medium text-primary">
- {activeIdea.timeline}
- </span>
- </div>
- )}
- 
- {activeIdea.validation_score && (
  <div className="mt-4">
- <div className="flex items-center justify-between mb-1">
- <span className="text-xs font-medium text-primary">Validation Score</span>
- <span className="text-sm font-semibold text-primary">{activeIdea.validation_score}/10</span>
+ <IdeaAttributes idea={activeIdea} heroChips={heroChips} />
  </div>
- <div className="h-[6px] rounded-[4px] bg-surface overflow-hidden">
- <div 
- className="h-full bg-accent rounded-[4px] transition-all"
- style={{ width: `${(parseInt(activeIdea.validation_score) / 10) * 100}%` }}
- />
- </div>
- </div>
- )}
- 
- {heroChips.length > 0 && (
- <div className="mt-6 flex flex-wrap gap-2">
- {heroChips.map(({ label, value }) => (
- <span
- key={`${label}-${value}`}
- className="rounded-2xl bg-surface border border-default px-[10px] py-1 text-primary font-medium"
- >
- {label}: {value}
- </span>
- ))}
- </div>
- )}
- 
- {activeIdea.target_market && (
- <div className="mt-4">
- <span className="text-xs font-medium text-primary mb-2 block">Target Market</span>
- <p className="text-sm text-primary">{activeIdea.target_market}</p>
- </div>
- )}
- 
- {activeIdea.revenue_model && (
- <div className="mt-4">
- <span className="text-xs font-medium text-primary mb-2 block">Revenue Model</span>
- <p className="text-sm text-primary">{activeIdea.revenue_model}</p>
- </div>
- )}
- </article>
+ </DiscoveryCard>
 
- <div className="flex flex-col gap-6">
+ <div className={`flex flex-col ${DISCOVERY_SPACING.sectionGap} mt-8`}>
+ {/* Show loading message if we have idea but no body content yet */}
+ {activeIdea && !hasBody && isEnriching && (
+ <DiscoveryLoadingState
+ title="Loading detailed content..."
+ message="Loading detailed content for this recommendation..."
+ size="sm"
+ />
+ )}
+ 
  {/* Render all sections from orderedSections - single source of truth */}
  {orderedSections.map((section) => {
  // Skip why_fits if fitNarrativeMarkdown is not available (special case)
@@ -1314,6 +1274,7 @@ const orderedSections = sections.orderedSections;
  theme={getSectionTheme(title)}
  isOpen={openSections.has(toggleId)}
  onToggle={() => toggleSection(toggleId)}
+ className="mb-2"
  >
           <RecommendationSections
             sectionKey={section.key}
@@ -1393,12 +1354,12 @@ const orderedSections = sections.orderedSections;
  {actions.map((action) => (
  <div
  key={action.id}
- className="flex items-center gap-3 rounded-lg border border-default bg-surface p-3"
+ className="flex items-center gap-3 rounded-xl border border-default bg-surface p-3"
  >
  <select
  value={action.status}
  onChange={(e) => handleUpdateAction(action.id, e.target.value)}
- className="rounded border border-default bg-surface px-2 py-1 text-xs font-semibold text-primary focus:border-default focus:outline-none"
+ className="rounded-lg border border-default bg-surface px-2 py-1 text-xs font-semibold text-primary focus:border-default focus:outline-none"
  >
  <option value="pending">Pending</option>
  <option value="in_progress">In Progress</option>
@@ -1446,7 +1407,7 @@ const orderedSections = sections.orderedSections;
  <div className="space-y-4">
  {/* Add new note */}
  {!isValidIdeaId ? (
- <div className="rounded-lg border border-default bg-surface bg-surface p-3">
+ <div className="rounded-xl border border-default bg-surface bg-surface p-3">
  <p className="text-sm text-accent text-accent">Idea reference not ready</p>
  </div>
  ) : (
@@ -1490,7 +1451,7 @@ const orderedSections = sections.orderedSections;
  {notes.map((note) => (
  <div
  key={note.id}
- className="ui-card2 ui-pad-md ui-radius-card shadow-card"
+ className="ui-card2 ui-pad-md rounded-xl shadow-card"
  >
  <div className="mb-2 flex items-center justify-between">
  <span className="text-xs text-primary text-primary">
@@ -1554,7 +1515,7 @@ const orderedSections = sections.orderedSections;
  {/* Explore other ideas section removed based on feedback */}
  </>
  )}
- </section>
+ </FocusLayout>
  );
 }
 

@@ -10,8 +10,9 @@
   --bg: #F9FAFB;
   --surface: #FFFFFF;
   --surface-muted: #F3F4F6;
-  --text: #1A1A1A;
+  --text: #111827;
   --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
   --text-light: var(--text-secondary);
   --border: #E5E7EB;
   --accent: #2563EB;
@@ -58,15 +59,15 @@
   /* UI Typography Scale */
   --ui-h1: clamp(28px, 4vw, 36px);
   --ui-h2: clamp(22px, 3vw, 28px);
-  --ui-h3: 20px;
-  --ui-body: 16px;
+  --ui-h3: 18px;
+  --ui-body: 15px;
   --ui-small: 14px;
-  --ui-xs: 12px;
+  --ui-xs: 13px;
 
   /* Line Heights */
-  --ui-lh-tight: 1.15;
-  --ui-lh-normal: 1.35;
-  --ui-lh-relaxed: 1.5;
+  --ui-lh-tight: 1.2;
+  --ui-lh-normal: 1.5;
+  --ui-lh-relaxed: 1.6;
 
   /* Spacing + radii (8px scale) */
   --space-4: 4px;
@@ -160,8 +161,9 @@
   --bg: #F9FAFB;
   --surface: #FFFFFF;
   --surface-muted: #F3F4F6;
-  --text: #1A1A1A;
+  --text: #111827;
   --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
   --text-light: var(--text-secondary);
   --border: #E5E7EB;
   --accent: #2563EB;
@@ -257,8 +259,9 @@
   --bg: #0F172A;
   --surface: #1E293B;
   --surface-muted: #24324a;
-  --text: #F8FAFC;
-  --text-secondary: #CBD5E1;
+  --text: #F9FAFB;
+  --text-secondary: #D1D5DB;
+  --text-tertiary: #9CA3AF;
   --text-light: var(--text-secondary);
   --border: #334155;
   --accent: #3B82F6;
@@ -271,13 +274,13 @@
   --ui-font: Inter, system-ui, sans-serif;
   --ui-h1: clamp(28px, 4vw, 36px);
   --ui-h2: clamp(22px, 3vw, 28px);
-  --ui-h3: 20px;
-  --ui-body: 16px;
+  --ui-h3: 18px;
+  --ui-body: 15px;
   --ui-small: 14px;
-  --ui-xs: 12px;
-  --ui-lh-tight: 1.15;
-  --ui-lh-normal: 1.35;
-  --ui-lh-relaxed: 1.5;
+  --ui-xs: 13px;
+  --ui-lh-tight: 1.2;
+  --ui-lh-normal: 1.5;
+  --ui-lh-relaxed: 1.6;
 
   /* Semantic */
   --success: #4ADE80;

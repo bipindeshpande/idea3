@@ -121,7 +121,7 @@ Once your problem is validated:
 
 ## Tools and Resources
 
-- **Customer Interview Script** - Download from our Frameworks page
+- **Customer Interview Script** - Download from our [Templates & Resources](/resources/templates) page
 - **Problem Validation Checklist** - Available in our templates
 - **Idea Validation Tool** - Use our AI-powered validator to get feedback
 
@@ -274,7 +274,7 @@ Your pricing is validated when:
 
 ---
 
-*Download our [Pricing Validation Framework](/frameworks) for a complete guide and templates.*`,
+*Download our [Pricing Validation Framework](/resources/templates) for a complete guide and templates.*`,
  },
  {
  slug: "customer-interview-best-practices",
@@ -418,7 +418,7 @@ Your interviews are successful when:
 
 ## Interview Script Template
 
-Download our complete [Customer Interview Script](/frameworks) with:
+Download our complete [Customer Interview Script](/resources/templates) with:
 - Introduction template
 - Problem discovery questions
 - Solution validation questions

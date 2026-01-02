@@ -12,7 +12,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 # Import models and config
 from app.core.database import Base
 from app.core.config import settings
-from app.models import Run, User, CacheEntry, Validation, Action, Note, PsycheProfile, FounderPsychology
+# Import all models so Alembic can detect them
+from app.models import (
+    Run, User, CacheEntry, Validation, Action, Note, 
+    PsycheProfile, FounderPsychology, FounderProfile, 
+    FounderIdeaListing, FounderConnection, SavedFramework
+)
 
 # this is the Alembic Config object
 config = context.config

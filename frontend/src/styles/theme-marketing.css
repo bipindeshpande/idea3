@@ -59,6 +59,7 @@
 
 /* Marketing typography utilities */
 .mkt-h1 {
+  font-family: var(--font-family);
   font-size: var(--mkt-h1);
   line-height: 1.1;
   font-weight: 700;
@@ -67,6 +68,7 @@
 }
 
 .mkt-h2 {
+  font-family: var(--font-family);
   font-size: var(--mkt-h2);
   line-height: 1.25; /* Tighter for density */
   font-weight: 600;
@@ -75,6 +77,7 @@
 }
 
 .mkt-h3 {
+  font-family: var(--font-family);
   font-size: var(--mkt-h3);
   line-height: 1.3;
   font-weight: 600;
@@ -82,6 +85,7 @@
 }
 
 .mkt-body {
+  font-family: var(--font-family);
   font-size: var(--mkt-body);
   line-height: 1.5; /* Tighter for density */
   color: var(--mkt-paragraph);
@@ -480,6 +484,7 @@
 
 /* Marketing V3 Typography Utilities */
 .mkt-display {
+  font-family: var(--font-family);
   font-size: var(--mkt-display);
   line-height: 1.15; /* Slightly tighter */
   font-weight: 700;
@@ -488,6 +493,7 @@
 }
 
 .mkt-eyebrow {
+  font-family: var(--font-family);
   font-size: 12px; /* V6: Fixed size for consistency */
   font-weight: 600;
   text-transform: uppercase;
@@ -497,6 +503,7 @@
 }
 
 .mkt-lead {
+  font-family: var(--font-family);
   font-size: var(--mkt-lead);
   line-height: 1.6;
   color: var(--mkt-subheading);

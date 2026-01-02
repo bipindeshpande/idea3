@@ -59,7 +59,7 @@ export default function MarketingLayout({ children, fullWidth = false }) {
 
   return (
     <div 
-      className="min-h-screen"
+      className="min-h-screen marketing-layout"
       style={{
         fontFamily: "var(--font-family)",
         backgroundColor: "var(--mkt-surface)",

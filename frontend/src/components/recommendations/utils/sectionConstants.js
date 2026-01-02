@@ -69,9 +69,18 @@ export const SECTION_TOGGLE_IDS = {
 
 // Section descriptions mapping
 export const SECTION_DESCRIPTIONS = {
+  why_fits: "Why this idea aligns with your goals, strengths, and current capacity.",
+  financial_snapshot: "Revenue potential, cost estimates, and financial benchmarks to assess viability.",
   execution_path: "Move from validation to scale with focused sprints that match your capacity.",
-  market_opportunity: "Trends and proof points worth validating as you move forward.",
+  immediate_experiments: "Quick tests and experiments to validate assumptions before committing resources.",
+  timeline_effort: "Expected timeframes and effort required for each phase of development.",
   customer_persona: "Understand your ideal customer profile and use these validation questions to confirm demand and buying triggers.",
+  market_opportunity: "Trends and proof points worth validating as you move forward.",
+  key_risks: "Potential challenges and mitigation strategies to navigate obstacles.",
+  validation_questions: "Key questions to answer before investing significant time or resources.",
+  immediate_next_steps: "Actionable next steps to move forward with this idea.",
+  decision_checklist: "Criteria to evaluate whether this idea is the right fit for you right now.",
+  additional_insights: "Extra context, considerations, and strategic insights for this opportunity.",
 };
 
 /**

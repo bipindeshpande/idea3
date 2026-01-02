@@ -353,6 +353,69 @@ export default function IdeaValidator() {
  }
  };
 
+ // Dev-only auto-fill handler
+ const handleAutoFill = () => {
+ // Sample data for Screen 1 (About Your Idea)
+ const sampleScreen1 = {
+  industry: "SaaS / Software",
+  geography: "US",
+  stage: "Early Research",
+  commitment: "Full-time Startup",
+ };
+
+ // Sample data for Screen 2 (How Your Idea Works)
+ const sampleScreen2 = {
+  problem_category: "Inefficiency",
+  solution_type: "SaaS / Online Platform",
+  user_type: "SMBs",
+  revenue_model: "Subscription",
+  unique_moat: "Superior UX",
+  business_archetype: "Online software / AI product (SaaS / app / tool)",
+ };
+
+ // Sample structured description
+ const sampleDescription = `1. Problem: 
+Small businesses struggle to manage customer relationships effectively. They use multiple disconnected tools (email, spreadsheets, CRM) which leads to lost opportunities, poor follow-up, and inefficient workflows.
+
+2. Solution:
+An AI-powered all-in-one customer relationship platform that integrates email, CRM, task management, and automated follow-ups. Uses AI to suggest optimal contact times, personalize messages, and prioritize leads.
+
+3. User:
+Small to medium businesses (SMBs) with 5-50 employees, particularly in service industries like consulting, agencies, and professional services. They need better organization but can't afford enterprise CRM solutions.
+
+4. Differentiation:
+Unlike generic CRMs, this platform is built specifically for SMB workflows with AI that learns from their communication patterns. More affordable than enterprise solutions, more powerful than basic tools.
+
+5. Monetization:
+Freemium model with basic features free. Paid tiers starting at $29/month for advanced AI features, integrations, and team collaboration. Enterprise plans for larger teams.
+
+6. Scope/Region:
+Launch in US market first, targeting tech-savvy SMBs. Expand to English-speaking markets (Canada, UK, Australia) in year 2.`;
+
+ // Sample optional fields
+ const sampleOptional = {
+  initial_budget: "$1k–$10k",
+  delivery_channel: "Online only",
+  constraints: ["Limited Budget", "Limited Time"],
+  competitors: "HubSpot, Salesforce (too expensive), Pipedrive (lacks AI features)",
+ };
+
+ // Fill all fields
+ setScreen1Answers(sampleScreen1);
+ setScreen2Answers(sampleScreen2);
+ setStructuredDescription(sampleDescription);
+ setOptionalAnswers(sampleOptional);
+ setError(""); // Clear any errors
+
+ // Scroll to form after auto-fill
+ setTimeout(() => {
+  const formElement = document.getElementById("validation-form");
+  if (formElement) {
+   formElement.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+ }, 100);
+ };
+
  const handleSubmit = async () => {
  // Merge all answers into category_answers for backend
  const mergedCategoryAnswers = {
@@ -402,10 +465,21 @@ export default function IdeaValidator() {
  {step === 0 && !isEditMode && (
  <div className="mb-8">
  <UICard variant="muted" className="p-6 md:p-8">
+ <div className="flex items-start justify-between gap-4 mb-6">
  <PageHeader
  title="Validate Your Startup Idea"
  subtitle="Get a comprehensive AI-powered analysis of your business idea across 10 key validation parameters. Understand market viability, risks, and opportunities before you build."
  />
+ {process.env.NODE_ENV === "development" && (
+ <button
+ type="button"
+ onClick={handleAutoFill}
+ className="ui-btn ui-btn-secondary focus-visible:outline-accent whitespace-nowrap flex-shrink-0"
+ >
+ 🔧 Auto-Fill (Dev)
+ </button>
+ )}
+ </div>
  <div className="mt-6 grid gap-4 md:grid-cols-2">
  <div className="flex items-start gap-3">
  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent text-on-accent flex items-center justify-center text-xs font-bold">
@@ -470,11 +544,24 @@ export default function IdeaValidator() {
 
  {/* SCREEN 1: About Your Idea */}
  {step === 0 && (
-  <div className="ui-card rounded-[16px] p-6 shadow-card">
+  <div id="validation-form" className="ui-card rounded-[16px] p-6 shadow-card">
   <header className="mb-6">
+  <div className="flex items-center justify-between gap-4">
+  <div>
   <p className="text-xs font-semibold text-secondary">Step 1 of 3</p>
   <UIHeading level="h1" className="mt-2 text-primary">About your idea</UIHeading>
   <p className="mt-2 text-base text-secondary">Set context and market boundaries.</p>
+  </div>
+  {process.env.NODE_ENV === "development" && (
+  <button
+  type="button"
+  onClick={handleAutoFill}
+  className="ui-btn ui-btn-secondary focus-visible:outline-accent whitespace-nowrap"
+  >
+  🔧 Auto-Fill (Dev)
+  </button>
+  )}
+  </div>
   </header>
 
  <div className="space-y-6">
@@ -525,7 +612,18 @@ export default function IdeaValidator() {
  {/* SCREEN 2: How Your Idea Works */}
  {step === 1 && (
  <div className="rounded-2xl border border-default bg-surface p-8 shadow-lg">
- <UIHeading level="h1" className="mb-3 text-primary">How Your Idea Works</UIHeading>
+ <div className="flex items-center justify-between gap-4 mb-3">
+ <UIHeading level="h1" className="text-primary">How Your Idea Works</UIHeading>
+ {process.env.NODE_ENV === "development" && (
+ <button
+ type="button"
+ onClick={handleAutoFill}
+ className="ui-btn ui-btn-secondary focus-visible:outline-accent whitespace-nowrap"
+ >
+ 🔧 Auto-Fill (Dev)
+ </button>
+ )}
+ </div>
  <p className="mb-8 text-base leading-relaxed text-primary">
  Capture mechanics, value proposition, monetization.
  </p>
@@ -583,7 +681,18 @@ export default function IdeaValidator() {
  {/* SCREEN 3: Tell Us More */}
  {step === 2 && (
  <div className="rounded-2xl border border-default bg-surface p-8 shadow-lg">
- <UIHeading level="h1" className="mb-3 text-primary">Tell Us More</UIHeading>
+ <div className="flex items-center justify-between gap-4 mb-3">
+ <UIHeading level="h1" className="text-primary">Tell Us More</UIHeading>
+ {process.env.NODE_ENV === "development" && (
+ <button
+ type="button"
+ onClick={handleAutoFill}
+ className="ui-btn ui-btn-secondary focus-visible:outline-accent whitespace-nowrap"
+ >
+ 🔧 Auto-Fill (Dev)
+ </button>
+ )}
+ </div>
  <p className="mb-8 text-base leading-relaxed text-primary">
  Capture the narrative + constraints that shape risk assessment.
  </p>

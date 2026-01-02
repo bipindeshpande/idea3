@@ -10,6 +10,8 @@ from app.models.user import User
 from app.models.run import Run
 from app.core.config import settings
 import json
+import time
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 
 
 class ValidationService(BaseService):
@@ -19,6 +21,38 @@ class ValidationService(BaseService):
         super().__init__(db, redis_client)
         self.llm_service = LLMService(db, redis_client)
     
+    # Validation parameter groups for parallel analysis
+    VALIDATION_PARAMETER_GROUPS = [
+        {
+            "group_id": "market",
+            "parameters": [
+                ("market_opportunity", "Market Opportunity"),
+                ("target_audience_clarity", "Target Audience Clarity"),
+                ("go_to_market_strategy", "Go-to-Market Strategy")
+            ],
+            "context": "Market viability and audience analysis"
+        },
+        {
+            "group_id": "product",
+            "parameters": [
+                ("problem_solution_fit", "Problem-Solution Fit"),
+                ("competitive_landscape", "Competitive Landscape"),
+                ("technical_feasibility", "Technical Feasibility"),
+                ("scalability_potential", "Scalability Potential")
+            ],
+            "context": "Product-market fit and technical viability"
+        },
+        {
+            "group_id": "execution",
+            "parameters": [
+                ("business_model_viability", "Business Model Viability"),
+                ("financial_sustainability", "Financial Sustainability"),
+                ("risk_assessment", "Risk Assessment")
+            ],
+            "context": "Execution feasibility and sustainability"
+        }
+    ]
+    
     def validate_idea(
         self,
         user_id: Optional[str],
@@ -26,7 +60,8 @@ class ValidationService(BaseService):
         idea_explanation: str,
         validation_id: Optional[str] = None,
         idea_id: Optional[str] = None,
-        idea_metadata: Optional[Dict[str, Any]] = None
+        idea_metadata: Optional[Dict[str, Any]] = None,
+        include_next_steps: bool = True
     ) -> Dict[str, Any]:
         """
         Validate an idea and generate personalized recommendations
@@ -36,40 +71,62 @@ class ValidationService(BaseService):
             category_answers: Validation form answers
             idea_explanation: User's idea description
             validation_id: Optional validation ID for updates
+            include_next_steps: Whether to generate next_steps (default: True, can be False for faster response)
         
         Returns:
             Dict with validation_id and validation result
         """
+        start_time = time.time()
+        
         try:
             # Generate validation scores and analysis
             validation_result = self._generate_validation_analysis(category_answers, idea_explanation)
             
-            # Get user profile if available
-            user_profile = None
-            user_constraints = None
-            if user_id:
-                user_profile, user_constraints = self._get_user_profile_and_constraints(user_id)
-            
-            # Build idea details including metadata if provided
-            idea_details = {
-                "explanation": idea_explanation,
-                "category_answers": category_answers
-            }
-            if idea_id:
-                idea_details["idea_id"] = idea_id
-            if idea_metadata:
-                idea_details.update(idea_metadata)
-            
-            # Generate personalized next_steps
-            next_steps = self.generate_next_steps(
-                user_profile=user_profile,
-                idea_details=idea_details,
-                validation_results=validation_result,
-                user_constraints=user_constraints
-            )
-            
-            # Add next_steps to validation_result
-            validation_result["next_steps"] = next_steps
+            # Check overall timeout
+            elapsed = time.time() - start_time
+            if elapsed > settings.VALIDATION_OVERALL_TIMEOUT:
+                self._log(f"Validation exceeded overall timeout ({settings.VALIDATION_OVERALL_TIMEOUT}s) after analysis", "WARNING")
+                # Return results without next_steps if timeout exceeded
+                validation_result["next_steps"] = "Next steps generation timed out. Please try again or view recommendations in the Detailed Analysis tab."
+            elif include_next_steps:
+                # Get user profile if available
+                user_profile = None
+                user_constraints = None
+                if user_id:
+                    user_profile, user_constraints = self._get_user_profile_and_constraints(user_id)
+                
+                # Build idea details including metadata if provided
+                idea_details = {
+                    "explanation": idea_explanation,
+                    "category_answers": category_answers
+                }
+                if idea_id:
+                    idea_details["idea_id"] = idea_id
+                if idea_metadata:
+                    idea_details.update(idea_metadata)
+                
+                # Generate personalized next_steps with timeout protection
+                try:
+                    next_steps_start = time.time()
+                    next_steps = self.generate_next_steps(
+                        user_profile=user_profile,
+                        idea_details=idea_details,
+                        validation_results=validation_result,
+                        user_constraints=user_constraints
+                    )
+                    next_steps_elapsed = time.time() - next_steps_start
+                    if next_steps_elapsed > settings.VALIDATION_NEXT_STEPS_TIMEOUT:
+                        self._log(f"Next steps generation took {next_steps_elapsed:.1f}s (timeout: {settings.VALIDATION_NEXT_STEPS_TIMEOUT}s)", "WARNING")
+                except Exception as next_steps_error:
+                    self._log(f"Next steps generation failed: {str(next_steps_error)}", "ERROR")
+                    # Use fallback next_steps instead of failing entire validation
+                    next_steps = self._get_fallback_next_steps(validation_result)
+                
+                # Add next_steps to validation_result
+                validation_result["next_steps"] = next_steps
+            else:
+                # Skip next_steps generation for faster response
+                validation_result["next_steps"] = None
             
             # Save or update validation
             if validation_id:
@@ -336,39 +393,321 @@ Be specific, practical, and organized into clear timeframes."""
         idea_explanation: str
     ) -> Dict[str, Any]:
         """
-        Generate validation scores and analysis
+        Generate validation scores and analysis using parallel LLM calls.
         
-        This is a placeholder - in production this would use a proper validation engine
+        This method is isolated from discovery pipeline - uses validation-specific
+        timeouts, error handling, and configuration.
         """
-        # TODO: Implement proper validation scoring logic
-        # For now, return a basic structure
+        self._log("Starting parallel LLM validation analysis", "INFO")
         
-        # Mock scores - in production this would be calculated based on answers
-        scores = {
-            "market_opportunity": 7.5,
-            "problem_solution_fit": 7.0,
-            "competitive_landscape": 6.5,
-            "target_audience_clarity": 7.0,
-            "business_model_viability": 6.8,
-            "technical_feasibility": 7.2,
-            "financial_sustainability": 6.5,
-            "scalability_potential": 7.0,
-            "risk_assessment": 6.8,
-            "go_to_market_strategy": 7.0,
+        # Verify LLM service is configured
+        if not self.llm_service:
+            self._log("LLM service not initialized!", "ERROR")
+            raise ValueError("LLM service not initialized")
+        
+        # Check if API keys are configured
+        from app.core.config import settings
+        if not settings.OPENAI_API_KEY and not settings.ANTHROPIC_API_KEY:
+            self._log("No LLM API keys configured (OPENAI_API_KEY or ANTHROPIC_API_KEY)", "ERROR")
+            raise ValueError("No LLM API keys configured")
+        
+        self._log(f"Using LLM provider: {settings.DEFAULT_LLM_PROVIDER}, model: {settings.DEFAULT_MODEL}", "INFO")
+        
+        try:
+            # Execute all groups in parallel
+            with ThreadPoolExecutor(max_workers=settings.VALIDATION_MAX_WORKERS) as executor:
+                # Submit all group analysis tasks
+                futures = {
+                    executor.submit(
+                        self._analyze_parameter_group,
+                        group,
+                        category_answers,
+                        idea_explanation
+                    ): group["group_id"]
+                    for group in self.VALIDATION_PARAMETER_GROUPS
+                }
+                
+                # Collect results with isolated error handling
+                group_results = {}
+                for future in futures:
+                    group_id = futures[future]
+                    try:
+                        # Use validation-specific timeout (isolated from STAGE1_TIMEOUT)
+                        result = future.result(timeout=settings.VALIDATION_GROUP_TIMEOUT)
+                        group_results[group_id] = result
+                    except FutureTimeoutError:
+                        self._log(f"Validation group {group_id} timed out after {settings.VALIDATION_GROUP_TIMEOUT}s", "WARNING")
+                        group_results[group_id] = self._get_fallback_group_analysis(group_id)
+                    except Exception as e:
+                        # Isolated error handling - doesn't affect other groups or services
+                        self._log(f"Validation group {group_id} failed: {str(e)}", "ERROR")
+                        group_results[group_id] = self._get_fallback_group_analysis(group_id)
+            
+            # Combine all group results
+            scores = {}
+            details = {}
+            for group_id, result in group_results.items():
+                if result and isinstance(result, dict):
+                    scores.update(result.get("scores", {}))
+                    details.update(result.get("details", {}))
+            
+            self._log(f"Validation analysis complete: {len(scores)} scores, {len(details)} details", "INFO")
+            
+            # Ensure all parameters have scores and details (fallback if missing)
+            all_params = []
+            for group in self.VALIDATION_PARAMETER_GROUPS:
+                all_params.extend([param_key for param_key, _ in group["parameters"]])
+            
+            for param_key in all_params:
+                if param_key not in scores:
+                    scores[param_key] = 6.0
+                if param_key not in details:
+                    details[param_key] = f"Analysis for {param_key.replace('_', ' ').title()} is being generated."
+            
+            # Clamp all scores to minimum of 1
+            for key in scores:
+                scores[key] = max(float(scores[key]), 1.0)
+            
+            # Calculate overall score
+            overall_score = sum(scores.values()) / len(scores) if scores else 0
+            
+            # Generate summary recommendations
+            recommendations = self._generate_summary_recommendations(scores, details)
+            
+            return {
+                "scores": scores,
+                "details": details,  # Now populated with actual analysis!
+                "overall_score": round(overall_score, 1),
+                "recommendations": recommendations
+            }
+        except Exception as e:
+            # If parallel execution fails completely, log and return fallback
+            self._log(f"Parallel validation analysis failed: {str(e)}", "ERROR")
+            import traceback
+            self._log(f"Traceback: {traceback.format_exc()}", "ERROR")
+            # Return fallback with all parameters
+            all_params = []
+            for group in self.VALIDATION_PARAMETER_GROUPS:
+                all_params.extend([param_key for param_key, _ in group["parameters"]])
+            
+            fallback_scores = {param: 6.0 for param in all_params}
+            fallback_details = {
+                param: f"Analysis for {param.replace('_', ' ').title()} could not be generated. Please try again."
+                for param in all_params
+            }
+            
+            return {
+                "scores": fallback_scores,
+                "details": fallback_details,
+                "overall_score": 6.0,
+                "recommendations": "Validation analysis encountered an error. Please try again."
+            }
+    
+    def _analyze_parameter_group(
+        self,
+        group: Dict[str, Any],
+        category_answers: Dict[str, Any],
+        idea_explanation: str
+    ) -> Dict[str, Any]:
+        """
+        Analyze one parameter group using LLM with structured output.
+        
+        This method is isolated - errors here don't affect other groups or services.
+        
+        Returns:
+            {"scores": {...}, "details": {...}} for this group's parameters
+        """
+        try:
+            # Build focused prompt for this group
+            prompt = self._build_group_analysis_prompt(group, category_answers, idea_explanation)
+            
+            # Define JSON schema for structured output
+            schema = {
+                "type": "object",
+                "properties": {
+                    "scores": {
+                        "type": "object",
+                        "properties": {
+                            param_key: {"type": "number", "minimum": 1, "maximum": 10}
+                            for param_key, param_name in group["parameters"]
+                        },
+                        "required": [param_key for param_key, _ in group["parameters"]]
+                    },
+                    "details": {
+                        "type": "object",
+                        "properties": {
+                            param_key: {
+                                "type": "string",
+                                "description": f"2-3 sentence analysis of {param_name}"
+                            }
+                            for param_key, param_name in group["parameters"]
+                        },
+                        "required": [param_key for param_key, _ in group["parameters"]]
+                    }
+                },
+                "required": ["scores", "details"]
+            }
+            
+            # Call LLM with structured output (reuses shared utility)
+            self._log(f"Calling LLM for validation group {group['group_id']} with {len(group['parameters'])} parameters", "INFO")
+            try:
+                response = self.llm_service.generate_structured(
+                    prompt=prompt,
+                    schema=schema,
+                    temperature=settings.VALIDATION_TEMPERATURE,
+                    max_tokens=settings.VALIDATION_MAX_TOKENS_PER_GROUP,
+                    run_id=None  # Validation doesn't use run_id tracking
+                )
+                self._log(f"LLM call successful for group {group['group_id']}", "INFO")
+            except Exception as llm_error:
+                import traceback
+                self._log(f"LLM call failed for group {group['group_id']}: {type(llm_error).__name__}: {str(llm_error)}", "ERROR")
+                self._log(f"LLM error traceback:\n{traceback.format_exc()}", "ERROR")
+                raise
+            
+            # Validate response structure
+            if not isinstance(response, dict):
+                raise ValueError("LLM response is not a dictionary")
+            
+            if "scores" not in response or "details" not in response:
+                raise ValueError("LLM response missing required 'scores' or 'details' fields")
+            
+            # Ensure minimum score of 1 for all parameters
+            if "scores" in response:
+                for key in response["scores"]:
+                    response["scores"][key] = max(float(response["scores"][key]), 1.0)
+            
+            # Validate details are strings
+            if "details" in response:
+                for key in response["details"]:
+                    if not isinstance(response["details"][key], str):
+                        response["details"][key] = str(response["details"][key])
+            
+            return response
+            
+        except Exception as e:
+            # Isolated error handling - log detailed error info
+            import traceback
+            error_type = type(e).__name__
+            error_msg = str(e)
+            error_traceback = traceback.format_exc()
+            self._log(f"Failed to analyze validation group {group['group_id']}: {error_type}: {error_msg}", "ERROR")
+            self._log(f"Traceback for group {group['group_id']}:\n{error_traceback}", "ERROR")
+            # Re-raise so caller can use fallback
+            raise
+    
+    def _build_group_analysis_prompt(
+        self,
+        group: Dict[str, Any],
+        category_answers: Dict[str, Any],
+        idea_explanation: str
+    ) -> str:
+        """
+        Build focused prompt for analyzing one parameter group.
+        
+        This is validation-specific and isolated from other services.
+        """
+        param_names = [name for _, name in group["parameters"]]
+        
+        prompt_parts = [
+            f"Analyze this startup idea across these {len(group['parameters'])} related parameters: {', '.join(param_names)}",
+            f"Context: {group['context']}",
+            "",
+            "**Idea Description:**",
+            idea_explanation,
+            "",
+            "**Business Details:**",
+            f"Industry: {category_answers.get('industry', 'Not specified')}",
+            f"Stage: {category_answers.get('stage', 'Not specified')}",
+            f"Geography: {category_answers.get('geography', 'Not specified')}",
+            f"Business Type: {category_answers.get('business_archetype', category_answers.get('business_type', 'Not specified'))}",
+            f"Revenue Model: {category_answers.get('revenue_model', 'Not specified')}",
+            f"Problem Category: {category_answers.get('problem_category', 'Not specified')}",
+            f"Solution Type: {category_answers.get('solution_type', 'Not specified')}",
+            f"User Type: {category_answers.get('user_type', 'Not specified')}",
+            "",
+            "**Your Task:**",
+            "For each parameter, provide:",
+            "1. A score from 1-10 (be realistic and critical, where 1-3 = weak, 4-6 = fair, 7-8 = strong, 9-10 = excellent)",
+            "2. A detailed 2-3 sentence analysis explaining the score, focusing on strengths and concerns",
+            "",
+            "Parameters to analyze:"
+        ]
+        
+        for param_key, param_name in group["parameters"]:
+            prompt_parts.append(f"- {param_name} ({param_key})")
+        
+        prompt_parts.extend([
+            "",
+            "Return a JSON object with 'scores' and 'details' objects containing entries for each parameter.",
+            "Be critical but fair in your assessment. Base scores on the idea's actual potential, not just optimism."
+        ])
+        
+        return "\n".join(prompt_parts)
+    
+    def _get_fallback_group_analysis(self, group_id: str) -> Dict[str, Any]:
+        """
+        Return fallback scores/details if LLM call fails for a group.
+        
+        This ensures validation always returns valid data even if some groups fail.
+        Isolated from other services - doesn't affect discovery pipeline.
+        """
+        group = next((g for g in self.VALIDATION_PARAMETER_GROUPS if g["group_id"] == group_id), None)
+        
+        if not group:
+            # Fallback if group not found
+            return {"scores": {}, "details": {}}
+        
+        # Default to 6.0 score and generic message
+        scores = {param_key: 6.0 for param_key, _ in group["parameters"]}
+        details = {
+            param_key: f"Analysis for {param_name} could not be generated at this time. Please try again or review manually."
+            for param_key, param_name in group["parameters"]
         }
         
-        # Clamp all scores to minimum of 1 - never allow 0 for analyzed content
-        for key in scores:
-            scores[key] = max(scores[key], 1.0)
+        return {"scores": scores, "details": details}
+    
+    def _generate_summary_recommendations(
+        self,
+        scores: Dict[str, float],
+        details: Dict[str, str]
+    ) -> str:
+        """
+        Generate summary recommendations based on scores and details.
         
-        overall_score = sum(scores.values()) / len(scores)
+        This is a simple rule-based approach (no LLM call) for speed.
+        Can be enhanced later with LLM if needed.
+        """
+        if not scores:
+            return "Unable to generate recommendations. Please review the validation details manually."
         
-        return {
-            "scores": scores,
-            "overall_score": round(overall_score, 1),
-            "recommendations": "Your idea shows strong potential. Focus on early customer validation and MVP development.",
-            "details": {}
-        }
+        overall_score = sum(scores.values()) / len(scores) if scores else 0
+        
+        # Identify top strengths and weaknesses
+        sorted_params = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        top_strength = sorted_params[0] if sorted_params else None
+        top_weakness = sorted_params[-1] if sorted_params else None
+        
+        if overall_score >= 8:
+            base_msg = "Your idea shows strong potential across multiple dimensions."
+            if top_strength:
+                strength_name = top_strength[0].replace("_", " ").title()
+                base_msg += f" Your strongest area is {strength_name}."
+            return f"{base_msg} Focus on early customer validation and MVP development to capitalize on this strength."
+        
+        elif overall_score >= 6:
+            base_msg = "Your idea has good potential with some areas for improvement."
+            if top_weakness:
+                weakness_name = top_weakness[0].replace("_", " ").title()
+                base_msg += f" Consider strengthening {weakness_name} through research and validation."
+            return f"{base_msg} Focus on addressing weaker areas while building on your strengths."
+        
+        else:
+            base_msg = "Your idea has potential but needs significant refinement."
+            if top_weakness:
+                weakness_name = top_weakness[0].replace("_", " ").title()
+                base_msg += f" Priority should be improving {weakness_name}."
+            return f"{base_msg} Consider pivoting or addressing key weaknesses before moving forward."
     
     def _get_fallback_next_steps(self, validation_results: Optional[Dict[str, Any]]) -> str:
         """Return fallback generic next steps if LLM generation fails"""

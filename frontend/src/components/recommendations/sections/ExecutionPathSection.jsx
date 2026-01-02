@@ -8,7 +8,7 @@ export default function ExecutionPathSection({ executionPhaseCards, content, isE
     return (
       <div className="grid gap-4 md:grid-cols-2">
         {executionPhaseCards.map((phase) => (
-          <div key={phase.title} className="ui-card2 ui-pad-md ui-radius-card shadow-card">
+          <div key={phase.title} className="ui-card2 ui-pad-md rounded-xl shadow-card">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-primary">{phase.title}</h3>
             <ol className="mt-3 space-y-2 text-sm text-primary">
               {phase.items.map((item) => (

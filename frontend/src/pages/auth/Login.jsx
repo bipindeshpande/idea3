@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
-import PageHeader from "../../components/layout/PageHeader.jsx";
 import PageContainer from "../../components/layout/PageContainer.jsx";
 import Card from "../../components/ui/Card.jsx";
 import UIButton from "../../components/ui/ui-button.jsx";
@@ -48,22 +47,22 @@ export default function Login() {
 
  return (
  <MarketingLayout>
- <PageContainer maxWidth="md">
- <Seo
- title="Sign In | Startup Idea Advisor"
- description="Sign in to your account to access startup idea recommendations and validation."
- path="/login"
- />
+      <PageContainer maxWidth="md" className="min-h-screen flex items-center justify-center py-12">
+        <Seo
+          title="Sign In | Startup Idea Advisor"
+          description="Sign in to your account to access startup idea recommendations and validation."
+          path="/login"
+        />
 
- <Card className="relative">
- <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-surface opacity-[0.09] blur-2xl pointer-events-none"></div>
- <div className="relative z-10">
- <PageHeader
- title="Sign In"
- description="Welcome back! Sign in to continue."
- />
+      <Card className="relative max-w-sm mx-auto w-full" padding="sm">
+        <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-surface opacity-[0.09] blur-2xl pointer-events-none"></div>
+        <div className="relative z-10">
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-primary mb-2">Sign In</h1>
+          <p className="text-sm text-secondary">Welcome back! Sign in to continue.</p>
+        </div>
 
- <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
  <FormInput
  type="email"
  id="email"
@@ -118,7 +117,7 @@ export default function Login() {
  </UIButton>
  </form>
 
- <div className="mt-6 text-center text-sm text-secondary">
+        <div className="mt-4 text-center text-sm text-secondary">
  Don't have an account?{" "}
  <Link to="/register" className="font-semibold text-accent hover:text-accent transition-colors">
  Create one

@@ -8,7 +8,7 @@ export default function MarketOpportunitySection({ marketInsights, content, isEn
     return (
       <ul className="space-y-3 text-sm text-primary text-primary">
         {marketInsights.map((insight, index) => (
-          <li key={index} className="flex gap-3 ui-card2 ui-pad-sm ui-radius-card shadow-card">
+          <li key={index} className="flex gap-3 ui-card2 ui-pad-sm rounded-xl shadow-card">
             <span className="mt-1 text-primary">📈</span>
             <span>{insight}</span>
           </li>

@@ -19,7 +19,7 @@ export default function TimelineEffortSection({ roadmapMarkdown, content, isEnri
         {["0-30 Days", "30-60 Days", "60-90 Days"].map((window, index) => {
           const segmentContent = extractTimelineSlice(roadmapMarkdown, index);
           return (
-            <div key={window} className="ui-card2 ui-pad-md ui-radius-card shadow-card">
+            <div key={window} className="ui-card2 ui-pad-md rounded-xl shadow-card">
               <p className="text-xs uppercase tracking-wide text-primary">{window}</p>
               <div className="mt-2 text-sm text-primary">
                 <ReactMarkdown>{segmentContent}</ReactMarkdown>

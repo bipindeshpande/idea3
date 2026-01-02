@@ -1,0 +1,28 @@
+{
+  "category_answers": {
+    "industry": "SaaS / Software",
+    "geography": "US",
+    "stage": "Early Research",
+    "commitment": "Full-time Startup",
+    "problem_category": "Inefficiency",
+    "solution_type": "SaaS / Online Platform",
+    "user_type": "SMBs",
+    "revenue_model": "Subscription",
+    "unique_moat": "Superior UX",
+    "business_archetype": "Online software / AI product (SaaS / app / tool)",
+    "initial_budget": "$1k–$10k",
+    "delivery_channel": "Online only",
+    "constraints": ["Limited Budget", "Limited Time"],
+    "competitors": "HubSpot, Salesforce (too expensive), Pipedrive (lacks AI features)"
+  },
+  "idea_explanation": "1. Problem: \nSmall businesses struggle to manage customer relationships effectively. They use multiple disconnected tools (email, spreadsheets, CRM) which leads to lost opportunities, poor follow-up, and inefficient workflows.\n\n2. Solution:\nAn AI-powered all-in-one customer relationship platform that integrates email, CRM, task management, and automated follow-ups. Uses AI to suggest optimal contact times, personalize messages, and prioritize leads.\n\n3. User:\nSmall to medium businesses (SMBs) with 5-50 employees, particularly in service industries like consulting, agencies, and professional services. They need better organization but can't afford enterprise CRM solutions.\n\n4. Differentiation:\nUnlike generic CRMs, this platform is built specifically for SMB workflows with AI that learns from their communication patterns. More affordable than enterprise solutions, more powerful than basic tools.\n\n5. Monetization:\nFreemium model with basic features free. Paid tiers starting at $29/month for advanced AI features, integrations, and team collaboration. Enterprise plans for larger teams.\n\n6. Scope/Region:\nLaunch in US market first, targeting tech-savvy SMBs. Expand to English-speaking markets (Canada, UK, Australia) in year 2.",
+  "idea_id": null,
+  "idea_metadata": {
+    "title": "AI-Powered SMB CRM Platform",
+    "summary": "An all-in-one customer relationship platform designed specifically for small businesses with AI-powered automation and insights.",
+    "target_market": "SMBs with 5-50 employees",
+    "revenue_model": "Subscription",
+    "delivery_mode": "Online only"
+  }
+}
+

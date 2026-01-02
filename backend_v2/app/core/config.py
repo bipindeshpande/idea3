@@ -69,6 +69,14 @@ class Settings(BaseSettings):
     STAGE2_TIMEOUT: int = 120  # seconds
     PARALLEL_EXECUTION: bool = True
     
+    # Validation Service (isolated from discovery pipeline)
+    VALIDATION_GROUP_TIMEOUT: int = 15  # seconds per parameter group
+    VALIDATION_MAX_TOKENS_PER_GROUP: int = 1500  # tokens per group analysis
+    VALIDATION_TEMPERATURE: float = 0.7  # LLM temperature for validation
+    VALIDATION_MAX_WORKERS: int = 3  # parallel groups
+    VALIDATION_OVERALL_TIMEOUT: int = 75  # seconds for entire validation (analysis + next_steps)
+    VALIDATION_NEXT_STEPS_TIMEOUT: int = 30  # seconds for next_steps generation
+    
     # Security
     SECRET_KEY: str = "change-me-in-production"
     ALGORITHM: str = "HS256"

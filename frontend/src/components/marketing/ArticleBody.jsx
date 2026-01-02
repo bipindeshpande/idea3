@@ -10,6 +10,9 @@ export default function ArticleBody({ children, className = "" }) {
       }}
     >
       <style>{`
+        .prose, .prose * {
+          font-family: var(--font-family) !important;
+        }
         .prose h1, .prose h2, .prose h3, .prose h4 {
           color: var(--mkt-heading);
           font-weight: 700;

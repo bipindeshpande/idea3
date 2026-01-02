@@ -4,6 +4,9 @@ import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import Seo from "../../components/common/Seo.jsx";
 import DiscoveryLoadingIndicator from "../../components/discovery/DiscoveryLoadingIndicator.jsx";
+import DiscoveryCard from "../../components/discovery/DiscoveryCard.jsx";
+import DiscoveryHeader from "../../components/discovery/DiscoveryHeader.jsx";
+import { DISCOVERY_SPACING, DISCOVERY_TYPOGRAPHY } from "../../components/discovery/DiscoveryTheme.js";
 import IntakeScreen from "./IntakeScreen.jsx";
 import ReviewScreen from "../../components/discovery/ReviewScreen.jsx";
 import FocusLayout from "../../layouts/FocusLayout.jsx";
@@ -260,7 +263,7 @@ export default function HomePage() {
  steps={[{ label: "Intake" }, { label: "Review" }]}
  currentStep={screen}
  >
- <div className="space-y-8">
+ <div className={DISCOVERY_SPACING.sectionGapLarge.replace('gap-', 'space-y-')}>
  {loading && <DiscoveryLoadingIndicator 
  streamingOutput={streamingOutput} 
  isCached={isCached}
@@ -293,26 +296,28 @@ export default function HomePage() {
  </script>
  </Seo>
 
- <header className="ui-card rounded-[16px] p-6 shadow-card">
+ <DiscoveryCard>
  <div className="flex items-start justify-between gap-4">
- <div>
- <p className="text-xs font-semibold text-secondary">Step {screen + 1} of 2</p>
- <h1 className="mt-2 text-2xl font-semibold text-primary">{screenTitles[screen]}</h1>
- <p className="mt-2 text-sm text-secondary">{screenDescriptions[screen]}</p>
- </div>
+ <DiscoveryHeader
+ step={screen + 1}
+ totalSteps={2}
+ title={screenTitles[screen]}
+ description={screenDescriptions[screen]}
+ />
  {process.env.NODE_ENV === "development" ? (
  <button type="button" onClick={handleAutoFill} className="ui-btn ui-btn-secondary focus-visible:outline-accent">
  Auto-Fill (Dev)
  </button>
  ) : null}
  </div>
- </header>
+ </DiscoveryCard>
 
- <form id="intake-form" onSubmit={handleSubmit} className="ui-card rounded-[16px] p-6 shadow-card">
+ <form id="intake-form" onSubmit={handleSubmit}>
+ <DiscoveryCard>
  {/* Persistent conversational header */}
  <div className="mb-6">
- <h2 className="text-lg font-medium text-primary">{conversationalHeaders[screen].title}</h2>
- <p className="mt-1 text-sm text-secondary">{conversationalHeaders[screen].description}</p>
+ <h2 className={DISCOVERY_TYPOGRAPHY.h3}>{conversationalHeaders[screen].title}</h2>
+ <p className={`mt-1 ${DISCOVERY_TYPOGRAPHY.subtitle}`}>{conversationalHeaders[screen].description}</p>
  </div>
 
  <div className="space-y-3">
@@ -356,27 +361,28 @@ export default function HomePage() {
  )}
  </div>
  </footer>
- {error && <p className="mt-3 text-sm text-accent">{error}</p>}
- <p className="text-xs text-secondary">
+ {error && <p className={`mt-3 ${DISCOVERY_TYPOGRAPHY.bodySmall} text-accent`}>{error}</p>}
+ <p className={DISCOVERY_TYPOGRAPHY.caption}>
  We never store your inputs. <Link to="/privacy" className="text-accent underline">Read our privacy promises.</Link>
  </p>
  {isAuthenticated && (
- <p className="text-xs text-secondary mt-2">
+ <p className={`${DISCOVERY_TYPOGRAPHY.caption} mt-2`}>
  Want more personalized recommendations?{" "}
  <Link to="/founder-psychology" className="text-accent underline hover:text-accent">
  Share your Founder Profile
  </Link>
  </p>
  )}
+ </DiscoveryCard>
  </form>
 
  {reports && (
- <section className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
- <h2 className="text-lg font-semibold text-primary flex items-center gap-2">Latest report saved</h2>
- <p className="mt-1 text-primary text-primary leading-relaxed">
+ <DiscoveryCard>
+ <h2 className={`${DISCOVERY_TYPOGRAPHY.h3} flex items-center gap-2`}>Latest report saved</h2>
+ <p className={`mt-1 ${DISCOVERY_TYPOGRAPHY.bodySmall}`}>
  Visit the dashboard or the tabs above to review your profile summary and recommendations anytime.
  </p>
- </section>
+ </DiscoveryCard>
  )}
  </div>
  </FocusLayout>

@@ -69,15 +69,41 @@ export function ValidationProvider({ children }) {
  }
 
  let data;
+ // Validation requests need longer timeout (90s) due to LLM calls for analysis + next_steps
+ const validationTimeout = 90000; // 90 seconds
  if (isEdit) {
- data = await apiClient.put(`/validate-idea/${validationId}`, requestBody);
+ data = await apiClient.put(`/validate-idea/${validationId}`, requestBody, { timeout: validationTimeout });
  } else {
- data = await apiClient.post("/validate-idea", requestBody);
+ data = await apiClient.post("/validate-idea", requestBody, { timeout: validationTimeout });
  }
  
+ // Backend returns: { success: true, validation_id: "...", validation: {...} }
+ // Extract validation data - check both validation and validation_result for compatibility
+ const validationData = data.validation || data.validation_result || null;
+ 
+ // 🔍 DEBUG STEP 2: Check what backend sent
+ console.log("🔍 Step 2 - Backend response details:", {
+  hasDetails: !!validationData?.details,
+  detailsType: typeof validationData?.details,
+  detailsKeysCount: validationData?.details ? Object.keys(validationData.details).length : 0,
+  detailsKeys: validationData?.details ? Object.keys(validationData.details).slice(0, 3) : "none"
+ });
+ 
  // Only save if we have valid validation data
- if (!data.validation || typeof data.validation !== 'object') {
+ if (!validationData || typeof validationData !== 'object') {
+ console.error("Invalid validation response - no validation data:", data);
  throw new Error("No validation data received from server");
+ }
+
+ // Ensure validation data has required fields (scores and overall_score)
+ if (!validationData.scores || validationData.overall_score === undefined) {
+ console.error("Validation data missing required fields:", {
+  hasScores: !!validationData.scores,
+  overallScore: validationData.overall_score,
+  validationDataKeys: Object.keys(validationData),
+  fullResponse: data
+ });
+ throw new Error("Validation data incomplete: missing scores or overall_score");
  }
 
  const validation = {
@@ -85,7 +111,7 @@ export function ValidationProvider({ children }) {
  timestamp: Date.now(),
  categoryAnswers: answers,
  ideaExplanation: explanation,
- validation: data.validation,
+ validation: validationData, // Store the complete validation result
  };
 
  // Only save successful validations with valid data
@@ -108,7 +134,19 @@ export function ValidationProvider({ children }) {
  // Try to load directly from GET /api/validate-idea/{id} first
  try {
  const data = await apiClient.get(`/validate-idea/${cleanId}`);
- const validationResult = data.validation_result || data.validation || {};
+ // GET endpoint returns both validation_result and validation (alias)
+ // Prioritize 'validation' as it matches POST response structure
+ const validationResult = data.validation || data.validation_result || null;
+ 
+ if (!validationResult || typeof validationResult !== 'object') {
+  console.error("No validation data in GET response:", data);
+  throw new Error("No validation data in response");
+ }
+ 
+ // Ensure validation result has required fields
+ if (!validationResult.scores || validationResult.overall_score === undefined) {
+  console.warn("Validation result missing scores or overall_score:", validationResult);
+ }
 
  const validationData = {
  id: data.validation_id || data.id || cleanId,

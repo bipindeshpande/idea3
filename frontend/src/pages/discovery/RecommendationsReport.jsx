@@ -4,6 +4,16 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 // import html2canvas from "html2canvas";
 // import jsPDF from "jspdf";
 import Seo from "../../components/common/Seo.jsx";
+import FocusLayout from "../../layouts/FocusLayout.jsx";
+import DiscoveryCard from "../../components/discovery/DiscoveryCard.jsx";
+import DiscoveryHeader from "../../components/discovery/DiscoveryHeader.jsx";
+import DiscoveryBadge from "../../components/discovery/DiscoveryBadge.jsx";
+import DiscoveryEmptyState from "../../components/discovery/DiscoveryEmptyState.jsx";
+import DiscoveryLoadingState from "../../components/discovery/DiscoveryLoadingState.jsx";
+import DiscoveryErrorState from "../../components/discovery/DiscoveryErrorState.jsx";
+import DiscoveryTabs from "../../components/discovery/DiscoveryTabs.jsx";
+import IdeaTableRow from "../../components/discovery/IdeaTableRow.jsx";
+import { DISCOVERY_SPACING, DISCOVERY_TYPOGRAPHY } from "../../components/discovery/DiscoveryTheme.js";
 import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useValidation } from "../../context/ValidationContext.jsx";
@@ -543,51 +553,34 @@ export default function RecommendationsReport() {
  // Show error state
  if (error) {
  return (
- <section className="mx-auto max-w-6xl px-6 py-6">
+ <FocusLayout>
  <Seo
  title="Error | Startup Idea Advisor"
  description="Error loading recommendation report"
  path="/results/recommendations"
  />
- <div className="rounded-3xl border border-default bg-surface p-6 text-accent shadow-soft">
- <h2 className="text-lg font-semibold">Error Loading Report</h2>
- <p className="mt-2 text-sm">{error}</p>
- <div className="mt-4 flex gap-3">
- <Link
- to="/dashboard"
- className="inline-block px-4 py-2 bg-app bg-surface text-primary text-secondary rounded-lg hover:bg-surface hover:bg-surface transition text-sm font-medium"
- >
- ← Back to Dashboard
- </Link>
- <Link
- to="/advisor"
- className="inline-block rounded-xl border border-default bg-surface px-4 py-2 text-sm font-semibold text-accent shadow-sm transition hover:bg-surface"
- >
- Generate New Report
- </Link>
- </div>
- </div>
- </section>
+ <DiscoveryErrorState
+ error={error}
+ primaryAction={{ to: "/advisor", label: "Generate New Report" }}
+ />
+ </FocusLayout>
  );
  }
 
  // Show loading state
  if (isLoading) {
  return (
- <section className="mx-auto max-w-6xl px-6 py-6">
+ <FocusLayout>
  <Seo
  title="Loading Recommendations | Startup Idea Advisor"
  description="Loading recommendation report"
  path="/results/recommendations"
  />
- <div className="rounded-3xl border border-default bg-app p-6 text-center">
- <div className="mb-4 flex justify-center">
- <div className="h-8 w-8 animate-spin rounded-full border-4 border-default border-t-brand-600"></div>
- </div>
- <h2 className="text-lg font-semibold text-primary">Loading Report...</h2>
- <p className="mt-2 text-sm text-secondary">Please wait while we load your recommendations.</p>
- </div>
- </section>
+ <DiscoveryLoadingState
+ title="Loading Report..."
+ message="Please wait while we load your recommendations."
+ />
+ </FocusLayout>
  );
  }
 
@@ -609,23 +602,7 @@ export default function RecommendationsReport() {
  });
  }
  
- return (
- <section className="mx-auto max-w-6xl px-6 py-6">
- <Seo
- title="No Recommendations | Startup Idea Advisor"
- description="No recommendation report available"
- path="/results/recommendations"
- />
- <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <h3 className="text-lg font-semibold text-primary mb-1">No Report Available</h3>
- <p className="text-primary text-secondary leading-relaxed max-w-md mx-auto">
- {runId ? "Report not found. It may have been deleted or the ID is invalid." : "No report data available. Please generate recommendations first."}
- </p>
- {process.env.NODE_ENV === 'development' && effectiveReports && (
- <details className="mt-4 text-left">
- <summary className="text-xs cursor-pointer text-secondary">Debug Info</summary>
- <pre className="mt-2 text-xs overflow-auto max-h-64 bg-app p-2 rounded">
- {JSON.stringify({
+ const debugInfo = process.env.NODE_ENV === 'development' && effectiveReports ? {
  hasEffectiveReports: !!effectiveReports,
  hasReports: !!reports,
  hasCachedRecommendations: !!cachedRecommendations,
@@ -634,84 +611,67 @@ export default function RecommendationsReport() {
  recommendationsLength: effectiveReports?.personalized_recommendations?.length || 0,
  recommendationsPreview: effectiveReports?.personalized_recommendations?.substring(0, 500),
  allKeys: Object.keys(effectiveReports || {}),
- }, null, 2)}
- </pre>
- </details>
- )}
- <div className="mt-4 flex gap-3 justify-center">
- <Link
- to="/advisor"
- className="inline-block rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-on-accent shadow-sm transition hover:bg-accent-hover"
- >
- Generate Recommendations
- </Link>
- <Link
- to="/dashboard"
- className="inline-block px-4 py-2 bg-app bg-surface text-primary text-secondary rounded-lg hover:bg-surface hover:bg-surface transition text-sm font-medium"
- >
- ← Back to Dashboard
- </Link>
- </div>
- </div>
- </section>
+ } : null;
+
+ return (
+ <FocusLayout>
+ <Seo
+ title="No Recommendations | Startup Idea Advisor"
+ description="No recommendation report available"
+ path="/results/recommendations"
+ />
+ <DiscoveryEmptyState
+ title="No Report Available"
+ message={runId ? "Report not found. It may have been deleted or the ID is invalid." : "No report data available. Please generate recommendations first."}
+ primaryAction={{ to: "/advisor", label: "Generate Recommendations" }}
+ debugInfo={debugInfo}
+ />
+ </FocusLayout>
  );
  }
 
  return (
- <section className="grid gap-6">
+ <FocusLayout>
  <Seo
  title="Personalized Startup Recommendations | Startup Idea Advisor"
  description="Review AI-generated startup ideas, financial outlook, and execution roadmap tailored to your profile."
  path="/results/recommendations"
  />
- <div className="flex flex-wrap items-center justify-between gap-3">
- <div className="flex items-center gap-4">
- <button
- onClick={() => navigate("/dashboard")}
- className="flex items-center gap-2 rounded-lg border border-default bg-surface px-3 py-2 text-sm font-medium text-primary text-secondary hover:bg-surface hover:bg-surface transition-colors"
- aria-label="Back to Dashboard"
- >
- <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
- </svg>
- Back
- </button>
- <h1 className="text-2xl font-semibold text-primary text-secondary">Recommendation Report</h1>
- </div>
- </div>
+ <DiscoveryHeader
+ title="Recommendation Report"
+ description="Review AI-generated startup ideas tailored to your profile"
+ />
 
- <div ref={reportRef} className="grid gap-6">
+ <div ref={reportRef} className={DISCOVERY_SPACING.sectionGap.replace('gap-', 'space-y-')}>
  {/* Conflict Adjustment Message */}
  {conflictAdjustment && conflictAdjustment.message && (
- <div className="rounded-xl border border-default bg-surface bg-surface p-5 shadow-sm">
- <div className="flex items-start gap-3">
- <div className="icon-circle bg-surface bg-surface text-accent text-accent text-xl shrink-0">
- 💡
- </div>
+ <DiscoveryCard variant="info">
+ <div className={`flex items-start ${DISCOVERY_SPACING.elementGap}`}>
+ <div className="text-xl shrink-0">💡</div>
  <div className="flex-1">
- <p className="text-primary text-accent text-accent leading-relaxed">
+ <p className={`${DISCOVERY_TYPOGRAPHY.body} text-accent`}>
  {conflictAdjustment.message}
  </p>
  {conflictAdjustment.optional_clarification && (
- <p className="mt-2 text-sm text-accent text-accent italic">
+ <p className={`mt-2 ${DISCOVERY_TYPOGRAPHY.bodySmall} text-accent italic`}>
  {conflictAdjustment.optional_clarification}
  </p>
  )}
  </div>
  </div>
- </div>
+ </DiscoveryCard>
  )}
 
  {topIdeas.length === 0 && markdown && markdown.length > 0 && (
- <div className="rounded-3xl border border-default bg-surface p-6 text-accent shadow-soft">
- <h2 className="text-lg font-semibold">Unable to Parse Recommendations</h2>
- <p className="mt-2 text-sm mb-4">
+ <DiscoveryCard variant="elevated">
+ <h2 className={DISCOVERY_TYPOGRAPHY.h3}>Unable to Parse Recommendations</h2>
+ <p className={`mt-2 ${DISCOVERY_TYPOGRAPHY.bodySmall} mb-4`}>
  The recommendations couldn't be parsed into individual ideas. This might happen if the format is unexpected or the report is very brief.
  </p>
- <div className="space-y-3">
+ <div className={DISCOVERY_SPACING.elementGap.replace('gap-', 'space-y-')}>
  <Link
  to="/advisor"
- className="inline-block rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-on-accent shadow-sm transition hover:bg-accent-hover"
+ className="ui-btn ui-btn-primary focus-visible:outline-accent"
  >
  Generate New Recommendations
  </Link>
@@ -752,71 +712,40 @@ export default function RecommendationsReport() {
  </div>
  </div>
  </div>
- </div>
+ </DiscoveryCard>
  )}
 
  {topIdeas.length === 0 && (!markdown || markdown.length === 0) && (
- <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <h3 className="text-lg font-semibold text-primary mb-1">No Recommendations Available</h3>
- <p className="text-primary text-secondary leading-relaxed max-w-md mx-auto">
+ <DiscoveryCard>
+ <div className="text-center">
+ <h3 className={`${DISCOVERY_TYPOGRAPHY.h3} mb-1`}>No Recommendations Available</h3>
+ <p className={`${DISCOVERY_TYPOGRAPHY.bodySmall} max-w-md mx-auto`}>
  The recommendation report is empty or could not be loaded.
  </p>
- <div className="mt-4 flex gap-3 justify-center">
+ <div className={`mt-4 flex ${DISCOVERY_SPACING.elementGap} justify-center`}>
  <Link
  to="/advisor"
- className="inline-block rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-on-accent shadow-sm transition hover:bg-accent-hover"
+ className="ui-btn ui-btn-primary focus-visible:outline-accent"
  >
  Generate Recommendations
  </Link>
- <Link
- to="/dashboard"
- className="inline-block rounded-xl border border-default bg-surface px-4 py-2 text-sm font-semibold text-accent shadow-sm transition hover:bg-surface"
- >
- Back to Dashboard
- </Link>
  </div>
  </div>
+ </DiscoveryCard>
  )}
 
  {topIdeas.length > 0 && (
  <>
  {/* Tabbed Interface */}
- <div className="border-b border-default">
- <nav className="-mb-px flex space-x-8 overflow-x-auto pb-2">
- <button
- onClick={() => setActiveTab("ideas")}
- className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-semibold transition ${
- activeTab === "ideas"
- ? "border-default text-accent"
- : "border-transparent text-secondary hover:border-default hover:text-primary"
- }`}
- >
- Top Startup Ideas
- </button>
- <button
- onClick={() => setActiveTab("nextsteps")}
- className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-semibold transition ${
- activeTab === "nextsteps"
- ? "border-default text-accent"
- : "border-transparent text-secondary hover:border-default hover:text-primary"
- }`}
- >
- Next Steps
- </button>
- {(finalRecommendation || finalConclusion) && (
- <button
- onClick={() => setActiveTab("conclusion")}
- className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-semibold transition ${
- activeTab === "conclusion"
- ? "border-default text-accent"
- : "border-transparent text-secondary hover:border-default hover:text-primary"
- }`}
- >
- Final Recommendation
- </button>
- )}
- </nav>
- </div>
+ <DiscoveryTabs
+ tabs={[
+ { id: "ideas", label: "Top Startup Ideas" },
+ { id: "nextsteps", label: "Next Steps" },
+ ...(finalRecommendation || finalConclusion ? [{ id: "conclusion", label: "Final Recommendation" }] : [])
+ ]}
+ activeTab={activeTab}
+ onTabChange={setActiveTab}
+ />
 
  {/* Tab Content: Top Startup Ideas */}
  {activeTab === "ideas" && (
@@ -840,71 +769,23 @@ export default function RecommendationsReport() {
  <tbody className="divide-y divide-slate-200">
  {topIdeas.map((idea) => {
  const runQuery = runId || currentRunId;
- const detailPath = runQuery
- ? `/results/recommendations/${idea.index}?id=${runQuery}`
- : `/results/recommendations/${idea.index}`;
  const ideaId = runQuery ? `run_${runQuery}_idea_${idea.index}` : `idea_${idea.index}`;
  const hasActions = ideasWithActions.has(ideaId);
  const hasNotes = ideasWithNotes.has(ideaId);
  
  return (
- <tr key={idea.index} className="transition hover:bg-surface">
- <td className="px-4 py-3 font-semibold text-secondary">{idea.index}</td>
- <td className="px-4 py-3 font-medium text-primary">
- <div className="flex items-center gap-2">
- <span>{idea.title}</span>
- {(hasActions || hasNotes) && (
- <div className="flex items-center gap-1">
- {hasActions && (
- <span 
- className="inline-flex items-center gap-1 rounded-full bg-surface bg-surface px-2 py-0.5 text-xs font-semibold text-accent text-accent"
- title="Has action items"
- >
- <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
- </svg>
- Tasks
- </span>
- )}
-{hasNotes && (
-<UIBadge variant="info" className="inline-flex items-center gap-1">
-<svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-</svg>
-Notes
-</UIBadge>
-)}
- </div>
- )}
- </div>
- {runQuery && (
- <p className="mt-1 text-xs text-secondary text-secondary">
- ID: {runQuery.slice(-8)}
- </p>
- )}
- </td>
- <td className="px-4 py-3 text-secondary">{personalizeCopy(idea.summary)}</td>
- <td className="px-4 py-3">
- <button
- onClick={() => {
- // Pass all ideas via navigation state to avoid API calls
- navigate(detailPath, {
- state: {
- idea: idea,
- allIdeas: allIdeas, // Pass full list to preserve when navigating back
- recommendations: effectiveReports,
- run: cachedRun, // Pass full run object to prevent recomputation
- runId: runId || currentRunId,
- inputs: effectiveInputs
- }
- });
- }}
- className="mx-auto flex max-w-[8rem] justify-center rounded-full px-4 py-2 text-xs font-semibold text-on-accent bg-accent shadow-sm transition hover:bg-accent-hover whitespace-nowrap"
- >
- View details
- </button>
- </td>
- </tr>
+ <IdeaTableRow
+ key={idea.index}
+ idea={idea}
+ runId={runId}
+ currentRunId={currentRunId}
+ allIdeas={allIdeas}
+ effectiveReports={effectiveReports}
+ cachedRun={cachedRun}
+ effectiveInputs={effectiveInputs}
+ hasActions={hasActions}
+ hasNotes={hasNotes}
+ />
  );
  })}
  {topIdeas.length < 3 && (
@@ -1115,6 +996,6 @@ return (
  </>
  )}
  </div>
- </section>
+ </FocusLayout>
  );
 }

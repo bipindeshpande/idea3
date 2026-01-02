@@ -5,6 +5,7 @@ import { HelmetProvider } from "react-helmet-async";
 import App from "./App.jsx";
 import { ReportsProvider } from "./context/ReportsContext.jsx";
 import { ValidationProvider } from "./context/ValidationContext.jsx";
+import { FrameworkProvider } from "./context/FrameworkContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import "./styles/theme.css";
@@ -34,22 +35,24 @@ function Root() {
  return (
  <React.StrictMode>
  <HelmetProvider>
- <ThemeProvider>
- <AuthProvider>
- <ReportsProvider>
- <ValidationProvider>
- <BrowserRouter
- future={{
- v7_startTransition: true,
- v7_relativeSplatPath: true,
- }}
- >
- <App />
- </BrowserRouter>
- </ValidationProvider>
- </ReportsProvider>
- </AuthProvider>
- </ThemeProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ReportsProvider>
+            <ValidationProvider>
+              <FrameworkProvider>
+                <BrowserRouter
+                  future={{
+                    v7_startTransition: true,
+                    v7_relativeSplatPath: true,
+                  }}
+                >
+                  <App />
+                </BrowserRouter>
+              </FrameworkProvider>
+            </ValidationProvider>
+          </ReportsProvider>
+        </AuthProvider>
+      </ThemeProvider>
  </HelmetProvider>
  </React.StrictMode>
  );

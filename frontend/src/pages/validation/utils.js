@@ -18,7 +18,8 @@ export const formatDetails = (details) => {
  .replace(/\s+/g, " ")
  .trim();
  if (!text) return FALLBACK_DETAIL;
- return text.length > 320 ? `${text.slice(0, 317).trim()}...` : text;
+ // Return full text - no truncation (user wants to see all details)
+ return text;
 };
 
 export const getScoreFromScores = (scores = {}, parameter = "") => {

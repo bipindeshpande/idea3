@@ -7,7 +7,7 @@
 // ---------------------------------------------------------------------------
 
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import Seo from "../../components/common/Seo.jsx";
 import { useReports } from "../../context/ReportsContext.jsx";
@@ -18,6 +18,9 @@ import DashboardActiveIdeasTab from "../../components/dashboard/DashboardActiveI
 import DashboardHistoryTab from "../../components/dashboard/DashboardHistoryTab.jsx";
 import DashboardValidationsTab from "../../components/dashboard/DashboardValidationsTab.jsx";
 import DashboardCompareTab from "../../components/dashboard/DashboardCompareTab.jsx";
+import DashboardStats from "../../components/dashboard/DashboardStats.jsx";
+import DashboardQuickActions from "../../components/dashboard/DashboardQuickActions.jsx";
+import TabButton from "../../components/ui/ui-tab-button.jsx";
 
 import { parseStructuredIdeas } from "../../utils/streamingParser.js";
 import {
@@ -25,18 +28,22 @@ import {
  parseRiskRows,
  splitFullReportSections
 } from "../../utils/formatters/recommendationFormatters.js";
-import UIButton from "../../components/ui/ui-button.jsx";
-import UIHeading from "../../components/ui/ui-heading.jsx";
+import { normalizeRunId } from "../../utils/runs.js";
+import { useDashboardData } from "../../hooks/dashboard/useDashboardData.js";
+import { useIdeasExtraction } from "../../hooks/dashboard/useIdeasExtraction.js";
+import { useRunDeletion } from "../../hooks/dashboard/useRunDeletion.js";
+import { useValidationDeletion } from "../../hooks/dashboard/useValidationDeletion.js";
+import { useTabNavigation } from "../../hooks/dashboard/useTabNavigation.js";
 
 const STORAGE_KEY = "sia_saved_runs";
 
 export default function DashboardPage() {
- const navigate = useNavigate();
  const location = useLocation();
+ const navigate = useNavigate();
 
- const { deleteRun, setInputs } = useReports();
+ const { deleteRun: deleteRunFromContext, setInputs } = useReports();
  const { isAuthenticated, getAuthHeaders } = useAuth();
- const { getSavedValidations } = useValidation();
+ const { getSavedValidations, deleteValidation: deleteValidationFromContext } = useValidation();
 
  // ---------------------------------------------------------------------------
  // INTERNAL STATE (UNCHANGED)
@@ -52,7 +59,7 @@ export default function DashboardPage() {
  const [loadingActions, setLoadingActions] = useState(false);
  const [loadingNotes, setLoadingNotes] = useState(false);
 
- const [activeTab, setActiveTab] = useState("ideas");
+ const [activeTab, setActiveTab] = useTabNavigation("ideas");
 
  const [allIdeas, setAllIdeas] = useState([]);
  const [selectedIdeas, setSelectedIdeas] = useState(new Set());
@@ -98,69 +105,21 @@ export default function DashboardPage() {
  };
 
  // ---------------------------------------------------------------------------
- // DASHBOARD DATA LOADER (UNCHANGED LOGIC)
+ // DASHBOARD DATA LOADER (MODULARIZED)
  // ---------------------------------------------------------------------------
 
- const loadDashboardData = useCallback(async () => {
- setLoadingRuns(true);
- setLoadingActions(true);
- setLoadingNotes(true);
-
- try {
- if (isAuthenticated) {
- localStorage.removeItem("sia_validations");
- localStorage.removeItem("revalidate_data");
- }
-
- // Pull from /api/user/activity
- const activity = await fetch("/api/user/activity?limit=100", {
- headers: getAuthHeaders()
+ const loadDashboardData = useDashboardData({
+  isAuthenticated,
+  getAuthHeaders,
+  setApiRuns,
+  setApiValidations,
+  setActions,
+  setNotes,
+  setInsights,
+  setLoadingRuns,
+  setLoadingActions,
+  setLoadingNotes
  });
- if (activity.ok) {
- const json = await activity.json();
- if (json.success) {
- const runsList = json.runs || json?.activity?.runs || [];
- const valList = json.validations || json?.activity?.validations || [];
- setApiRuns(runsList);
- setApiValidations(valList);
- }
- }
-
- // Pull from /api/user/dashboard (actions + notes)
- const dash = await fetch("/api/user/dashboard", {
- headers: getAuthHeaders()
- });
- if (dash.ok) {
- const data = await dash.json();
- if (data.success) {
- setApiRuns(prev => (prev.length ? prev : data.activity?.runs || []));
- setApiValidations(prev =>
- prev.length ? prev : data.activity?.validations || []
- );
- setActions(data.actions || []);
- setNotes(data.notes || []);
- }
- }
-
- // Optional insights
- try {
- const stats = await fetch("/api/runs/stats", {
- headers: getAuthHeaders()
- });
- if (stats.ok) {
- const d = await stats.json();
- if (d.success) setInsights(d);
- }
- } catch {}
-
- } catch (err) {
- console.error("Dashboard load error:", err);
- } finally {
- setLoadingRuns(false);
- setLoadingActions(false);
- setLoadingNotes(false);
- }
- }, [isAuthenticated, getAuthHeaders]);
 
  // ---------------------------------------------------------------------------
  // INITIALIZE LOAD
@@ -226,121 +185,16 @@ export default function DashboardPage() {
  }, [apiRuns, runs, isAuthenticated, loadingRuns]);
 
  // ---------------------------------------------------------------------------
- // EXTRACT IDEAS FROM RUNS (UNCHANGED LOGIC)
+ // EXTRACT IDEAS FROM RUNS
  // ---------------------------------------------------------------------------
 
- useEffect(() => {
- const extractIdeas = async () => {
- const ideas = [];
- const seen = new Set();
-
- const normalizeRunId = id => String(id || "").replace(/^run_/, "");
-
- const runsMissing = apiRuns.filter(
- r => !(r.reports?.personalized_recommendations || r.personalized_recommendations)
- );
-
- const fetchedReports = new Map();
- for (const run of runsMissing) {
- const id = normalizeRunId(run.run_id);
- try {
- const res = await fetch(`/api/user/run/${id}`, {
- headers: getAuthHeaders()
+ useIdeasExtraction({
+  apiRuns,
+  isAuthenticated,
+  loadingRuns,
+  getAuthHeaders,
+  setAllIdeas
  });
- if (res.ok) {
- const json = await res.json();
- if (json.success) {
- let rep = json.run.reports;
- if (typeof rep === "string") {
- try {
- rep = JSON.parse(rep);
- } catch {}
- }
- if (rep?.personalized_recommendations) {
- fetchedReports.set(id, rep);
- }
- }
- }
- } catch {}
- }
-
- // Process API runs
- for (const r of apiRuns) {
- const runId = normalizeRunId(r.run_id);
- let reports = r.reports;
- if (typeof reports === "string") {
- try {
- reports = JSON.parse(reports);
- } catch {}
- }
- let recs =
- reports?.personalized_recommendations ||
- r.personalized_recommendations ||
- fetchedReports.get(runId)?.personalized_recommendations;
-
- if (!recs) continue;
-
- const top = parseStructuredIdeas(recs, 3);
- top.forEach(idea => {
- const idx = String(idea.index);
- const id = `${runId}-${idx}`;
- if (!seen.has(id)) {
- seen.add(id);
- ideas.push({
- id,
- runId,
- ideaIndex: idx,
- title: idea.title,
- summary: idea.summary,
- runInputs: r.inputs || {},
- runCreatedAt: r.created_at,
- runReports: reports
- });
- }
- });
- }
-
- // Process localStorage runs
- const stored = localStorage.getItem(STORAGE_KEY);
- if (stored) {
- try {
- const parsed = JSON.parse(stored);
- parsed.forEach(run => {
- const runId = normalizeRunId(run.run_id || run.id);
- if (
- apiRuns.some(a => normalizeRunId(a.run_id) === runId)
- ) {
- return;
- }
- const recs = run.outputs?.personalized_recommendations;
- if (!recs) return;
- const top = parseStructuredIdeas(recs, 3);
- top.forEach(idea => {
- const idx = String(idea.index);
- const id = `${runId}-${idx}`;
- if (!seen.has(id)) {
- seen.add(id);
- ideas.push({
- id,
- runId,
- ideaIndex: idx,
- title: idea.title,
- summary: idea.summary,
- runInputs: run.inputs,
- runCreatedAt: run.timestamp,
- runReports: run.outputs
- });
- }
- });
- });
- } catch {}
- }
-
- setAllIdeas(ideas);
- };
-
- if (apiRuns.length || !isAuthenticated || !loadingRuns) extractIdeas();
- }, [apiRuns, isAuthenticated, loadingRuns, getAuthHeaders]);
 
  // ---------------------------------------------------------------------------
  // COMPARISON LOGIC (UNCHANGED)
@@ -369,12 +223,76 @@ export default function DashboardPage() {
  }, [allIdeas, getAuthHeaders]);
 
  // ---------------------------------------------------------------------------
- // VALIDATIONS (UNCHANGED)
+ // VALIDATIONS
  // ---------------------------------------------------------------------------
 
  const allValidations = useMemo(() => {
- // unchanged — omitted for length
- return [];
+ if (loadingRuns) return [];
+
+ // Transform API validations to expected format
+ const apiMapped = (apiValidations || []).map(v => {
+ const validationResult = v.validation_result || v.validation || {};
+ const overallScore = validationResult.overall_score;
+ 
+ return {
+  id: v.validation_id || v.id,
+  validation_id: v.validation_id || v.id,
+  timestamp: v.created_at ? new Date(v.created_at).getTime() : Date.now(),
+  idea_explanation: v.idea_explanation || "",
+  category_answers: v.category_answers || {},
+  overall_score: overallScore !== undefined ? overallScore : validationResult.scores ? 
+   Object.values(validationResult.scores || {}).reduce((sum, score) => sum + (parseFloat(score) || 0), 0) / 
+   (Object.keys(validationResult.scores || {}).length || 1) : undefined,
+  validation_result: validationResult,
+  created_at: v.created_at,
+  from_api: true,
+  is_validation: true
+ };
+ });
+
+ // Get localStorage validations if authenticated and merge
+ let localValidations = [];
+ if (isAuthenticated) {
+  try {
+   const saved = getSavedValidations();
+   localValidations = (saved || []).map(v => {
+    const validationResult = v.validation || v.validation_result || {};
+    const overallScore = validationResult.overall_score;
+    
+    return {
+     id: v.id || v.validation_id,
+     validation_id: v.validation_id || v.id,
+     timestamp: v.timestamp || Date.now(),
+     idea_explanation: v.ideaExplanation || v.idea_explanation || "",
+     category_answers: v.categoryAnswers || v.category_answers || {},
+     overall_score: overallScore !== undefined ? overallScore : 
+      (validationResult.scores ? 
+       Object.values(validationResult.scores || {}).reduce((sum, score) => sum + (parseFloat(score) || 0), 0) / 
+       (Object.keys(validationResult.scores || {}).length || 1) : undefined),
+     validation_result: validationResult,
+     created_at: v.created_at || (v.timestamp ? new Date(v.timestamp).toISOString() : null),
+     from_api: false,
+     is_validation: true
+    };
+   });
+  } catch (err) {
+   console.error("Failed to load saved validations:", err);
+  }
+ }
+
+ // Merge: prefer API validations, add local ones that aren't in API
+ const combined = [...apiMapped];
+ const apiIds = new Set(apiMapped.map(v => v.validation_id || v.id));
+ 
+ localValidations.forEach(local => {
+  const id = local.validation_id || local.id;
+  if (!apiIds.has(id)) {
+   combined.push(local);
+  }
+ });
+
+ // Sort by timestamp (newest first)
+ return combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
  }, [apiValidations, getSavedValidations, isAuthenticated, loadingRuns]);
 
  // ---------------------------------------------------------------------------
@@ -382,13 +300,114 @@ export default function DashboardPage() {
  // ---------------------------------------------------------------------------
 
  const filteredRuns = useMemo(() => {
- // unchanged
- return [];
- }, [allRunsMerged, sortBy]);
+ if (!allRunsMerged || allRunsMerged.length === 0) return [];
+ 
+ // Filter out validations (only show discovery runs in history)
+ // The API returns runs and validations separately, so apiRuns should only contain discovery runs
+ // Filter out any that have validation characteristics
+ const discoveryRuns = allRunsMerged.filter(run => {
+  // Exclude if explicitly marked as validation
+  if (run.is_validation === true) return false;
+  // Exclude if it has a validation_id (linked to a validation)
+  if (run.validation_id) return false;
+  // Exclude if it has overall_score (validation characteristic)
+  if (run.overall_score !== undefined && run.overall_score !== null) return false;
+  // Include all other runs
+  return true;
+ });
+ 
+ // Sort by selected criteria
+ let sorted = [...discoveryRuns];
+ 
+ if (sortBy === "date") {
+  sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+ } else if (sortBy === "date_oldest") {
+  sorted.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+ }
+ 
+ return sorted;
+}, [allRunsMerged, sortBy]);
 
  const filteredValidations = useMemo(() => {
- // unchanged
- return [];
+ if (!allValidations || allValidations.length === 0) return [];
+
+ let filtered = [...allValidations];
+
+ // Date filter
+ if (dateFilter !== "all") {
+  const now = Date.now();
+  const oneDay = 24 * 60 * 60 * 1000;
+  const oneWeek = 7 * oneDay;
+  const oneMonth = 30 * oneDay;
+
+  filtered = filtered.filter(v => {
+   const timestamp = v.timestamp || 0;
+   const age = now - timestamp;
+
+   switch (dateFilter) {
+    case "today":
+     return age < oneDay;
+    case "week":
+     return age < oneWeek;
+    case "month":
+     return age < oneMonth;
+    default:
+     return true;
+   }
+  });
+ }
+
+ // Score filter
+ if (scoreFilter !== "all") {
+  filtered = filtered.filter(v => {
+   const score = v.overall_score;
+   if (score === undefined || score === null) return false;
+
+   switch (scoreFilter) {
+    case "high":
+     return score >= 7;
+    case "medium":
+     return score >= 4 && score < 7;
+    case "low":
+     return score < 4;
+    default:
+     return true;
+   }
+  });
+ }
+
+ // Advanced search filter (for validations)
+ if (advancedSearch && advancedSearch.searchType === "validations") {
+  const query = (advancedSearch.ideaDescription || "").toLowerCase().trim();
+  if (query) {
+   filtered = filtered.filter(v => {
+    const explanation = (v.idea_explanation || "").toLowerCase();
+    return explanation.includes(query);
+   });
+  }
+ }
+
+ // Sort
+ let sorted = [...filtered];
+ if (sortBy === "date") {
+  sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+ } else if (sortBy === "date_oldest") {
+  sorted.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+ } else if (sortBy === "score_high") {
+  sorted.sort((a, b) => {
+   const scoreA = a.overall_score ?? -1;
+   const scoreB = b.overall_score ?? -1;
+   return scoreB - scoreA;
+  });
+ } else if (sortBy === "score_low") {
+  sorted.sort((a, b) => {
+   const scoreA = a.overall_score ?? 999;
+   const scoreB = b.overall_score ?? 999;
+   return scoreA - scoreB;
+  });
+ }
+
+ return sorted;
  }, [
  allValidations,
  dateFilter,
@@ -461,6 +480,49 @@ export default function DashboardPage() {
  }, [allIdeas, searchTabQuery, searchCategory]);
 
  // ---------------------------------------------------------------------------
+ // DELETE HANDLER WITH WARNING
+ // ---------------------------------------------------------------------------
+
+ const handleDeleteRun = useRunDeletion({
+  allIdeas,
+  isAuthenticated,
+  deleteRunFromContext,
+  loadDashboardData,
+  loadRuns,
+  setRuns,
+  setAllIdeas,
+  setApiRuns
+ });
+
+ // ---------------------------------------------------------------------------
+ // DELETE VALIDATION HANDLER
+ // ---------------------------------------------------------------------------
+
+ const handleDeleteValidation = useValidationDeletion({
+  isAuthenticated,
+  getAuthHeaders,
+  deleteValidationFromContext,
+  loadDashboardData,
+  setApiValidations
+ });
+
+ // ---------------------------------------------------------------------------
+ // EDIT VALIDATION HANDLER
+ // ---------------------------------------------------------------------------
+
+ const handleEditValidation = useCallback((session) => {
+  const validationId = session.validation_id || session.id;
+  if (!validationId) {
+   alert("Error: Cannot identify validation to edit.");
+   return;
+  }
+
+  // Navigate to validation form with edit parameter
+  const cleanId = String(validationId).replace(/^val_/, '');
+  navigate(`/validate-idea?edit=${cleanId}`);
+ }, [navigate]);
+
+ // ---------------------------------------------------------------------------
  // HELPER LOGIC (unchanged)
  // ---------------------------------------------------------------------------
 
@@ -468,16 +530,9 @@ export default function DashboardPage() {
  const sessionHasNotes = useCallback(() => false, []);
 
  // ---------------------------------------------------------------------------
- // URL TAB SYNC (UNCHANGED)
+ // URL TAB SYNC
  // ---------------------------------------------------------------------------
-
- useEffect(() => {
- const params = new URLSearchParams(location.search);
- const tab = params.get("tab");
-  if (["ideas", "validations", "history"].includes(tab)) {
- setActiveTab(tab);
- }
- }, [location.search]);
+ // Handled by useTabNavigation hook
 
  // ---------------------------------------------------------------------------
  // PREMIUM UI STARTS HERE
@@ -494,73 +549,13 @@ export default function DashboardPage() {
  <div className="pb-16">
  {/* Quick Actions + Stats */}
  <div className="grid gap-4">
- {/* Quick Actions - reduced vertical space by ~12px top/bottom, horizontal buttons with icons */}
- <div className="ui-card2 ui-card2--muted" style={{ paddingTop: "calc(var(--space-16) - 12px)", paddingBottom: "calc(var(--space-16) - 12px)", paddingLeft: "var(--space-16)", paddingRight: "var(--space-16)" }}>
- <div className="flex items-center justify-between gap-4">
- <div className="flex-1">
- <UIHeading level="h3" className="text-primary">Quick Actions</UIHeading>
- <p className="mt-0.5 text-xs text-secondary">
- Start a new flow or continue working from where you left off.
- </p>
- </div>
- <div className="flex items-center gap-3">
- <UIButton variant="primary" onClick={() => navigate("/advisor")} className="flex items-center gap-2">
- <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
- </svg>
- Discover New Ideas
- </UIButton>
- <UIButton variant="secondary" onClick={() => navigate("/validate-idea")} className="flex items-center gap-2">
- <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
- </svg>
- Validate Your Idea
- </UIButton>
- </div>
- </div>
- </div>
-
- {/* Stats cards - 4 equal-width, muted, standardized radii, larger icons, aligned vertically */}
- <div className="grid gap-3 md:grid-cols-4">
- <div className="ui-card2 ui-card2--muted ui-pad-sm">
- <div className="flex items-center gap-2.5 mb-2">
- <svg className="w-5 h-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
- </svg>
- <p className="text-xs text-secondary">Ideas</p>
- </div>
- <p className="ui-heading ui-heading--h2 font-mono text-primary">{allIdeas?.length || 0}</p>
- </div>
- <div className="ui-card2 ui-card2--muted ui-pad-sm">
- <div className="flex items-center gap-2.5 mb-2">
- <svg className="w-5 h-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
- </svg>
- <p className="text-xs text-secondary">Validations</p>
- </div>
- <p className="ui-heading ui-heading--h2 font-mono text-primary">{apiValidations?.length || 0}</p>
- </div>
- <div className="ui-card2 ui-card2--muted ui-pad-sm">
- <div className="flex items-center gap-2.5 mb-2">
- <svg className="w-5 h-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
- </svg>
- <p className="text-xs text-secondary">Match %</p>
- </div>
- <p className="ui-heading ui-heading--h2 font-mono text-primary">
- {Math.round((insights?.match_percent ?? 0) * 100) / 100 || 0}
- </p>
- </div>
- <div className="ui-card2 ui-card2--muted ui-pad-sm">
- <div className="flex items-center gap-2.5 mb-2">
- <svg className="w-5 h-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
- </svg>
- <p className="text-xs text-secondary">Risk Alerts</p>
- </div>
- <p className="ui-heading ui-heading--h2 font-mono text-primary">{insights?.risk_alerts ?? 0}</p>
- </div>
- </div>
+ <DashboardQuickActions />
+ <DashboardStats
+  ideas={allIdeas}
+  validations={apiValidations}
+  matchPercent={insights?.match_percent}
+  riskAlerts={insights?.risk_alerts}
+ />
  </div>
 
  {/* ---------------------------------------------------------------------
@@ -569,18 +564,13 @@ export default function DashboardPage() {
  <div className="mt-6 pt-6 border-t border-default">
  <nav className="flex gap-8 border-b border-default pb-0">
  {["ideas", "validations", "history"].map(tab => (
- <button
+ <TabButton
  key={tab}
+ active={activeTab === tab}
  onClick={() => setActiveTab(tab)}
- className={`py-3 text-base font-medium transition-colors border-b-2 ${
- activeTab === tab
- ? "border-accent text-primary font-semibold"
- : "border-transparent text-secondary hover:text-primary"
- }`}
- style={activeTab === tab ? { borderBottomWidth: "3px", borderBottomColor: "var(--accent)" } : {}}
  >
  {tab.charAt(0).toUpperCase() + tab.slice(1)}
- </button>
+ </TabButton>
  ))}
  </nav>
  </div>
@@ -644,8 +634,8 @@ export default function DashboardPage() {
  setComparisonData={setComparisonData}
  comparing={comparing}
  performComparison={performComparison}
- handleDelete={() => {}}
- handleEditValidation={() => {}}
+ handleDelete={handleDeleteValidation}
+ handleEditValidation={handleEditValidation}
  />
  </div>
  )}
@@ -662,7 +652,7 @@ export default function DashboardPage() {
  loadingRuns={loadingRuns}
  sessionHasOpenActions={sessionHasOpenActions}
  sessionHasNotes={sessionHasNotes}
- handleDelete={deleteRun}
+ handleDelete={handleDeleteRun}
  handleNewRequest={() => {}}
  />
  </div>

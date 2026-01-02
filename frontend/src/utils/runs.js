@@ -2,6 +2,18 @@
  * Helper functions for run history API.
  */
 
+/**
+ * Normalize run ID by removing 'run_' prefix if present
+ * @param {string|undefined|null} id - The run ID to normalize
+ * @returns {string} Normalized run ID (empty string if invalid)
+ */
+export function normalizeRunId(id) {
+ if (!id) return "";
+ const str = String(id).trim();
+ if (!str) return "";
+ return str.startsWith('run_') ? str.substring(4) : str;
+}
+
 export async function fetchRuns({ page = 1, pageSize = 100, sortBy = "created_at", sortOrder = "desc" } = {}) {
  const resp = await fetch(`/api/runs?page=${page}&page_size=${pageSize}&sort_by=${sortBy}&sort_order=${sortOrder}`);
  if (!resp.ok) throw new Error("Failed to load runs");

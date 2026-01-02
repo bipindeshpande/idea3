@@ -4,6 +4,7 @@ import { useReports } from "../../context/ReportsContext.jsx";
 import { extractProfileJSON } from "../../utils/streamingParser.js";
 import Seo from "../../components/common/Seo.jsx";
 import UIHeading from "../../components/ui/ui-heading.jsx";
+import FocusLayout from "../../layouts/FocusLayout.jsx";
 
 function useQuery() {
  return new URLSearchParams(useLocation().search);
@@ -319,11 +320,11 @@ function Section({ section, theme, sectionNumber, isOpen, onToggle }) {
  >
  <div className="flex items-center gap-2">
  <span className="text-xl">{theme.icon}</span>
- <UIHeading level="h2" className="text-primary flex items-center gap-2 text-left">
+ <UIHeading level="h2" className="text-primary flex items-center gap-2 text-left text-lg font-semibold">
  {section.title}
  </UIHeading>
  </div>
- <span className={`w-5 h-5 text-secondary text-secondary transition ${isOpen ? "rotate-180" : ""}`}>
+ <span className={`w-5 h-5 text-secondary transition ${isOpen ? "rotate-180" : ""}`}>
  ▼
  </span>
  </button>
@@ -331,10 +332,10 @@ function Section({ section, theme, sectionNumber, isOpen, onToggle }) {
  {isOpen && (
  <div className="p-6 md:p-7 space-y-5 bg-surface">
  {section.content && section.content.length > 0 && (
- <div className="text-primary leading-relaxed text-primary text-secondary">
+ <div className="text-base text-primary leading-relaxed">
  <ul className="list-disc list-outside space-y-2.5 ml-6">
  {section.content.map((item, idx) => (
- <li key={idx} className="leading-relaxed pl-1">
+ <li key={idx} className="text-base leading-relaxed pl-1">
  {item.replace(/^-\s+/, "")}
  </li>
  ))}
@@ -403,6 +404,7 @@ export default function ProfileReport() {
  };
 
  return (
+ <FocusLayout title="Profile Analysis">
  <section className="grid gap-6">
  <Seo
  title="Profile Analysis Report | Startup Idea Advisor"
@@ -412,7 +414,7 @@ export default function ProfileReport() {
  
  {isSample && (
  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <p className="text-primary text-primary leading-relaxed">
+ <p className="text-base text-primary leading-relaxed">
  📋 Sample Profile Analysis — This is a demonstration of what you'll receive
  </p>
  </div>
@@ -423,15 +425,15 @@ export default function ProfileReport() {
  <div className="relative z-10">
  <div className="flex items-center justify-between mb-4">
  <div>
- <UIHeading level="h1" className="text-primary mb-2">Profile Analysis</UIHeading>
- <p className="text-primary text-primary leading-relaxed mb-8">
+ <UIHeading level="h1" className="text-primary mb-2 text-3xl md:text-4xl font-semibold">Profile Analysis</UIHeading>
+ <p className="text-base text-secondary leading-relaxed mb-8">
  Comprehensive analysis of your entrepreneurial profile, strengths, and opportunities
  </p>
  </div>
  {isSample && (
  <Link 
  to="/product" 
- className="inline-flex items-center gap-2 text-base text-accent hover:text-accent"
+ className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:text-accent transition-colors"
  >
  <span aria-hidden="true">←</span> Back to product
  </Link>
@@ -444,12 +446,12 @@ export default function ProfileReport() {
  
  {!effectiveProfileAnalysis ? (
  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
- <p className="text-primary text-primary leading-relaxed">No profile analysis available. Please run a new analysis first.</p>
+ <p className="text-base text-primary leading-relaxed">No profile analysis available. Please run a new analysis first.</p>
  </div>
  ) : sections.length === 0 ? (
  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
- <p className="text-primary text-primary leading-relaxed mb-4">Could not parse profile analysis JSON. Expected format with delimiters:</p>
- <pre className="text-base text-secondary bg-app p-3 rounded overflow-auto max-h-64">
+ <p className="text-base text-primary leading-relaxed mb-4">Could not parse profile analysis JSON. Expected format with delimiters:</p>
+ <pre className="text-sm text-secondary bg-app p-3 rounded overflow-auto max-h-64 font-mono">
  ---PROFILE_ANALYSIS_START---{'\n'}
  {'{'}{'\n'}
  {' "core_motivations": "...",'}{'\n'}
@@ -461,7 +463,7 @@ export default function ProfileReport() {
  {'}'}{'\n'}
  ---PROFILE_ANALYSIS_END---
  </pre>
- <p className="text-base mt-4 text-secondary">
+ <p className="text-sm mt-4 text-secondary">
  Raw content length: {effectiveProfileAnalysis?.length || 0} characters
  </p>
  </div>
@@ -488,5 +490,6 @@ export default function ProfileReport() {
  </div>
  </article>
  </section>
+ </FocusLayout>
  );
 }

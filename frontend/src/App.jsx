@@ -36,12 +36,12 @@ import ValidationResult from "./pages/validation/ValidationResult.jsx";
 import ResourcesPage from "./pages/resources/Resources.jsx";
 import AdvisorResourcesPage from "./pages/resources/AdvisorResources.jsx";
 import BlogPage from "./pages/resources/Blog.jsx";
-import FrameworksPage from "./pages/resources/Frameworks.jsx";
 
 // Dashboard pages
 import DashboardPage from "./pages/dashboard/Dashboard.jsx";
 import CompareSessionsPage from "./pages/dashboard/CompareSessions.jsx";
 import RunHistoryPage from "./pages/dashboard/RunHistoryPage.jsx";
+import WorkspaceFrameworksPage from "./pages/dashboard/WorkspaceFrameworksPage.jsx";
 import FounderConnectPage from "./pages/founder/FounderConnect.jsx";
 import FounderPsychologyPage from "./pages/founder/FounderPsychology.jsx";
 import PsycheQuestionnairePage from "./pages/psyche/PsycheQuestionnaire.jsx";
@@ -118,13 +118,13 @@ export default function App() {
  <Route path="/product/validate" element={<ProductValidatePage />} />
  <Route path="/product/network" element={<ProductNetworkPage />} />
  <Route path="/pricing" element={<PricingPage />} />
- <Route path="/resources" element={<Navigate to="/resources/templates" replace />} />
- <Route path="/resources/templates" element={<ResourceTemplatesPage />} />
- <Route path="/resources/frameworks" element={<FrameworksPage />} />
- <Route path="/advisor-resources" element={<AdvisorResourcesPage />} />
- <Route path="/blog" element={<BlogPage />} />
- <Route path="/blog/:slug" element={<BlogArticlePage />} />
- <Route path="/frameworks" element={<FrameworksPage />} />
+        <Route path="/resources" element={<Navigate to="/resources/templates" replace />} />
+        <Route path="/resources/templates" element={<ResourceTemplatesPage />} />
+        <Route path="/resources/frameworks" element={<Navigate to="/resources/templates" replace />} />
+        <Route path="/frameworks" element={<Navigate to="/resources/templates" replace />} />
+        <Route path="/advisor-resources" element={<AdvisorResourcesPage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:slug" element={<BlogArticlePage />} />
  <Route path="/about" element={<AboutPage />} />
  <Route path="/contact" element={<ContactPage />} />
  {/* Workspace nested layout (Sidebar persists between workspace routes) */}
@@ -147,16 +147,24 @@ export default function App() {
  </Suspense>
  }
  />
- <Route path="/founder-connect" element={<FounderConnectPage />} />
- <Route path="/founder-psychology" element={<FounderPsychologyPage />} />
- <Route
- path="/account"
- element={
- <Suspense fallback={<LoadingIndicator simple={true} message="Loading account..." />}>
- <AccountPage />
- </Suspense>
- }
- />
+        <Route path="/founder-connect" element={<FounderConnectPage />} />
+        <Route path="/founder-psychology" element={<FounderPsychologyPage />} />
+        <Route
+          path="/dashboard/frameworks"
+          element={
+            <Suspense fallback={<LoadingIndicator simple={true} message="Loading frameworks..." />}>
+              <WorkspaceFrameworksPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/account"
+          element={
+            <Suspense fallback={<LoadingIndicator simple={true} message="Loading account..." />}>
+              <AccountPage />
+            </Suspense>
+          }
+        />
  </Route>
  </Route>
  <Route
