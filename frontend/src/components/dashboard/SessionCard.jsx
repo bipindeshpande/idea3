@@ -8,7 +8,9 @@ function SessionCard({
  hasNotes, 
  onDelete, 
  onEdit,
- isValidation = false 
+ isValidation = false,
+ selectedIdeas,
+ setSelectedIdeas
 }) {
  const navigate = useNavigate();
  if (!session) return null;
@@ -34,9 +36,11 @@ function SessionCard({
  const run_type = hasNormalizedFormat ? session.run_type : (isValidation ? "validation" : "discovery");
  const timestamp = session.timestamp || (created_at ? new Date(created_at).getTime() : Date.now());
 
+ const isSelected = selectedIdeas && session.id && selectedIdeas.has(session.id);
+ 
  return (
- <article className="ui-card group relative overflow-hidden rounded-xl p-6 md:p-7 transition-all duration-300 hover:shadow-md">
- <div className="flex items-center justify-between gap-4">
+ <article className="ui-card group relative rounded-xl transition-all duration-300 hover:shadow-md" style={{ padding: '13.6px 17px', overflow: 'visible' }}>
+ <div className="flex items-start justify-between gap-4">
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 mb-1">
  <p className="text-xs text-secondary">
@@ -209,13 +213,6 @@ function SessionCard({
  <p className="text-sm text-primary leading-relaxed">{session.idea_explanation}</p>
  </div>
  )}
- {session.overall_score !== undefined && (
- <div className="mt-3 pt-3 border-t border-default">
- <p className="text-secondary">
- <span className="font-medium">Score:</span> {session.overall_score.toFixed(1)}/10
- </p>
- </div>
- )}
  </>
  ) : (
  <>
@@ -255,7 +252,44 @@ function SessionCard({
  )}
  </div>
  
- <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+ <div className="flex flex-col items-end gap-2 flex-shrink-0">
+ <div className="flex items-center gap-2">
+ {selectedIdeas && setSelectedIdeas && (
+ <div className="relative group" style={{ zIndex: 50 }}>
+ <input
+ type="checkbox"
+ checked={isSelected || false}
+ onChange={(e) => {
+ e.stopPropagation();
+ const newSet = new Set(selectedIdeas);
+ if (newSet.has(session.id)) {
+ newSet.delete(session.id);
+ } else {
+ if (newSet.size >= 5) {
+ alert("Maximum 5 items can be compared at once");
+ return;
+ }
+ newSet.add(session.id);
+ }
+ setSelectedIdeas(newSet);
+ }}
+ className="h-4 w-4 rounded border-default text-accent cursor-pointer"
+ title="Select for comparison"
+ />
+ <span className="absolute -top-10 right-0 bg-surface border border-default rounded px-2 py-1 text-xs text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg" style={{ zIndex: 100 }}>
+ Select for comparison
+ </span>
+ </div>
+ )}
+ {isValidation && session.overall_score !== undefined && (
+ <div className="px-2 py-1 rounded border border-default bg-surface">
+ <p className="text-sm font-semibold text-primary whitespace-nowrap">
+ Score: {session.overall_score.toFixed(1)}/10
+ </p>
+ </div>
+ )}
+ </div>
+ <div className="flex items-center gap-2 flex-wrap">
  {onEdit && (
  <UIButton
  variant="action"
@@ -317,6 +351,7 @@ function SessionCard({
  Delete
  </UIButton>
  )}
+ </div>
  </div>
  </div>
  </article>

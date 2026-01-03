@@ -58,43 +58,17 @@ function DashboardValidationsTab({
  const isSelected = selectedIdeas && selectedIdeas.has(session.id);
  
  return (
- <div 
- key={session.id}
- className={isSelected ? "rounded-xl border-2 border-default bg-surface" : ""}
- >
- {selectedIdeas && (
- <div className="p-2 border-b border-default">
- <input
- type="checkbox"
- checked={isSelected || false}
- onChange={(e) => {
- e.stopPropagation();
- const newSet = new Set(selectedIdeas);
- if (newSet.has(session.id)) {
- newSet.delete(session.id);
- } else {
- if (newSet.size >= 5) {
- alert("Maximum 5 validations can be compared at once");
- return;
- }
- newSet.add(session.id);
- }
- setSelectedIdeas(newSet);
- }}
- className="rounded border-default text-accent "
- />
- <span className="ml-2 text-sm text-primary">Select for comparison</span>
- </div>
- )}
  <SessionCard
+ key={session.id}
  session={session}
  hasOpenActions={hasOpenActions}
  hasNotes={hasNotes}
  onDelete={handleDelete}
  onEdit={handleEditValidation}
  isValidation={true}
+ selectedIdeas={selectedIdeas}
+ setSelectedIdeas={setSelectedIdeas}
  />
- </div>
  );
  })}
  </div>

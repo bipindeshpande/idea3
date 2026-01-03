@@ -5,8 +5,6 @@ const nav = [
  { to: "/validate-idea", label: "Validate Your Idea" },
  { to: "/advisor", label: "Discover New Ideas" },
  { to: "/dashboard/frameworks", label: "My Validation Frameworks" },
- { to: "/resources/templates", label: "Browse Templates & Resources" },
- { to: "/dashboard/runs", label: "View Run History" },
  { to: "/founder-connect", label: "Founder Network" },
  { to: "/account", label: "Account Settings" },
 ];

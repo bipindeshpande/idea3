@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 
 import { Link, useNavigate } from "react-router-dom";
-import { memo, useMemo } from "react";
+import { memo, useMemo, useState } from "react";
 import Card from "../ui/Card.jsx";
 import UIHeading from "../ui/ui-heading.jsx";
 import UIButton from "../ui/ui-button.jsx";
@@ -56,14 +56,25 @@ function DashboardActiveIdeasTab({
  });
 
  // Create maps for quick lookup of actions/notes by idea_id
- // Handle both formats: "run_xxx_idea_1" and "xxx-1"
+ // Backend uses canonical format: run_id::idea_index (e.g., "abc123::idea_1")
+ // Frontend also uses formats: "run_xxx_idea_y" and "xxx-y"
  const actionsByIdeaId = new Map();
  ideaActions.forEach(action => {
  actionsByIdeaId.set(action.idea_id, action);
- // Also map normalized format for matching
- const match = action.idea_id.match(/run_([^_]+)_idea_(\d+)/);
- if (match) {
-  const [, runId, idx] = match;
+ 
+ // Handle canonical format: run_id::idea_index
+ const canonicalMatch = action.idea_id.match(/^([^:]+)::idea_(\d+)$/);
+ if (canonicalMatch) {
+  const [, runId, idx] = canonicalMatch;
+  // Map to frontend formats
+  actionsByIdeaId.set(`${runId}-${idx}`, action);
+  actionsByIdeaId.set(`run_${runId}_idea_${idx}`, action);
+ }
+ 
+ // Handle legacy format: run_xxx_idea_y
+ const legacyMatch = action.idea_id.match(/run_([^_]+)_idea_(\d+)/);
+ if (legacyMatch) {
+  const [, runId, idx] = legacyMatch;
   actionsByIdeaId.set(`${runId}-${idx}`, action);
  }
  });
@@ -71,10 +82,20 @@ function DashboardActiveIdeasTab({
  const notesByIdeaId = new Map();
  ideaNotes.forEach(note => {
  notesByIdeaId.set(note.idea_id, note);
- // Also map normalized format for matching
- const match = note.idea_id.match(/run_([^_]+)_idea_(\d+)/);
- if (match) {
-  const [, runId, idx] = match;
+ 
+ // Handle canonical format: run_id::idea_index
+ const canonicalMatch = note.idea_id.match(/^([^:]+)::idea_(\d+)$/);
+ if (canonicalMatch) {
+  const [, runId, idx] = canonicalMatch;
+  // Map to frontend formats
+  notesByIdeaId.set(`${runId}-${idx}`, note);
+  notesByIdeaId.set(`run_${runId}_idea_${idx}`, note);
+ }
+ 
+ // Handle legacy format: run_xxx_idea_y
+ const legacyMatch = note.idea_id.match(/run_([^_]+)_idea_(\d+)/);
+ if (legacyMatch) {
+  const [, runId, idx] = legacyMatch;
   notesByIdeaId.set(`${runId}-${idx}`, note);
  }
  });
@@ -87,10 +108,16 @@ function DashboardActiveIdeasTab({
  // Also create the "run_xxx_idea_y" format for matching
  const runIdNormalized = String(idea.runId || "").replace(/^run_/, "");
  const ideaIdFormatted = `run_${runIdNormalized}_idea_${idea.ideaIndex}`;
+ // Also create canonical format: run_id::idea_index
+ const canonicalId = `${runIdNormalized}::idea_${idea.ideaIndex}`;
  
- // Try both formats when looking up actions/notes
- const action = actionsByIdeaId.get(ideaId) || actionsByIdeaId.get(ideaIdFormatted);
- const note = notesByIdeaId.get(ideaId) || notesByIdeaId.get(ideaIdFormatted);
+ // Try all formats when looking up actions/notes (canonical, formatted, and original)
+ const action = actionsByIdeaId.get(canonicalId) || 
+                actionsByIdeaId.get(ideaIdFormatted) || 
+                actionsByIdeaId.get(ideaId);
+ const note = notesByIdeaId.get(canonicalId) || 
+              notesByIdeaId.get(ideaIdFormatted) || 
+              notesByIdeaId.get(ideaId);
  
  return {
  idea_id: ideaIdFormatted, // Use standard format for compatibility
@@ -106,53 +133,97 @@ function DashboardActiveIdeasTab({
  const allActiveIdeas = allIdeasList;
 
  // ---------------------------------------------------------------------------
- // SEARCH FILTER (unchanged, just wrapped cleanly)
+ // FILTER STATE
+ // ---------------------------------------------------------------------------
+
+ const [showActiveOnly, setShowActiveOnly] = useState(false);
+
+ // ---------------------------------------------------------------------------
+ // STATISTICS CALCULATION
+ // ---------------------------------------------------------------------------
+
+ const stats = useMemo(() => {
+  const total = allActiveIdeas.length;
+  const withNotes = allActiveIdeas.filter(item => item.hasNote).length;
+  const withActions = allActiveIdeas.filter(item => item.hasAction).length;
+  const withBoth = allActiveIdeas.filter(item => item.hasNote && item.hasAction).length;
+  const activeCount = allActiveIdeas.filter(item => item.hasNote || item.hasAction).length;
+  
+  return { total, withNotes, withActions, withBoth, activeCount };
+ }, [allActiveIdeas]);
+
+ // ---------------------------------------------------------------------------
+ // SEARCH FILTER + ACTIVE FILTER + SORTING
  // ---------------------------------------------------------------------------
 
  const activeIdeas = useMemo(() => {
- if (!searchQuery.trim()) return allActiveIdeas;
- const query = searchQuery.toLowerCase().trim();
- const normalize = v => (v ? String(v).trim().toLowerCase() : "");
+  let filtered = allActiveIdeas;
 
- return allActiveIdeas.filter(item => {
- let match = false;
+  // Apply active filter first (if enabled)
+  if (showActiveOnly) {
+   filtered = filtered.filter(item => item.hasNote || item.hasAction);
+  }
 
- if (item.hasAction && item.action?.action_text) {
- if (normalize(item.action.action_text).includes(query)) match = true;
- }
+  // Apply search filter (searches within the already filtered list)
+  if (searchQuery.trim()) {
+   const query = searchQuery.toLowerCase().trim();
+   const normalize = v => (v ? String(v).trim().toLowerCase() : "");
 
- if (item.hasNote && item.note?.content) {
- if (normalize(item.note.content).includes(query)) match = true;
- }
+   filtered = filtered.filter(item => {
+    let match = false;
 
- // Match idea title or summary
- const ideaId = item.idea_id;
- if (ideaId && allIdeas.length) {
- const matchRun = ideaId.match(/run_([^_]+)_idea_(\d+)/);
- let matchingIdea = null;
+    if (item.hasAction && item.action?.action_text) {
+     if (normalize(item.action.action_text).includes(query)) match = true;
+    }
 
- if (matchRun) {
- const [, runId, ideaIndex] = matchRun;
- matchingIdea = allIdeas.find(
- i =>
- String(i.runId || "").replace(/^run_/, "") === runId &&
- String(i.ideaIndex) === ideaIndex
- );
- }
+    if (item.hasNote && item.note?.content) {
+     if (normalize(item.note.content).includes(query)) match = true;
+    }
 
- if (matchingIdea) {
- if (
- normalize(matchingIdea.title).includes(query) ||
- normalize(matchingIdea.summary).includes(query)
- ) {
- match = true;
- }
- }
- }
+    // Match idea title or summary
+    const ideaId = item.idea_id;
+    if (ideaId && allIdeas.length) {
+     const matchRun = ideaId.match(/run_([^_]+)_idea_(\d+)/);
+     let matchingIdea = null;
 
- return match;
- });
- }, [allActiveIdeas, searchQuery, allIdeas]);
+     if (matchRun) {
+      const [, runId, ideaIndex] = matchRun;
+      matchingIdea = allIdeas.find(
+       i =>
+       String(i.runId || "").replace(/^run_/, "") === runId &&
+       String(i.ideaIndex) === ideaIndex
+      );
+     }
+
+     if (matchingIdea) {
+      if (
+       normalize(matchingIdea.title).includes(query) ||
+       normalize(matchingIdea.summary).includes(query)
+      ) {
+       match = true;
+      }
+     }
+    }
+
+    return match;
+   });
+  }
+
+  // Sort: active ideas (with notes/actions) first, then by recency
+  filtered.sort((a, b) => {
+   const aIsActive = a.hasNote || a.hasAction;
+   const bIsActive = b.hasNote || b.hasAction;
+   
+   // Active ideas come first
+   if (aIsActive && !bIsActive) return -1;
+   if (!aIsActive && bIsActive) return 1;
+   
+   // Within same category, maintain original order (already sorted by run date)
+   return 0;
+  });
+
+  return filtered;
+ }, [allActiveIdeas, searchQuery, allIdeas, showActiveOnly]);
 
  const hasExploredIdeas = allRuns && allRuns.length > 0;
 
@@ -163,6 +234,7 @@ function DashboardActiveIdeasTab({
  const IdeaCard = ({ item, ideaLink, projectName, run, ideaData }) => {
  const isSelected = selectedIdeas?.has(item.idea_id);
  const navigate = useNavigate();
+ const isActive = item.hasNote || item.hasAction;
 
  const handleClick = (e) => {
   e.preventDefault();
@@ -179,7 +251,13 @@ function DashboardActiveIdeasTab({
  };
 
  return (
- <div className={`subtle-card hover:shadow-md transition-all ${isSelected ? "border-default bg-surface" : ""}`} style={{ padding: "8px 12px" }}>
+ <div 
+  className={`subtle-card hover:shadow-md transition-all ${isSelected ? "border-default bg-surface" : ""} ${isActive ? "shadow-sm" : ""}`} 
+  style={{ 
+   padding: "8px 12px",
+   borderLeft: isActive ? "4px solid var(--accent)" : undefined
+  }}
+ >
  <div className="flex gap-2">
  {selectedIdeas && (
  <input
@@ -201,7 +279,7 @@ function DashboardActiveIdeasTab({
 
  <div className="flex-1">
  <a href={ideaLink} onClick={handleClick} className="block cursor-pointer">
- <div className="flex items-center gap-1.5 mb-0.5">
+ <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
  {item.hasAction && (
 <div
 className={`h-2 w-2 rounded-full ${
@@ -213,16 +291,38 @@ item.action.status === "in_progress"
 ? "bg-success"
 : "bg-surface-muted"
 }`}
+title="Has action item"
 />
- )}
+)}
 
 {!item.hasAction && item.hasNote && (
-<div className="h-2 w-2 rounded-full" style={{ background: "var(--badge-info-bg)" }} />
+<div className="h-2 w-2 rounded-full" style={{ background: "var(--badge-info-bg)" }} title="Has note" />
 )}
 
  <h4 className="text-sm font-semibold text-primary">
  {projectName}
  </h4>
+
+ {isActive && (
+ <div className="flex items-center gap-1 ml-auto">
+  {item.hasNote && (
+   <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium" style={{ background: "var(--badge-info-bg)", color: "var(--badge-info-text)" }}>
+    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+    </svg>
+    Note
+   </span>
+  )}
+  {item.hasAction && (
+   <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium bg-surface border border-default text-secondary">
+    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+    </svg>
+    Task
+   </span>
+  )}
+ </div>
+ )}
  </div>
 
  {/* run metadata */}
@@ -283,25 +383,67 @@ if (!hasExploredIdeas || allIdeas.length === 0) {
  <div className="space-y-6">
 
  {/* SECTION HEADER */}
- <div className="flex items-center justify-between mb-3">
- <h3 className="ui-heading ui-heading--h3 text-primary">
- All Ideas ({activeIdeas.length})
- </h3>
+ <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
+ <div className="flex items-center gap-4 flex-wrap">
+  <h3 className="ui-heading ui-heading--h3 text-primary">
+   {showActiveOnly ? `Active Ideas (${activeIdeas.length})` : `All Ideas (${activeIdeas.length})`}
+  </h3>
+  
+  {/* Summary Statistics */}
+  {!showActiveOnly && (
+   <div className="flex items-center gap-2 text-sm text-secondary">
+    <span>{stats.total} ideas</span>
+    {stats.activeCount > 0 && (
+     <>
+      <span>•</span>
+      <span className="text-accent font-medium">{stats.activeCount} active</span>
+      {stats.withNotes > 0 && (
+       <>
+        <span>•</span>
+        <span>{stats.withNotes} with notes</span>
+       </>
+      )}
+      {stats.withActions > 0 && (
+       <>
+        <span>•</span>
+        <span>{stats.withActions} with actions</span>
+       </>
+      )}
+     </>
+    )}
+   </div>
+  )}
+ </div>
 
- {selectedIdeas?.size >= 2 && (
- <UIButton
- variant="primary"
- onClick={() => performComparison(selectedIdeas)}
- disabled={comparing}
- >
- {comparing ? "Comparing..." : `Compare (${selectedIdeas.size})`}
- </UIButton>
- )}
+ <div className="flex items-center gap-2 flex-wrap">
+  {/* Filter Toggle */}
+  <UIButton
+   variant={showActiveOnly ? "primary" : "secondary"}
+   size="sm"
+   onClick={() => setShowActiveOnly(prev => !prev)}
+   className="whitespace-nowrap"
+  >
+   {showActiveOnly ? "Show All" : "Show Active Only"}
+  </UIButton>
+
+  {selectedIdeas?.size >= 2 && (
+   <UIButton
+    variant="primary"
+    onClick={() => performComparison(selectedIdeas)}
+    disabled={comparing}
+    size="sm"
+   >
+    {comparing ? "Comparing..." : `Compare (${selectedIdeas.size})`}
+   </UIButton>
+  )}
+ </div>
  </div>
 
  {activeIdeas.length === 0 ? (
  <div className="text-center text-base text-secondary py-8">
- No ideas match your search.
+  {showActiveOnly 
+   ? "No active ideas. Ideas with notes or actions will appear here."
+   : "No ideas match your search."}
  </div>
  ) : (
  <div className="space-y-4">

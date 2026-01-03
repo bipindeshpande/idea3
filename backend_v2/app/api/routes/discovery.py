@@ -15,6 +15,8 @@ from rq import Queue
 from worker.tasks import run_stage2
 from datetime import datetime, timezone
 from app.utils.file_logger import write_to_log, write_section_to_log
+from app.utils.user_utils import extract_user_id
+from app.utils.error_handler import handle_exception, ValidationError
 import uuid
 import json
 
@@ -139,7 +141,7 @@ async def create_run(
     
     if not is_allowed:
         request_id = request_id_var.get()
-        user_id = current_user.user_id if current_user else None
+        user_id = extract_user_id(current_user)
         rate_limit_service.log_rate_limit_violation(
             ip_address=ip_address,
             endpoint="discovery",
@@ -245,22 +247,22 @@ async def create_run(
         import logging
         logger = logging.getLogger("startup_discovery")
         logger.warning(f"Missing required fields: {missing_fields}. Received inputs: {list(inputs.keys())}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Missing required fields: {', '.join(missing_fields)}"
+        raise ValidationError(
+            f"Missing required fields: {', '.join(missing_fields)}",
+            details={"missing_fields": missing_fields, "received_fields": list(inputs.keys())}
         )
     
-    # Get user_id from authenticated user
-    user_id = current_user.user_id if current_user else None
+    # Extract user_id consistently
+    user_id = extract_user_id(current_user)
     
     # Initialize service
     discovery_service = DiscoveryService(db)
     
     # Log authentication status for debugging
-    if not current_user:
+    if not user_id:
         discovery_service._log(f"WARNING: Discovery run created without authentication (user_id will be NULL). Make sure to authenticate in Swagger!", "WARNING")
     else:
-        discovery_service._log(f"Creating discovery run for authenticated user: {current_user.user_id} (email: {current_user.email})", "INFO")
+        discovery_service._log(f"Creating discovery run for authenticated user: {user_id}", "INFO")
     
     # Check cache before streaming
     cache_key = discovery_service.cache_service.build_discovery_cache_key(inputs, user_id)
@@ -483,9 +485,12 @@ async def create_run(
                     db.commit()
                 except:
                     pass
-                # Send error event
+                # Send error event with structured error info
+                error_detail = str(e)
+                if isinstance(e, ValidationError):
+                    error_detail = e.message
                 yield f"event: error\n"
-                yield f"data: {json.dumps({'run_id': run_id, 'error': str(e)})}\n\n"
+                yield f"data: {json.dumps({'run_id': run_id, 'error': error_detail, 'error_type': type(e).__name__})}\n\n"
                 yield f"event: end\n"
                 yield f"data: {json.dumps({'run_id': run_id, 'status': 'failed'})}\n\n"
         
@@ -608,7 +613,10 @@ async def create_run(
                 except:
                     pass
                 # Yield error message and stop streaming
-                yield f"\n\n[ERROR] Discovery failed: {str(e)}\n"
+                error_detail = str(e)
+                if isinstance(e, ValidationError):
+                    error_detail = e.message
+                yield f"\n\n[ERROR] Discovery failed: {error_detail}\n"
                 return
         
         return StreamingResponse(
@@ -692,7 +700,7 @@ async def create_run_background(
             detail=f"Missing required fields: {', '.join(missing_fields)}"
         )
 
-    user_id = current_user.user_id if current_user else None
+    user_id = extract_user_id(current_user)
 
     # Create run record (queued)
     run_id = str(uuid.uuid4())
@@ -853,8 +861,8 @@ async def enrich_idea(
             detail="Industry is required"
         )
     
-    # Get user_id from authenticated user
-    user_id = current_user.user_id if current_user else None
+    # Extract user_id consistently
+    user_id = extract_user_id(current_user)
     
     if format == "json":
         # Return JSON response (non-streaming)

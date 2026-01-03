@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import LoadingIndicator from "../../components/common/LoadingIndicator.jsx";
 import { parseStructuredIdeas } from "../../utils/streamingParser.js";
 import UIButton from "../../components/ui/ui-button.jsx";
+import UIHeading from "../../components/ui/ui-heading.jsx";
 
 export default function CompareSessionsPage() {
  const { getAuthHeaders, isAuthenticated } = useAuth();
@@ -167,9 +168,9 @@ export default function CompareSessionsPage() {
  <div className="mb-6">
  <div className="flex items-center justify-between">
  <div>
- <h1 className="text-xl font-bold tracking-tight text-primary md:text-2xl">
+ <UIHeading level="h1" className="text-primary">
  Compare Ideas
- </h1>
+ </UIHeading>
  <p className="mt-2 text-sm text-secondary">
  Select up to 5 ideas to compare side-by-side. See differences and patterns across your ideas.
  </p>
@@ -192,7 +193,7 @@ export default function CompareSessionsPage() {
 
  {/* Ideas List */}
  <section className="rounded-2xl border border-default bg-surface p-6 shadow-lg">
- <h2 className="mb-4 text-lg font-bold text-primary">Select Ideas to Compare</h2>
+ <UIHeading level="h2" className="text-primary mb-4">Select Ideas to Compare</UIHeading>
  {allIdeas.length === 0 ? (
  <p className="text-sm text-secondary">No ideas found. Create some idea discovery sessions first.</p>
  ) : (
@@ -239,24 +240,25 @@ export default function CompareSessionsPage() {
  ) : (
  <div className="space-y-6">
  <div className="flex items-center justify-between">
- <h2 className="text-lg font-bold text-primary">Comparison Results</h2>
- <button
+ <UIHeading level="h2" className="text-primary">Comparison Results</UIHeading>
+ <UIButton
+ variant="secondary"
+ size="sm"
  onClick={() => {
  setComparisonData(null);
  setSelectedIdeas(new Set());
  }}
- className="rounded-xl border border-default px-4 py-2 text-sm font-semibold text-primary transition hover:bg-surface"
  >
  Compare Different Ideas
- </button>
+ </UIButton>
  </div>
 
  {/* Ideas Comparison */}
  {comparisonData && comparisonData.ideas && comparisonData.ideas.length > 0 && (
  <section className="ui-card rounded-[16px] p-6 shadow-card">
- <h3 className="mb-4 text-lg font-semibold text-primary">
+ <UIHeading level="h3" className="text-primary mb-4">
  Ideas Comparison ({comparisonData.ideas.length})
- </h3>
+ </UIHeading>
  <div className="overflow-x-auto">
  <table className="min-w-full divide-y divide-[color-mix(in srgb, var(--border) 70%, transparent)]">
  <thead className="bg-surface-muted">

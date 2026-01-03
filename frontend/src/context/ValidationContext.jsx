@@ -77,9 +77,9 @@ export function ValidationProvider({ children }) {
  data = await apiClient.post("/validate-idea", requestBody, { timeout: validationTimeout });
  }
  
- // Backend returns: { success: true, validation_id: "...", validation: {...} }
- // Extract validation data - check both validation and validation_result for compatibility
- const validationData = data.validation || data.validation_result || null;
+ // Backend now returns standardized format: { success: true, validation_id: "...", validation: {...} }
+ // Always use 'validation' key (standardized)
+ const validationData = data.validation || null;
  
  // 🔍 DEBUG STEP 2: Check what backend sent
  console.log("🔍 Step 2 - Backend response details:", {
@@ -111,7 +111,7 @@ export function ValidationProvider({ children }) {
  timestamp: Date.now(),
  categoryAnswers: answers,
  ideaExplanation: explanation,
- validation: validationData, // Store the complete validation result
+ validation: validationData, // Store the complete validation result (standardized)
  };
 
  // Only save successful validations with valid data
@@ -134,9 +134,8 @@ export function ValidationProvider({ children }) {
  // Try to load directly from GET /api/validate-idea/{id} first
  try {
  const data = await apiClient.get(`/validate-idea/${cleanId}`);
- // GET endpoint returns both validation_result and validation (alias)
- // Prioritize 'validation' as it matches POST response structure
- const validationResult = data.validation || data.validation_result || null;
+ // GET endpoint now returns standardized format with 'validation' key
+ const validationResult = data.validation || null;
  
  if (!validationResult || typeof validationResult !== 'object') {
   console.error("No validation data in GET response:", data);
@@ -154,7 +153,7 @@ export function ValidationProvider({ children }) {
  timestamp: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
  categoryAnswers: data.category_answers || {},
  ideaExplanation: data.idea_explanation || "",
- validation: validationResult,
+ validation: validationResult, // Standardized format
  };
 
  setCurrentValidation(validationData);
@@ -175,14 +174,15 @@ export function ValidationProvider({ children }) {
  });
 
  if (validation) {
- const validationResult = validation.validation_result || {};
+ // Standardized format - always use 'validation' key
+ const validationResult = validation.validation || validation.validation_result || {};
  const validationData = {
  id: validation.validation_id || validation.id,
  validation_id: validation.validation_id,
  timestamp: validation.created_at ? new Date(validation.created_at).getTime() : Date.now(),
  categoryAnswers: validation.category_answers || {},
  ideaExplanation: validation.idea_explanation || "",
- validation: validationResult,
+ validation: validationResult, // Standardized format
  };
 
  setCurrentValidation(validationData);

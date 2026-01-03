@@ -238,7 +238,7 @@ export default function HomePage() {
  const conversationalHeaders = [
  {
  title: "Let's start with the basics.",
- description: "These answers reflect your current situation. You can change them anytime and re-run."
+ description: ""
  },
  {
  title: "Review what you've shared.",
@@ -317,16 +317,9 @@ export default function HomePage() {
  {/* Persistent conversational header */}
  <div className="mb-6">
  <h2 className={DISCOVERY_TYPOGRAPHY.h3}>{conversationalHeaders[screen].title}</h2>
+ {conversationalHeaders[screen].description && (
  <p className={`mt-1 ${DISCOVERY_TYPOGRAPHY.subtitle}`}>{conversationalHeaders[screen].description}</p>
- </div>
-
- <div className="space-y-3">
- <div className="h-2 w-full overflow-hidden rounded-full bg-surface-muted">
- <div
-  className="h-full bg-accent transition-all"
- style={{ width: `${progressPercent}%` }}
- />
- </div>
+ )}
  </div>
 
  {renderScreenContent()}

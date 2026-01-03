@@ -150,6 +150,14 @@ export default function App() {
         <Route path="/founder-connect" element={<FounderConnectPage />} />
         <Route path="/founder-psychology" element={<FounderPsychologyPage />} />
         <Route
+          path="/psyche/questionnaire"
+          element={
+            <ProtectedRoute>
+              <PsycheQuestionnairePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/dashboard/frameworks"
           element={
             <Suspense fallback={<LoadingIndicator simple={true} message="Loading frameworks..." />}>
@@ -167,14 +175,6 @@ export default function App() {
         />
  </Route>
  </Route>
- <Route
- path="/psyche/questionnaire"
- element={
- <ProtectedRoute>
- <PsycheQuestionnairePage />
- </ProtectedRoute>
- }
- />
  <Route
  path="/psyche/complete"
  element={

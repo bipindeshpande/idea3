@@ -279,13 +279,6 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
 
  return (
  <div className="grid gap-4 sm:gap-5">
- {/* Reassurance text at the top */}
- <div className="rounded-lg border border-default bg-app bg-surface p-3 mb-2">
- <p className="text-sm text-secondary text-secondary">
- These answers reflect your current situation. You can change them anytime and re-run.
- </p>
- </div>
- 
  {/* Startup Category - FIRST FIELD */}
  <div className="grid gap-1.5">
  <label htmlFor="startup_category" className="text-xs sm:text-sm font-semibold text-primary text-secondary">

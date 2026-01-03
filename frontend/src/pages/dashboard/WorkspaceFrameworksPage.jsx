@@ -76,22 +76,20 @@ export default function WorkspaceFrameworksPage() {
 
    <div className="pb-16">
     {/* Header */}
-    <div className="mb-8">
-     <div className="flex items-start justify-between mb-4">
-      <div>
-       <UIHeading level="h1" className="text-primary mb-2">
-        My Validation Frameworks
-       </UIHeading>
-       <p className="text-secondary">
-        Manage your customized validation frameworks. Browse templates in <Link to="/resources/templates" className="text-accent hover:text-accent-hover underline">Resources</Link>.
-       </p>
-      </div>
-      <Link to="/resources/templates">
-       <UIButton variant="primary">
-        Browse Templates
-       </UIButton>
-      </Link>
+    <div className="mb-6 flex items-start justify-between border-b border-default pb-3">
+     <div>
+      <UIHeading level="h2" className="text-primary mb-2">
+       My Validation Frameworks
+      </UIHeading>
+      <p className="text-sm text-secondary">
+       Manage your customized validation frameworks. Browse templates in <Link to="/resources/templates" className="text-accent hover:text-accent-hover underline">Resources</Link>.
+      </p>
      </div>
+     <Link to="/resources/templates">
+      <UIButton variant="primary">
+       Browse Templates
+      </UIButton>
+     </Link>
     </div>
 
     {/* Frameworks Content */}
@@ -123,9 +121,9 @@ export default function WorkspaceFrameworksPage() {
           <div className="flex items-start justify-between">
            <div className="flex-1">
             <div className="flex items-center gap-3 mb-1.5">
-             <UIHeading level="h3" className="text-primary text-base">
+             <h3 className="text-lg font-semibold text-primary">
               {framework.title}
-             </UIHeading>
+             </h3>
              <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusBadge(framework.status)}`}>
               {framework.status.replace("_", " ")}
              </span>
@@ -136,12 +134,12 @@ export default function WorkspaceFrameworksPage() {
              )}
             </div>
             {templateInfo && (
-             <p className="text-xs text-secondary mb-1">
+             <p className="text-sm text-secondary mb-1">
               Based on: {templateInfo.title}
              </p>
             )}
             {framework.linked_validation_id && (
-             <p className="text-xs text-secondary">
+             <p className="text-sm text-secondary">
               Linked to validation: {framework.linked_validation_id.substring(0, 8)}...
              </p>
             )}
@@ -161,7 +159,7 @@ export default function WorkspaceFrameworksPage() {
       </div>
      ) : (
       <Card className="p-8 text-center">
-       <p className="text-secondary mb-4">
+       <p className="text-sm text-secondary mb-4">
         You don't have any frameworks yet. Browse templates in Resources to create your first framework.
        </p>
        <Link to="/resources/templates">

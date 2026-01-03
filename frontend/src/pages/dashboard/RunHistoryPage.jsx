@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { fetchRuns, fetchRunById } from "../../utils/runs";
 import { useReports } from "../../context/ReportsContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
+import UIHeading from "../../components/ui/ui-heading.jsx";
 
 const TIME_FILTERS = [
  { id: "all", label: "All time", days: null },
@@ -28,6 +29,7 @@ function formatDurationMs(ms) {
 
 export default function RunHistoryPage() {
  const { runCrew, setInputs } = useReports();
+ const { isAuthenticated, getAuthHeaders } = useAuth();
  const [loading, setLoading] = useState(true);
  const [runs, setRuns] = useState([]);
  const [selectedRun, setSelectedRun] = useState(null);
@@ -40,25 +42,40 @@ export default function RunHistoryPage() {
  useEffect(() => {
  let isMounted = true;
  setLoading(true);
- fetchRuns({ page: 1, pageSize: 200, sortBy: "created_at", sortOrder: "desc" })
- .then((data) => {
- if (!isMounted) return;
- // FIX: Extract runs from response - API returns { runs: [...], pagination: {...} }
+ 
+ const loadRuns = async () => {
+ try {
+ const headers = isAuthenticated ? getAuthHeaders() : {};
+ const response = await fetch(`/api/runs?page=1&page_size=200&sort_by=created_at&sort_order=desc`, {
+ headers: { ...headers, "Content-Type": "application/json" }
+ });
+ 
+ if (!response.ok) {
+ throw new Error(`Failed to load runs: ${response.status}`);
+ }
+ 
+ const data = await response.json();
  const runsList = data.runs || [];
- console.log("Loaded sessions:", runsList);
+ if (!isMounted) return;
+ console.log("Loaded runs:", runsList);
  setRuns(runsList);
  setError(null);
- })
- .catch((err) => {
- if (isMounted) setError(err.message || "Failed to load runs");
- })
- .finally(() => {
+ } catch (err) {
+ if (isMounted) {
+ console.error("Failed to load runs:", err);
+ setError(err.message || "Failed to load runs");
+ }
+ } finally {
  if (isMounted) setLoading(false);
- });
+ }
+ };
+
+ loadRuns();
+
  return () => {
  isMounted = false;
  };
- }, []);
+ }, [isAuthenticated, getAuthHeaders]);
 
  const filteredRuns = useMemo(() => {
  let r = runs.slice();
@@ -112,9 +129,17 @@ export default function RunHistoryPage() {
  const handleSelectRun = async (runId) => {
  setDetailLoading(true);
  try {
- const data = await fetchRunById(runId);
+ const headers = isAuthenticated ? getAuthHeaders() : {};
+ const response = await fetch(`/api/runs/${encodeURIComponent(runId)}`, {
+ headers: { ...headers, "Content-Type": "application/json" }
+ });
+ if (!response.ok) {
+ throw new Error(`Failed to load run details: ${response.status}`);
+ }
+ const data = await response.json();
  setSelectedRun(data);
  } catch (e) {
+ console.error("Failed to load run details:", e);
  setError(e.message || "Failed to load run details");
  } finally {
  setDetailLoading(false);
@@ -228,7 +253,7 @@ export default function RunHistoryPage() {
  {selectedRun && (
  <div className="rounded-xl border border-default bg-surface p-4 shadow space-y-3">
  <div className="flex items-center justify-between">
- <h2 className="text-lg font-semibold">Run Details</h2>
+ <UIHeading level="h2" className="text-primary">Run Details</UIHeading>
  {detailLoading && <span className="text-xs text-secondary">Loading...</span>}
  </div>
  <div className="grid gap-2 text-sm">

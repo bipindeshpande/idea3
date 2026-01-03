@@ -39,6 +39,10 @@
   color: var(--text);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-card);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.ui-card:hover {
+  box-shadow: var(--shadow-card-lg);
 }
 
 .ui-btn {
@@ -204,9 +208,13 @@
   background: var(--surface);
   color: var(--text);
   box-shadow: var(--shadow-card);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.ui-card2:hover {
+  box-shadow: var(--shadow-card-lg);
 }
 .ui-card2--muted { background: var(--surface-muted); }
-.ui-card2--elevated { box-shadow: var(--shadow-card-lg); }
+.ui-card2--elevated { box-shadow: var(--shadow-card-elevated, var(--shadow-card-lg)); }
 
 /* Canonical spacing helpers (component-level, token-driven) */
 .ui-pad-sm { padding: var(--space-16); }

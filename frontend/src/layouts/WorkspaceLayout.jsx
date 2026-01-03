@@ -5,6 +5,12 @@ import UICard from "../components/ui/ui-card.jsx";
 
 function getWorkspaceMeta(pathname) {
  // Route-derived titles/subtitles so TopBar persists while Outlet swaps.
+ if (pathname.startsWith("/dashboard/frameworks")) {
+ return {
+ title: null,
+ subtitle: null,
+ };
+ }
  if (pathname.startsWith("/dashboard")) {
  return {
  title: "Workspace",
@@ -21,6 +27,12 @@ function getWorkspaceMeta(pathname) {
  return {
  title: "Founder Psychology",
  subtitle: "Capture your decision style and working patterns.",
+ };
+ }
+ if (pathname.startsWith("/psyche/questionnaire")) {
+ return {
+ title: "Decision & Work Style Assessment",
+ subtitle: "Answer 12 questions to personalize your startup recommendations.",
  };
  }
  if (pathname.startsWith("/account")) {
@@ -64,14 +76,14 @@ export default function WorkspaceLayout() {
  </UICard>
 
  {/* Right Pane - Content Area */}
- <div className="min-w-0">
- <UICard variant="muted" className="ui-radius-page ui-pad-md shadow-soft">
- <WorkspaceTopBar title={title} subtitle={subtitle} />
- <div>
- <Outlet />
- </div>
- </UICard>
- </div>
+      <div className="min-w-0">
+       <UICard variant="muted" className="ui-radius-page ui-pad-md shadow-soft">
+        {title && <WorkspaceTopBar title={title} subtitle={subtitle} />}
+        <div>
+         <Outlet />
+        </div>
+       </UICard>
+      </div>
  </div>
  </div>
  </div>

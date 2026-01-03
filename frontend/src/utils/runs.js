@@ -14,8 +14,10 @@ export function normalizeRunId(id) {
  return str.startsWith('run_') ? str.substring(4) : str;
 }
 
-export async function fetchRuns({ page = 1, pageSize = 100, sortBy = "created_at", sortOrder = "desc" } = {}) {
- const resp = await fetch(`/api/runs?page=${page}&page_size=${pageSize}&sort_by=${sortBy}&sort_order=${sortOrder}`);
+export async function fetchRuns({ page = 1, pageSize = 100, sortBy = "created_at", sortOrder = "desc", headers = {} } = {}) {
+ const resp = await fetch(`/api/runs?page=${page}&page_size=${pageSize}&sort_by=${sortBy}&sort_order=${sortOrder}`, {
+ headers: { ...headers, "Content-Type": "application/json" }
+ });
  if (!resp.ok) throw new Error("Failed to load runs");
  const data = await resp.json();
  // Return the runs array from the response, or empty array if not found
@@ -25,8 +27,10 @@ export async function fetchRuns({ page = 1, pageSize = 100, sortBy = "created_at
  };
 }
 
-export async function fetchRunById(runId) {
- const resp = await fetch(`/api/runs/${encodeURIComponent(runId)}`);
+export async function fetchRunById(runId, headers = {}) {
+ const resp = await fetch(`/api/runs/${encodeURIComponent(runId)}`, {
+ headers: { ...headers, "Content-Type": "application/json" }
+ });
  if (!resp.ok) throw new Error("Failed to load run details");
  return resp.json();
 }

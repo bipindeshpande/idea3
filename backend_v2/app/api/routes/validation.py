@@ -7,6 +7,9 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_user_or_none
 from app.models.user import User
 from app.services.validation_service import ValidationService
+from app.utils.user_utils import extract_user_id
+from app.utils.error_handler import handle_exception, ValidationError, NotFoundError, AuthorizationError
+from app.utils.response_models import ValidationResponse, create_success_response, create_error_response
 
 router = APIRouter()
 
@@ -36,11 +39,19 @@ async def validate_idea(
     }
     
     Returns:
-        Validation result with scores, recommendations, and personalized next_steps
+        Standardized validation response with validation_id and validation data
     """
     try:
+        # Extract user_id consistently
+        user_id = extract_user_id(current_user)
+        
+        # Validate request
+        if not request.category_answers:
+            raise ValidationError("category_answers is required")
+        if not request.idea_explanation or not request.idea_explanation.strip():
+            raise ValidationError("idea_explanation is required and cannot be empty")
+        
         validation_service = ValidationService(db)
-        user_id = current_user.user_id if current_user else None
         
         result = validation_service.validate_idea(
             user_id=user_id,
@@ -51,12 +62,21 @@ async def validate_idea(
             include_next_steps=request.include_next_steps if request.include_next_steps is not None else True
         )
         
-        return result
+        # Standardize response format - always use 'validation' key
+        return create_success_response({
+            "validation_id": result.get("validation_id"),
+            "validation": result.get("validation"),  # Always use 'validation' key
+            "created_at": result.get("created_at")
+        })
         
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to validate idea: {str(e)}"
+        raise handle_exception(
+            error=e,
+            context={
+                "endpoint": "validate_idea",
+                "user_id": user_id,
+                "has_idea_id": bool(request.idea_id)
+            }
         )
 
 
@@ -71,20 +91,31 @@ async def update_validation(
     Update an existing validation
     
     Returns:
-        Updated validation result with new personalized next_steps
+        Standardized validation response with updated validation data
     """
     try:
-        validation_service = ValidationService(db)
-        user_id = current_user.user_id if current_user else None
+        # Extract user_id consistently
+        user_id = extract_user_id(current_user)
         
-        # Verify ownership if user is authenticated
-        if current_user:
-            validation = validation_service.get_validation(validation_id, user_id)
-            if not validation:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Validation not found or access denied"
-                )
+        # Validate request
+        if not request.category_answers:
+            raise ValidationError("category_answers is required")
+        if not request.idea_explanation or not request.idea_explanation.strip():
+            raise ValidationError("idea_explanation is required and cannot be empty")
+        
+        validation_service = ValidationService(db)
+        
+        # Verify ownership - check for all users (authenticated or not)
+        validation = validation_service.get_validation(validation_id, user_id)
+        if not validation:
+            raise NotFoundError("Validation", validation_id)
+        
+        # Check authorization - user must own the validation
+        if validation.user_id:
+            if not user_id:
+                raise AuthorizationError("Authentication required to update this validation")
+            if validation.user_id != user_id:
+                raise AuthorizationError("You do not have permission to update this validation")
         
         result = validation_service.validate_idea(
             user_id=user_id,
@@ -95,14 +126,21 @@ async def update_validation(
             idea_metadata=request.idea_metadata
         )
         
-        return result
+        # Standardize response format - always use 'validation' key
+        return create_success_response({
+            "validation_id": result.get("validation_id"),
+            "validation": result.get("validation"),  # Always use 'validation' key
+            "updated_at": result.get("updated_at")
+        })
         
-    except HTTPException:
-        raise
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update validation: {str(e)}"
+        raise handle_exception(
+            error=e,
+            context={
+                "endpoint": "update_validation",
+                "validation_id": validation_id,
+                "user_id": user_id
+            }
         )
 
 
@@ -116,37 +154,41 @@ async def get_validation(
     Get validation by ID
     
     Returns:
-        Validation data including personalized next_steps
+        Standardized validation response with validation data
     """
     try:
-        validation_service = ValidationService(db)
-        user_id = current_user.user_id if current_user else None
+        # Extract user_id consistently
+        user_id = extract_user_id(current_user)
         
+        validation_service = ValidationService(db)
         validation = validation_service.get_validation(validation_id, user_id)
         
         if not validation:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Validation not found"
-            )
+            raise NotFoundError("Validation", validation_id)
         
-        return {
-            "success": True,
+        # Check authorization - user must own the validation if it has a user_id
+        if validation.user_id:
+            if validation.user_id != user_id:
+                raise AuthorizationError("You do not have permission to view this validation")
+        
+        # Standardize response format - always use 'validation' key
+        return create_success_response({
             "validation_id": validation.validation_id,
-            "id": validation.validation_id,  # Alias for compatibility
+            "id": validation.validation_id,  # Alias for backward compatibility
             "category_answers": validation.category_answers,
             "idea_explanation": validation.idea_explanation,
-            "validation_result": validation.validation_result,
-            "validation": validation.validation_result,  # Alias for frontend compatibility
+            "validation": validation.validation_result,  # Always use 'validation' key
             "status": validation.status,
             "created_at": validation.created_at.isoformat() if validation.created_at else None,
-        }
+        })
         
-    except HTTPException:
-        raise
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get validation: {str(e)}"
+        raise handle_exception(
+            error=e,
+            context={
+                "endpoint": "get_validation",
+                "validation_id": validation_id,
+                "user_id": user_id
+            }
         )
 

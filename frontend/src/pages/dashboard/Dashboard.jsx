@@ -230,8 +230,9 @@ export default function DashboardPage() {
  if (loadingRuns) return [];
 
  // Transform API validations to expected format
+ // Use standardized 'validation' key (removed validation_result fallback)
  const apiMapped = (apiValidations || []).map(v => {
- const validationResult = v.validation_result || v.validation || {};
+ const validationResult = v.validation || {};
  const overallScore = validationResult.overall_score;
  
  return {

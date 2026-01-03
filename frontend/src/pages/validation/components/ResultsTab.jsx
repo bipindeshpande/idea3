@@ -4,6 +4,7 @@ import ParameterScores from "../../../components/validation/ParameterScores.jsx"
 import ScoreLegend from "../../../components/validation/ScoreLegend.jsx";
 import ParameterCard from "../../../components/validation/ParameterCard.jsx";
 import { getScoreMeta } from "../utils.js";
+import UIHeading from "../../../components/ui/ui-heading.jsx";
 
 export default function ResultsTab({
   overallScore,
@@ -31,9 +32,9 @@ export default function ResultsTab({
               {getCelebrationMessage(overallScore).emoji}
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-primary">
+              <UIHeading level="h3" className="text-primary">
                 {getCelebrationMessage(overallScore).message}
-              </h3>
+              </UIHeading>
               <p className="mt-1 text-sm text-secondary">
                 Your idea scored {overallScore.toFixed(1)}/10 - That's impressive! 🎉
               </p>
@@ -45,10 +46,10 @@ export default function ResultsTab({
       {/* Re-Validation Comparison Banner */}
       {previousScore !== null && previousScore !== undefined && (
         <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
-          <h2 className="text-lg font-semibold text-primary flex items-center gap-2 mb-4">
+          <UIHeading level="h2" className="text-primary flex items-center gap-2 mb-4">
             <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center text-xl">📈</div>
             Improvement Comparison
-          </h2>
+          </UIHeading>
           <div className="flex items-center gap-4">
             <div className="flex-1 rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
               <div className="text-xs text-secondary mb-1">Previous Score</div>
@@ -106,7 +107,7 @@ export default function ResultsTab({
         </div>
 
         {/* Diagnostic Overview - Unified Analytics Block */}
-        <p className="text-lg font-semibold text-primary mb-2">Diagnostic Overview Across 10 Validation Pillars</p>
+        <UIHeading level="h3" className="text-primary mb-2">Diagnostic Overview Across 10 Validation Pillars</UIHeading>
         <div className="mb-3 rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
           <div className="flex flex-col lg:flex-row gap-6 items-stretch lg:items-stretch min-h-[340px]">
             {/* Column 1: Radar Chart (50%) */}
@@ -174,7 +175,7 @@ export default function ResultsTab({
             parameterGroups.map((group) => (
               <div key={group.id}>
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-primary flex items-center gap-2">{group.title}</h3>
+                  <UIHeading level="h3" className="text-primary flex items-center gap-2">{group.title}</UIHeading>
                   <p className="text-sm text-secondary">{group.description}</p>
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">

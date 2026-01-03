@@ -166,7 +166,7 @@ export default function PsycheQuestionnaire() {
  const progress = getProgress();
  const currentQuestions = getCurrentQuestions();
  const isLastStep = currentStep === totalSteps - 1;
- const canProceed = currentQuestions.every((q) => answers[q.question_id]);
+ const allQuestionsAnswered = questions.every((q) => answers[q.question_id]);
 
  return (
  <>
@@ -174,21 +174,8 @@ export default function PsycheQuestionnaire() {
  title="Decision & Work Style Assessment"
  description="Complete a short assessment to personalize your startup recommendations"
  />
- <div className="min-h-screen py-12 px-6">
+ <div className="py-6">
  <div className="max-w-3xl mx-auto">
- {/* Header */}
- <div className="mb-8 text-center relative">
- <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-surface opacity-[0.09] blur-2xl pointer-events-none"></div>
- <div className="relative z-10">
- <h1 className="text-3xl md:text-4xl font-semibold text-primary mb-2">
- Decision & Work Style Assessment
- </h1>
- <p className="text-primary text-primary leading-relaxed mb-8">
- Answer 12 questions to help personalize your startup recommendations (takes about 3–4 minutes)
- </p>
- </div>
- </div>
-
  {/* Progress Bar */}
  <div className="mb-8">
  <div className="flex justify-between items-center mb-2">
@@ -289,21 +276,16 @@ export default function PsycheQuestionnaire() {
  <button
  type="button"
  onClick={handleNext}
- disabled={!canProceed}
- className={`px-5 py-2.5 rounded-lg font-medium transition-all ${
- canProceed
- ? "text-on-accent bg-accent hover:bg-accent-hover shadow-sm hover:shadow-md"
- : "bg-surface text-secondary cursor-not-allowed"
- }`}
+ className="px-5 py-2.5 rounded-lg font-medium text-on-accent bg-accent hover:bg-accent-hover shadow-sm hover:shadow-md transition-all"
  >
  Next
  </button>
  ) : (
  <button
  type="submit"
- disabled={!canProceed || submitting}
+ disabled={!allQuestionsAnswered || submitting}
  className={`px-5 py-2.5 rounded-lg font-medium transition-all ${
- canProceed && !submitting
+ allQuestionsAnswered && !submitting
  ? "text-on-accent bg-accent hover:bg-accent-hover shadow-sm hover:shadow-md"
  : "bg-surface text-secondary cursor-not-allowed"
  }`}

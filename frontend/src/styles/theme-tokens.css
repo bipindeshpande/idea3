@@ -6,19 +6,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* IDEA theme tokens (light) */
-  --bg: #F9FAFB;
-  --surface: #FFFFFF;
-  --surface-muted: #F3F4F6;
+  /* IDEA theme tokens (light) - Enhanced for better visual depth */
+  --bg: #FAFBFC;
+  --surface: #FEFEFE;
+  --surface-muted: #F4F5F7;
   --text: #111827;
   --text-secondary: #6B7280;
   --text-tertiary: #9CA3AF;
   --text-light: var(--text-secondary);
-  --border: #E5E7EB;
+  --border: #D1D5DB;
   --accent: #2563EB;
   --accent-hover: #1D4ED8;
   --on-accent: #FFFFFF;
-  --surface-hover: #F3F4F6;
+  --surface-hover: #F4F5F7;
   --overlay-light: rgba(15, 23, 42, 0.55);
 
   /* Semantic */
@@ -85,10 +85,11 @@
   --radius-btn: 10px;
   --radius-input: 8px;
 
-  /* Shadows */
-  --shadow-soft: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-card: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-card-lg: 0 18px 60px -34px rgba(15, 23, 42, 0.25);
+  /* Shadows - Enhanced for better depth */
+  --shadow-soft: 0 2px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-card-lg: 0 12px 32px -8px rgba(15, 23, 42, 0.15), 0 4px 16px -4px rgba(15, 23, 42, 0.12);
+  --shadow-card-elevated: 0 16px 48px -12px rgba(15, 23, 42, 0.18), 0 6px 20px -6px rgba(15, 23, 42, 0.14);
 
   /* Backwards-compatible aliases (existing app uses these) */
   --color-bg: var(--bg);
@@ -157,19 +158,19 @@
 
 /* Explicit light mode selector - ensures light tokens apply when data-theme="light" */
 [data-theme="light"] {
-  /* IDEA theme tokens (light) - explicitly set for light mode */
-  --bg: #F9FAFB;
-  --surface: #FFFFFF;
-  --surface-muted: #F3F4F6;
+  /* IDEA theme tokens (light) - Enhanced for better visual depth */
+  --bg: #FAFBFC;
+  --surface: #FEFEFE;
+  --surface-muted: #F4F5F7;
   --text: #111827;
   --text-secondary: #6B7280;
   --text-tertiary: #9CA3AF;
   --text-light: var(--text-secondary);
-  --border: #E5E7EB;
+  --border: #D1D5DB;
   --accent: #2563EB;
   --accent-hover: #1D4ED8;
   --on-accent: #FFFFFF;
-  --surface-hover: #F3F4F6;
+  --surface-hover: #F4F5F7;
   --overlay-light: rgba(15, 23, 42, 0.55);
 
   /* Semantic */
@@ -202,10 +203,11 @@
   --badge-danger-text: #B91C1C;
   --badge-danger-border: #FCA5A5;
 
-  /* Shadows */
-  --shadow-soft: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-card: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-card-lg: 0 18px 60px -34px rgba(15, 23, 42, 0.25);
+  /* Shadows - Enhanced for better depth */
+  --shadow-soft: 0 2px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-card-lg: 0 12px 32px -8px rgba(15, 23, 42, 0.15), 0 4px 16px -4px rgba(15, 23, 42, 0.12);
+  --shadow-card-elevated: 0 16px 48px -12px rgba(15, 23, 42, 0.18), 0 6px 20px -6px rgba(15, 23, 42, 0.14);
 
   /* Marketing-only tokens (for public pages only) */
   --mkt-hero-start: #eef2ff;
