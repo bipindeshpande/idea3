@@ -131,27 +131,6 @@ export default function ProductDiscoverPage() {
         </div>
       </section>
 
-      <section className="mkt-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle title="Discovery Deliverables" subtitle="Everything you'll receive from your discovery session" center />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-            {deliverables.map((deliverable, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-2 p-3 rounded-lg"
-                style={{
-                  background: "var(--mkt-surface-muted)",
-                  border: "1px solid var(--mkt-outline)",
-                }}
-              >
-                <span className="text-xl mt-0.5" style={{ color: "var(--mkt-primary)" }}>✓</span>
-                <span className="text-base font-medium" style={{ color: "var(--mkt-heading)" }}>{deliverable}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <CTASection {...ctaData} gradient className="my-12" />
     </MarketingLayout>
   );

@@ -9,7 +9,7 @@ import DiscoveryHeader from "../../components/discovery/DiscoveryHeader.jsx";
 import { DISCOVERY_SPACING, DISCOVERY_TYPOGRAPHY } from "../../components/discovery/DiscoveryTheme.js";
 import IntakeScreen from "./IntakeScreen.jsx";
 import ReviewScreen from "../../components/discovery/ReviewScreen.jsx";
-import FocusLayout from "../../layouts/FocusLayout.jsx";
+import Stepper from "../../components/Stepper.jsx";
 import { CONTACT_EMAIL } from "../../constants/contact.js";
 
 export default function HomePage() {
@@ -137,9 +137,13 @@ export default function HomePage() {
  };
 
  const handleBack = () => {
+ if (screen > 0) {
  setTouched(false);
  setErrors({});
- setScreen((prev) => Math.max(prev - 1, 0));
+ setScreen((prev) => prev - 1);
+ } else {
+ navigate("/dashboard");
+ }
  };
 
  // Dev-only auto-fill handler
@@ -258,23 +262,14 @@ export default function HomePage() {
  ];
 
  const progressPercent = Math.round(((screen + 1) / 2) * 100);
+ const discoverySteps = [{ label: "Intake" }, { label: "Review" }];
 
  return (
- <FocusLayout
- steps={[{ label: "Intake" }, { label: "Review" }]}
- currentStep={screen}
- >
- <div className={DISCOVERY_SPACING.sectionGapLarge.replace('gap-', 'space-y-')}>
- {loading && <DiscoveryLoadingIndicator 
- streamingOutput={streamingOutput} 
- isCached={isCached}
- startTime={requestStartTime}
- duration={requestDuration}
- />}
+ <>
  <Seo
  title="AI Startup Idea Generator | Startup Idea Advisor"
  description="Provide your goals, availability, and expertise—our AI advisor researches markets and delivers personalized startup recommendations."
- path="/"
+ path="/advisor"
  keywords="ai startup idea generator, business idea advisor, personalized startup recommendations"
  >
  <script type="application/ld+json">
@@ -297,8 +292,22 @@ export default function HomePage() {
  </script>
  </Seo>
 
+ {/* Stepper - shown at top of workspace content */}
+ <div className="mb-6">
+ <Stepper steps={discoverySteps} current={screen} />
+ </div>
+
+ <div className={DISCOVERY_SPACING.sectionGapLarge.replace('gap-', 'space-y-')}>
+ {loading && <DiscoveryLoadingIndicator 
+ streamingOutput={streamingOutput} 
+ isCached={isCached}
+ startTime={requestStartTime}
+ duration={requestDuration}
+ />}
+
+ <form id="intake-form" onSubmit={handleSubmit}>
  <DiscoveryCard>
- <div className="flex items-start justify-between gap-4">
+ <div className="flex items-start justify-between gap-4 mb-6">
  <DiscoveryHeader
  step={screen + 1}
  totalSteps={2}
@@ -310,17 +319,6 @@ export default function HomePage() {
  Auto-Fill (Dev)
  </button>
  ) : null}
- </div>
- </DiscoveryCard>
-
- <form id="intake-form" onSubmit={handleSubmit}>
- <DiscoveryCard>
- {/* Persistent conversational header */}
- <div className="mb-6">
- <h2 className={DISCOVERY_TYPOGRAPHY.h3}>{conversationalHeaders[screen].title}</h2>
- {conversationalHeaders[screen].description && (
- <p className={`mt-1 ${DISCOVERY_TYPOGRAPHY.subtitle}`}>{conversationalHeaders[screen].description}</p>
- )}
  </div>
 
  {renderScreenContent()}
@@ -379,6 +377,6 @@ export default function HomePage() {
  </DiscoveryCard>
  )}
  </div>
- </FocusLayout>
+ </>
  );
 }

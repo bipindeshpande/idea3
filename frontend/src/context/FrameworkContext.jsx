@@ -31,12 +31,12 @@ export function FrameworkProvider({ children }) {
    
    const data = await apiClient.get(url);
    
-   if (data.success) {
+   if (data && data.success) {
     setFrameworks(data.frameworks || []);
     return data.frameworks || [];
    }
    
-   throw new Error("Failed to load frameworks");
+   throw new Error(data?.error || data?.detail || "Failed to load frameworks");
   } catch (err) {
    const errorMessage = err instanceof ApiError ? err.message : (err.message || "Failed to load frameworks");
    setError(errorMessage);
@@ -58,11 +58,11 @@ export function FrameworkProvider({ children }) {
   try {
    const data = await apiClient.get(`/frameworks/${frameworkId}`);
    
-   if (data.success) {
+   if (data && data.success) {
     return data.framework;
    }
    
-   throw new Error("Failed to load framework");
+   throw new Error(data?.error || data?.detail || "Failed to load framework");
   } catch (err) {
    const errorMessage = err instanceof ApiError ? err.message : (err.message || "Failed to load framework");
    setError(errorMessage);
@@ -83,14 +83,21 @@ export function FrameworkProvider({ children }) {
   try {
    const data = await apiClient.post("/frameworks", frameworkData);
    
+   console.log("Create framework response:", data);
+   
+   if (!data) {
+    throw new Error("No response from server");
+   }
+   
    if (data.success) {
     // Reload frameworks list
     await loadFrameworks();
     return data.framework;
    }
    
-   throw new Error("Failed to create framework");
+   throw new Error(data.error || data.detail || "Failed to create framework");
   } catch (err) {
+   console.error("Create framework error:", err);
    const errorMessage = err instanceof ApiError ? err.message : (err.message || "Failed to create framework");
    setError(errorMessage);
    throw err;
@@ -110,13 +117,13 @@ export function FrameworkProvider({ children }) {
   try {
    const data = await apiClient.put(`/frameworks/${frameworkId}`, updates);
    
-   if (data.success) {
+   if (data && data.success) {
     // Update frameworks list
     await loadFrameworks();
     return data.framework;
    }
    
-   throw new Error("Failed to update framework");
+   throw new Error(data?.error || data?.detail || "Failed to update framework");
   } catch (err) {
    const errorMessage = err instanceof ApiError ? err.message : (err.message || "Failed to update framework");
    setError(errorMessage);
@@ -137,13 +144,13 @@ export function FrameworkProvider({ children }) {
   try {
    const data = await apiClient.delete(`/frameworks/${frameworkId}`);
    
-   if (data.success) {
+   if (data && data.success) {
     // Reload frameworks list
     await loadFrameworks();
     return true;
    }
    
-   throw new Error("Failed to delete framework");
+   throw new Error(data?.error || data?.detail || "Failed to delete framework");
   } catch (err) {
    const errorMessage = err instanceof ApiError ? err.message : (err.message || "Failed to delete framework");
    setError(errorMessage);
@@ -164,14 +171,14 @@ export function FrameworkProvider({ children }) {
   try {
    const data = await apiClient.post(`/frameworks/${frameworkId}/export`);
    
-   if (data.success) {
+   if (data && data.success) {
     return {
      content: data.content,
      filename: data.filename || "framework.md"
     };
    }
    
-   throw new Error("Failed to export framework");
+   throw new Error(data?.error || data?.detail || "Failed to export framework");
   } catch (err) {
    const errorMessage = err instanceof ApiError ? err.message : (err.message || "Failed to export framework");
    setError(errorMessage);
@@ -196,7 +203,7 @@ export function FrameworkProvider({ children }) {
     idea_id: ideaId
    });
    
-   if (data.success) {
+   if (data && data.success) {
     return data.content;
    }
    

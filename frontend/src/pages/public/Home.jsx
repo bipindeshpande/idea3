@@ -277,10 +277,10 @@ export default function HomePage() {
         </div>
       </section>
       
-      {/* Section 3: Value Proposition + What You Get (Clarity) - CONSOLIDATED */}
+      {/* Section 3: Value Proposition (Clarity) */}
       <ValueSection
-        title="Why clarity matters and what you get"
-        subtitle="Every day spent on the wrong idea is a day you can't get back. Know what fits before you commit months of effort—and get comprehensive reports with actionable insights."
+        title="Why clarity matters"
+        subtitle="Every day spent on the wrong idea is a day you can't get back. Know what fits before you commit months of effort."
         items={combinedValueItems}
       />
       

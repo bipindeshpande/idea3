@@ -3,81 +3,11 @@ import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import WorkspaceTopBar from "../components/workspace/WorkspaceTopBar.jsx";
 import UICard from "../components/ui/ui-card.jsx";
-
-function getWorkspaceMeta(pathname) {
- // Route-derived titles/subtitles so TopBar persists while Outlet swaps.
- if (pathname.startsWith("/dashboard/frameworks")) {
- return {
- title: null,
- subtitle: null,
- };
- }
- if (pathname.startsWith("/dashboard")) {
- return {
- title: "Workspace",
- subtitle: "Your saved ideas, validations, and insights.",
- };
- }
- if (pathname.startsWith("/founder-connect")) {
- return {
- title: "Founder Network",
- subtitle: "Connect with peers aligned with your working style.",
- };
- }
- if (pathname.startsWith("/founder-psychology")) {
- return {
- title: "Founder Psychology",
- subtitle: "Capture your decision style and working patterns.",
- };
- }
- if (pathname.startsWith("/psyche/questionnaire")) {
- return {
- title: "Decision & Work Style Assessment",
- subtitle: "Answer 12 questions to personalize your startup recommendations.",
- };
- }
- if (pathname.startsWith("/account")) {
- return {
- title: "Account",
- subtitle: "Manage your subscription, profile, and settings.",
- };
- }
- if (pathname.startsWith("/validate-result")) {
- return {
- title: "Validation Results",
- subtitle: "Review your idea validation scores and recommendations.",
- };
- }
- if (pathname.startsWith("/validate-idea")) {
- return {
- title: "Validate Idea",
- subtitle: "Assess the viability of your startup idea.",
- };
- }
- if (pathname.startsWith("/advisor")) {
- return {
- title: "Discover",
- subtitle: "Get personalized startup recommendations.",
- };
- }
- if (pathname.startsWith("/dashboard/runs")) {
- return {
- title: "History",
- subtitle: "Browse all previous discoveries and validations.",
- };
- }
- if (pathname.startsWith("/how-advisor-thinks")) {
- return {
- title: "How Advisor Thinks",
- subtitle: "Understand how recommendations are generated and what influences decisions.",
- };
- }
- return { title: null, subtitle: null };
-}
+import { getWorkspaceMeta } from "../utils/workspaceMeta.js";
 
 export default function WorkspaceLayout() {
- const { pathname } = useLocation();
- const { title, subtitle } = getWorkspaceMeta(pathname);
+ const { pathname, search } = useLocation();
+ const { title, subtitle } = getWorkspaceMeta(pathname, search);
  
  // Sidebar collapse state with localStorage persistence
  const [isCollapsed, setIsCollapsed] = useState(() => {

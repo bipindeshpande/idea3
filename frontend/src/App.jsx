@@ -38,6 +38,14 @@ import AdvisorResourcesPage from "./pages/resources/AdvisorResources.jsx";
 import HowAdvisorThinksPage from "./pages/resources/HowAdvisorThinks.jsx";
 import BlogPage from "./pages/resources/Blog.jsx";
 
+// Help pages
+import ValidateIdeaHelp from "./pages/help/ValidateIdeaHelp.jsx";
+import DiscoverHelp from "./pages/help/DiscoverHelp.jsx";
+import FounderNetworkHelp from "./pages/help/FounderNetworkHelp.jsx";
+import WorkspaceHelp from "./pages/help/WorkspaceHelp.jsx";
+import FrameworksHelp from "./pages/help/FrameworksHelp.jsx";
+import AccountHelp from "./pages/help/AccountHelp.jsx";
+
 // Dashboard pages
 import DashboardPage from "./pages/dashboard/Dashboard.jsx";
 import CompareSessionsPage from "./pages/dashboard/CompareSessions.jsx";
@@ -89,24 +97,8 @@ export default function App() {
  <Route path="/register" element={<RegisterPage />} />
  <Route path="/login" element={<LoginPage />} />
  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
- <Route path="/reset-password" element={<ResetPasswordPage />} />
- <Route
- path="/advisor"
- element={
- <ProtectedRoute>
- <HomePage />
- </ProtectedRoute>
- }
- />
- <Route
- path="/validate-idea"
- element={
- <ProtectedRoute>
- <IdeaValidator />
- </ProtectedRoute>
- }
- />
- <Route path="/product" element={<ProductPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/product" element={<ProductPage />} />
  <Route path="/product/discover" element={<ProductDiscoverPage />} />
  <Route path="/product/validate" element={<ProductValidatePage />} />
  <Route path="/product/network" element={<ProductNetworkPage />} />
@@ -148,6 +140,22 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/validate-idea"
+          element={
+            <ProtectedRoute>
+              <IdeaValidator />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/advisor"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/founder-connect" element={<FounderConnectPage />} />
         <Route path="/founder-psychology" element={<FounderPsychologyPage />} />
         <Route
@@ -179,6 +187,54 @@ export default function App() {
           element={
             <ProtectedRoute>
               <HowAdvisorThinksPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/help/validate-idea"
+          element={
+            <ProtectedRoute>
+              <ValidateIdeaHelp />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/help/discover"
+          element={
+            <ProtectedRoute>
+              <DiscoverHelp />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/help/founder-network"
+          element={
+            <ProtectedRoute>
+              <FounderNetworkHelp />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/help/workspace"
+          element={
+            <ProtectedRoute>
+              <WorkspaceHelp />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/help/frameworks"
+          element={
+            <ProtectedRoute>
+              <FrameworksHelp />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/help/account"
+          element={
+            <ProtectedRoute>
+              <AccountHelp />
             </ProtectedRoute>
           }
         />

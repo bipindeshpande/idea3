@@ -6,11 +6,10 @@ import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { validationQuestions } from "../../config/validationQuestions.js";
 import ValidationLoadingIndicator from "../../components/validation/ValidationLoadingIndicator.jsx";
-import FocusLayout from "../../layouts/FocusLayout.jsx";
+import Stepper from "../../components/Stepper.jsx";
 import { useValidationData } from "../../hooks/validation/useValidationData.js";
 import { useValidationEditMode } from "../../hooks/validation/useValidationEditMode.js";
 import { useValidationForm } from "../../hooks/validation/useValidationForm.js";
-import ValidationHero from "./components/ValidationHero.jsx";
 import Screen1 from "./components/Screen1.jsx";
 import Screen2 from "./components/Screen2.jsx";
 import Screen3 from "./components/Screen3.jsx";
@@ -109,7 +108,7 @@ export default function IdeaValidator() {
       setStep(step - 1);
       setError("");
     } else {
-      navigate("/");
+      navigate("/dashboard");
     }
   };
 
@@ -133,15 +132,14 @@ export default function IdeaValidator() {
     }, 100);
   };
 
+  const validationSteps = [
+    { label: "About your idea" },
+    { label: "How it works" },
+    { label: "Tell us more" },
+  ];
+
   return (
-    <FocusLayout
-      steps={[
-        { label: "About your idea" },
-        { label: "How it works" },
-        { label: "Tell us more" },
-      ]}
-      currentStep={step}
-    >
+    <>
       <Seo
         title="Validate Your Startup Idea | Free AI-Powered Validation Tool | Startup Idea Advisor"
         description="Validate your startup idea with our free AI-powered tool. Get comprehensive analysis across 10 key parameters."
@@ -149,10 +147,12 @@ export default function IdeaValidator() {
         path="/validate-idea"
       />
 
-      {loading && <ValidationLoadingIndicator />}
+      {/* Stepper - shown at top of workspace content */}
+      <div className="mb-6">
+        <Stepper steps={validationSteps} current={step} />
+      </div>
 
-      {/* Hero Section - Only show on first step and not in edit mode */}
-      {step === 0 && !isEditMode && <ValidationHero onAutoFill={handleAutoFill} />}
+      {loading && <ValidationLoadingIndicator />}
 
       <section>
         {loadingValidationData && (
@@ -218,6 +218,6 @@ export default function IdeaValidator() {
           />
         )}
       </section>
-    </FocusLayout>
+    </>
   );
 }

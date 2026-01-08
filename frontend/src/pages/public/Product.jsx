@@ -148,31 +148,6 @@ export default function ProductPage() {
         </div>
       </section>
 
-      {/* Value Panels / Features */}
-      <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            title="What You Get"
-            subtitle="Comprehensive analysis and actionable insights tailored to your profile"
-            center
-            animate="slide"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {valuePanels.map((panel, index) => (
-              <div key={index} className="scroll-reveal">
-                <FeatureCard
-                  icon={panel.icon}
-                  title={panel.title}
-                  description={panel.summary}
-                  tint={panel.tint}
-                  animate="fade"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* 10-Parameter Validation Framework */}
       <section className="mkt-pad-section mkt-section-gradient-blue">
         <div className="max-w-7xl mx-auto px-6">
@@ -333,54 +308,6 @@ export default function ProductPage() {
                   tint={item.tint}
                 />
               </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Real Deliverables List */}
-      <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            title="What You'll Receive"
-            subtitle="Comprehensive deliverables included with every session"
-            center
-            animate="slide"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-            {[
-              "Personalized Profile Analysis",
-              "Top 3 Ranked Startup Ideas",
-              "Financial Outlook & Projections",
-              "Risk Assessment & Mitigation",
-              "Validation Questions & Scripts",
-              "30/60/90 Day Roadmap",
-              "Market Opportunity Analysis",
-              "Competitive Landscape Review",
-              "Go-to-Market Strategy",
-              "Technical Feasibility Assessment",
-            ].map((deliverable, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-2 p-3 rounded-lg"
-                style={{
-                  background: "var(--mkt-surface-muted)",
-                  border: "1px solid var(--mkt-outline)",
-                }}
-              >
-                <span
-                  className="text-xl mt-0.5"
-                  style={{ color: "var(--mkt-primary)" }}
-                >
-                  ✓
-                </span>
-                <span
-                  className="text-base font-medium"
-                  style={{ color: "var(--mkt-heading)" }}
-                >
-                  {deliverable}
-                </span>
-              </div>
             ))}
           </div>
         </div>

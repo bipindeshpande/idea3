@@ -19,7 +19,6 @@ import DashboardHistoryTab from "../../components/dashboard/DashboardHistoryTab.
 import DashboardValidationsTab from "../../components/dashboard/DashboardValidationsTab.jsx";
 import DashboardCompareTab from "../../components/dashboard/DashboardCompareTab.jsx";
 import DashboardStats from "../../components/dashboard/DashboardStats.jsx";
-import DashboardQuickActions from "../../components/dashboard/DashboardQuickActions.jsx";
 import TabButton from "../../components/ui/ui-tab-button.jsx";
 import UIButton from "../../components/ui/ui-button.jsx";
 
@@ -277,9 +276,8 @@ export default function DashboardPage() {
  />
 
  <div className="pb-16">
- {/* Quick Actions + Stats */}
+ {/* Stats */}
  <div className="grid gap-4">
- <DashboardQuickActions />
  <DashboardStats
   ideas={allIdeas}
   validations={apiValidations}

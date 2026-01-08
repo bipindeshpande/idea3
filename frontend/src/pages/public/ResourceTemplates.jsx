@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
 import SectionTitle from "../../components/marketing/SectionTitle.jsx";
@@ -12,6 +12,7 @@ import { markdownToDocx } from "../../utils/markdownToDocx.js";
 import { frameworks } from "../../templates/frameworksConfig.js";
 import { templates as traditionalTemplates } from "../../templates/templatesConfig.js";
 import { generateBreadcrumbs, breadcrumbPatterns } from "../../utils/seo/breadcrumbs.js";
+import { useAuth } from "../../context/AuthContext.jsx";
 import {
   seo,
   heroData,
@@ -24,6 +25,10 @@ export default function ResourceTemplatesPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [previewContent, setPreviewContent] = useState(null);
+  const [previewTemplateType, setPreviewTemplateType] = useState(null);
+  const [previewTemplateId, setPreviewTemplateId] = useState(null);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   // Map categories to tint colors for consistent theming
   const categoryTintMap = {
@@ -111,6 +116,8 @@ export default function ResourceTemplatesPage() {
                         downloadName: template.downloadName || `${template.title.toLowerCase().replace(/\s+/g, "-")}.docx`
                       });
                       setPreviewContent(template.content);
+                      setPreviewTemplateType(template.type);
+                      setPreviewTemplateId(template.id);
                     }}
                     className="cursor-pointer"
                   >
@@ -134,25 +141,44 @@ export default function ResourceTemplatesPage() {
                           </Link>
                         </div>
                       )}
-                      <UIButton
-                        variant="secondary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPreviewTemplate({
-                            title: template.title,
-                            downloadName: template.downloadName || `${template.title.toLowerCase().replace(/\s+/g, "-")}.docx`
-                          });
-                          setPreviewContent(template.content);
-                        }}
-                        className="w-full mt-4"
-                        style={{
-                          background: "var(--mkt-surface)",
-                          color: "var(--mkt-heading)",
-                          border: "1px solid var(--mkt-outline)"
-                        }}
-                      >
-                        Download Template
-                      </UIButton>
+                      <div className="mt-4 space-y-2">
+                        {template.type === "framework" && isAuthenticated && (
+                          <UIButton
+                            variant="primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Navigate to workspace frameworks page with template data
+                              navigate(`/dashboard/frameworks?create=${template.id}`);
+                            }}
+                            className="w-full"
+                            style={{
+                              background: "var(--mkt-primary)",
+                              color: "white"
+                            }}
+                          >
+                            Create in Workspace
+                          </UIButton>
+                        )}
+                        <UIButton
+                          variant="secondary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewTemplate({
+                              title: template.title,
+                              downloadName: template.downloadName || `${template.title.toLowerCase().replace(/\s+/g, "-")}.docx`
+                            });
+                            setPreviewContent(template.content);
+                          }}
+                          className="w-full"
+                          style={{
+                            background: "var(--mkt-surface)",
+                            color: "var(--mkt-heading)",
+                            border: "1px solid var(--mkt-outline)"
+                          }}
+                        >
+                          Download Template
+                        </UIButton>
+                      </div>
                     </FeatureCard>
                   </div>
                 ))
@@ -211,9 +237,13 @@ export default function ResourceTemplatesPage() {
         <TemplatePreviewModal
           template={previewTemplate}
           content={previewContent}
+          templateType={previewTemplateType}
+          templateId={previewTemplateId}
           onClose={() => {
             setPreviewTemplate(null);
             setPreviewContent(null);
+            setPreviewTemplateType(null);
+            setPreviewTemplateId(null);
           }}
           onDownload={async (fetchedContent) => {
             const contentToDownload = fetchedContent || previewContent;

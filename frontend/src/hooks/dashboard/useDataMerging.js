@@ -57,7 +57,17 @@ export function useDataMerging({
   }, [apiRuns, runs, isAuthenticated, loadingRuns]);
 
   const allValidations = useMemo(() => {
-    if (loadingRuns) return [];
+    if (loadingRuns) {
+      console.log("⏳ Validations loading - waiting for runs to finish");
+      return [];
+    }
+
+    console.log("🔍 Processing validations:", {
+      apiValidationsCount: apiValidations?.length || 0,
+      apiValidations: apiValidations,
+      isAuthenticated,
+      loadingRuns
+    });
 
     // Transform API validations
     const apiMapped = (apiValidations || []).map(v => {
@@ -122,7 +132,18 @@ export function useDataMerging({
     });
 
     // Sort by timestamp (newest first)
-    return combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const sorted = combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    console.log("✅ Final validations:", {
+      totalCount: sorted.length,
+      apiCount: apiMapped.length,
+      localCount: localValidations.length,
+      validations: sorted.slice(0, 3).map(v => ({
+        id: v.id,
+        idea_explanation: v.idea_explanation?.substring(0, 50),
+        overall_score: v.overall_score
+      }))
+    });
+    return sorted;
   }, [apiValidations, getSavedValidations, isAuthenticated, loadingRuns]);
 
   return {

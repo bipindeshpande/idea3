@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useFramework } from "../../context/FrameworkContext.jsx";
+import { ApiError } from "../../utils/apiClient.js";
 import UIButton from "../ui/ui-button.jsx";
 import UIHeading from "../ui/ui-heading.jsx";
 import Card from "../ui/Card.jsx";
@@ -75,7 +76,14 @@ export default function FrameworkEditor({ framework, onClose, onSave, allFramewo
    return; // Don't save if duplicate name
   }
   
+  // Validate framework_template_id for new frameworks
+  if (!framework.id && !framework.framework_template_id) {
+   setNameError("Template ID is required to create a framework.");
+   return;
+  }
+  
   setSaving(true);
+  setNameError(""); // Clear any previous errors
   try {
    if (framework.id) {
     // Update existing
@@ -84,20 +92,57 @@ export default function FrameworkEditor({ framework, onClose, onSave, allFramewo
      customized_content: content
     });
    } else {
+    // Validate required fields before creating
+    if (!framework.framework_template_id || typeof framework.framework_template_id !== "number") {
+     throw new Error("Template ID is required to create a framework. Please select a template first.");
+    }
+    if (!content || !content.trim()) {
+     throw new Error("Framework content cannot be empty.");
+    }
+    
+    // Ensure framework_template_id is an integer
+    const templateId = parseInt(framework.framework_template_id, 10);
+    if (isNaN(templateId)) {
+     throw new Error("Invalid template ID. Please try creating from a template again.");
+    }
+    
     // Create new
     await createFramework({
-     framework_template_id: framework.framework_template_id,
-     title,
+     framework_template_id: templateId,
+     title: title.trim(),
      customized_content: content,
-     linked_idea_id: framework.linked_idea_id,
-     linked_validation_id: framework.linked_validation_id,
-     metadata: framework.metadata
+     linked_idea_id: framework.linked_idea_id || null,
+     linked_validation_id: framework.linked_validation_id || null,
+     metadata: framework.metadata || {}
     });
    }
    onSave();
   } catch (error) {
    console.error("Failed to save framework:", error);
-   alert("Failed to save framework. Please try again.");
+   let errorMessage = "Failed to save framework. Please try again.";
+   
+   // Handle ApiError instances
+   if (error instanceof ApiError) {
+    errorMessage = error.message || error.detail || "Failed to save framework. Please try again.";
+   } else if (error?.message) {
+    errorMessage = error.message;
+   } else if (error?.detail) {
+    errorMessage = error.detail;
+   } else if (error?.response?.data?.detail) {
+    errorMessage = error.response.data.detail;
+   } else if (typeof error === "string") {
+    errorMessage = error;
+   }
+   
+   console.error("Error details:", {
+    error,
+    message: errorMessage,
+    type: error?.constructor?.name,
+    isApiError: error instanceof ApiError
+   });
+   
+   setNameError(errorMessage);
+   alert(errorMessage);
   } finally {
    setSaving(false);
   }

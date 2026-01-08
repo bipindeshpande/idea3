@@ -1,10 +1,14 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import UIButton from "../ui/ui-button.jsx";
 import UIHeading from "../ui/ui-heading.jsx";
 import { markdownToDocx } from "../../utils/markdownToDocx.js";
+import { useAuth } from "../../context/AuthContext.jsx";
 
-export default function TemplatePreviewModal({ template, content, onClose, onDownload }) {
+export default function TemplatePreviewModal({ template, content, onClose, onDownload, templateType, templateId }) {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
  // Content is now always passed directly as a string (templates are bundled)
  const templateContent = content || "";
 
@@ -48,18 +52,30 @@ export default function TemplatePreviewModal({ template, content, onClose, onDow
  <div className="flex items-center justify-between p-6 border-b border-default bg-surface rounded-t-xl">
  <UIHeading level="h2" className="text-primary">{template?.title || "Template Preview"}</UIHeading>
  <div className="flex items-center gap-3">
- <UIButton variant="primary" onClick={handleDownload} className="whitespace-nowrap">
- Download Word doc
- </UIButton>
- <button
- onClick={onClose}
- className="rounded-lg p-1 text-secondary transition hover:bg-surface hover:text-primary"
- aria-label="Close"
- >
- <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
- </svg>
- </button>
+  {templateType === "framework" && isAuthenticated && (
+   <UIButton 
+    variant="primary" 
+    onClick={() => {
+     onClose();
+     navigate(`/dashboard/frameworks?create=${templateId}`);
+    }} 
+    className="whitespace-nowrap"
+   >
+    Create in Workspace
+   </UIButton>
+  )}
+  <UIButton variant="secondary" onClick={handleDownload} className="whitespace-nowrap">
+   Download Word doc
+  </UIButton>
+  <button
+   onClick={onClose}
+   className="rounded-lg p-1 text-secondary transition hover:bg-surface hover:text-primary"
+   aria-label="Close"
+  >
+   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+   </svg>
+  </button>
  </div>
  </div>
 
@@ -79,10 +95,21 @@ export default function TemplatePreviewModal({ template, content, onClose, onDow
  {/* Bottom Actions */}
  <div className="flex items-center justify-end gap-3 p-6 border-t border-default bg-surface rounded-b-xl">
  <UIButton variant="secondary" onClick={onClose}>
- Close
+  Close
  </UIButton>
- <UIButton variant="primary" onClick={handleDownload}>
- Download Word doc
+ {templateType === "framework" && isAuthenticated && (
+  <UIButton 
+   variant="primary" 
+   onClick={() => {
+    onClose();
+    navigate(`/dashboard/frameworks?create=${templateId}`);
+   }}
+  >
+   Create in Workspace
+  </UIButton>
+ )}
+ <UIButton variant="secondary" onClick={handleDownload}>
+  Download Word doc
  </UIButton>
  </div>
  </div>

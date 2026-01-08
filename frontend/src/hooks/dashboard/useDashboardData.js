@@ -45,6 +45,11 @@ export function useDashboardData({
         // Fetch activity (runs and validations)
         try {
           const activity = await fetchUserActivity(100, headers);
+          console.log("📊 Activity data received:", {
+            runsCount: activity.runs?.length || 0,
+            validationsCount: activity.validations?.length || 0,
+            validations: activity.validations
+          });
           setApiRuns(activity.runs);
           setApiValidations(activity.validations);
         } catch (error) {
@@ -54,11 +59,22 @@ export function useDashboardData({
         // Fetch dashboard (actions, notes, and fallback activity)
         try {
           const dashboard = await fetchDashboard(headers);
+          console.log("📊 Dashboard data received:", {
+            runsCount: dashboard.runs?.length || 0,
+            validationsCount: dashboard.validations?.length || 0,
+            validations: dashboard.validations
+          });
           // Only update if we don't already have runs from activity endpoint
           setApiRuns(prev => (prev.length ? prev : dashboard.runs));
-          setApiValidations(prev =>
-            prev.length ? prev : dashboard.validations
-          );
+          setApiValidations(prev => {
+            const newValidations = prev.length ? prev : dashboard.validations;
+            console.log("📊 Setting validations:", {
+              prevCount: prev.length,
+              newCount: newValidations?.length || 0,
+              validations: newValidations
+            });
+            return newValidations;
+          });
           setActions(dashboard.actions);
           setNotes(dashboard.notes);
         } catch (error) {

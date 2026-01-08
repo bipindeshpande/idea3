@@ -73,10 +73,6 @@ export default function FounderConnectPage() {
         description="Connect with other founders, find co-founders, and collaborate on startup ideas."
       />
       <div>
-        <p className="text-sm text-secondary">
-          Your saved ideas, validations, and insights appear here. Choose an item to continue working.
-        </p>
-
         {/* Credits Display - Updated with subscription tier messaging */}
         <CreditCounter 
           credits={connectionCredits} 

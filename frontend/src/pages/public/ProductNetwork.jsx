@@ -233,53 +233,6 @@ export default function ProductNetworkPage() {
         </div>
       </section>
 
-      {/* Real Deliverables List */}
-      <section className="mkt-pad-section" style={{ background: "var(--mkt-surface)" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionTitle
-            title="Network Features"
-            subtitle="Everything you get with Founder Network"
-            center
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-            {[
-              "Anonymized Profile Browsing",
-              "Idea Listing & Discovery",
-              "Privacy-First Connections",
-              "Mutual Acceptance System",
-              "Profile Analytics",
-              "Skill-Based Filtering",
-              "Interest Matching",
-              "Connection Request Management",
-              "Credit-Based Limits",
-              "Co-Founder Search",
-            ].map((deliverable, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-2 p-3 rounded-lg"
-                style={{
-                  background: "var(--mkt-surface-muted)",
-                  border: "1px solid var(--mkt-outline)",
-                }}
-              >
-                <span
-                  className="text-xl mt-0.5"
-                  style={{ color: "var(--mkt-primary)" }}
-                >
-                  ✓
-                </span>
-                <span
-                  className="text-base font-medium"
-                  style={{ color: "var(--mkt-heading)" }}
-                >
-                  {deliverable}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <CTASection
         title="Ready to find your co-founder?"

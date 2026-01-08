@@ -23,9 +23,18 @@ export async function fetchUserActivity(limit = 100, headers = {}) {
     throw new Error('Activity fetch was not successful');
   }
   
+  const validations = json.validations || json?.activity?.validations || [];
+  console.log("🔍 fetchUserActivity raw response:", {
+    hasValidations: !!json.validations,
+    hasActivityValidations: !!json?.activity?.validations,
+    validationsCount: validations.length,
+    validations: validations,
+    jsonKeys: Object.keys(json)
+  });
+  
   return {
     runs: json.runs || json?.activity?.runs || [],
-    validations: json.validations || json?.activity?.validations || []
+    validations: validations
   };
 }
 
@@ -48,9 +57,18 @@ export async function fetchDashboard(headers = {}) {
     throw new Error('Dashboard fetch was not successful');
   }
   
+  const validations = data.activity?.validations || [];
+  console.log("🔍 fetchDashboard raw response:", {
+    hasActivity: !!data.activity,
+    hasActivityValidations: !!data.activity?.validations,
+    validationsCount: validations.length,
+    validations: validations,
+    dataKeys: Object.keys(data)
+  });
+  
   return {
     runs: data.activity?.runs || [],
-    validations: data.activity?.validations || [],
+    validations: validations,
     actions: data.actions || [],
     notes: data.notes || []
   };
