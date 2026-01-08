@@ -128,6 +128,26 @@ def valid_industry_data():
                     "automation_patterns": [{"id": "auto_1", "weight": 4, "priority": "medium"}],
                     "archetypes": ["tool"]
                 }
+            },
+            "startup_style": {
+                "Tech Startup": {
+                    "problems": [{"id": "problem_1", "weight": 5, "priority": "high"}],
+                    "solutions": [{"id": "solution_1", "weight": 5, "priority": "high"}],
+                    "delivery_modes": [{"id": "delivery_1", "weight": 4, "priority": "medium"}],
+                    "revenue_patterns": [{"id": "revenue_1", "weight": 5, "priority": "high"}],
+                    "automation_patterns": [{"id": "auto_1", "weight": 4, "priority": "medium"}],
+                    "archetypes": ["tool"]
+                }
+            },
+            "business_region": {
+                "US": {
+                    "problems": [{"id": "problem_1", "weight": 5, "priority": "high"}],
+                    "solutions": [{"id": "solution_1", "weight": 5, "priority": "high"}],
+                    "delivery_modes": [{"id": "delivery_1", "weight": 4, "priority": "medium"}],
+                    "revenue_patterns": [{"id": "revenue_1", "weight": 5, "priority": "high"}],
+                    "automation_patterns": [{"id": "auto_1", "weight": 4, "priority": "medium"}],
+                    "archetypes": ["tool"]
+                }
             }
         },
         "archetypes": [
@@ -205,6 +225,61 @@ class TestSchemaValidation:
         is_valid, errors = _validate_schema(valid_industry_data)
         assert not is_valid
         assert any("must be a list" in error for error in errors)
+    
+    def test_fragment_not_dict_fails(self, valid_industry_data):
+        """Fragment item that's not a dict should fail."""
+        valid_industry_data["idea_fragments"]["problems"][0] = "not a dict"
+        is_valid, errors = _validate_schema(valid_industry_data)
+        assert not is_valid
+        assert any("must be an object" in error for error in errors)
+    
+    def test_fragment_missing_text_fails(self, valid_industry_data):
+        """Fragment missing text should fail."""
+        valid_industry_data["idea_fragments"]["problems"][0] = {"id": "problem_1"}
+        is_valid, errors = _validate_schema(valid_industry_data)
+        assert not is_valid
+        assert any("'text' keys" in error for error in errors)
+    
+    def test_parameter_mappings_not_dict_fails(self, valid_industry_data):
+        """parameter_mappings that's not a dict should fail."""
+        valid_industry_data["parameter_mappings"] = "not a dict"
+        is_valid, errors = _validate_schema(valid_industry_data)
+        assert not is_valid
+        assert any("parameter_mappings must be a dictionary" in error for error in errors)
+    
+    def test_parameter_mapping_key_not_dict_fails(self, valid_industry_data):
+        """parameter_mappings key that's not a dict should fail."""
+        valid_industry_data["parameter_mappings"]["time_commitment"] = "not a dict"
+        is_valid, errors = _validate_schema(valid_industry_data)
+        assert not is_valid
+        assert any("time_commitment must be a dictionary" in error for error in errors)
+    
+    def test_missing_work_style_both_fails(self, valid_industry_data):
+        """Missing both work_style and preferred_work_style should fail."""
+        del valid_industry_data["parameter_mappings"]["work_style"]
+        # Add preferred_work_style to ensure we test the missing both case
+        if "preferred_work_style" in valid_industry_data["parameter_mappings"]:
+            del valid_industry_data["parameter_mappings"]["preferred_work_style"]
+        is_valid, errors = _validate_schema(valid_industry_data)
+        assert not is_valid
+        assert any("work_style or preferred_work_style" in error for error in errors)
+    
+    def test_work_style_not_dict_fails(self, valid_industry_data):
+        """work_style that's not a dict should fail."""
+        valid_industry_data["parameter_mappings"]["work_style"] = "not a dict"
+        is_valid, errors = _validate_schema(valid_industry_data)
+        assert not is_valid
+        assert any("work_style must be a dictionary" in error for error in errors)
+    
+    def test_preferred_work_style_not_dict_fails(self, valid_industry_data):
+        """preferred_work_style that's not a dict should fail."""
+        # Remove work_style to test preferred_work_style
+        if "work_style" in valid_industry_data["parameter_mappings"]:
+            del valid_industry_data["parameter_mappings"]["work_style"]
+        valid_industry_data["parameter_mappings"]["preferred_work_style"] = "not a dict"
+        is_valid, errors = _validate_schema(valid_industry_data)
+        assert not is_valid
+        assert any("preferred_work_style must be a dictionary" in error for error in errors)
 
 
 class TestLoadIndustryData:

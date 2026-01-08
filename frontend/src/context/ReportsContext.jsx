@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { runDiscovery } from "../utils/discovery.js";
-import { splitProfileAndRecommendations } from "../utils/streamingParser.js";
+import { splitProfileAndRecommendations } from "../utils/parsers/index.js";
 import { normalizeRunId } from "../utils/runs.js";
 import apiClient, { ApiError } from "../utils/apiClient.js";
 

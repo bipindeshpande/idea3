@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { parseStructuredIdeas, trimFromHeading } from "../../utils/streamingParser.js";
+import { parseStructuredIdeas, trimFromHeading } from "../../utils/parsers/index.js";
 import { splitIdeaSections } from "../../utils/formatters/recommendationFormatters.js";
 import { DEFAULT_SECTIONS, SECTION_ORDER, SECTION_LABELS } from "../../components/recommendations/utils/sectionConstants.js";
 

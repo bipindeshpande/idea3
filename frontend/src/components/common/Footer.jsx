@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import UIHeading from "../ui/ui-heading.jsx";
+import { CONTACT_EMAIL } from "../../constants/contact.js";
 
 const footerLinks = {
  "Product": [
@@ -58,7 +59,7 @@ export default function Footer() {
  </svg>
  </a>
  <a
- href="mailto:hello@ideabunch.com"
+ href={`mailto:${CONTACT_EMAIL}`}
  className="text-secondary hover:text-accent transition-colors"
  aria-label="Email"
  >

@@ -1,6 +1,6 @@
 // Home page data
 export const seo = {
-  title: "Startup Idea Advisor — Validate Ideas & Discover Opportunities",
+  title: "Idea Bunch — Your Startup Idea Advisor",
   description: "Transform your profile into validated startup ideas with AI-powered analysis, financial outlook, and actionable roadmaps. Validate existing ideas or discover personalized opportunities.",
   keywords: ["startup ideas", "idea validation", "business ideas", "startup advisor", "ai startup", "idea discovery"],
   canonical: "/",

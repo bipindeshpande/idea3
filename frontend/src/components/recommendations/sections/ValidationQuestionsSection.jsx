@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
  * Validation Questions Section Component
  */
 export default function ValidationQuestionsSection({ validationQuestions, content, isEnriching }) {
-  if (validationQuestions.length > 0) {
+  if (validationQuestions && validationQuestions.length > 0) {
     return (
       <div className="grid gap-4 md:grid-cols-2">
         {validationQuestions.map(({ question, listenFor, actOn }, index) => (

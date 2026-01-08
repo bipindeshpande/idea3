@@ -1,11 +1,14 @@
 /**
  * SectionHeader - Standard section header component
+ * Uses workspace typography system for consistent, proportionate font sizes
  * 
  * @param {string} title - Section title
  * @param {string} description - Optional description
  * @param {string} icon - Optional icon
  * @param {string} className - Additional CSS classes
  */
+import { WORKSPACE_TYPOGRAPHY } from "../workspace/WorkspaceTheme.js";
+
 export default function SectionHeader({
  title,
  description,
@@ -19,11 +22,11 @@ export default function SectionHeader({
  {icon}
  </div>
  )}
- <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
+ <h2 className={`${WORKSPACE_TYPOGRAPHY.h3} flex items-center gap-2`}>
  {title}
  </h2>
  {description && (
- <p className="mt-1 text-primary text-primary leading-relaxed">
+ <p className={`mt-1 ${WORKSPACE_TYPOGRAPHY.subtitle}`}>
  {description}
  </p>
  )}

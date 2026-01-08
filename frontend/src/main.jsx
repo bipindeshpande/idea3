@@ -14,6 +14,48 @@ import "./styles/marketing.css";
 import "./styles/marketing-tokens.css"; // Marketing design tokens - single source of truth
 import "./styles/marketing-typography.css"; // Marketing typography system
 
+// Initialize Sentry for error tracking (if DSN is provided)
+// Note: We use dynamic import to avoid loading Sentry if DSN is not set
+const initSentry = async () => {
+  const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
+  if (!SENTRY_DSN) return;
+  
+  try {
+    const Sentry = await import("@sentry/react");
+    Sentry.init({
+      dsn: SENTRY_DSN,
+      environment: import.meta.env.MODE || "development",
+      integrations: [
+        Sentry.browserTracingIntegration(),
+        Sentry.replayIntegration({
+          maskAllText: true,
+          blockAllMedia: true,
+        }),
+      ],
+      // Performance Monitoring
+      tracesSampleRate: 0.1, // 10% of transactions
+      // Session Replay
+      replaysSessionSampleRate: 0.1, // 10% of sessions
+      replaysOnErrorSampleRate: 1.0, // 100% of sessions with errors
+      // Filter out expected errors
+      beforeSend(event, hint) {
+        // Don't send 404 errors
+        if (event.request?.url?.includes("404") || event.exception?.values?.[0]?.value?.includes("404")) {
+          return null;
+        }
+        return event;
+      },
+    });
+    // Make Sentry available globally for ErrorBoundary
+    window.Sentry = Sentry;
+  } catch (error) {
+    console.warn("Failed to initialize Sentry:", error);
+  }
+};
+
+// Initialize Sentry asynchronously (non-blocking)
+initSentry();
+
 const GA_ID = import.meta.env.VITE_GA_ID;
 
 function Root() {

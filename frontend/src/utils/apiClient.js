@@ -71,8 +71,10 @@ class ApiClient {
       const errorText = await response.text();
       try {
         const errorData = JSON.parse(errorText);
+        // FastAPI uses 'detail' for HTTPException, also check 'error' and 'message'
+        const errorMessage = errorData.detail || errorData.error || errorData.message || `Server error: ${response.status}`;
         return {
-          message: errorData.error || errorData.message || `Server error: ${response.status}`,
+          message: errorMessage,
           data: errorData,
         };
       } catch {
@@ -232,7 +234,8 @@ class ApiClient {
           this.handleUnauthorized();
         }
         const error = await this.parseError(processedResponse);
-        throw new ApiError("Unauthorized", 401, error.data);
+        // Use the actual error message from the backend instead of hardcoding "Unauthorized"
+        throw new ApiError(error.message || "Unauthorized", 401, error.data);
       }
 
       // Handle other error statuses
@@ -371,7 +374,8 @@ class ApiClient {
           this.handleUnauthorized();
         }
         const error = await this.parseError(processedResponse);
-        throw new ApiError("Unauthorized", 401, error.data);
+        // Use the actual error message from the backend instead of hardcoding "Unauthorized"
+        throw new ApiError(error.message || "Unauthorized", 401, error.data);
       }
 
       if (!processedResponse.ok) {

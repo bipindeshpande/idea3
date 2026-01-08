@@ -16,7 +16,8 @@ from app.core.config import settings
 from app.models import (
     Run, User, CacheEntry, Validation, Action, Note, 
     PsycheProfile, FounderPsychology, FounderProfile, 
-    FounderIdeaListing, FounderConnection, SavedFramework
+    FounderIdeaListing, FounderConnection, SavedFramework,
+    ContactSubmission
 )
 
 # this is the Alembic Config object

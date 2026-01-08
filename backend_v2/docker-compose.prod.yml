@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: idea2_postgres_prod
+    container_name: idea3_postgres_prod
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-startup_discovery}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -23,7 +21,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: idea2_redis_prod
+    container_name: idea3_redis_prod
     volumes:
       - redis_data_prod:/data
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
@@ -41,7 +39,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
-    container_name: idea2_backend_prod
+    container_name: idea3_backend_prod
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-startup_discovery}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-startup_discovery}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
@@ -71,7 +69,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
-    container_name: idea2_worker_prod
+    container_name: idea3_worker_prod
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-startup_discovery}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-startup_discovery}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
@@ -101,7 +99,7 @@ services:
 
   nginx:
     image: nginx:alpine
-    container_name: idea2_nginx_prod
+    container_name: idea3_nginx_prod
     ports:
       - "80:80"
       - "443:443"

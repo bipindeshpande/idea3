@@ -72,21 +72,28 @@ class AuthService(BaseService):
     
     def authenticate_user(self, email: str, password: str) -> Optional[User]:
         """Authenticate a user and return user object if valid"""
+        import logging
+        logger = logging.getLogger("startup_discovery")
+        
         user = self.db.query(User).filter(User.email == email).first()
         
         if not user:
+            logger.info(f"Authentication failed: User not found for email: {email}")
             return None
         
         if not self.verify_password(password, user.hashed_password):
+            logger.info(f"Authentication failed: Incorrect password for email: {email}")
             return None
         
         if not user.is_active:
+            logger.warning(f"Authentication failed: User account is inactive for email: {email}")
             return None
         
         # Update last_login
         user.last_login = datetime.now(timezone.utc)
         self.db.commit()
         
+        logger.info(f"Authentication successful for email: {email}, user_id: {user.user_id}")
         return user
     
     def get_user_by_id(self, user_id: str) -> Optional[User]:

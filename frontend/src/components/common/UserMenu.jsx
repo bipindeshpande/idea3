@@ -34,18 +34,17 @@ export default function UserMenu() {
 
  return (
  <div className="relative" ref={menuRef}>
- <button
- type="button"
- className="flex items-center gap-2 px-3 py-2 text-base font-medium text-primary transition hover:text-accent-hover focus-visible:outline-accent rounded-lg hover:bg-surface-hover"
- onClick={() => setOpen(!open)}
- aria-expanded={open}
- >
- <div className="w-8 h-8 rounded-full flex items-center justify-center bg-accent text-on-accent text-xs font-semibold">
- {initial}
- </div>
- <span className="hidden xl:block max-w-[120px] truncate">{user?.email}</span>
- <span className="text-xs">▾</span>
- </button>
+      <button
+        type="button"
+        className="flex items-center gap-2 px-3 py-2 text-base font-medium text-primary transition hover:text-accent-hover focus-visible:outline-accent rounded-lg hover:bg-surface-hover"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+      >
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-accent text-on-accent text-xs font-semibold">
+          {initial}
+        </div>
+        <span className="text-xs">▾</span>
+      </button>
 
  {open && (
  <div className="absolute right-0 z-50 mt-2 w-56 rounded-xl border border-default bg-surface p-2 shadow-card-lg transition-all duration-200">
@@ -88,15 +87,13 @@ export default function UserMenu() {
  <div className="px-3 py-1.5 text-xs font-semibold text-secondary uppercase tracking-wide">
  Help
  </div>
- <button
- onClick={() => {
- closeMenu();
- navigate("/dashboard?show=getting-started");
- }}
- className="block w-full text-left rounded-lg px-3 py-2 text-base text-primary hover:bg-surface-hover transition"
+ <NavLink
+ to="/how-advisor-thinks"
+ className="block rounded-lg px-3 py-2 text-base transition text-primary hover:bg-surface-hover"
+ onClick={closeMenu}
  >
- How this works
- </button>
+ How Advisor Thinks
+ </NavLink>
  <NavLink
  to="/advisor-resources"
  className="block rounded-lg px-3 py-2 text-base transition text-primary hover:bg-surface-hover"

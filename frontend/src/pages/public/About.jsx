@@ -8,15 +8,19 @@ import Card from "../../components/ui/Card.jsx";
 import UIButton from "../../components/ui/ui-button.jsx";
 import PageContainer from "../../components/layout/PageContainer.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
+import { generateBreadcrumbs, breadcrumbPatterns } from "../../utils/seo/breadcrumbs.js";
 
 export default function AboutPage() {
+  const breadcrumbs = generateBreadcrumbs(breadcrumbPatterns.about);
+
   return (
     <MarketingLayout>
       <PageContainer>
         <Seo
           title="About | Startup Idea Advisor"
-          description="Learn why we built Startup Idea Advisor and how our AI advisor empowers founders to validate ideas faster."
+          description="Learn why we built Startup Idea Advisor and how our AI-powered platform helps founders validate startup ideas faster with advisor-grade analysis in minutes, not weeks."
           path="/about"
+          breadcrumbs={breadcrumbs}
         />
         
         {/* Hero Section - Enhanced with eyebrow */}

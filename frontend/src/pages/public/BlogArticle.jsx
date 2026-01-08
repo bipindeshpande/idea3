@@ -103,12 +103,71 @@ export default function BlogArticlePage() {
   // Filter out current article from related articles
   const filteredRelated = relatedArticles.filter(a => a.slug !== slug).slice(0, 3);
 
+  // Article structured data for SEO
+  const articleStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.title,
+    description: `Read ${article.title} on the Startup Idea Advisor blog.`,
+    image: article.image || `https://ideabunch.com/og-image.jpg`,
+    datePublished: article.date,
+    dateModified: article.date,
+    author: {
+      "@type": "Person",
+      name: article.author
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Startup Idea Advisor",
+      url: "https://ideabunch.com",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://ideabunch.com/logo.png"
+      }
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://ideabunch.com/blog/${slug}`
+    },
+    articleSection: article.category,
+    keywords: ["startup blog", article.category.toLowerCase(), "entrepreneurship"].join(", ")
+  };
+
+  // Breadcrumb structured data
+  const breadcrumbStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://ideabunch.com"
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: "https://ideabunch.com/blog"
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: article.title,
+        item: `https://ideabunch.com/blog/${slug}`
+      }
+    ]
+  };
+
   // SEO metadata
   const seo = {
     title: `${article.title} | Startup Idea Advisor Blog`,
-    description: `Read ${article.title} on the Startup Idea Advisor blog.`,
+    description: `Read ${article.title} on the Startup Idea Advisor blog. Learn about ${article.category.toLowerCase()} and entrepreneurship.`,
     keywords: ["startup blog", article.category.toLowerCase(), "entrepreneurship"],
     canonical: `/blog/${slug}`,
+    type: "article",
+    structuredData: articleStructuredData,
+    breadcrumbs: breadcrumbStructuredData,
   };
 
   return (

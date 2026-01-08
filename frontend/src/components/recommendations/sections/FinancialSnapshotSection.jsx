@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
  * Financial Snapshot Section Component
  */
 export default function FinancialSnapshotSection({ financialSnapshot, content, isEnriching }) {
-  if (financialSnapshot.length > 0) {
+  if (financialSnapshot && financialSnapshot.length > 0) {
     return (
       <div className="overflow-hidden rounded-xl">
         <table className="min-w-full text-sm">

@@ -102,6 +102,33 @@ class FounderService(BaseService):
         self.db.refresh(listing)
         return listing
     
+    def get_listing(self, listing_id: str, user_id: Optional[str] = None) -> Optional[FounderIdeaListing]:
+        """Get a single idea listing by ID"""
+        listing = self.db.query(FounderIdeaListing).filter(
+            FounderIdeaListing.id == listing_id
+        ).first()
+        
+        if not listing:
+            return None
+        
+        # If user_id provided, check if user owns it (for private access)
+        # Otherwise, only return if listing is active and profile is public
+        if user_id:
+            profile = self.get_profile(user_id, include_private=True)
+            if profile and listing.profile_id == profile.id:
+                # User owns it, return regardless of active/public status
+                return listing
+        
+        # For public access, check if listing is active and profile is public
+        if listing.is_active:
+            profile = self.db.query(FounderProfile).filter(
+                FounderProfile.id == listing.profile_id
+            ).first()
+            if profile and profile.is_public:
+                return listing
+        
+        return None
+    
     def update_listing(self, listing_id: str, user_id: str, data: Dict[str, Any]) -> Optional[FounderIdeaListing]:
         """Update an existing listing (only if owned by user)"""
         profile = self.get_profile(user_id, include_private=True)

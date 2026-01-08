@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { parseStructuredIdeas } from "../../utils/streamingParser.js";
+import { parseStructuredIdeas } from "../../utils/parsers/index.js";
 import { normalizeRunId } from "../../utils/runs.js";
 
 const STORAGE_KEY = "sia_saved_runs";

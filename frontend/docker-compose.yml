@@ -1,0 +1,22 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: idea3_frontend
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    networks:
+      - frontend_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+networks:
+  frontend_network:
+    driver: bridge
+

@@ -343,6 +343,36 @@ async def browse_listings(
         )
 
 
+@router.get("/ideas/{listing_id}", response_model=Dict[str, Any], status_code=status.HTTP_200_OK)
+async def get_listing(
+    listing_id: str = Path(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """Get a single idea listing by ID"""
+    try:
+        service = FounderService(db)
+        listing = service.get_listing(listing_id, current_user.user_id)
+        
+        if not listing:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Listing not found"
+            )
+        
+        return {
+            "success": True,
+            "listing": listing.to_dict(include_founder=True)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get listing: {str(e)}"
+        )
+
+
 @router.put("/ideas/{listing_id}", response_model=Dict[str, Any], status_code=status.HTTP_200_OK)
 async def update_listing(
     listing_id: str = Path(...),

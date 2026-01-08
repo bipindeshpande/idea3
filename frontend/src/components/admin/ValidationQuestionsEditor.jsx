@@ -103,7 +103,7 @@ export default function ValidationQuestionsEditor() {
   return (
     <div className="rounded-3xl border border-default bg-surface p-8 shadow-soft">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-primary text-secondary">Validation Questions</h2>
+        <h2 className="text-2xl font-semibold text-primary">Validation Questions</h2>
         <button
           onClick={handleSave}
           className="ui-btn ui-btn-primary focus-visible:outline-accent"

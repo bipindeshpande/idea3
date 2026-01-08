@@ -1,6 +1,7 @@
 import { memo } from "react";
 import SessionCard from "./SessionCard.jsx";
 import UIButton from "../ui/ui-button.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../workspace/WorkspaceTheme.js";
 
 function DashboardValidationsTab({
  filteredValidations,
@@ -20,16 +21,16 @@ function DashboardValidationsTab({
  <>
  {loadingRuns ? (
  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <p className="text-sm text-secondary leading-relaxed">Loading validations...</p>
+ <p className={WORKSPACE_TYPOGRAPHY.subtitle}>Loading validations...</p>
  </div>
  ) : (
  <>
  {filteredValidations.length === 0 ? (
  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <h3 className="text-lg font-semibold text-primary mb-1">
+ <h3 className={`${WORKSPACE_TYPOGRAPHY.h3} mb-1`}>
  No validations yet
  </h3>
- <p className="text-secondary leading-relaxed max-w-md mx-auto">
+ <p className={`${WORKSPACE_TYPOGRAPHY.body} max-w-md mx-auto`}>
  Validations are created when you test your own ideas.
  </p>
  </div>
@@ -40,9 +41,12 @@ function DashboardValidationsTab({
  <UIButton
  variant="primary"
  onClick={() => {
- // For validations, use validation IDs directly
- const selectedIds = Array.from(selectedIdeas);
- performComparison(new Set(selectedIds));
+  if (selectedIdeas.size < 2) {
+   alert("Please select at least 2 validations to compare");
+   return;
+  }
+  // For validations, use validation IDs directly
+  performComparison(selectedIdeas);
  }}
  disabled={comparing}
  className="flex items-center gap-2"

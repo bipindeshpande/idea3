@@ -85,7 +85,7 @@ async def create_framework(
 async def list_frameworks(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user_or_none),
-    status: Optional[str] = Query(None, description="Filter by status: draft, in_progress, completed"),
+    status_filter: Optional[str] = Query(None, alias="status", description="Filter by status: draft, in_progress, completed"),
     framework_template_id: Optional[int] = Query(None, description="Filter by template ID"),
     linked_idea_id: Optional[str] = Query(None, description="Filter by linked idea ID"),
     linked_validation_id: Optional[str] = Query(None, description="Filter by linked validation ID")
@@ -102,7 +102,7 @@ async def list_frameworks(
         
         frameworks = framework_service.list_frameworks(
             user_id=current_user.user_id,
-            status=status,
+            status=status_filter,
             framework_template_id=framework_template_id,
             linked_idea_id=linked_idea_id,
             linked_validation_id=linked_validation_id

@@ -10,6 +10,12 @@ import UIButton from "../../components/ui/ui-button.jsx";
 import FormInput from "../../components/ui/FormInput.jsx";
 import FormSelect from "../../components/ui/FormSelect.jsx";
 import SectionHeader from "../../components/layout/SectionHeader.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../../components/workspace/WorkspaceTheme.js";
+import AccountInformationSection from "../../components/account/AccountInformationSection.jsx";
+import AboutYouSection from "../../components/account/AboutYouSection.jsx";
+import FrameworkSettingsSection from "../../components/account/FrameworkSettingsSection.jsx";
+import ChangePasswordSection from "../../components/account/ChangePasswordSection.jsx";
+import SubscriptionSection from "../../components/account/SubscriptionSection.jsx";
 
 export default function AccountPage() {
  const { user, isAuthenticated, subscription, getAuthHeaders, refreshSubscription, changePassword } = useAuth();
@@ -368,398 +374,110 @@ export default function AccountPage() {
  path="/account"
  />
 
- <div className="mb-8 relative">
- <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-surface opacity-[0.09] blur-2xl pointer-events-none"></div>
- <div className="relative z-10">
- <PageHeader
- title="Account Settings"
- description="Manage your account information and subscription"
- />
- </div>
- </div>
 
- {error && (
- <Card className="mb-6 border-default border-default bg-surface bg-surface">
- <p className="text-sm text-accent text-accent">{error}</p>
- </Card>
- )}
+{error && (
+<Card className="mb-6 border-default bg-surface">
+<p className={WORKSPACE_TYPOGRAPHY.bodySmall + " text-accent"}>{error}</p>
+</Card>
+)}
 
- {success && (
- <Card className="mb-6 border-default border-default bg-surface bg-surface">
- <p className="text-sm text-accent text-accent">{success}</p>
- </Card>
- )}
+{success && (
+<Card className="mb-6 border-default bg-surface">
+<p className={WORKSPACE_TYPOGRAPHY.bodySmall + " text-accent"}>{success}</p>
+</Card>
+)}
 
  {/* User Information */}
- <Card className="mt-10 md:mt-12">
- <SectionHeader title="Account Information" className="mb-6" />
- <div className="grid gap-6 md:grid-cols-2">
- <div>
- <p className="text-sm text-secondary uppercase tracking-wide">Email</p>
- <p className="mt-2 text-base text-primary leading-relaxed">{user?.email || "—"}</p>
- </div>
- <div>
- <p className="text-sm text-secondary uppercase tracking-wide">Account Status</p>
- <p className="mt-2 text-base text-primary leading-relaxed">
- {user?.is_active ? "Active" : "Inactive"}
- </p>
- </div>
- {user?.subscription_type && (
- <div>
- <p className="text-sm text-secondary uppercase tracking-wide">Subscription Type</p>
- <p className="mt-2 text-base text-primary leading-relaxed capitalize">
- {getPlanInfo(user.subscription_type).name}
- </p>
- </div>
- )}
- {user?.subscription_expires_at && (
- <div>
- <p className="text-sm text-secondary uppercase tracking-wide">Subscription Expires</p>
- <p className="mt-2 text-base text-primary leading-relaxed">
- {new Date(user.subscription_expires_at).toLocaleDateString()}
- </p>
- </div>
- )}
- </div>
- </Card>
+ <AccountInformationSection user={user} getPlanInfo={getPlanInfo} />
 
  {/* About You */}
- <Card className="mt-10 md:mt-12">
- <SectionHeader
- title="About You"
- description="Complete assessments to personalize your experience"
- className="mb-6"
+ <AboutYouSection psychologyData={psychologyData} />
+
+ {/* Framework Settings */}
+ <FrameworkSettingsSection
+   frameworkTrackingEnabled={frameworkTrackingEnabled}
+   savingPreferences={savingPreferences}
+   onToggle={handleToggleFrameworkTracking}
  />
- 
- {/* Decision & Work Style Card */}
- <Card className="mb-6">
- <div className="flex items-center justify-between mb-3">
- <div>
- <SectionHeader title="Decision & Work Style" className="text-lg" />
- <p className="mt-1 text-sm text-secondary leading-relaxed">Used by the system to personalize and explain startup recommendations.</p>
- </div>
- <UIButton as={Link} to="/psyche/questionnaire" variant="secondary" className="whitespace-nowrap">
- Complete Assessment
- </UIButton>
- </div>
- <div className="flex items-center justify-between">
- <p className="text-xs text-secondary">Takes about 3–4 minutes</p>
- <Link
- to="/psyche/profile?details=true"
- className="text-xs text-secondary hover:text-primary transition"
- >
- View Details (Advanced)
- </Link>
- </div>
- </Card>
 
- {/* Founder Profile Card */}
- <Card>
- <div className="flex items-center justify-between mb-3">
- <div>
- <SectionHeader title="Founder Profile" className="text-lg" />
- <p className="mt-1 text-sm text-secondary leading-relaxed">Helps other founders understand your background, interests, and goals.</p>
- </div>
- <UIButton as={Link} to="/founder-psychology" variant="secondary">
- {psychologyData?.archetype ? "Edit Profile" : "Add Profile"}
- </UIButton>
- </div>
-  </Card>
-  </Card>
-
-  {/* Framework Settings */}
-  <Card className="mt-10 md:mt-12">
-   <SectionHeader title="Framework Settings" className="mb-6" />
-   
-   <div className="flex items-center justify-between py-4 border-b border-default">
-    <div>
-     <p className="text-primary font-medium">Enable Framework Tracking</p>
-     <p className="mt-1 text-sm text-secondary">
-      When enabled, you can create and manage validation frameworks in your workspace.
-     </p>
-    </div>
-    <label className="relative inline-flex items-center cursor-pointer">
-     <input
-      type="checkbox"
-      checked={frameworkTrackingEnabled}
-      onChange={(e) => handleToggleFrameworkTracking(e.target.checked)}
-      disabled={savingPreferences}
-      className="sr-only peer"
-     />
-     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-    </label>
-   </div>
-  </Card>
-
-  {/* Framework Settings */}
-  <Card className="mt-10 md:mt-12">
-   <SectionHeader title="Framework Settings" className="mb-6" />
-   
-   <div className="flex items-center justify-between py-4 border-b border-default">
-    <div>
-     <p className="text-primary font-medium">Enable Framework Tracking</p>
-     <p className="mt-1 text-sm text-secondary">
-      When enabled, you can create and manage validation frameworks in your workspace.
-     </p>
-    </div>
-    <label className="relative inline-flex items-center cursor-pointer">
-     <input
-      type="checkbox"
-      checked={frameworkTrackingEnabled}
-      onChange={(e) => handleToggleFrameworkTracking(e.target.checked)}
-      disabled={savingPreferences}
-      className="sr-only peer"
-     />
-     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-    </label>
-   </div>
-  </Card>
-
-  {/* Change Password */}
-  <Card className="mt-10 md:mt-12">
-   <SectionHeader title="Change Password" className="mb-6" />
- 
- {passwordError && (
- <Card className="mb-4 border-default border-default bg-surface bg-surface">
- <p className="text-sm text-accent text-accent">{passwordError}</p>
- </Card>
- )}
-
- {passwordSuccess && (
- <Card className="mb-4 border-default border-default bg-surface bg-surface">
- <p className="text-sm text-accent text-accent">{passwordSuccess}</p>
- </Card>
- )}
-
- <form onSubmit={handlePasswordChange} className="space-y-4">
- <FormInput
- type="password"
- id="currentPassword"
- label="Current Password"
- value={passwordForm.currentPassword}
- onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
- autoComplete="current-password"
- required
+ {/* Change Password */}
+ <ChangePasswordSection
+   passwordForm={passwordForm}
+   setPasswordForm={setPasswordForm}
+   passwordError={passwordError}
+   passwordSuccess={passwordSuccess}
+   changingPassword={changingPassword}
+   onSubmit={handlePasswordChange}
  />
- <FormInput
- type="password"
- id="newPassword"
- label="New Password"
- value={passwordForm.newPassword}
- onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
- autoComplete="new-password"
- required
- minLength={8}
- helperText="Must be at least 8 characters"
- />
- <FormInput
- type="password"
- id="confirmPassword"
- label="Confirm New Password"
- value={passwordForm.confirmPassword}
- onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
- autoComplete="new-password"
- required
- minLength={8}
- />
- <UIButton
- type="submit"
- disabled={changingPassword}
- >
- {changingPassword ? "Changing Password..." : "Change Password"}
- </UIButton>
- </form>
- </Card>
 
  {/* Subscription Management */}
- {subscriptionData ? (
- <Card className="mt-10 md:mt-12">
- <div className="mb-6 flex items-center justify-between">
- <div>
- <SectionHeader title="Subscription" description="Manage your subscription plan" />
- </div>
- <div className={`rounded-full px-4 py-2 text-sm font-semibold ${
- subscriptionData.is_active
- ? "bg-surface bg-surface text-accent text-accent"
- : "bg-app bg-surface text-primary text-secondary"
- }`}>
- {subscriptionData.is_active ? "Active" : subscriptionData.status}
- </div>
- </div>
-
- <div className="grid gap-6 md:grid-cols-2">
- <div>
- <p className="text-sm font-semibold text-secondary uppercase tracking-wide">Plan</p>
- <p className="mt-2 text-xl font-bold text-primary">{planName}</p>
- <p className="mt-1 text-primary text-secondary">{planPrice}</p>
- </div>
- <div>
- <p className="text-sm font-semibold text-secondary uppercase tracking-wide">Status</p>
- <p className="mt-2 text-base font-semibold text-primary capitalize">{subscriptionData.status}</p>
- {subscriptionData.is_active && subscriptionData.days_remaining !== null && (
- <p className="mt-1 text-primary text-secondary">
- {subscriptionData.days_remaining} {subscriptionData.days_remaining === 1 ? "day" : "days"} remaining
- </p>
- )}
- </div>
- {subscriptionData.expires_at && (
- <div>
- <p className="text-sm font-semibold text-secondary uppercase tracking-wide">Expires</p>
- <p className="mt-2 text-base font-semibold text-primary">
- {new Date(subscriptionData.expires_at).toLocaleDateString()}
- </p>
- </div>
- )}
- {subscriptionData.started_at && (
- <div>
- <p className="text-sm font-semibold text-secondary uppercase tracking-wide">Started</p>
- <p className="mt-2 text-base font-semibold text-primary">
- {new Date(subscriptionData.started_at).toLocaleDateString()}
- </p>
- </div>
- )}
- </div>
-
- {/* Actions */}
- {canChange && (
- <div className="mt-8 border-t border-default pt-6">
- <SectionHeader title="Change Plan" className="mb-4" />
- <p className="mb-4 text-sm text-secondary">
- Switch to a different plan. Your current plan will remain active until the end of the billing period.
- </p>
- <div className="flex flex-wrap gap-4">
- {subscriptionData.type !== "starter" && (
- <UIButton
- onClick={() => handleChangePlan("starter")}
- disabled={changing}
- variant="secondary"
- >
- {changing ? "Processing..." : "Switch to Starter ($7/month)"}
- </UIButton>
- )}
- {subscriptionData.type !== "pro" && subscriptionData.type !== "monthly" && (
- <UIButton
- onClick={() => handleChangePlan("pro")}
- disabled={changing}
- variant="secondary"
- >
- {changing ? "Processing..." : "Switch to Pro ($15/month)"}
- </UIButton>
- )}
- {subscriptionData.type !== "weekly" && (
- <UIButton
- onClick={() => handleChangePlan("weekly")}
- disabled={changing}
- variant="secondary"
- >
- {changing ? "Processing..." : "Switch to Weekly ($5/week)"}
- </UIButton>
- )}
- {/* Legacy monthly plan - allow switching to pro */}
- {subscriptionData.type === "monthly" && (
- <UIButton
- onClick={() => handleChangePlan("pro")}
- disabled={changing}
- variant="secondary"
- >
- {changing ? "Processing..." : "Switch to Pro ($15/month)"}
- </UIButton>
- )}
- </div>
- </div>
- )}
-
- {canCancel && (
- <div className="mt-6 border-t border-default pt-6">
- <SectionHeader title="Cancel Subscription" className="mb-4" />
- <p className="mb-4 text-sm text-secondary">
- You'll continue to have access to all features until your subscription expires on{" "}
- {subscriptionData.expires_at ? new Date(subscriptionData.expires_at).toLocaleDateString() : "the expiration date"}.
- </p>
- <UIButton
- onClick={handleCancelClick}
- disabled={cancelling}
- variant="secondary"
- className="border-default text-accent hover:bg-surface"
- >
- Cancel Subscription
- </UIButton>
- </div>
- )}
-
- {!subscriptionData.is_active && (
- <div className="mt-6">
- <UIButton as={Link} to="/pricing">
- Resubscribe
- </UIButton>
- </div>
- )}
- </Card>
- ) : (
- <Card className="mb-8 text-center">
- <p className="text-primary text-secondary">No active subscription found.</p>
- <UIButton as={Link} to="/pricing" className="mt-4">
- View Pricing Plans
- </UIButton>
- </Card>
- )}
+ <SubscriptionSection
+   subscriptionData={subscriptionData}
+   getPlanInfo={getPlanInfo}
+   canChange={canChange}
+   canCancel={canCancel}
+   changing={changing}
+   cancelling={cancelling}
+   onCancelClick={handleCancelClick}
+   onChangePlan={handleChangePlan}
+ />
 
  {/* Payment History */}
  {paymentHistory.length > 0 && (
- <Card className="mt-10 md:mt-12">
- <SectionHeader title="Payment History" className="mb-6 text-lg" />
+ <Card className="mt-6">
+ <SectionHeader title="Payment History" className="mb-6" />
  <div className="overflow-x-auto">
  <table className="w-full">
  <thead>
  <tr className="border-b border-default">
- <th className="px-4 py-3 text-left text-sm font-semibold text-primary">Date</th>
- <th className="px-4 py-3 text-left text-sm font-semibold text-primary">Amount</th>
- <th className="px-4 py-3 text-left text-sm font-semibold text-primary">Plan</th>
- <th className="px-4 py-3 text-left text-sm font-semibold text-primary">Status</th>
+ <th className={`px-4 py-3 text-left ${WORKSPACE_TYPOGRAPHY.label}`}>Date</th>
+ <th className={`px-4 py-3 text-left ${WORKSPACE_TYPOGRAPHY.label}`}>Amount</th>
+ <th className={`px-4 py-3 text-left ${WORKSPACE_TYPOGRAPHY.label}`}>Plan</th>
+ <th className={`px-4 py-3 text-left ${WORKSPACE_TYPOGRAPHY.label}`}>Status</th>
  </tr>
  </thead>
  <tbody>
  {paymentHistory.map((payment) => (
  <tr key={payment.id} className="border-b border-default">
- <td className="px-4 py-3 text-sm text-secondary">
+ <td className={`px-4 py-3 ${WORKSPACE_TYPOGRAPHY.bodySmall} text-secondary`}>
  {payment.created_at ? new Date(payment.created_at).toLocaleDateString() : "—"}
  </td>
- <td className="px-4 py-3 text-sm font-semibold text-primary">
+ <td className={`px-4 py-3 ${WORKSPACE_TYPOGRAPHY.label}`}>
  {payment.amount != null && typeof payment.amount === 'number' 
  ? `$${payment.amount.toFixed(2)}` 
  : payment.amount != null 
  ? `$${Number(payment.amount).toFixed(2)}` 
  : "—"}
  </td>
- <td className="px-4 py-3 text-sm text-secondary capitalize">{payment.subscription_type}</td>
+ <td className={`px-4 py-3 ${WORKSPACE_TYPOGRAPHY.bodySmall} text-secondary capitalize`}>{payment.subscription_type}</td>
  <td className="px-4 py-3">
- <span className="rounded-full bg-surface bg-surface px-3 py-1 text-xs font-semibold text-accent text-accent">
- Completed
- </span>
- </td>
- </tr>
- ))}
- </tbody>
- </table>
- </div>
- </Card>
- )}
+<span className={`rounded-full bg-surface px-3 py-1 ${WORKSPACE_TYPOGRAPHY.caption} font-semibold text-accent`}>
+Completed
+</span>
+</td>
+</tr>
+))}
+</tbody>
+</table>
+</div>
+</Card>
+)}
 
- {/* Cancellation Reason Modal */}
- {showCancelModal && (
- <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-light p-4">
- <Card className="w-full shadow-xl">
- <SectionHeader title="Cancel Subscription" className="mb-4 text-2xl" />
- <p className="mb-6 text-sm text-primary text-secondary">
- We're sorry to see you go. Your subscription will remain active until{" "}
- {subscriptionData?.expires_at ? new Date(subscriptionData.expires_at).toLocaleDateString() : "the expiration date"}.
- Please let us know why you're canceling so we can improve.
- </p>
+{/* Cancellation Reason Modal */}
+{showCancelModal && (
+<div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-light p-4">
+<Card className="w-full shadow-xl">
+<SectionHeader title="Cancel Subscription" className="mb-4" />
+<p className={`mb-6 ${WORKSPACE_TYPOGRAPHY.subtitle}`}>
+We're sorry to see you go. Your subscription will remain active until{" "}
+{subscriptionData?.expires_at ? new Date(subscriptionData.expires_at).toLocaleDateString() : "the expiration date"}.
+Please let us know why you're canceling so we can improve.
+</p>
  
- <div className="mb-6">
- <label htmlFor="cancellation-reason" className="block text-sm font-semibold text-primary text-secondary mb-2">
- Reason for Cancellation <span className="text-accent">*</span>
- </label>
+<div className="mb-6">
+<label htmlFor="cancellation-reason" className={`block ${WORKSPACE_TYPOGRAPHY.label} mb-2`}>
+Reason for Cancellation <span className="text-accent">*</span>
+</label>
  <FormSelect
  id="cancellation-reason"
  value={selectedReason}
@@ -775,11 +493,11 @@ export default function AccountPage() {
  </FormSelect>
  </div>
 
- <div className="mb-6">
- <label htmlFor="additional-comments" className="block text-sm font-semibold text-primary text-secondary mb-2">
- Additional Comments {selectedReason === "other" && <span className="text-accent">*</span>}
- {selectedReason && selectedReason !== "other" && <span className="text-xs text-secondary font-normal">(Optional)</span>}
- </label>
+<div className="mb-6">
+<label htmlFor="additional-comments" className={`block ${WORKSPACE_TYPOGRAPHY.label} mb-2`}>
+Additional Comments {selectedReason === "other" && <span className="text-accent">*</span>}
+{selectedReason && selectedReason !== "other" && <span className={`${WORKSPACE_TYPOGRAPHY.caption} font-normal`}>(Optional)</span>}
+</label>
  <textarea
  id="additional-comments"
  value={additionalComments}
@@ -790,16 +508,16 @@ export default function AccountPage() {
  required={selectedReason === "other"}
  maxLength={500}
  />
- <p className="mt-2 text-xs text-secondary">
+ <p className={`mt-2 ${WORKSPACE_TYPOGRAPHY.caption}`}>
  {additionalComments.length}/500 characters
  </p>
  </div>
 
- {error && (
- <Card className="mb-4 border-default border-default bg-surface bg-surface">
- <p className="text-sm text-accent text-accent">{error}</p>
- </Card>
- )}
+{error && (
+<Card className="mb-4 border-default bg-surface">
+<p className={`${WORKSPACE_TYPOGRAPHY.bodySmall} text-accent`}>{error}</p>
+</Card>
+)}
 
  <div className="flex gap-3">
  <UIButton

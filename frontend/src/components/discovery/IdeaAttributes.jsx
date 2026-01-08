@@ -22,16 +22,18 @@ export default function IdeaAttributes({
       )}
 
       {/* Validation Score */}
-      {idea.validation_score && (
+      {idea.validation_score && idea.validation_score.trim() && !isNaN(parseFloat(idea.validation_score)) && (
         <div className="mt-4">
           <div className="flex items-center justify-between mb-1">
             <span className={DISCOVERY_TYPOGRAPHY.label}>Validation Score</span>
-            <span className={DISCOVERY_TYPOGRAPHY.bodySmall}>{idea.validation_score}/10</span>
+            <span className={DISCOVERY_TYPOGRAPHY.bodySmall}>
+              {Math.min(10, Math.max(0, parseFloat(idea.validation_score))).toFixed(1)}/10
+            </span>
           </div>
           <div className="h-[6px] rounded-[4px] bg-surface overflow-hidden">
             <div 
               className="h-full bg-accent rounded-[4px] transition-all"
-              style={{ width: `${(parseInt(idea.validation_score) / 10) * 100}%` }}
+              style={{ width: `${Math.min(100, Math.max(0, (parseFloat(idea.validation_score) / 10) * 100))}%` }}
             />
           </div>
         </div>

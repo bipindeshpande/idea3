@@ -7,7 +7,7 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_user_or_none
 from app.models.user import User
 from app.services.validation_service import ValidationService
-from app.utils.user_utils import extract_user_id
+from app.utils.user_utils import extract_user_id, verify_run_ownership
 from app.utils.error_handler import handle_exception, ValidationError, NotFoundError, AuthorizationError
 from app.utils.response_models import ValidationResponse, create_success_response, create_error_response
 
@@ -110,12 +110,8 @@ async def update_validation(
         if not validation:
             raise NotFoundError("Validation", validation_id)
         
-        # Check authorization - user must own the validation
-        if validation.user_id:
-            if not user_id:
-                raise AuthorizationError("Authentication required to update this validation")
-            if validation.user_id != user_id:
-                raise AuthorizationError("You do not have permission to update this validation")
+        # Verify user has permission to access this validation
+        verify_run_ownership(validation.user_id, user_id, resource_name="validation")
         
         result = validation_service.validate_idea(
             user_id=user_id,
@@ -166,10 +162,8 @@ async def get_validation(
         if not validation:
             raise NotFoundError("Validation", validation_id)
         
-        # Check authorization - user must own the validation if it has a user_id
-        if validation.user_id:
-            if validation.user_id != user_id:
-                raise AuthorizationError("You do not have permission to view this validation")
+        # Verify user has permission to access this validation
+        verify_run_ownership(validation.user_id, user_id, resource_name="validation")
         
         # Standardize response format - always use 'validation' key
         return create_success_response({

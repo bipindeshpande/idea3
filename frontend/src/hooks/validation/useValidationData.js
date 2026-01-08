@@ -37,6 +37,11 @@ export function useValidationData({ isAuthenticated, getAuthHeaders, inputs }) {
           headers: getAuthHeaders(),
         });
 
+        // Check if response exists before accessing properties
+        if (!response) {
+          throw new Error('Network error: No response received');
+        }
+
         if (response.ok) {
           const data = await response.json();
 

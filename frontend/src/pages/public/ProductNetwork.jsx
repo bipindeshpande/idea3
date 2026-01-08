@@ -6,6 +6,7 @@ import SectionTitle from "../../components/marketing/SectionTitle.jsx";
 import CTASection from "../../components/marketing/CTASection.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
 import MockupBrowser from "../../components/marketing/mockups/MockupBrowser.jsx";
+import { generateBreadcrumbs, breadcrumbPatterns } from "../../utils/seo/breadcrumbs.js";
 
 // SEO metadata
 export const seo = {
@@ -79,6 +80,8 @@ const features = [
 ];
 
 export default function ProductNetworkPage() {
+  const breadcrumbs = generateBreadcrumbs(breadcrumbPatterns.productNetwork);
+
   return (
     <MarketingLayout>
       <Seo 
@@ -89,6 +92,7 @@ export default function ProductNetworkPage() {
         ogTitle={seo.ogTitle}
         ogDescription={seo.ogDescription}
         structuredData={seo.structuredData}
+        breadcrumbs={breadcrumbs}
       />
 
       {/* Hero Section */}

@@ -48,23 +48,24 @@ export const PARAMETER_GROUPS_LAYOUT = [
 ];
 
 export const RADAR_AXES = [
- { label: "Market Opportunity", parameter: "Market Opportunity" },
- { label: "Target Audience", parameter: "Target Audience Clarity" },
- { label: "Go to Market", parameter: "Go-to-Market Strategy" },
- { label: "Problem-Solution Fit", parameter: "Problem-Solution Fit" },
- { label: "Competitive Landscape", parameter: "Competitive Landscape" },
- { label: "Technical Feasibility", parameter: "Technical Feasibility" },
- { label: "Scalability", parameter: "Scalability Potential" },
- { label: "Business Model", parameter: "Business Model Viability" },
- { label: "Financials", parameter: "Financial Sustainability" },
- { label: "Risk Assessment", parameter: "Risk Assessment" },
+  { label: "Market Opportunity", parameter: "Market Opportunity" },
+  { label: "Target Audience", parameter: "Target Audience Clarity" },
+  { label: "Go to Market", parameter: "Go-to-Market Strategy" },
+  { label: "Problem-Solution Fit", parameter: "Problem-Solution Fit" },
+  { label: "Competitive Landscape", parameter: "Competitive Landscape" },
+  { label: "Technical Feasibility", parameter: "Technical Feasibility" },
+  { label: "Scalability", parameter: "Scalability Potential" },
+  { label: "Business Model", parameter: "Business Model Viability" },
+  { label: "Financials", parameter: "Financial Sustainability" },
+  { label: "Risk Assessment", parameter: "Risk Assessment" },
+  { label: "Team / Founder Fit", parameter: "Team / Founder Fit" },
 ];
 
 export const SCORE_LEGEND = [
  { range: "0 – 3", label: "Needs Work", color: "bg-coral-500" },
- { range: "4 – 6", label: "Fair", color: "bg-surface" },
- { range: "7 – 8", label: "Strong", color: "bg-surface" },
- { range: "9 – 10", label: "Excellent", color: "bg-surface" },
+ { range: "4 – 6", label: "Fair", color: "bg-amber-500" },
+ { range: "7 – 8", label: "Strong", color: "bg-emerald-500" },
+ { range: "9 – 10", label: "Excellent", color: "bg-emerald-600" },
 ];
 
 export const FALLBACK_DETAIL =

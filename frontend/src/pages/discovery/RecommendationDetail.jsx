@@ -2,21 +2,14 @@ import { useEffect, useMemo } from "react";
 import { Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import FocusLayout from "../../layouts/FocusLayout.jsx";
-import DiscoveryNavigation from "../../components/discovery/DiscoveryNavigation.jsx";
 import DiscoveryEmptyState from "../../components/discovery/DiscoveryEmptyState.jsx";
 import DiscoveryLoadingState from "../../components/discovery/DiscoveryLoadingState.jsx";
-import { DISCOVERY_SPACING } from "../../components/discovery/DiscoveryTheme.js";
 import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useValidation } from "../../context/ValidationContext.jsx";
-import OpenForCollaboratorsButton from "../../components/founder/OpenForCollaboratorsButton.jsx";
-import CollapsibleSection from "../../components/ui/CollapsibleSection.jsx";
-import { logToFile, downloadLogFile, getLogBufferSize } from "../../utils/fileLogger.js";
+import { logToFile } from "../../utils/fileLogger.js";
 // Import extracted modules
-import { getSectionToggleId, getSectionDescription } from "../../components/recommendations/utils/sectionConstants.js";
-import { getSectionTheme } from "../../components/recommendations/utils/sectionThemes.js";
 import { useSectionToggle } from "../../components/recommendations/hooks/useSectionToggle.js";
-import RecommendationSections from "../../components/recommendations/RecommendationSections.jsx";
 // Import custom hooks
 import { useRecommendationData } from "../../hooks/recommendation/useRecommendationData.js";
 import { useEnrichment } from "../../hooks/recommendation/useEnrichment.js";
@@ -28,6 +21,9 @@ import RecommendationLoadingState from "../../components/recommendation/Recommen
 import RecommendationHeader from "../../components/recommendation/RecommendationHeader.jsx";
 import ActionItemsSection from "../../components/recommendation/ActionItemsSection.jsx";
 import NotesSection from "../../components/recommendation/NotesSection.jsx";
+import RecommendationSectionsList from "../../components/recommendation/RecommendationSectionsList.jsx";
+import RecommendationActionButtons from "../../components/recommendation/RecommendationActionButtons.jsx";
+import RecommendationNavigation from "../../components/recommendation/RecommendationNavigation.jsx";
 
 
 export default function RecommendationDetail() {
@@ -165,42 +161,13 @@ export default function RecommendationDetail() {
  path={`/results/recommendations/${ideaIndex}`}
  />
 
- <DiscoveryNavigation
+ <RecommendationNavigation
  backPath={backPath}
- backLabel="Back to recommendations"
  backState={backState}
- showDashboard={isAuthenticated}
- rightContent={
- <>
- {process.env.NODE_ENV === 'development' && (
- <button
- onClick={() => {
- const size = getLogBufferSize();
- if (size > 0) {
- downloadLogFile();
- } else {
- alert("No logs collected yet. Logs will be collected as you interact with the page.");
- }
- }}
- className="ui-btn ui-btn-secondary focus-visible:outline-accent text-xs mr-2"
- title={`Download all collected logs as mylog.log (${getLogBufferSize()} entries)`}
- >
- 📥 Download Logs ({getLogBufferSize()})
- </button>
- )}
- {activeIdea && runQuery && (
- <OpenForCollaboratorsButton
- runId={runQuery}
- sourceType="advisor"
- sourceId={runQuery}
- ideaTitle={activeIdea.title}
- ideaIndex={activeIdea.index}
- categoryAnswers={inputs}
- />
- )}
- </>
- }
- className="mb-6"
+ isAuthenticated={isAuthenticated}
+ activeIdea={activeIdea}
+ runQuery={runQuery}
+ inputs={inputs}
  />
 
 
@@ -231,59 +198,26 @@ export default function RecommendationDetail() {
  notes={notes}
  />
 
- <div className={`flex flex-col ${DISCOVERY_SPACING.sectionGap} mt-8`}>
- {/* Show loading message if we have idea but no body content yet */}
- {activeIdea && !hasBody && isEnriching && (
- <DiscoveryLoadingState
- title="Loading detailed content..."
- message="Loading detailed content for this recommendation..."
- size="sm"
+ <RecommendationSectionsList
+ orderedSections={orderedSections}
+ openSections={openSections}
+ toggleSection={toggleSection}
+ fitNarrativeMarkdown={fitNarrativeMarkdown}
+ discoveryNextSteps={discoveryNextSteps}
+ financialSnapshot={financialSnapshot}
+ executionPhaseCards={executionPhaseCards}
+ riskRows={riskRows}
+ validationQuestions={validationQuestions}
+ roadmapMarkdown={roadmapMarkdown}
+ personaMarkdown={personaMarkdown}
+ marketInsights={marketInsights}
+ immediateExperimentsList={immediateExperimentsList}
+ immediateNextSteps={finalImmediateNextSteps}
+ decisionChecklist={decisionChecklist}
+ isEnriching={isEnriching}
+ hasBody={hasBody}
+ activeIdea={activeIdea}
  />
- )}
- 
- {/* Render all sections from orderedSections - single source of truth */}
- {orderedSections.map((section) => {
- // Skip why_fits if fitNarrativeMarkdown is not available (special case)
- if (section.key === "why_fits" && !fitNarrativeMarkdown) {
- return null;
- }
- 
- const toggleId = getSectionToggleId(section.key);
- const description = getSectionDescription(section.key);
- const title = section.key === "immediate_next_steps" && discoveryNextSteps 
- ? "Early-stage Next Steps" 
- : section.title;
- 
- return (
- <CollapsibleSection
- key={section.key}
- title={title}
- description={description}
- theme={getSectionTheme(title)}
- isOpen={openSections.has(toggleId)}
- onToggle={() => toggleSection(toggleId)}
- className="mb-2"
- >
-          <RecommendationSections
-            sectionKey={section.key}
-            content={section.content}
-            isEnriching={isEnriching}
-            fitNarrativeMarkdown={fitNarrativeMarkdown}
-            financialSnapshot={financialSnapshot}
-            executionPhaseCards={executionPhaseCards}
-            riskRows={riskRows}
-            validationQuestions={validationQuestions}
-            roadmapMarkdown={roadmapMarkdown}
-            personaMarkdown={personaMarkdown}
-            marketInsights={marketInsights}
-            immediateExperimentsList={immediateExperimentsList}
-            discoveryNextSteps={discoveryNextSteps}
-            immediateNextSteps={finalImmediateNextSteps}
-            decisionChecklist={decisionChecklist}
-          />
-        </CollapsibleSection>
-      );
-    })}
 
     {/* Action Items Section */}
     <ActionItemsSection
@@ -307,29 +241,16 @@ export default function RecommendationDetail() {
       isValidIdeaId={isValidIdeaId}
       isAuthenticated={isAuthenticated}
     />
- </div>
 
- <div className="mt-6 flex flex-wrap gap-3">
- <button
- onClick={async () => {
- if (!activeIdea) return;
- const result = await validateRecommendationIdea(activeIdea, inputs, reports?.profile_analysis);
- if (result.success && result.validation?.id) {
- navigate(`/validate-result?id=${result.validation.id}`);
- }
- }}
- disabled={validating || !activeIdea}
- className="ui-btn ui-btn-primary focus-visible:outline-accent disabled:opacity-50 disabled:cursor-not-allowed"
- >
- {validating ? "Validating..." : "Validate Idea"}
- </button>
- <button
- onClick={() => navigate(backPath, { state: backState })}
- className="ui-btn ui-btn-secondary focus-visible:outline-accent"
- >
- Back to top ideas
- </button>
- </div>
+ <RecommendationActionButtons
+ activeIdea={activeIdea}
+ inputs={inputs}
+ reports={reports}
+ validateRecommendationIdea={validateRecommendationIdea}
+ validating={validating}
+ backPath={backPath}
+ backState={backState}
+ />
 
  {/* Explore other ideas section removed based on feedback */}
  </>

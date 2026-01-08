@@ -42,7 +42,7 @@ export default function IdeasTabContent({
 
               return (
                 <IdeaTableRow
-                  key={idea.index}
+                  key={ideaId}
                   idea={idea}
                   runId={runId}
                   currentRunId={currentRunId}

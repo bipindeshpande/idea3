@@ -1,0 +1,22 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: idea3_frontend_dev
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount source code for hot-reload
+      - .:/app
+      - /app/node_modules  # Use container's node_modules, not host's
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    networks:
+      - frontend_network
+
+networks:
+  frontend_network:
+    driver: bridge
+

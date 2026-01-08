@@ -104,18 +104,18 @@ export default function ConnectionsTab({ connections, onUpdate, getAuthHeaders, 
         <div>
           {incomingRequests.length === 0 ? (
             <div className="text-center py-12 bg-surface rounded-xl border border-default">
-              <p className="text-secondary text-secondary mb-2">No incoming requests.</p>
-              <p className="text-sm text-secondary text-secondary">When other founders send you connection requests, they'll appear here.</p>
+              <p className="text-secondary mb-2">No incoming requests.</p>
+              <p className="text-sm text-secondary">When other founders send you connection requests, they'll appear here.</p>
             </div>
           ) : (
             <div className="space-y-4">
               {incomingRequests.map((req) => (
                 <div key={req.id} className="bg-surface rounded-xl shadow-sm border border-default p-6">
                   <div className="mb-3">
-                    <p className="text-secondary text-secondary mb-2">
+                    <p className="text-secondary mb-2">
                       {req.message || "Connection request from an anonymous founder"}
                     </p>
-                    <p className="text-xs text-secondary text-secondary mb-3">
+                    <p className="text-xs text-secondary mb-3">
                       Accepting will reveal both identities and allow you to contact each other.
                     </p>
                   </div>
@@ -128,7 +128,7 @@ export default function ConnectionsTab({ connections, onUpdate, getAuthHeaders, 
                     </button>
                     <button
                       onClick={() => handleRespond(req.id, "decline")}
-                      className="px-4 py-2 border rounded-lg hover:bg-surface hover:bg-surface"
+                      className="px-4 py-2 border rounded-lg hover:bg-surface"
                     >
                       Decline
                     </button>
@@ -145,17 +145,17 @@ export default function ConnectionsTab({ connections, onUpdate, getAuthHeaders, 
         <div>
           {sentRequests.length === 0 ? (
             <div className="text-center py-12 bg-surface rounded-xl border border-default">
-              <p className="text-secondary text-secondary mb-2">No sent requests.</p>
-              <p className="text-sm text-secondary text-secondary">Your pending connection requests will appear here.</p>
+              <p className="text-secondary mb-2">No sent requests.</p>
+              <p className="text-sm text-secondary">Your pending connection requests will appear here.</p>
             </div>
           ) : (
             <div className="space-y-4">
               {sentRequests.map((req) => (
                 <div key={req.id} className="bg-surface rounded-xl shadow-sm border border-default p-6">
-                  <p className="text-secondary text-secondary mb-2">
+                  <p className="text-secondary mb-2">
                     {req.message || "Connection request sent"}
                   </p>
-                  <p className="text-sm text-secondary text-secondary mb-3">Status: Pending</p>
+                  <p className="text-sm text-secondary mb-3">Status: Pending</p>
                   <button
                     onClick={() => handleWithdraw(req.id)}
                     className="ui-btn ui-btn-secondary px-4 py-2 rounded-lg"
@@ -230,8 +230,8 @@ function AcceptedConnectionsList({ connections, getAuthHeaders }) {
   if (connections.length === 0) {
     return (
       <div className="text-center py-12 bg-surface rounded-xl border border-default">
-        <p className="text-secondary text-secondary mb-2">No accepted connections yet.</p>
-        <p className="text-sm text-secondary text-secondary">Accepted connections will show full contact information here.</p>
+        <p className="text-secondary mb-2">No accepted connections yet.</p>
+        <p className="text-sm text-secondary">Accepted connections will show full contact information here.</p>
       </div>
     );
   }
@@ -245,12 +245,12 @@ function AcceptedConnectionsList({ connections, getAuthHeaders }) {
         const contact = connectionRequest?.sender || connectionRequest?.recipient;
 
         return (
-          <div key={conn.id} className="bg-surface bg-surface rounded-xl border border-default border-default p-6">
+          <div key={conn.id} className="bg-surface rounded-xl border border-default p-6">
             {isLoading ? (
-              <p className="text-secondary text-secondary">Loading contact information...</p>
+              <p className="text-secondary">Loading contact information...</p>
             ) : contact ? (
               <>
-                <h3 className="font-semibold mb-3 text-accent text-accent">
+                <h3 className="font-semibold mb-3 text-accent">
                   {contact.full_name || "Connection"}
                 </h3>
                 <div className="space-y-2">
@@ -280,7 +280,7 @@ function AcceptedConnectionsList({ connections, getAuthHeaders }) {
                 </div>
               </>
             ) : (
-              <p className="text-secondary text-secondary">Connection details unavailable</p>
+              <p className="text-secondary">Connection details unavailable</p>
             )}
           </div>
         );

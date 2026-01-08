@@ -154,7 +154,7 @@ function OpenForCollaboratorsButton({
  <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-light">
  <div className="bg-surface rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
  <h2 className="text-xl font-bold mb-4">Create Founder Profile</h2>
- <p className="text-secondary text-secondary mb-6">
+ <p className="text-secondary mb-6">
  To list your idea and find collaborators, you need to create a Founder Profile first.
  </p>
  <div className="flex gap-3">
@@ -166,7 +166,7 @@ function OpenForCollaboratorsButton({
  </button>
  <button
  onClick={() => setShowProfileModal(false)}
- className="flex-1 px-4 py-2 border rounded-lg hover:bg-surface hover:bg-surface"
+ className="flex-1 px-4 py-2 border rounded-lg hover:bg-surface"
  >
  Cancel
  </button>
@@ -179,10 +179,10 @@ function OpenForCollaboratorsButton({
  <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay-light">
  <div className="bg-surface rounded-xl p-6 max-w-lg w-full mx-4 shadow-xl">
  <h2 className="text-xl font-bold mb-4">Create Idea Listing</h2>
- <p className="text-secondary text-secondary mb-4">
+ <p className="text-secondary mb-4">
  This will create a listing from your {sourceType === "validation" ? "validated idea" : "discovered idea"}:
  </p>
- <div className="bg-app bg-surface p-4 rounded-lg mb-4 space-y-2">
+ <div className="bg-surface p-4 rounded-lg mb-4 space-y-2">
  <p><strong>Title:</strong> {listingData.title}</p>
  <p><strong>Industry:</strong> {listingData.industry}</p>
  <p><strong>Stage:</strong> {listingData.stage}</p>
@@ -190,7 +190,7 @@ function OpenForCollaboratorsButton({
  <p><strong>Skills Needed:</strong> {listingData.skills_needed.join(", ")}</p>
  )}
  </div>
- <p className="text-sm text-secondary text-secondary mb-6">
+ <p className="text-sm text-secondary mb-6">
  You'll be redirected to Founder Connect where you can manage this listing and find collaborators.
  </p>
  <div className="flex gap-3">
@@ -207,7 +207,7 @@ function OpenForCollaboratorsButton({
  setListingData(null);
  }}
  disabled={loading}
- className="flex-1 px-4 py-2 border rounded-lg hover:bg-surface hover:bg-surface disabled:opacity-50"
+ className="flex-1 px-4 py-2 border rounded-lg hover:bg-surface disabled:opacity-50"
  >
  Cancel
  </button>

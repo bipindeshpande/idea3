@@ -13,17 +13,17 @@ else
 fi
 
 echo "Starting PostgreSQL container on port $POSTGRES_PORT..."
-docker-compose up -d idea2_postgres
+docker-compose up -d postgres
 
 echo "Waiting for database to be ready..."
 sleep 5
 
 # Check if container is running
-if docker ps --filter "name=idea2_postgres" --format "{{.Status}}" | grep -q "Up"; then
+if docker ps --filter "name=idea3_postgres" --format "{{.Status}}" | grep -q "Up"; then
     echo "✓ PostgreSQL container is running"
     echo "✓ Database URL: postgresql://startup_discovery:startup_discovery_dev@localhost:$POSTGRES_PORT/startup_discovery"
 else
-    echo "✗ Container failed to start. Check logs with: docker-compose logs idea2_postgres"
+    echo "✗ Container failed to start. Check logs with: docker-compose logs idea3_postgres"
     exit 1
 fi
 

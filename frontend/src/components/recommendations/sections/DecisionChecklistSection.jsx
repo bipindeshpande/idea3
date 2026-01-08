@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
  * Decision Checklist Section Component
  */
 export default function DecisionChecklistSection({ decisionChecklist, content, isEnriching }) {
-  if (decisionChecklist.length > 0) {
+  if (decisionChecklist && decisionChecklist.length > 0) {
     return (
       <ul className="space-y-2 text-sm text-primary text-primary">
         {decisionChecklist.map((item, index) => (

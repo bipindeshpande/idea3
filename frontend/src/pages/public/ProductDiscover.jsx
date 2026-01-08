@@ -5,6 +5,7 @@ import CTASection from "../../components/marketing/CTASection.jsx";
 import SectionTitle from "../../components/marketing/SectionTitle.jsx";
 import FeatureCard from "../../components/marketing/FeatureCard.jsx";
 import { HeroSection } from "../../sections/marketing/discover";
+import { generateBreadcrumbs, breadcrumbPatterns } from "../../utils/seo/breadcrumbs.js";
 import {
   seo,
   heroData,
@@ -18,6 +19,8 @@ import {
 } from "../../data/marketing/discover.js";
 
 export default function ProductDiscoverPage() {
+  const breadcrumbs = generateBreadcrumbs(breadcrumbPatterns.productDiscover);
+
   return (
     <MarketingLayout>
       <Seo 
@@ -28,6 +31,7 @@ export default function ProductDiscoverPage() {
         ogTitle={seo.ogTitle}
         ogDescription={seo.ogDescription}
         structuredData={seo.structuredData}
+        breadcrumbs={breadcrumbs}
       />
 
       <HeroSection data={heroData} />

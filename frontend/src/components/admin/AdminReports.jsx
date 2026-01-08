@@ -33,13 +33,13 @@ export default function AdminReports() {
     <div className="space-y-6">
       <div className="rounded-3xl border border-default bg-surface p-8 shadow-soft">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-primary text-secondary">Reports</h2>
+          <h2 className="text-2xl font-semibold text-primary">Reports</h2>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-xl border border-default border-default bg-surface bg-surface p-6 flex flex-col">
-            <h3 className="mb-2 text-lg font-semibold text-accent text-accent">User Report</h3>
-            <p className="mb-4 text-sm text-accent text-accent flex-grow">Export all user data with subscription details</p>
+          <div className="rounded-xl border border-default bg-surface p-6 flex flex-col">
+            <h3 className="mb-2 text-lg font-semibold text-accent">User Report</h3>
+            <p className="mb-4 text-sm text-accent flex-grow">Export all user data with subscription details</p>
             <button
               onClick={() => exportReport("users")}
               className="ui-btn ui-btn-secondary w-full mt-auto focus-visible:outline-accent"
@@ -70,9 +70,9 @@ export default function AdminReports() {
             </button>
           </div>
 
-          <div className="rounded-xl border border-default border-default bg-surface bg-surface p-6 flex flex-col">
-            <h3 className="mb-2 text-lg font-semibold text-accent text-accent">Subscription Report</h3>
-            <p className="mb-4 text-sm text-accent text-accent flex-grow">Export subscription analytics</p>
+          <div className="rounded-xl border border-default bg-surface p-6 flex flex-col">
+            <h3 className="mb-2 text-lg font-semibold text-accent">Subscription Report</h3>
+            <p className="mb-4 text-sm text-accent flex-grow">Export subscription analytics</p>
             <button
               onClick={() => exportReport("subscriptions")}
               className="ui-btn ui-btn-secondary w-full mt-auto focus-visible:outline-accent"
@@ -81,9 +81,9 @@ export default function AdminReports() {
             </button>
           </div>
 
-          <div className="rounded-xl border border-default border-default bg-surface bg-surface p-6 flex flex-col">
-            <h3 className="mb-2 text-lg font-semibold text-accent text-accent">Revenue Report</h3>
-            <p className="mb-4 text-sm text-accent text-accent flex-grow">Export revenue breakdown by period</p>
+          <div className="rounded-xl border border-default bg-surface p-6 flex flex-col">
+            <h3 className="mb-2 text-lg font-semibold text-accent">Revenue Report</h3>
+            <p className="mb-4 text-sm text-accent flex-grow">Export revenue breakdown by period</p>
             <button
               onClick={() => exportReport("revenue")}
               className="ui-btn ui-btn-secondary w-full mt-auto focus-visible:outline-accent"
@@ -92,9 +92,9 @@ export default function AdminReports() {
             </button>
           </div>
 
-          <div className="rounded-xl border border-default bg-app bg-surface p-6 flex flex-col">
-            <h3 className="mb-2 text-lg font-semibold text-primary text-secondary">Full Report</h3>
-            <p className="mb-4 text-sm text-primary text-secondary flex-grow">Export comprehensive data dump</p>
+          <div className="rounded-xl border border-default bg-surface p-6 flex flex-col">
+            <h3 className="mb-2 text-lg font-semibold text-primary">Full Report</h3>
+            <p className="mb-4 text-sm text-secondary flex-grow">Export comprehensive data dump</p>
             <button
               onClick={() => exportReport("full")}
               className="ui-btn ui-btn-secondary w-full mt-auto focus-visible:outline-accent"

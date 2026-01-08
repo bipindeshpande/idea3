@@ -97,15 +97,15 @@ export default function BrowseIdeasTab({
           <h2 className="text-xl font-bold">Browse Ideas</h2>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 border rounded-lg hover:bg-surface hover:bg-surface text-sm"
+            className="px-4 py-2 border rounded-lg hover:bg-surface text-sm"
           >
             {showFilters ? "Hide Filters" : "Show Filters"}
           </button>
         </div>
 
         {/* Privacy Notice */}
-        <div className="bg-surface bg-surface p-3 rounded-lg border border-default border-default mb-4">
-          <p className="text-sm text-accent text-accent">
+        <div className="bg-surface p-3 rounded-lg border border-default mb-4">
+          <p className="text-sm text-accent">
             <strong>Privacy:</strong> Profiles are anonymized. Names and contact details are only shared after both sides accept.
           </p>
         </div>
@@ -172,7 +172,7 @@ export default function BrowseIdeasTab({
             <div className="flex items-end">
               <button
                 onClick={() => setFilters({ industry: "", stage: "", skills_needed: "", commitment_level: "", location: "" })}
-                className="px-4 py-2 border rounded-lg hover:bg-surface hover:bg-surface text-sm"
+                className="px-4 py-2 border rounded-lg hover:bg-surface text-sm"
               >
                 Clear Filters
               </button>
@@ -183,8 +183,8 @@ export default function BrowseIdeasTab({
 
       {ideas.length === 0 ? (
         <div className="text-center py-12 bg-surface rounded-xl border border-default">
-          <p className="text-secondary text-secondary mb-2">No matching ideas found yet.</p>
-          <p className="text-sm text-secondary text-secondary">Check back later or list your own idea to get started.</p>
+          <p className="text-secondary mb-2">No matching ideas found yet.</p>
+          <p className="text-sm text-secondary">Check back later or list your own idea to get started.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -193,17 +193,17 @@ export default function BrowseIdeasTab({
             return (
               <div key={idea.id} className="bg-surface rounded-xl shadow-sm border border-default p-6">
                 <h3 className="font-bold text-lg mb-2">{idea.title}</h3>
-                <p className="text-secondary text-secondary mb-4">{idea.brief_description}</p>
+                <p className="text-secondary mb-4">{idea.brief_description}</p>
                 <div className="flex flex-wrap gap-2 mb-3">
                   {idea.industry && <span className="px-2 py-1 bg-surface rounded text-sm">{idea.industry}</span>}
                   {idea.stage && <span className="px-2 py-1 bg-surface rounded text-sm">{idea.stage}</span>}
                   {idea.commitment_level && <span className="px-2 py-1 bg-surface rounded text-sm">{idea.commitment_level}</span>}
                 </div>
                 {matchReason && (
-                  <p className="text-sm text-accent text-accent mb-3 font-medium">{matchReason}</p>
+                  <p className="text-sm text-accent mb-3 font-medium">{matchReason}</p>
                 )}
                 {idea.founder && (
-                  <div className="mb-4 text-sm text-secondary text-secondary">
+                  <div className="mb-4 text-sm text-secondary">
                     <p>Looking for: {idea.founder.looking_for || "Collaborators"}</p>
                     {idea.founder.primary_skills && idea.founder.primary_skills.length > 0 && (
                       <p className="mt-1">Skills: {idea.founder.primary_skills.join(", ")}</p>

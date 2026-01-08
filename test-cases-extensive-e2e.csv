@@ -1,0 +1,1479 @@
+Test Case Title,Module / Feature,Priority,Preconditions,Test Steps,Test Data,Expected Result,Status,Defect ID,Description,Estimated Time (minutes),Postconditions,Test Suites
+"Verify user registration with valid email and password","Authentication","HIGH","Application is running and accessible","1. Navigate to registration page (/register)
+2. Enter valid email address
+3. Enter valid password (min 8 characters)
+4. Confirm password
+5. Click Register button
+6. Verify redirect to dashboard
+7. Check user is logged in","Email: newuser@example.com, Password: Test123!@#, Confirm Password: Test123!@#","1. Registration page loads
+2. Form fields are visible
+3. Password validation works
+4. User account created successfully
+5. User redirected to dashboard
+6. User is authenticated
+7. Session is active","ACTIVE","","Test complete user registration flow",15,"User is logged in and redirected to dashboard","Authentication Suite"
+"Verify user login with valid credentials","Authentication","HIGH","User account exists in the system with valid credentials","1. Navigate to login page (/login)
+2. Enter valid email address
+3. Enter valid password
+4. Click Login button
+5. Verify redirect to dashboard
+6. Check user profile is displayed","Email: user@example.com, Password: Test123!","1. Login page displays correctly
+2. Credentials are accepted
+3. User successfully authenticated
+4. User redirected to dashboard (or requested page)
+5. Dashboard loads successfully
+6. User profile information is visible
+7. Session token is set","ACTIVE","","Test successful login flow",10,"User is logged in and on dashboard","Authentication Suite"
+"Verify login with invalid credentials","Authentication","HIGH","User account exists in the system","1. Navigate to login page
+2. Enter valid email address
+3. Enter incorrect password
+4. Click Login button
+5. Verify error message displays
+6. Check user remains on login page","Email: user@example.com, Password: WrongPassword123","1. Login page displays
+2. Credentials are rejected
+3. Error message displays: Invalid email or password
+4. User remains on login page
+5. Password field is cleared
+6. Account is not locked after failed attempt
+7. Error message is visible and clear","ACTIVE","","Test error handling for invalid credentials",5,"User remains on login page with error message","Authentication Suite"
+"Verify login page UI elements and validation","Authentication","MEDIUM","Application is accessible","1. Navigate to login page (/login)
+2. Verify all UI elements are displayed
+3. Check form validation
+4. Verify password field is masked
+5. Check remember me option (if available)
+6. Verify links (forgot password, register)","","1. Login page displays correctly
+2. Email input field is visible
+3. Password input field is visible and masked (shows dots/asterisks)
+4. Login button is visible and enabled
+5. Forgot password link is visible
+6. Register link is visible
+7. Form validation works (required fields)
+8. Responsive design works on mobile/tablet","ACTIVE","","Test UI and validation on login page",5,"All UI elements verified","Authentication Suite"
+"Verify logout functionality","Authentication","HIGH","User is logged in and on dashboard","1. Click user profile menu/avatar
+2. Click Logout button (or menu option)
+3. Verify logout confirmation (if applicable)
+4. Confirm logout action
+5. Verify redirect to login page or home
+6. Verify session is cleared
+7. Try accessing protected route","","1. Logout button/menu is accessible
+2. Logout confirmation works (if implemented)
+3. User successfully logs out
+4. User redirected to login page or home
+5. Session token is cleared from storage
+6. Protected routes redirect to login
+7. No user data persists in browser","ACTIVE","","Test complete logout flow",5,"User is logged out and session cleared","Authentication Suite"
+"Verify forgot password flow - request reset","Authentication","HIGH","User account exists with valid email","1. Navigate to login page
+2. Click Forgot Password link
+3. Navigate to forgot password page (/forgot-password)
+4. Enter registered email address
+5. Click Send Reset Link button
+6. Verify success message
+7. Check email for reset link","Email: user@example.com","1. Forgot password page loads
+2. Email input field is visible
+3. Submit button is enabled
+4. Success message displays: Check your email for reset link
+5. Email sent to registered address
+6. Reset link contains valid token
+7. Reset link expires after set time (e.g., 1 hour)","ACTIVE","","Test password reset request flow",10,"Reset email sent to user","Authentication Suite"
+"Verify password reset with valid token","Authentication","HIGH","User has received password reset email with valid token","1. Open password reset email
+2. Click reset link (navigates to /reset-password?token=xxx)
+3. Verify reset page loads
+4. Enter new password (min 8 characters)
+5. Confirm new password
+6. Click Reset Password button
+7. Verify success message
+8. Attempt login with new password","Token: valid_reset_token_12345, New Password: NewPass123!@#, Confirm Password: NewPass123!@#","1. Reset password page loads with token
+2. Token is validated
+3. Password fields are visible and masked
+4. Password validation works (length, complexity)
+5. Password reset successful
+6. Success message displays
+7. User redirected to login page
+8. Login with new password succeeds
+9. Old password no longer works","ACTIVE","","Test password reset completion",10,"Password reset successfully and user can login","Authentication Suite"
+"Verify password reset with invalid/expired token","Authentication","MEDIUM","Application is accessible","1. Navigate to reset password page with invalid token (/reset-password?token=invalid)
+2. Verify error message displays
+3. Try with expired token
+4. Verify appropriate error handling","Token: invalid_token_12345","1. Reset password page loads
+2. Token validation fails
+3. Error message displays: Invalid or expired reset token
+4. User is redirected to forgot password page
+5. Link to request new reset email is provided
+6. Security message about token expiration is shown","ACTIVE","","Test error handling for invalid tokens",5,"Error message shown and user redirected","Authentication Suite"
+"Verify protected route redirect when not authenticated","Authentication","HIGH","User is not logged in","1. Navigate directly to protected route (/dashboard)
+2. Verify redirect to login page
+3. Check redirect preserves intended destination
+4. Login and verify redirect to intended page","URL: /dashboard, /advisor, /validate-idea","1. User redirected to login page
+2. Login page URL includes return path (state parameter)
+3. After login, user redirected to originally requested page
+4. Protected routes are inaccessible without authentication
+5. No sensitive data is exposed","ACTIVE","","Test route protection and redirect logic",5,"User redirected to login and can access after authentication","Authentication Suite"
+"Verify subscription check on protected routes","Authentication","CRITICAL","User is logged in but subscription is expired","1. Login with expired subscription account
+2. Navigate to protected route (/advisor)
+3. Verify subscription check
+4. Verify payment prompt displays
+5. Click View Pricing button
+6. Verify redirect to pricing page","User with expired subscription","1. User authenticated successfully
+2. Subscription status checked
+3. Payment prompt displays: Your subscription has expired
+4. Subscribe button/link is visible
+5. Redirect to pricing page works
+6. User cannot access protected features until subscribed
+7. Dashboard shows subscription status","ACTIVE","","Test subscription validation on protected routes",8,"Payment prompt displayed and pricing page accessible","Authentication Suite"
+"Verify discovery intake form - screen 1 validation","Discovery","HIGH","User is logged in with active subscription","1. Navigate to discovery page (/advisor)
+2. Verify intake form displays
+3. Fill Screen 1 - About You section
+4. Verify all required fields are marked
+5. Test field validation
+6. Try submitting without required fields
+7. Fill all required fields and proceed","Startup Category: Tech, Time Commitment: 10-20 hours/week, Budget Range: $5K-$25K, Risk Tolerance: Medium, Preferred Work Style: Remote, Startup Style: B2B SaaS, Customer Interaction: High, Location: United States, Business Region: North America","1. Discovery page loads correctly
+2. Intake form is displayed
+3. All required fields are visible and labeled
+4. Field validation works (required, format)
+5. Error messages display for missing fields
+6. Form submission blocked until all required fields filled
+7. Progress indicator shows completion status
+8. Next button enabled when required fields complete","ACTIVE","","Test discovery form validation and required fields",15,"Screen 1 completed and validated","Discovery Suite"
+"Verify discovery intake form - screen 2 validation","Discovery","HIGH","Screen 1 of discovery form is completed","1. Complete Screen 1 and proceed
+2. Verify Screen 2 - Interests & Goals displays
+3. Fill all required fields in Screen 2
+4. Test optional fields (skills, experience summary)
+5. Verify field validation
+6. Submit discovery form
+7. Verify API call is made","Industry Interest: Technology, Sub Interest Area: AI/ML, Business Type: SaaS, Earnings Timeline: 6-12 months, Founder Ambition: Build a scalable startup, Skills: {technical: [Python, React], creative: [Design]}, Experience Summary: 5 years in software development","1. Screen 2 loads correctly
+2. All required fields are visible
+3. Dropdowns and inputs work correctly
+4. Skills input accepts multiple values
+5. Experience summary textarea works
+6. Optional fields can be left empty
+7. Form validation works
+8. Submit button enabled when required fields complete
+9. Form data is properly formatted for API","ACTIVE","","Test second screen of discovery form",12,"Screen 2 completed and form ready for submission","Discovery Suite"
+"Verify discovery API call with streaming (SSE)","Discovery","CRITICAL","Discovery form is completed and submitted","1. Submit discovery form with valid data
+2. Verify API request to /api/discovery
+3. Verify SSE connection established
+4. Monitor streaming progress
+5. Verify progress indicators update
+6. Verify profile analysis stage completes
+7. Verify idea research stage completes
+8. Verify recommendations stage streams
+9. Verify final results displayed","Valid discovery form data, Format: SSE","1. API request sent with correct payload
+2. SSE connection established (EventSource)
+3. Progress events received: stage_start, progress, stage_complete
+4. Profile Analysis stage completes (~30 seconds)
+5. Idea Research stage completes (~20 seconds)
+6. Recommendations stream in real-time
+7. Progress bar/indicators update smoothly
+8. Loading states display correctly
+9. No connection errors occur
+10. Final results structure is correct","ACTIVE","","Test SSE streaming for discovery workflow",180,"Discovery run completed with streaming results","Discovery Suite"
+"Verify discovery API rate limiting","Discovery","HIGH","User is logged in","1. Submit discovery form successfully
+2. Immediately submit discovery form again (within 60 seconds)
+3. Repeat 5 times quickly
+4. Verify rate limit error on 6th attempt
+5. Verify error message and headers
+6. Wait 60 seconds and retry
+7. Verify request succeeds","Multiple rapid discovery submissions","1. First 5 requests succeed
+2. 6th request returns 429 Too Many Requests
+3. Error message: Rate limit exceeded: 5/5 requests per 60 seconds
+4. Rate limit headers present: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After
+5. After waiting 60+ seconds, next request succeeds
+6. Rate limit resets correctly","ACTIVE","","Test rate limiting protection for discovery endpoint",5,"Rate limit enforced and resets correctly","Discovery Suite"
+"Verify discovery cached results return immediately","Discovery","CRITICAL","Discovery run was previously completed with same inputs","1. Submit discovery form with inputs that match previous run
+2. Verify cache check in API
+3. Verify cached result returned immediately (no streaming)
+4. Verify cached flag in response
+5. Verify results match previous run
+6. Verify faster response time","Same discovery inputs as previous run","1. API checks cache before processing
+2. Cache hit detected
+3. Cached result returned immediately (< 1 second)
+4. Response includes cached: true flag
+5. Results match previous run exactly
+6. No streaming occurs for cached results
+7. Response time significantly faster than new run
+8. Cache key includes all relevant input parameters","ACTIVE","","Test caching mechanism for discovery results",10,"Cached results returned without reprocessing","Discovery Suite"
+"Verify profile report page displays correctly","Discovery","HIGH","Discovery run has completed successfully","1. Navigate to profile report page (/results/profile?id=run_id)
+2. Verify report loads from cache or API
+3. Verify all sections display
+4. Verify profile analysis content
+5. Check core motivations section
+6. Check operating constraints section
+7. Check strengths and capabilities section
+8. Check strategic considerations section
+9. Verify export options (if available)","Run ID: run_abc123","1. Profile report page loads
+2. Report data displays correctly
+3. Core Motivations section visible with content
+4. Operating Constraints section visible with content
+5. Strengths and Capabilities section visible with content
+6. Strategic Considerations section visible with content
+7. Viability Red Flags section visible (if applicable)
+8. Report is readable and well-formatted
+9. Navigation to recommendations works
+10. Export to PDF/Markdown works (if available)","ACTIVE","","Test profile report display and content",10,"Profile report displayed correctly","Discovery Suite"
+"Verify recommendations report displays all ideas","Discovery","CRITICAL","Discovery run has completed successfully","1. Navigate to recommendations report (/results/recommendations?id=run_id)
+2. Verify report loads
+3. Verify top 3 ideas are displayed
+4. Verify each idea has required fields
+5. Check idea titles are displayed
+6. Check summaries are displayed
+7. Check fit analysis for each idea
+8. Verify comparison matrix displays
+9. Test navigation to individual idea details","Run ID: run_abc123","1. Recommendations report page loads
+2. All 3 ideas are displayed
+3. Each idea shows: title, summary, target market, revenue model
+4. Fit analysis is visible for each idea
+5. Comparison matrix/table displays correctly
+6. Ideas are ranked (1, 2, 3)
+7. Navigation to individual idea pages works
+8. Back to dashboard link works
+9. Report is scrollable and responsive","ACTIVE","","Test recommendations report display",12,"Recommendations report displayed with all 3 ideas","Discovery Suite"
+"Verify individual idea detail page","Discovery","HIGH","Discovery run has completed successfully","1. Navigate to idea detail page (/results/recommendations/1?id=run_id)
+2. Verify page loads correctly
+3. Verify idea title displays
+4. Verify full idea description/summary
+5. Check target market information
+6. Check revenue model details
+7. Check fit analysis details
+8. Check financial projections (if available)
+9. Verify action buttons (validate, save, etc.)
+10. Test navigation back to recommendations","Idea Index: 1, Run ID: run_abc123","1. Idea detail page loads
+2. Idea title is prominent
+3. Full description/summary is displayed
+4. Target market section is visible and detailed
+5. Revenue model section is visible and detailed
+6. Fit analysis is expanded and detailed
+7. Financial projections display (if available)
+8. Validate Idea button works
+9. Back to recommendations link works
+10. Page is responsive and readable","ACTIVE","","Test individual idea detail view",10,"Idea detail page displayed correctly","Discovery Suite"
+"Verify idea enrichment API endpoint","Discovery","HIGH","Idea detail page is open and user clicks enrich","1. Navigate to idea detail page
+2. Click Enrich Idea button (if available)
+3. Verify API call to /api/discovery/enrich_idea
+4. Verify request payload includes idea and profile data
+5. Monitor SSE stream for enrichment
+6. Verify enriched content displays
+7. Verify playbook sections are added","Idea data, Profile analysis data, Format: SSE","1. Enrich button triggers API call
+2. Request payload is correctly formatted
+3. SSE stream established
+4. Enrichment progress updates received
+5. Enriched playbook sections display: market research, competitive analysis, go-to-market strategy
+6. Content is personalized based on profile
+7. No errors during enrichment process
+8. Original idea content is preserved","ACTIVE","","Test idea enrichment feature",90,"Idea enriched with additional playbook content","Discovery Suite"
+"Verify discovery background job endpoint","Discovery","MEDIUM","User is logged in","1. Submit discovery form to /api/discovery/run endpoint
+2. Verify 202 Accepted response
+3. Verify run_id returned immediately
+4. Poll status endpoint for job completion
+5. Verify job completes successfully
+6. Retrieve results when complete","Discovery form data, Endpoint: /api/discovery/run","1. Request returns 202 Accepted status
+2. Response includes run_id immediately
+3. Job is queued for background processing
+4. Status polling shows job progress
+5. Job completes successfully
+6. Results are available via status/results endpoint
+7. Results match streaming endpoint output
+8. Job status updates correctly (pending, processing, completed)","ACTIVE","","Test background job processing for discovery",180,"Background job completed and results available","Discovery Suite"
+"Verify validation form - idea details input","Validation","HIGH","User is logged in and has an idea to validate","1. Navigate to validation page (/validate-idea)
+2. Verify validation form displays
+3. Enter idea title
+4. Enter idea description/summary
+5. Enter target market
+6. Enter revenue model
+7. Verify all fields accept input
+8. Test field validation","Idea Title: AI-Powered Task Manager, Description: A smart task management app using AI, Target Market: Small businesses and freelancers, Revenue Model: Subscription SaaS ($29/month)","1. Validation form page loads
+2. All input fields are visible
+3. Idea title field accepts text input
+4. Description textarea accepts longer text
+5. Target market field accepts input
+6. Revenue model field accepts input
+7. Required field validation works
+8. Form validation errors display correctly
+9. Character limits are enforced (if applicable)
+10. Submit button state updates based on form completion","ACTIVE","","Test validation form input fields",10,"Validation form completed with idea details","Validation Suite"
+"Verify validation form - parameter scoring","Validation","HIGH","Validation form idea details are filled","1. Complete idea details section
+2. Navigate to parameter scoring section
+3. Verify all validation parameters are listed
+4. Enter scores for each parameter (1-10 scale)
+5. Add notes/comments for parameters
+6. Verify parameter descriptions are visible
+7. Verify scoring guidance is available","Parameters: Market Size, Problem Validation, Competition, Team Fit, Revenue Model, Scalability, Market Timing, Risk Assessment, Scores: Market Size: 8, Problem Validation: 7, Competition: 6, Team Fit: 9, Revenue Model: 8, Scalability: 9, Market Timing: 7, Risk Assessment: 6","1. Parameter scoring section displays
+2. All validation parameters are listed with descriptions
+3. Score inputs accept 1-10 values
+4. Score validation works (numeric, range)
+5. Notes/comments can be added for each parameter
+6. Parameter descriptions are helpful and clear
+7. Scoring guidance/tooltips available
+8. Visual feedback for score ranges (colors)
+9. Total/average score displays
+10. Form can be saved as draft (if available)","ACTIVE","","Test validation parameter scoring interface",15,"All parameters scored and notes added","Validation Suite"
+"Verify validation API submission and processing","Validation","CRITICAL","Validation form is completed with all required data","1. Complete validation form (idea details + parameters)
+2. Click Submit Validation button
+3. Verify API call to /api/validate
+4. Verify request payload includes all data
+5. Monitor API response
+6. Verify validation ID returned
+7. Verify redirect to validation results page","Complete validation form data including idea details and all parameter scores","1. Submit button triggers API call
+2. Request payload is correctly formatted with all fields
+3. API returns 200 OK status
+4. Response includes validation_id
+5. Response includes validation status
+6. User redirected to /validate-result?id=validation_id
+7. Loading state displays during processing
+8. Error handling works if API fails
+9. Validation is saved to database
+10. Validation is linked to user account","ACTIVE","","Test validation submission and API integration",5,"Validation submitted and results page accessed","Validation Suite"
+"Verify validation results page displays","Validation","CRITICAL","Validation has been submitted successfully","1. Navigate to validation results page (/validate-result?id=validation_id)
+2. Verify page loads
+3. Verify validation summary displays
+4. Verify parameter scores are displayed
+5. Verify radar chart displays (if implemented)
+6. Check overall score/rating
+7. Verify risk assessment section
+8. Verify financial projections section
+9. Check next steps/recommendations section
+10. Test export options (PDF, Markdown)","Validation ID: val_abc123","1. Validation results page loads
+2. Validation summary is displayed at top
+3. All parameter scores are shown with visual indicators
+4. Radar chart renders correctly (if implemented)
+5. Overall score/rating is prominently displayed
+6. Risk assessment section shows risks and mitigations
+7. Financial projections display (if calculated)
+8. Next steps/recommendations are actionable
+9. Export to PDF button works
+10. Export to Markdown button works
+11. Back to dashboard link works
+12. Share validation link works (if available)","ACTIVE","","Test validation results display and visualization",15,"Validation results displayed correctly","Validation Suite"
+"Verify validation update API","Validation","MEDIUM","Validation exists in database","1. Navigate to existing validation results
+2. Modify parameter scores (if editable)
+3. Update validation via API
+4. Verify update API endpoint (/api/validate/{validation_id})
+5. Verify request updates validation
+6. Refresh results page
+7. Verify updated scores display","Validation ID: val_abc123, Updated Scores: Market Size: 9, Problem Validation: 8","1. Update API endpoint accepts PUT/PATCH request
+2. Request payload updates specified fields
+3. API returns 200 OK with updated validation
+4. Validation is updated in database
+5. Results page reflects updated scores
+6. Timestamp shows last updated time
+7. Validation history is preserved (if implemented)
+8. Error handling works for invalid updates","ACTIVE","","Test validation update functionality",8,"Validation updated successfully","Validation Suite"
+"Verify dashboard - ideas tab displays","Dashboard","HIGH","User is logged in and has completed discovery runs","1. Navigate to dashboard (/dashboard?tab=ideas)
+2. Verify Ideas tab is active
+3. Verify all discovered ideas are displayed
+4. Verify idea cards show required information
+5. Check idea titles are visible
+6. Check idea summaries are visible
+7. Verify metadata displays (time, budget, focus area)
+8. Check active indicators (notes, actions) display
+9. Verify statistics display (total ideas, active ideas)","User with multiple discovery runs and ideas","1. Dashboard loads correctly
+2. Ideas tab is selected and highlighted
+3. All ideas from all runs are displayed
+4. Each idea card shows: title, summary, metadata
+5. Active indicators (dots, badges) show for ideas with notes/actions
+6. Statistics display: X ideas, Y active, Z with notes, W with actions
+7. Ideas are sorted correctly (active first, then by date)
+8. Search functionality works
+9. Filter toggle (Show Active Only) works
+10. Ideas are clickable and navigate to detail page","ACTIVE","","Test dashboard ideas tab display",12,"Ideas tab displays all ideas correctly","Dashboard Suite"
+"Verify dashboard - ideas tab search functionality","Dashboard","MEDIUM","Dashboard ideas tab is open with multiple ideas","1. Verify search input field is visible
+2. Enter search query matching idea title
+3. Verify filtered results display
+4. Enter search query matching idea summary
+5. Verify filtered results display
+6. Enter search query matching note content
+7. Verify filtered results display
+8. Clear search query
+9. Verify all ideas display again","Search Queries: AI, task manager, subscription","1. Search input field is visible and functional
+2. Search filters ideas in real-time
+3. Search matches idea titles (case-insensitive)
+4. Search matches idea summaries (case-insensitive)
+5. Search matches note content (case-insensitive)
+6. Search matches action text (case-insensitive)
+7. No results message displays when no matches
+8. Clear search button restores all ideas
+9. Search is responsive and fast
+10. Search highlights matches (if implemented)","ACTIVE","","Test search functionality in ideas tab",8,"Search filters ideas correctly","Dashboard Suite"
+"Verify dashboard - ideas tab active filter","Dashboard","MEDIUM","Dashboard ideas tab is open with active and inactive ideas","1. Verify Show Active Only toggle button
+2. Click toggle to show active only
+3. Verify only ideas with notes or actions display
+4. Click toggle to show all ideas
+5. Verify all ideas display again
+6. Verify statistics update based on filter","Toggle between Show Active Only and Show All","1. Toggle button is visible and functional
+2. Active filter shows only ideas with notes or actions
+3. Statistics update to show filtered count
+4. Toggle back to All shows all ideas
+5. Statistics update to show total count
+6. Filter state persists during session (if implemented)
+7. Active ideas are clearly indicated with visual indicators
+8. Filter works in combination with search","ACTIVE","","Test active filter toggle in ideas tab",5,"Active filter works correctly","Dashboard Suite"
+"Verify dashboard - adding notes to ideas","Dashboard","HIGH","Dashboard ideas tab is open and user selects an idea","1. Navigate to idea detail page from dashboard
+2. Click Add Note button (or note icon)
+3. Enter note content in text area
+4. Click Save Note button
+5. Verify note is saved
+6. Navigate back to dashboard
+7. Verify note indicator displays on idea card
+8. Click idea again and verify note is visible","Note Content: This idea has good market potential. Need to research competitors.","1. Add Note button/icon is visible
+2. Note input modal/area displays
+3. Note textarea accepts input
+4. Save button saves note to database
+5. Success message displays (if implemented)
+6. Note is associated with correct idea_id
+7. Note indicator (badge/icon) appears on idea card
+8. Note content is visible on idea detail page
+9. Note can be edited (if implemented)
+10. Note can be deleted (if implemented)","ACTIVE","","Test adding notes to ideas",10,"Note added and visible on idea card","Dashboard Suite"
+"Verify dashboard - adding actions to ideas","Dashboard","HIGH","Dashboard ideas tab is open and user selects an idea","1. Navigate to idea detail page from dashboard
+2. Click Add Action button (or action icon)
+3. Enter action text/description
+4. Select action status (in_progress, blocked, completed)
+5. Click Save Action button
+6. Verify action is saved
+7. Navigate back to dashboard
+8. Verify action indicator displays on idea card
+9. Verify action status color displays correctly","Action Text: Research competitor pricing, Status: in_progress","1. Add Action button/icon is visible
+2. Action input modal/area displays
+3. Action text input accepts description
+4. Status dropdown/selector works
+5. Save button saves action to database
+6. Success message displays (if implemented)
+7. Action is associated with correct idea_id
+8. Action indicator (dot/badge) appears on idea card with correct color
+9. Action status colors: in_progress (warning), blocked (muted), completed (success)
+10. Action can be updated (if implemented)
+11. Action can be deleted (if implemented)","ACTIVE","","Test adding actions to ideas",10,"Action added and visible on idea card","Dashboard Suite"
+"Verify dashboard - idea comparison feature","Dashboard","HIGH","Dashboard ideas tab has multiple ideas selected","1. Select first idea checkbox
+2. Select second idea checkbox
+3. Verify Compare button appears
+4. Verify Compare button shows count (Compare (2))
+5. Select third idea checkbox (if allowed, max 5)
+6. Click Compare button
+7. Verify comparison page loads
+8. Verify ideas are displayed side-by-side
+9. Verify comparison table/matrix displays
+10. Verify differences are highlighted","Ideas selected: Idea 1, Idea 2, Idea 3 (up to 5)","1. Checkboxes are visible on idea cards
+2. Selecting checkbox enables compare functionality
+3. Compare button appears when 2+ ideas selected
+4. Compare button shows correct count
+5. Maximum 5 ideas can be selected (if limit enforced)
+6. Comparison page loads (/dashboard/compare)
+7. Ideas displayed side-by-side
+8. Comparison matrix shows: title, summary, target market, revenue model, scores
+9. Differences are visually highlighted
+10. Navigation back to dashboard works
+11. Comparison can be exported (if implemented)","ACTIVE","","Test idea comparison functionality",15,"Ideas compared side-by-side","Dashboard Suite"
+"Verify dashboard - validations tab displays","Dashboard","HIGH","User is logged in and has completed validations","1. Navigate to dashboard (/dashboard?tab=validations)
+2. Verify Validations tab is active
+3. Verify all validations are displayed
+4. Verify validation cards show required information
+5. Check idea titles are visible
+6. Check validation scores are visible
+7. Verify validation dates display
+8. Check navigation to validation results works","User with multiple completed validations","1. Dashboard loads correctly
+2. Validations tab is selected and highlighted
+3. All validations are displayed
+4. Each validation card shows: idea title, overall score, date
+5. Validation cards are clickable
+6. Clicking card navigates to validation results page
+7. Validations are sorted by date (newest first)
+8. Empty state displays if no validations
+9. Statistics display (if implemented)","ACTIVE","","Test dashboard validations tab",10,"Validations tab displays all validations","Dashboard Suite"
+"Verify dashboard - history tab displays","Dashboard","HIGH","User is logged in and has discovery run history","1. Navigate to dashboard (/dashboard?tab=history)
+2. Verify History tab is active
+3. Verify all discovery runs are displayed
+4. Verify run cards show required information
+5. Check run dates are visible
+6. Check run inputs summary (time, budget, focus)
+7. Verify navigation to run results works
+8. Test filtering by date range (if available)","User with multiple discovery runs","1. Dashboard loads correctly
+2. History tab is selected and highlighted
+3. All discovery runs are displayed
+4. Each run card shows: date, inputs summary, status
+5. Run cards are clickable
+6. Clicking card navigates to run results
+7. Runs are sorted by date (newest first)
+8. Empty state displays if no runs
+9. Filter by date range works (if implemented)
+10. Search runs works (if implemented)","ACTIVE","","Test dashboard history tab",10,"History tab displays all discovery runs","Dashboard Suite"
+"Verify dashboard - sessions tab displays","Dashboard","MEDIUM","User is logged in and has active sessions","1. Navigate to dashboard (/dashboard?tab=sessions)
+2. Verify Sessions tab is active
+3. Verify active discovery sessions are displayed
+4. Verify session status indicators
+5. Check session progress displays
+6. Verify ability to resume session
+7. Verify ability to cancel session (if applicable)","User with active discovery sessions","1. Dashboard loads correctly
+2. Sessions tab is selected and highlighted
+3. Active sessions are displayed
+4. Session status shows: pending, processing, completed
+5. Progress indicators show completion percentage
+6. Resume button works for in-progress sessions
+7. Cancel button works (if implemented)
+8. Completed sessions move to history
+9. Empty state displays if no active sessions","ACTIVE","","Test dashboard sessions tab",8,"Sessions tab displays active sessions correctly","Dashboard Suite"
+"Verify compare sessions page displays","Dashboard","HIGH","User has multiple discovery runs completed","1. Navigate to compare sessions page (/dashboard/compare)
+2. Verify page loads correctly
+3. Verify session selection interface
+4. Select first session
+5. Select second session
+6. Verify comparison displays
+7. Check profile analysis comparison
+8. Check recommendations comparison
+9. Verify differences are highlighted","Session 1: run_abc123, Session 2: run_def456","1. Compare sessions page loads
+2. Session selection interface is visible
+3. Multiple sessions can be selected
+4. Comparison view displays selected sessions side-by-side
+5. Profile analysis comparison shows differences
+6. Recommendations comparison shows different ideas
+7. Differences are visually highlighted
+8. Comparison can be exported (if implemented)
+9. Navigation back to dashboard works","ACTIVE","","Test session comparison functionality",15,"Sessions compared successfully","Dashboard Suite"
+"Verify run history page displays","Dashboard","MEDIUM","User is logged in and has discovery run history","1. Navigate to run history page (/dashboard/runs)
+2. Verify page loads correctly
+3. Verify all runs are listed
+4. Check run details display
+5. Verify pagination works (if implemented)
+6. Verify filtering works (if implemented)
+7. Test navigation to run results","User with multiple discovery runs","1. Run history page loads
+2. All runs are displayed in list/table format
+3. Each run shows: date, inputs, status, actions
+4. Pagination works correctly (if implemented)
+5. Filters work (by date, status, etc.)
+6. Clicking run navigates to results
+7. Delete run button works (if implemented)
+8. Empty state displays if no runs
+9. Search functionality works (if implemented)","ACTIVE","","Test run history page",10,"Run history page displays correctly","Dashboard Suite"
+"Verify account page displays user information","Dashboard","MEDIUM","User is logged in","1. Navigate to account page (/account)
+2. Verify page loads correctly
+3. Verify user email displays
+4. Verify account information section
+5. Check subscription status displays
+6. Verify subscription management section
+7. Check password change section
+8. Verify profile update section (if available)","Logged in user account","1. Account page loads
+2. User email is displayed correctly
+3. Account information section is visible
+4. Subscription status is shown (active, expired, trial)
+5. Subscription management buttons/links work
+6. Password change form is available
+7. Profile update form is available (if implemented)
+8. Settings/preferences section is available (if implemented)
+9. Delete account option is available (if implemented)
+10. Changes are saved successfully","ACTIVE","","Test account page display and functionality",12,"Account page displays and functions correctly","Dashboard Suite"
+"Verify pricing page displays all tiers","Public Pages","MEDIUM","Application is accessible (no login required)","1. Navigate to pricing page (/pricing)
+2. Verify page loads correctly
+3. Verify all subscription tiers are displayed
+4. Check tier names and prices
+5. Verify feature comparison table
+6. Check Subscribe buttons for each tier
+7. Verify guarantee blocks display
+8. Check value propositions display
+9. Test responsive design on mobile","","1. Pricing page loads correctly
+2. All subscription tiers are visible (e.g., Basic, Pro, Enterprise)
+3. Tier prices are clearly displayed
+4. Feature comparison table shows differences
+5. Subscribe buttons are visible and clickable
+6. Guarantee blocks are displayed
+7. Value propositions are clear
+8. Page is responsive on mobile/tablet
+9. Payment modal opens when Subscribe clicked (if implemented)
+10. Navigation to other pages works","ACTIVE","","Test pricing page display",8,"Pricing page displays correctly","Public Pages Suite"
+"Verify pricing page subscription flow","Public Pages","HIGH","Pricing page is open and user clicks Subscribe","1. Click Subscribe button on desired tier
+2. Verify payment modal opens (if not logged in, redirect to login)
+3. If logged in, verify payment form displays
+4. Enter payment details (if testing with test cards)
+5. Verify subscription is processed
+6. Verify redirect to dashboard
+7. Verify subscription status updated","Subscription Tier: Pro, Payment: Test card details","1. Subscribe button triggers action
+2. If not logged in, redirects to login with return path
+3. If logged in, payment modal/form opens
+4. Payment form accepts card details
+5. Payment processing works (test mode)
+6. Subscription is created in database
+7. User redirected to dashboard
+8. Subscription status shows as active
+9. Confirmation email sent (if implemented)
+10. Access to protected features is granted","ACTIVE","","Test subscription purchase flow",15,"Subscription purchased and active","Public Pages Suite"
+"Verify home page displays correctly","Public Pages","MEDIUM","Application is accessible (no login required)","1. Navigate to home page (/)
+2. Verify page loads correctly
+3. Verify hero section displays
+4. Check value proposition is clear
+5. Verify call-to-action buttons
+6. Check social proof section
+7. Check how it works section
+8. Check features section
+9. Check testimonials section (if available)
+10. Check footer displays
+11. Test responsive design","","1. Home page loads correctly
+2. Hero section is prominent with clear value proposition
+3. CTA buttons are visible (Get Started, Learn More)
+4. Social proof section displays logos/testimonials
+5. How It Works section explains the process
+6. Features section highlights key benefits
+7. Testimonials section displays (if available)
+8. Footer displays with links
+9. Navigation menu is functional
+10. Page is responsive on all devices
+11. SEO meta tags are present
+12. Page load time is acceptable (< 3 seconds)","ACTIVE","","Test home page display and content",10,"Home page displays correctly","Public Pages Suite"
+"Verify product pages display correctly","Public Pages","MEDIUM","Application is accessible","1. Navigate to product page (/product)
+2. Verify page loads correctly
+3. Navigate to Product Discover page (/product/discover)
+4. Verify discovery feature details
+5. Navigate to Product Validate page (/product/validate)
+6. Verify validation feature details
+7. Navigate to Product Network page (/product/network)
+8. Verify network feature details
+9. Check all CTAs work","","1. Product page loads correctly
+2. Product Discover page displays discovery features
+3. Product Validate page displays validation features
+4. Product Network page displays network features
+5. Each page has clear feature descriptions
+6. Each page has screenshots/mockups
+7. CTAs (Get Started, Try Now) work correctly
+8. Navigation between product pages works
+9. Pages are responsive
+10. SEO optimized","ACTIVE","","Test product pages display",12,"All product pages display correctly","Public Pages Suite"
+"Verify resources pages display correctly","Public Pages","MEDIUM","Application is accessible","1. Navigate to resources page (/resources)
+2. Verify redirects to templates (/resources/templates)
+3. Verify templates list displays
+4. Verify all template types are listed
+5. Test template download (if available)
+6. Navigate to advisor resources (/advisor-resources)
+7. Verify advisor resources display
+8. Navigate to blog (/blog)
+9. Verify blog posts list displays
+10. Test blog post navigation","","1. Resources page redirects correctly
+2. Templates page displays all available templates
+3. Template categories are organized
+4. Template download buttons work (if implemented)
+5. Advisor resources page displays additional resources
+6. Blog page lists all blog posts
+7. Blog posts are clickable
+8. Individual blog post pages load correctly
+9. Navigation between resources sections works
+10. Search functionality works (if implemented)","ACTIVE","","Test resources pages display",15,"All resources pages display correctly","Public Pages Suite"
+"Verify contact page and form submission","Public Pages","HIGH","Application is accessible","1. Navigate to contact page (/contact)
+2. Verify page loads correctly
+3. Verify contact form displays
+4. Enter name
+5. Enter email
+6. Enter company (optional)
+7. Enter topic (optional)
+8. Enter message
+9. Click Submit button
+10. Verify success message
+11. Verify API call to /api/contact","Name: Test User, Email: test@example.com, Company: Test Company, Topic: General Inquiry, Message: This is a test message","1. Contact page loads correctly
+2. Contact form is visible with all fields
+3. Name field accepts input (required)
+4. Email field accepts input with validation (required)
+5. Company field accepts input (optional)
+6. Topic field accepts input (optional)
+7. Message textarea accepts input (required)
+8. Submit button is enabled when required fields filled
+9. Form validation works
+10. Submit triggers API call to /api/contact
+11. Success message displays: Thank you for your message!
+12. Form is cleared after submission
+13. Contact submission saved to database","ACTIVE","","Test contact page and form",10,"Contact form submitted successfully","Public Pages Suite"
+"Verify about page displays correctly","Public Pages","LOW","Application is accessible","1. Navigate to about page (/about)
+2. Verify page loads correctly
+3. Verify company information displays
+4. Check team section (if available)
+5. Check mission/vision section
+6. Verify navigation works","","1. About page loads correctly
+2. Company information is displayed
+3. Team section displays (if available)
+4. Mission/vision section is clear
+5. Page is well-formatted and readable
+6. Navigation to other pages works
+7. Page is responsive","ACTIVE","","Test about page display",5,"About page displays correctly","Public Pages Suite"
+"Verify privacy policy page displays","Public Pages","MEDIUM","Application is accessible","1. Navigate to privacy policy page (/privacy)
+2. Verify page loads correctly
+3. Verify privacy policy content displays
+4. Check all sections are present
+5. Verify content is readable
+6. Check footer links work","","1. Privacy policy page loads correctly
+2. Privacy policy content is displayed
+3. All required sections are present: data collection, usage, sharing, security, user rights
+4. Content is well-formatted and readable
+5. Links to other pages work
+6. Page is responsive
+7. Legal content is accurate and up-to-date","ACTIVE","","Test privacy policy page",5,"Privacy policy page displays correctly","Public Pages Suite"
+"Verify terms of service page displays","Public Pages","MEDIUM","Application is accessible","1. Navigate to terms page (/terms)
+2. Verify page loads correctly
+3. Verify terms content displays
+4. Check all sections are present
+5. Verify content is readable
+6. Check footer links work","","1. Terms page loads correctly
+2. Terms of service content is displayed
+3. All required sections are present: user obligations, service usage, liability, termination
+4. Content is well-formatted and readable
+5. Links to other pages work
+6. Page is responsive
+7. Legal content is accurate and up-to-date","ACTIVE","","Test terms of service page",5,"Terms page displays correctly","Public Pages Suite"
+"Verify founder connect page displays","Founder Network","HIGH","User is logged in with active subscription","1. Navigate to founder connect page (/founder-connect)
+2. Verify page loads correctly
+3. Verify founder profiles list displays
+4. Check profile cards show required information
+5. Verify search functionality works
+6. Verify filter options work
+7. Test profile detail view
+8. Test connection request feature (if implemented)","Logged in user with active subscription","1. Founder connect page loads
+2. Founder profiles are displayed in list/grid
+3. Each profile card shows: name, skills, location, availability
+4. Search functionality filters profiles
+5. Filter options work (by skills, location, availability)
+6. Clicking profile shows detail view
+7. Connection request button works (if implemented)
+8. Profile browsing is smooth
+9. Empty state displays if no profiles
+10. Navigation works correctly","ACTIVE","","Test founder connect page display and functionality",15,"Founder connect page displays and functions correctly","Founder Network Suite"
+"Verify founder psychology page displays","Founder Network","HIGH","User is logged in with active subscription","1. Navigate to founder psychology page (/founder-psychology)
+2. Verify page loads correctly
+3. Verify psychology profiling features display
+4. Check personality insights section
+5. Verify behavioral analysis section
+6. Check team fit recommendations section
+7. Test questionnaire access (if applicable)
+8. Verify profile completion status","Logged in user with active subscription","1. Founder psychology page loads
+2. Psychology features are displayed
+3. Personality insights section is visible
+4. Behavioral analysis section is visible
+5. Team fit recommendations section is visible
+6. Questionnaire link/button works (if applicable)
+7. Profile completion status displays
+8. Navigation to questionnaire works
+9. Results display correctly (if profile completed)
+10. Page is informative and well-designed","ACTIVE","","Test founder psychology page",12,"Founder psychology page displays correctly","Founder Network Suite"
+"Verify psyche questionnaire completion","Founder Network","HIGH","User is on founder psychology page","1. Navigate to psyche questionnaire (/psyche/questionnaire)
+2. Verify questionnaire loads
+3. Answer all questionnaire questions
+4. Verify progress indicator updates
+5. Submit completed questionnaire
+6. Verify results processing
+7. Verify redirect to profile page
+8. Verify psychological profile displays","Questionnaire answers for all questions","1. Questionnaire page loads correctly
+2. All questions are displayed
+3. Answer inputs work (multiple choice, scales, text)
+4. Progress indicator shows completion percentage
+5. Navigation between questions works
+6. Form validation works
+7. Submit button enabled when all questions answered
+8. Submission triggers processing
+9. Redirect to profile page works
+10. Psychological profile displays with insights
+11. Profile can be viewed and shared (if implemented)","ACTIVE","","Test psyche questionnaire completion flow",30,"Questionnaire completed and profile generated","Founder Network Suite"
+"Verify psyche profile page displays","Founder Network","HIGH","User has completed psyche questionnaire","1. Navigate to psyche profile page (/psyche/profile)
+2. Verify page loads correctly
+3. Verify psychological profile displays
+4. Check personality traits section
+5. Check behavioral patterns section
+6. Check team fit recommendations
+7. Verify insights are actionable
+8. Test export/share functionality (if available)","User with completed psyche profile","1. Psyche profile page loads
+2. Psychological profile is displayed
+3. Personality traits section shows results
+4. Behavioral patterns section shows analysis
+5. Team fit recommendations are provided
+6. Insights are clear and actionable
+7. Visual charts/graphs display (if implemented)
+8. Export to PDF works (if implemented)
+9. Share link works (if implemented)
+10. Profile can be updated by retaking questionnaire","ACTIVE","","Test psyche profile page display",12,"Psyche profile page displays correctly","Founder Network Suite"
+"Verify admin login with valid credentials","Admin","CRITICAL","Admin account exists in the system","1. Navigate to admin login page (/admin)
+2. Verify admin login page loads (separate from user login)
+3. Enter admin email
+4. Enter admin password
+5. Click Login button
+6. Verify redirect to admin dashboard
+7. Verify admin interface is separate from user interface","Admin Email: admin@example.com, Admin Password: AdminPass123!","1. Admin login page loads correctly
+2. Admin login is separate from user login
+3. Admin credentials are accepted
+4. Admin is authenticated successfully
+5. Redirect to admin dashboard works
+6. Admin interface is isolated from user interface
+7. Admin navigation is separate
+8. Admin session is active
+9. No user navigation links visible in admin interface","ACTIVE","","Test admin authentication flow",10,"Admin logged in and on admin dashboard","Admin Suite"
+"Verify admin dashboard displays system metrics","Admin","HIGH","Admin is logged in","1. Navigate to admin dashboard (/admin)
+2. Verify dashboard loads correctly
+3. Verify system metrics display
+4. Check user statistics
+5. Check API usage statistics
+6. Check error logging section
+7. Check LLM usage tracking
+8. Verify real-time updates work (if implemented)","Admin user logged in","1. Admin dashboard loads correctly
+2. System metrics are displayed prominently
+3. User statistics show: total users, active users, new users
+4. API usage statistics show: requests, endpoints, rate limits
+5. Error logging section shows recent errors
+6. LLM usage tracking shows: API calls, tokens used, costs
+7. Real-time updates work (if implemented)
+8. Charts/graphs display correctly (if implemented)
+9. Export functionality works (if implemented)
+10. Filters and date ranges work (if implemented)","ACTIVE","","Test admin dashboard metrics display",15,"Admin dashboard displays all metrics correctly","Admin Suite"
+"Verify admin user management features","Admin","HIGH","Admin is logged in","1. Navigate to user management section in admin
+2. Verify user list displays
+3. Verify user details are visible
+4. Test user search functionality
+5. Test user filter options
+6. Verify user actions (view, edit, delete) work
+7. Test user subscription management
+8. Verify user activity logs display","Admin user with access to user management","1. User management section loads
+2. User list displays all users
+3. User details show: email, subscription status, registration date, last login
+4. Search functionality filters users
+5. Filter options work (by status, subscription, date)
+6. View user details works
+7. Edit user information works
+8. Delete user works (with confirmation)
+9. Subscription management works
+10. User activity logs display correctly
+11. Pagination works (if implemented)","ACTIVE","","Test admin user management functionality",20,"Admin can manage users effectively","Admin Suite"
+"Verify admin system monitoring and logs","Admin","MEDIUM","Admin is logged in","1. Navigate to system monitoring section
+2. Verify system logs display
+3. Check error logs
+4. Check API request logs
+5. Check performance metrics
+6. Verify log filtering works
+7. Test log export functionality
+8. Verify alert notifications (if implemented)","Admin user with access to monitoring","1. System monitoring section loads
+2. System logs are displayed
+3. Error logs show recent errors with details
+4. API request logs show all API calls
+5. Performance metrics display: response times, throughput
+6. Log filtering works (by type, date, severity)
+7. Log export works (CSV, JSON)
+8. Alert notifications display (if implemented)
+9. Real-time log updates work (if implemented)
+10. Log search functionality works","ACTIVE","","Test admin system monitoring and logging",15,"Admin can monitor system and view logs","Admin Suite"
+"Verify admin forgot password flow","Admin","HIGH","Admin account exists","1. Navigate to admin login page
+2. Click Forgot Password link
+3. Navigate to admin forgot password page (/admin/forgot-password)
+4. Enter admin email
+5. Click Send Reset Link
+6. Verify admin reset email sent
+7. Follow reset link
+8. Reset admin password
+9. Verify login with new password","Admin Email: admin@example.com","1. Admin forgot password page loads
+2. Email input works
+3. Reset email sent to admin address
+4. Admin reset email has admin-specific link
+5. Reset password page loads (/admin/reset-password?token=xxx)
+6. Password reset works
+7. Admin can login with new password
+8. Admin reset flow is separate from user reset flow","ACTIVE","","Test admin password reset flow",12,"Admin password reset successfully","Admin Suite"
+"Verify API health check endpoint","API","HIGH","Backend server is running","1. Make GET request to /health endpoint
+2. Verify response status is 200 OK
+3. Verify response body contains status
+4. Verify response time is acceptable
+5. Test endpoint during high load
+6. Test endpoint when database is down","","1. GET /health returns 200 OK
+2. Response body: {""status"": ""ok""}
+3. Response time < 100ms
+4. Endpoint is accessible without authentication
+5. Endpoint works during high load
+6. Endpoint indicates database status (if implemented)
+7. Endpoint can be used for monitoring/alerting
+8. CORS headers are correct (if applicable)","ACTIVE","","Test API health check endpoint",2,"Health check endpoint works correctly","API Suite"
+"Verify API root endpoint","API","LOW","Backend server is running","1. Make GET request to / endpoint
+2. Verify response status is 200 OK
+3. Verify response body contains app information
+4. Verify version information is included","","1. GET / returns 200 OK
+2. Response body contains: name, version, status
+3. Response format: {""name"": ""Idea Bunch"", ""version"": ""x.x.x"", ""status"": ""running""}
+4. Response is valid JSON
+5. CORS headers are correct (if applicable)","ACTIVE","","Test API root endpoint",2,"Root endpoint returns app information","API Suite"
+"Verify API authentication endpoints","API","CRITICAL","Backend server is running","1. Test POST /api/auth/register with valid data
+2. Verify user registration works
+3. Test POST /api/auth/login with valid credentials
+4. Verify login returns token
+5. Test POST /api/auth/login with invalid credentials
+6. Verify error response
+7. Test POST /api/auth/refresh (if implemented)
+8. Verify token refresh works","Registration: email, password, Login: email, password","1. POST /api/auth/register creates user account
+2. Registration returns 201 Created with user data
+3. POST /api/auth/login returns 200 OK with access token
+4. Token is valid JWT format
+5. Invalid credentials return 401 Unauthorized
+6. Error messages are clear and helpful
+7. Token refresh works (if implemented)
+8. All endpoints return proper HTTP status codes
+9. Error handling is consistent","ACTIVE","","Test API authentication endpoints",15,"Authentication endpoints work correctly","API Suite"
+"Verify API discovery endpoint validation","API","HIGH","Backend server is running with database","1. Make POST request to /api/discovery with missing required fields
+2. Verify validation error response
+3. Make POST request with invalid field types
+4. Verify validation error response
+5. Make POST request with all required fields
+6. Verify request is accepted
+7. Test field format validation","Invalid data: missing fields, wrong types, Valid data: all required fields","1. Missing required fields return 422 Unprocessable Entity
+2. Validation errors list all missing/invalid fields
+3. Invalid field types return appropriate errors
+4. Valid request returns 200 OK or 202 Accepted
+5. Validation errors are clear and helpful
+6. Field format validation works (email, enum values, etc.)
+7. Error messages point to specific fields
+8. Validation happens before processing","ACTIVE","","Test API discovery endpoint validation",10,"API validation works correctly","API Suite"
+"Verify API CORS configuration","API","MEDIUM","Backend server is running","1. Make OPTIONS request from frontend origin
+2. Verify CORS preflight response
+3. Verify allowed origins are correct
+4. Verify allowed methods include POST, GET, etc.
+5. Verify allowed headers are correct
+6. Make actual request from frontend
+7. Verify CORS headers in response","Frontend origin, Backend origin","1. OPTIONS request returns 200 OK
+2. CORS headers include: Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Allow-Headers
+3. Frontend origin is allowed
+4. Required HTTP methods are allowed
+5. Required headers are allowed
+6. Credentials are allowed (Access-Control-Allow-Credentials: true)
+7. Actual requests include CORS headers
+8. No CORS errors in browser console","ACTIVE","","Test API CORS configuration",5,"CORS is configured correctly","API Suite"
+"Verify API error handling and status codes","API","HIGH","Backend server is running","1. Make request to non-existent endpoint
+2. Verify 404 Not Found response
+3. Make request without authentication to protected endpoint
+4. Verify 401 Unauthorized response
+5. Make request with invalid token
+6. Verify 401 Unauthorized response
+7. Make request that causes server error
+8. Verify 500 Internal Server Error response (in development)
+9. Verify error messages are appropriate","Various invalid requests","1. Non-existent endpoint returns 404
+2. Error message is clear: Not Found
+3. Unauthenticated request returns 401
+4. Error message indicates authentication required
+5. Invalid token returns 401
+6. Error message indicates token invalid/expired
+7. Server errors return 500 (or appropriate status)
+8. Error messages don't expose sensitive information
+9. Error responses have consistent format
+10. Error logging works (errors are logged)","ACTIVE","","Test API error handling",10,"API error handling works correctly","API Suite"
+"Verify API request ID middleware","API","MEDIUM","Backend server is running","1. Make API request to any endpoint
+2. Verify response includes X-Request-ID header
+3. Verify request ID is unique for each request
+4. Check server logs for request ID
+5. Verify request ID format is consistent
+6. Test with multiple concurrent requests","Multiple API requests","1. All API responses include X-Request-ID header
+2. Request ID is unique UUID format
+3. Request ID is logged in server logs
+4. Request ID format is consistent across endpoints
+5. Request ID helps with debugging and tracing
+6. Concurrent requests have different request IDs
+7. Request ID is included in error responses","ACTIVE","","Test API request ID middleware",5,"Request ID middleware works correctly","API Suite"
+"Verify database connection and queries","Database","HIGH","Database is configured and running","1. Verify database connection is established
+2. Execute simple SELECT query
+3. Verify query returns results
+4. Execute INSERT query
+5. Verify data is inserted
+6. Execute UPDATE query
+7. Verify data is updated
+8. Execute DELETE query
+9. Verify data is deleted
+10. Test transaction rollback on error","Test data for CRUD operations","1. Database connection is successful
+2. SELECT queries return expected results
+3. INSERT queries add data successfully
+4. UPDATE queries modify data correctly
+5. DELETE queries remove data correctly
+6. Transactions work correctly
+7. Rollback works on errors
+8. Database constraints are enforced
+9. Foreign key relationships work
+10. Database indexes improve query performance","ACTIVE","","Test database operations",15,"Database operations work correctly","Database Suite"
+"Verify Redis cache operations","Database","MEDIUM","Redis is configured and running","1. Connect to Redis
+2. Set a cache key with value
+3. Verify key is set
+4. Get cache value by key
+5. Verify value matches
+6. Set cache key with expiration
+7. Wait for expiration
+8. Verify key is expired
+9. Delete cache key
+10. Verify key is deleted","Cache key: test_key, Value: test_value, TTL: 60 seconds","1. Redis connection is successful
+2. SET operation works correctly
+3. GET operation retrieves correct value
+4. TTL/expiration works correctly
+5. Keys expire after set time
+6. DELETE operation works correctly
+7. Cache operations are fast (< 10ms)
+8. Cache can handle concurrent operations
+9. Cache eviction works (if configured)
+10. Cache statistics are available (if configured)","ACTIVE","","Test Redis cache operations",10,"Redis cache operations work correctly","Database Suite"
+"Verify application performance under load","Performance","MEDIUM","Application is deployed and accessible","1. Run load test with 50 concurrent users
+2. Monitor response times
+3. Monitor error rates
+4. Monitor server resources (CPU, memory)
+5. Monitor database performance
+6. Run load test with 100 concurrent users
+7. Verify application handles load gracefully
+8. Check for memory leaks
+9. Verify cache effectiveness","Load test configuration: 50-100 concurrent users, Duration: 5 minutes","1. Application handles 50 concurrent users without errors
+2. Average response time < 2 seconds
+3. 95th percentile response time < 5 seconds
+4. Error rate < 1%
+5. Server resources remain within limits
+6. Database queries are optimized
+7. Cache reduces database load
+8. No memory leaks detected
+9. Application recovers gracefully after load
+10. Performance degrades gracefully under extreme load","ACTIVE","","Test application performance under load",30,"Application performs well under load","Performance Suite"
+"Verify application security - SQL injection prevention","Security","CRITICAL","Application is running with database","1. Attempt SQL injection in login form
+2. Attempt SQL injection in search fields
+3. Attempt SQL injection in API parameters
+4. Verify queries are parameterized
+5. Verify malicious input is sanitized
+6. Check database logs for injection attempts
+7. Verify no SQL is executed from user input","SQL injection attempts: ' OR '1'='1, ; DROP TABLE users; --","1. SQL injection attempts are blocked
+2. Queries use parameterized statements
+3. User input is sanitized/escaped
+4. No SQL is executed from user input
+5. Database structure is not exposed
+6. Error messages don't reveal database schema
+7. Logs record injection attempts
+8. Application continues to function normally
+9. Security headers are present
+10. No sensitive data is exposed","ACTIVE","","Test SQL injection prevention",15,"Application is protected against SQL injection","Security Suite"
+"Verify application security - XSS prevention","Security","CRITICAL","Application is running","1. Attempt XSS in user input fields
+2. Attempt XSS in search queries
+3. Attempt XSS in API parameters
+4. Verify input is sanitized
+5. Verify output is escaped
+6. Check for Content-Security-Policy headers
+7. Verify scripts are not executed from user input","XSS attempts: <script>alert('XSS')</script>, <img src=x onerror=alert('XSS')>","1. XSS attempts are blocked
+2. User input is sanitized
+3. Output is properly escaped
+4. Scripts are not executed from user input
+5. Content-Security-Policy headers are present
+6. XSS protection works in all input fields
+7. Error messages don't execute scripts
+8. Application continues to function normally
+9. Security headers are configured correctly
+10. No malicious scripts are executed","ACTIVE","","Test XSS prevention",15,"Application is protected against XSS","Security Suite"
+"Verify application security - authentication token security","Security","CRITICAL","Application is running with authentication","1. Login and obtain authentication token
+2. Verify token is JWT format
+3. Verify token contains required claims
+4. Verify token expiration is set
+5. Attempt to use expired token
+6. Verify expired token is rejected
+7. Attempt to use modified token
+8. Verify modified token is rejected
+9. Verify token is stored securely (not in localStorage if sensitive)
+10. Verify HTTPS is enforced in production","Valid token, Expired token, Modified token","1. Token is valid JWT format
+2. Token contains: user_id, exp, iat claims
+3. Token expiration is reasonable (e.g., 24 hours)
+4. Expired tokens are rejected with 401
+5. Modified tokens are rejected with 401
+6. Token signature is verified
+7. Token is stored securely (httpOnly cookie preferred)
+8. Token is not exposed in URLs or logs
+9. HTTPS is enforced in production
+10. Token refresh mechanism works (if implemented)","ACTIVE","","Test authentication token security",15,"Authentication tokens are secure","Security Suite"
+"Verify application security - rate limiting","Security","HIGH","Application is running","1. Make rapid requests to rate-limited endpoint
+2. Verify rate limit is enforced
+3. Verify rate limit headers are returned
+4. Verify error message indicates rate limit
+5. Wait for rate limit window to reset
+6. Verify requests succeed after reset
+7. Test rate limits for different endpoints
+8. Verify rate limits are per IP/user","Rapid requests to /api/discovery, /api/auth/login","1. Rate limits are enforced correctly
+2. Rate limit headers are present: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
+3. 429 Too Many Requests returned when limit exceeded
+4. Error message is clear: Rate limit exceeded
+5. Rate limit resets after window expires
+6. Different endpoints have appropriate limits
+7. Rate limits prevent abuse
+8. Legitimate users are not overly restricted
+9. Rate limit logs are recorded
+10. Rate limits work for both authenticated and anonymous users","ACTIVE","","Test rate limiting security",10,"Rate limiting works correctly","Security Suite"
+"Verify application security - CSRF protection","Security","HIGH","Application is running with forms","1. Verify CSRF tokens are generated
+2. Verify CSRF tokens are included in forms
+3. Verify CSRF tokens are validated on submission
+4. Attempt form submission without CSRF token
+5. Verify submission is rejected
+6. Attempt form submission with invalid CSRF token
+7. Verify submission is rejected
+8. Check for SameSite cookie attributes","Forms: login, registration, contact, validation","1. CSRF tokens are generated for forms
+2. CSRF tokens are included in form submissions
+3. CSRF tokens are validated server-side
+4. Submissions without token are rejected (403)
+5. Submissions with invalid token are rejected (403)
+6. SameSite cookie attribute is set (Strict or Lax)
+7. CSRF protection works for all forms
+8. Error messages are appropriate
+9. CSRF tokens expire after session
+10. CSRF protection doesn't break legitimate usage","ACTIVE","","Test CSRF protection",12,"CSRF protection works correctly","Security Suite"
+"Verify error boundary and error handling in frontend","Error Handling","MEDIUM","Frontend application is running","1. Trigger JavaScript error in component
+2. Verify error boundary catches error
+3. Verify error UI displays
+4. Verify error message is user-friendly
+5. Verify application doesn't crash
+6. Verify other parts of app continue to work
+7. Test with network errors
+8. Test with API errors
+9. Verify error logging works (if implemented)","Various error scenarios: component errors, network errors, API errors","1. Error boundary catches component errors
+2. Error UI displays instead of blank screen
+3. Error message is user-friendly (not technical)
+4. Application doesn't crash completely
+5. Navigation still works
+6. Other components continue to function
+7. Network errors are handled gracefully
+8. API errors show appropriate messages
+9. Errors are logged (if implemented)
+10. Users can recover from errors (refresh, navigate away)","ACTIVE","","Test error boundary and handling",15,"Error handling works correctly","Error Handling Suite"
+"Verify responsive design on mobile devices","UI/UX","MEDIUM","Frontend application is accessible","1. Open application on mobile device (or emulator)
+2. Verify home page displays correctly
+3. Verify navigation menu works (hamburger menu)
+4. Verify forms are usable on mobile
+5. Verify buttons are appropriately sized
+6. Verify text is readable
+7. Verify images are responsive
+8. Test on tablet device
+9. Test landscape orientation
+10. Verify touch interactions work","Mobile device (375px width), Tablet device (768px width)","1. Application is responsive on mobile
+2. Navigation menu collapses to hamburger menu
+3. Forms are usable (inputs are large enough)
+4. Buttons are touch-friendly (min 44x44px)
+5. Text is readable without zooming
+6. Images scale correctly
+7. Layout adapts to screen size
+8. Tablet layout is optimized
+9. Landscape orientation works
+10. Touch interactions are smooth
+11. No horizontal scrolling on mobile
+12. Performance is acceptable on mobile","ACTIVE","","Test responsive design",20,"Application works well on mobile devices","UI/UX Suite"
+"Verify accessibility - keyboard navigation","UI/UX","HIGH","Frontend application is accessible","1. Navigate entire application using only keyboard
+2. Verify tab order is logical
+3. Verify focus indicators are visible
+4. Verify all interactive elements are keyboard accessible
+5. Verify skip links work (if implemented)
+6. Test with screen reader (if available)
+7. Verify ARIA labels are present
+8. Verify form labels are associated","Keyboard navigation throughout app","1. All pages are keyboard navigable
+2. Tab order follows visual order
+3. Focus indicators are clear and visible
+4. All buttons/links are keyboard accessible
+5. Forms are keyboard navigable
+6. Skip links work (if implemented)
+7. Screen reader announces elements correctly
+8. ARIA labels are present and accurate
+9. Form labels are properly associated
+10. Keyboard shortcuts work (if implemented)
+11. Focus trap works in modals
+12. Esc key closes modals/dropdowns","ACTIVE","","Test keyboard navigation accessibility",25,"Application is keyboard accessible","UI/UX Suite"
+"Verify accessibility - screen reader compatibility","UI/UX","HIGH","Frontend application is accessible, Screen reader software available","1. Open application with screen reader
+2. Navigate through home page
+3. Verify headings are announced
+4. Verify links are announced with context
+5. Verify form fields are announced with labels
+6. Verify buttons are announced with purpose
+7. Verify error messages are announced
+8. Verify ARIA live regions work for dynamic content
+9. Test form validation announcements
+10. Test navigation announcements","Screen reader: NVDA, JAWS, or VoiceOver","1. Screen reader can navigate application
+2. Headings are announced correctly (h1, h2, etc.)
+3. Links are announced with accessible text
+4. Form fields are announced with labels
+5. Buttons are announced with purpose
+6. Error messages are announced automatically
+7. ARIA live regions announce dynamic updates
+8. Form validation errors are announced
+9. Navigation changes are announced
+10. ARIA attributes are used correctly
+11. Landmark regions are identified
+12. Content is understandable without visual context","ACTIVE","","Test screen reader compatibility",30,"Application works with screen readers","UI/UX Suite"
+"Verify loading states and indicators","UI/UX","MEDIUM","Frontend application is accessible","1. Trigger API calls that take time
+2. Verify loading indicators display
+3. Verify loading states are clear
+4. Verify skeleton screens display (if implemented)
+5. Verify progress indicators update
+6. Test with slow network (throttle)
+7. Verify users can understand what's happening
+8. Verify cancel actions work (if available)","Slow API calls, Network throttling","1. Loading indicators display during API calls
+2. Loading states are clear and informative
+3. Skeleton screens show content structure (if implemented)
+4. Progress indicators update for long operations
+5. Users understand what's loading
+6. Loading states don't block entire UI
+7. Cancel buttons work (if available)
+8. Error states display if loading fails
+9. Loading indicators are accessible (ARIA labels)
+10. Loading states don't cause layout shift","ACTIVE","","Test loading states",12,"Loading states work correctly","UI/UX Suite"
+"Verify form validation and error messages","UI/UX","HIGH","Frontend application is accessible","1. Submit form with empty required fields
+2. Verify validation errors display
+3. Submit form with invalid email format
+4. Verify email validation error
+5. Submit form with password that doesn't meet requirements
+6. Verify password validation error
+7. Verify errors are clear and actionable
+8. Verify errors are associated with fields
+9. Verify errors clear when fixed
+10. Test real-time validation (if implemented)","Invalid inputs: empty fields, invalid email, weak password","1. Required field validation works
+2. Validation errors display immediately or on submit
+3. Error messages are clear and specific
+4. Error messages are associated with fields (ARIA)
+5. Email format validation works
+6. Password strength validation works (if implemented)
+7. Errors are visually distinct (color, icon)
+8. Errors clear when field is corrected
+9. Real-time validation works (if implemented)
+10. Form submission is blocked until valid
+11. Error summary is available (if implemented)
+12. Errors are accessible to screen readers","ACTIVE","","Test form validation",15,"Form validation works correctly","UI/UX Suite"
+"Verify data persistence and localStorage","Data Management","MEDIUM","Frontend application is accessible","1. Complete discovery form and submit
+2. Verify data is stored in localStorage/cache
+3. Refresh page
+4. Verify data persists and loads
+5. Navigate away and back
+6. Verify data is still available
+7. Clear browser cache
+8. Verify data is cleared appropriately
+9. Test with multiple browser tabs
+10. Verify data syncs across tabs (if implemented)","Discovery form data, Validation data","1. Data is stored in localStorage appropriately
+2. Data persists across page refreshes
+3. Data loads correctly when returning to page
+4. Data is cleared when appropriate (logout, expiration)
+5. Data doesn't conflict across browser tabs
+6. Data syncs across tabs (if implemented)
+7. Storage quota is managed (no errors)
+8. Data is encrypted/sanitized (if sensitive)
+9. Cache invalidation works correctly
+10. Old data is cleaned up automatically","ACTIVE","","Test data persistence",12,"Data persistence works correctly","Data Management Suite"
+"Verify session management","Data Management","HIGH","Application is running with authentication","1. Login to application
+2. Verify session is established
+3. Verify session token is stored
+4. Leave application idle for session duration
+5. Verify session expires correctly
+6. Verify redirect to login on expired session
+7. Verify remember me option (if implemented)
+8. Test session across browser tabs
+9. Verify logout clears session
+10. Verify session security","Session duration: 24 hours (configurable)","1. Session is established on login
+2. Session token is stored securely
+3. Session persists across page refreshes
+4. Session expires after set duration
+5. Expired session redirects to login
+6. Remember me extends session (if implemented)
+7. Session works across browser tabs
+8. Logout clears session completely
+9. Session tokens are secure (httpOnly, Secure flags)
+10. Session cannot be hijacked easily
+11. Concurrent sessions are handled (if configured)
+12. Session activity is tracked (if implemented)","ACTIVE","","Test session management",15,"Session management works correctly","Data Management Suite"
+"Verify export functionality - PDF export","Export","MEDIUM","User has completed discovery or validation","1. Navigate to results page (profile, recommendations, validation)
+2. Click Export to PDF button
+3. Verify PDF generation starts
+4. Verify PDF downloads
+5. Open PDF file
+6. Verify PDF contains all expected content
+7. Verify PDF formatting is correct
+8. Verify PDF is readable
+9. Test with different result types","Profile report, Recommendations report, Validation report","1. Export to PDF button is visible and works
+2. PDF generation starts immediately
+3. PDF downloads successfully
+4. PDF contains all report content
+5. PDF formatting is correct (layout, fonts, images)
+6. PDF is readable and professional
+7. PDF includes branding (logo, colors)
+8. PDF file size is reasonable
+9. PDF works for all report types
+10. PDF generation doesn't block UI
+11. Error handling works if PDF generation fails
+12. PDF can be opened in standard PDF readers","ACTIVE","","Test PDF export functionality",15,"PDF export works correctly","Export Suite"
+"Verify export functionality - Markdown export","Export","LOW","User has completed discovery or validation","1. Navigate to results page
+2. Click Export to Markdown button
+3. Verify Markdown file downloads
+4. Open Markdown file
+5. Verify Markdown contains all expected content
+6. Verify Markdown formatting is correct
+7. Verify Markdown is readable
+8. Test with different result types","Profile report, Recommendations report, Validation report","1. Export to Markdown button is visible and works
+2. Markdown file downloads successfully
+3. Markdown contains all report content
+4. Markdown formatting is correct (headings, lists, code blocks)
+5. Markdown is readable and well-structured
+6. Markdown works for all report types
+7. Markdown file size is reasonable
+8. Markdown can be opened in text editors
+9. Markdown renders correctly in Markdown viewers
+10. Error handling works if export fails","ACTIVE","","Test Markdown export functionality",10,"Markdown export works correctly","Export Suite"
+"Verify API endpoint documentation","Documentation","LOW","Backend server is running","1. Navigate to API documentation endpoint (/docs or /openapi.json)
+2. Verify API documentation is accessible
+3. Verify all endpoints are documented
+4. Verify request/response schemas are documented
+5. Verify example requests are provided
+6. Test API calls from documentation interface
+7. Verify authentication is documented
+8. Verify error responses are documented","","1. API documentation is accessible at /docs
+2. All API endpoints are listed
+3. Endpoint descriptions are clear
+4. Request schemas are documented with field types
+5. Response schemas are documented
+6. Example requests are provided
+7. Try it out functionality works (if Swagger UI)
+8. Authentication methods are documented
+9. Error responses are documented with status codes
+10. API versioning is documented (if applicable)
+11. Rate limits are documented
+12. Documentation is up-to-date with code","ACTIVE","","Test API documentation completeness",10,"API documentation is complete and accurate","Documentation Suite"
+"Verify browser compatibility - Chrome","Browser Compatibility","MEDIUM","Application is accessible","1. Open application in Chrome (latest version)
+2. Verify all features work correctly
+3. Verify styling displays correctly
+4. Verify JavaScript executes correctly
+5. Verify forms work
+6. Verify API calls work
+7. Test responsive design
+8. Verify no console errors
+9. Test on Chrome mobile","Chrome latest version, Chrome mobile","1. Application works correctly in Chrome
+2. All features are functional
+3. Styling displays correctly
+4. JavaScript executes without errors
+5. Forms work correctly
+6. API calls succeed
+7. Responsive design works
+8. No console errors or warnings
+9. Performance is acceptable
+10. Chrome mobile works correctly","ACTIVE","","Test Chrome browser compatibility",15,"Application works in Chrome","Browser Compatibility Suite"
+"Verify browser compatibility - Firefox","Browser Compatibility","MEDIUM","Application is accessible","1. Open application in Firefox (latest version)
+2. Verify all features work correctly
+3. Verify styling displays correctly
+4. Verify JavaScript executes correctly
+5. Verify forms work
+6. Verify API calls work
+7. Test responsive design
+8. Verify no console errors
+9. Test on Firefox mobile","Firefox latest version, Firefox mobile","1. Application works correctly in Firefox
+2. All features are functional
+3. Styling displays correctly
+4. JavaScript executes without errors
+5. Forms work correctly
+6. API calls succeed
+7. Responsive design works
+8. No console errors or warnings
+9. Performance is acceptable
+10. Firefox mobile works correctly","ACTIVE","","Test Firefox browser compatibility",15,"Application works in Firefox","Browser Compatibility Suite"
+"Verify browser compatibility - Safari","Browser Compatibility","MEDIUM","Application is accessible","1. Open application in Safari (latest version)
+2. Verify all features work correctly
+3. Verify styling displays correctly
+4. Verify JavaScript executes correctly
+5. Verify forms work
+6. Verify API calls work
+7. Test responsive design
+8. Verify no console errors
+9. Test on Safari iOS","Safari latest version, Safari iOS","1. Application works correctly in Safari
+2. All features are functional
+3. Styling displays correctly
+4. JavaScript executes without errors
+5. Forms work correctly
+6. API calls succeed
+7. Responsive design works
+8. No console errors or warnings
+9. Performance is acceptable
+10. Safari iOS works correctly
+11. Safari-specific features work (if used)","ACTIVE","","Test Safari browser compatibility",15,"Application works in Safari","Browser Compatibility Suite"
+"Verify browser compatibility - Edge","Browser Compatibility","MEDIUM","Application is accessible","1. Open application in Edge (latest version)
+2. Verify all features work correctly
+3. Verify styling displays correctly
+4. Verify JavaScript executes correctly
+5. Verify forms work
+6. Verify API calls work
+7. Test responsive design
+8. Verify no console errors","Edge latest version","1. Application works correctly in Edge
+2. All features are functional
+3. Styling displays correctly
+4. JavaScript executes without errors
+5. Forms work correctly
+6. API calls succeed
+7. Responsive design works
+8. No console errors or warnings
+9. Performance is acceptable","ACTIVE","","Test Edge browser compatibility",12,"Application works in Edge","Browser Compatibility Suite"
+"Verify SEO meta tags on public pages","SEO","MEDIUM","Application is accessible","1. Navigate to home page
+2. View page source
+3. Verify title tag is present and descriptive
+4. Verify meta description is present
+5. Verify Open Graph tags are present
+6. Verify Twitter Card tags are present
+7. Verify canonical URL is present
+8. Check other public pages (product, pricing, blog)
+9. Verify structured data (JSON-LD) if implemented","Public pages: home, product, pricing, blog","1. Title tags are present and unique per page
+2. Meta descriptions are present and compelling
+3. Open Graph tags are present (og:title, og:description, og:image, og:url)
+4. Twitter Card tags are present
+5. Canonical URLs are correct
+6. Meta tags are different for each page
+7. Structured data is present (if implemented)
+8. Meta tags are optimized for search engines
+9. Images have alt text
+10. URLs are SEO-friendly","ACTIVE","","Test SEO meta tags",10,"SEO meta tags are present and optimized","SEO Suite"
+"Verify analytics tracking implementation","Analytics","LOW","Application is accessible, Analytics configured","1. Navigate through application
+2. Verify page views are tracked
+3. Verify custom events are tracked
+4. Verify conversion events are tracked
+5. Check analytics dashboard for data
+6. Verify user actions are tracked
+7. Verify e-commerce events (if applicable)
+8. Test with analytics debugging tools","Google Analytics or similar configured","1. Page views are tracked correctly
+2. Custom events fire on user actions
+3. Conversion events track correctly (signups, purchases)
+4. User properties are tracked (if applicable)
+5. E-commerce events work (if implemented)
+6. Analytics data appears in dashboard
+7. No duplicate events are sent
+8. Analytics doesn't slow down application
+9. Privacy-compliant tracking (GDPR, etc.)
+10. Analytics works in all browsers","ACTIVE","","Test analytics tracking",12,"Analytics tracking works correctly","Analytics Suite"
+"Verify error logging and monitoring","Monitoring","HIGH","Application is deployed with monitoring","1. Trigger various errors (API errors, validation errors, etc.)
+2. Verify errors are logged
+3. Check error monitoring dashboard (Sentry, etc.)
+4. Verify error details are captured
+5. Verify error context is included (user, request, etc.)
+6. Verify alerts are triggered for critical errors
+7. Test error grouping
+8. Verify error resolution tracking","Various error scenarios","1. Errors are logged to monitoring service
+2. Error details are captured: message, stack trace, context
+3. User context is included (if available)
+4. Request context is included (URL, method, headers)
+5. Alerts are triggered for critical errors
+6. Errors are grouped by type/message
+7. Error trends are visible in dashboard
+8. Error resolution can be tracked
+9. Performance impact of logging is minimal
+10. Sensitive data is not logged","ACTIVE","","Test error logging and monitoring",15,"Error logging and monitoring work correctly","Monitoring Suite"
+"Verify database backup and recovery","Database","CRITICAL","Database is configured with backup system","1. Verify automated backups are running
+2. Verify backup frequency is appropriate
+3. Test manual backup creation
+4. Verify backup files are created
+5. Verify backup files are stored securely
+6. Test database restoration from backup
+7. Verify restored data is correct
+8. Test point-in-time recovery (if available)
+9. Verify backup retention policy","Database backup configuration","1. Automated backups run on schedule
+2. Backup frequency is appropriate (daily minimum)
+3. Manual backups can be created
+4. Backup files are created successfully
+5. Backup files are stored securely (encrypted, off-site)
+6. Database restoration works correctly
+7. Restored data matches original data
+8. Point-in-time recovery works (if available)
+9. Backup retention policy is followed
+10. Backup restoration is tested regularly
+11. Backup process doesn't impact application performance
+12. Backup verification is automated","ACTIVE","","Test database backup and recovery",30,"Database backup and recovery work correctly","Database Suite"
+"Verify application deployment and rollback","Deployment","CRITICAL","Application has deployment pipeline configured","1. Trigger application deployment
+2. Verify deployment process executes
+3. Verify application starts correctly after deployment
+4. Verify database migrations run (if applicable)
+5. Verify application is accessible after deployment
+6. Verify new version is live
+7. Test rollback procedure
+8. Verify rollback restores previous version
+9. Verify data integrity after rollback","Deployment pipeline, Previous version available","1. Deployment process executes successfully
+2. Application starts without errors after deployment
+3. Database migrations run automatically (if applicable)
+4. Application is accessible immediately after deployment
+5. New version features are live
+6. Rollback procedure works correctly
+7. Previous version is restored successfully
+8. Data integrity is maintained during rollback
+9. Zero-downtime deployment works (if implemented)
+10. Deployment logs are available
+11. Deployment notifications are sent (if configured)
+12. Health checks pass after deployment","ACTIVE","","Test deployment and rollback procedures",45,"Deployment and rollback work correctly","Deployment Suite"
+
+

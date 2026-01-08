@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
  * Risks Section Component
  */
 export default function RisksSection({ riskRows, content, isEnriching }) {
-  if (riskRows.length > 0) {
+  if (riskRows && riskRows.length > 0) {
     return (
       <div className="overflow-hidden rounded-xl">
         <table className="min-w-full text-sm">

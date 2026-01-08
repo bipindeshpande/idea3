@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
  * Execution Path Section Component
  */
 export default function ExecutionPathSection({ executionPhaseCards, content, isEnriching }) {
-  if (executionPhaseCards.length > 0) {
+  if (executionPhaseCards && executionPhaseCards.length > 0) {
     return (
       <div className="grid gap-4 md:grid-cols-2">
         {executionPhaseCards.map((phase) => (

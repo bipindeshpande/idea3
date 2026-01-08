@@ -17,8 +17,8 @@ export default function AdminTabs({ activeTab, onTabChange }) {
           onClick={() => onTabChange(tab.id)}
           className={`px-4 py-2 text-sm font-semibold transition whitespace-nowrap ${
             activeTab === tab.id
-              ? "border-b-2 border-default border-default text-accent text-accent"
-              : "text-secondary text-secondary hover:text-primary hover:text-primary"
+              ? "border-b-2 border-default text-accent"
+              : "text-secondary hover:text-primary"
           }`}
         >
           {tab.label}

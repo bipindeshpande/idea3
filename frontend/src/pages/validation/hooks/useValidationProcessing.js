@@ -360,11 +360,27 @@ export function useValidationProcessing(validation, categoryAnswers, ideaExplana
     const lookup = {};
     VALIDATION_PARAMETERS.forEach((parameter) => {
       const normalized = normalizeKey(parameter);
-      const detailsKey = detailsMap[parameter]
-        || detailsMap[normalized]
-        || detailsMap[normalized.replace(/_/g, "")]
-        || detailsMap[parameter.toLowerCase()]
-        || null;
+      // Build candidates list for details lookup (matching score lookup logic)
+      const detailsCandidates = [
+        parameter,
+        normalized,
+        normalized.replace(/_/g, ""),
+        parameter.toLowerCase(),
+      ];
+      
+      // Handle Team / Founder Fit variations for details
+      if (parameter === "Team / Founder Fit") {
+        detailsCandidates.push("team_founder_fit", "team_fit", "founder_fit");
+      }
+      
+      // Try each candidate to find the details
+      let detailsKey = null;
+      for (const candidate of detailsCandidates) {
+        if (detailsMap[candidate] !== undefined) {
+          detailsKey = detailsMap[candidate];
+          break;
+        }
+      }
 
       lookup[parameter] = {
         score: getScoreFromScores(scores, parameter),

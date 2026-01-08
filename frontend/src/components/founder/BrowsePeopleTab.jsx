@@ -101,15 +101,15 @@ export default function BrowsePeopleTab({
           <h2 className="text-xl font-bold">Browse Founders</h2>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 border rounded-lg hover:bg-surface hover:bg-surface text-sm"
+            className="px-4 py-2 border rounded-lg hover:bg-surface text-sm"
           >
             {showFilters ? "Hide Filters" : "Show Filters"}
           </button>
         </div>
 
         {/* Privacy Notice */}
-        <div className="bg-surface bg-surface p-3 rounded-lg border border-default border-default mb-4">
-          <p className="text-sm text-accent text-accent">
+        <div className="bg-surface p-3 rounded-lg border border-default mb-4">
+          <p className="text-sm text-accent">
             <strong>Privacy:</strong> Profiles are anonymized. Names and contact details are only shared after both sides accept.
           </p>
         </div>
@@ -163,7 +163,7 @@ export default function BrowsePeopleTab({
             <div className="flex items-end">
               <button
                 onClick={() => setFilters({ skills: "", industries: "", commitment_level: "", location: "" })}
-                className="px-4 py-2 border rounded-lg hover:bg-surface hover:bg-surface text-sm"
+                className="px-4 py-2 border rounded-lg hover:bg-surface text-sm"
               >
                 Clear Filters
               </button>
@@ -174,8 +174,8 @@ export default function BrowsePeopleTab({
 
       {people.length === 0 ? (
         <div className="text-center py-12 bg-surface rounded-xl border border-default">
-          <p className="text-secondary text-secondary mb-2">No matching founders found yet.</p>
-          <p className="text-sm text-secondary text-secondary">Check back later or create your profile to get discovered.</p>
+          <p className="text-secondary mb-2">No matching founders found yet.</p>
+          <p className="text-sm text-secondary">Check back later or create your profile to get discovered.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -186,19 +186,19 @@ export default function BrowsePeopleTab({
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h3 className="font-bold text-lg mb-2">Founder Profile</h3>
-                    <p className="text-secondary text-secondary mb-2">{person.looking_for || "Looking for collaborators"}</p>
+                    <p className="text-secondary mb-2">{person.looking_for || "Looking for collaborators"}</p>
                     {matchReason && (
-                      <p className="text-sm text-accent text-accent mb-2 font-medium">{matchReason}</p>
+                      <p className="text-sm text-accent mb-2 font-medium">{matchReason}</p>
                     )}
                     {person.primary_skills && person.primary_skills.length > 0 && (
                       <div className="flex gap-2 flex-wrap mb-2">
                         {person.primary_skills.map((skill, idx) => (
-                          <span key={idx} className="px-2 py-1 bg-app bg-surface rounded text-sm">{skill}</span>
+                          <span key={idx} className="px-2 py-1 bg-surface rounded text-sm">{skill}</span>
                         ))}
                       </div>
                     )}
                     {person.commitment_level && (
-                      <p className="text-sm text-secondary text-secondary">Commitment: {person.commitment_level}</p>
+                      <p className="text-sm text-secondary">Commitment: {person.commitment_level}</p>
                     )}
                   </div>
                   <button

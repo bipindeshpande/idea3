@@ -4,6 +4,7 @@ import SectionTitle from "../../components/marketing/SectionTitle.jsx";
 import FeatureCard from "../../components/marketing/FeatureCard.jsx";
 import CTASection from "../../components/marketing/CTASection.jsx";
 import { HeroSection } from "../../sections/marketing/validate";
+import { generateBreadcrumbs, breadcrumbPatterns } from "../../utils/seo/breadcrumbs.js";
 import {
   seo,
   heroData,
@@ -15,6 +16,8 @@ import {
 } from "../../data/marketing/validate.js";
 
 export default function ProductValidatePage() {
+  const breadcrumbs = generateBreadcrumbs(breadcrumbPatterns.productValidate);
+
   return (
     <MarketingLayout>
       <Seo 
@@ -25,6 +28,7 @@ export default function ProductValidatePage() {
         ogTitle={seo.ogTitle}
         ogDescription={seo.ogDescription}
         structuredData={seo.structuredData}
+        breadcrumbs={breadcrumbs}
       />
 
       <HeroSection data={heroData} />

@@ -100,15 +100,30 @@ async def login(
     auth_service = AuthService(db)
     
     # Authenticate user
-    user = auth_service.authenticate_user(
-        email=request.email,
-        password=request.password
-    )
-    
-    if not user:
+    try:
+        user = auth_service.authenticate_user(
+            email=request.email,
+            password=request.password
+        )
+    except Exception as e:
+        # Log authentication errors for debugging
+        import logging
+        logger = logging.getLogger("startup_discovery")
+        logger.warning(f"Authentication error for {request.email}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Authentication failed. Please check your credentials and try again.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user:
+        # Log failed login attempt (don't reveal if user exists or not)
+        import logging
+        logger = logging.getLogger("startup_discovery")
+        logger.warning(f"Failed login attempt for email: {request.email}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password. Please check your credentials and try again.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
@@ -154,7 +169,7 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     """Request model for reset password"""
     token: str
-    new_password: str
+    password: str  # Frontend sends 'password', not 'new_password'
 
 
 class ChangePasswordRequest(BaseModel):
@@ -194,7 +209,7 @@ async def forgot_password(
     Request password reset
     
     Generates a reset token and sends it via email (if email service configured).
-    For now, returns a mock response indicating success.
+    In development mode, returns the reset link directly.
     
     In production, this should:
     1. Generate a secure reset token
@@ -206,12 +221,41 @@ async def forgot_password(
         user = auth_service.get_user_by_email(request.email)
         
         # Always return success (don't reveal if email exists for security)
-        # In production, generate and send reset token
-        # For now, return success message
-        return {
-            "success": True,
-            "message": "If an account with that email exists, a password reset link has been sent."
-        }
+        if user:
+            # Generate reset token (JWT with user_id, expires in 1 hour)
+            reset_token_expires = timedelta(hours=1)
+            reset_token = auth_service.create_access_token(
+                data={"sub": user.user_id, "type": "password_reset"},
+                expires_delta=reset_token_expires
+            )
+            
+            # In development mode, return the reset link
+            # In production, this would be sent via email
+            reset_link = None
+            if settings.DEBUG:
+                # Use first CORS origin as base URL for reset link
+                cors_origins = settings.CORS_ORIGINS
+                if isinstance(cors_origins, list) and len(cors_origins) > 0:
+                    base_url = cors_origins[0]
+                else:
+                    base_url = "http://localhost:5173"
+                reset_link = f"{base_url}/reset-password?token={reset_token}"
+            
+            # TODO: In production, send email with reset link
+            # For now, return success message (and reset_link in dev mode)
+            response = {
+                "success": True,
+                "message": "If an account with that email exists, a password reset link has been sent."
+            }
+            if reset_link:
+                response["reset_link"] = reset_link
+            return response
+        else:
+            # User doesn't exist, but return same message for security
+            return {
+                "success": True,
+                "message": "If an account with that email exists, a password reset link has been sent."
+            }
     except Exception as e:
         # Always return success to avoid email enumeration
         return {
@@ -239,46 +283,59 @@ async def reset_password(
     try:
         auth_service = AuthService(db)
         
-        # TODO: In production, verify token from database
-        # For now, decode token to get user_id
+        # Decode token to get user_id
         payload = auth_service.decode_access_token(request.token)
         if not payload:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid or expired reset token"
-            )
+            return {
+                "success": False,
+                "error": "Invalid or expired reset token",
+                "message": "The reset token is invalid or has expired. Please request a new password reset."
+            }
+        
+        # Verify token type (should be password_reset)
+        token_type = payload.get("type")
+        if token_type != "password_reset":
+            return {
+                "success": False,
+                "error": "Invalid reset token",
+                "message": "The reset token is invalid. Please request a new password reset."
+            }
         
         user_id = payload.get("sub")
         if not user_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid reset token"
-            )
+            return {
+                "success": False,
+                "error": "Invalid reset token",
+                "message": "The reset token is invalid. Please request a new password reset."
+            }
         
         user = auth_service.get_user_by_id(user_id)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
-            )
+            return {
+                "success": False,
+                "error": "User not found",
+                "message": "The user associated with this reset token was not found."
+            }
         
         # Update password
-        hashed_password = auth_service.get_password_hash(request.new_password)
+        hashed_password = auth_service.get_password_hash(request.password)
         user.hashed_password = hashed_password
         db.commit()
         
         return {
             "success": True,
-            "message": "Password reset successfully"
+            "message": "Password reset successfully",
+            "error": None
         }
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to reset password: {str(e)}"
-        )
+        return {
+            "success": False,
+            "error": f"Failed to reset password: {str(e)}",
+            "message": "An error occurred while resetting your password. Please try again."
+        }
 
 
 @router.post("/change-password", response_model=Dict[str, Any], status_code=status.HTTP_200_OK)
@@ -297,10 +354,11 @@ async def change_password(
         
         # Verify current password
         if not auth_service.verify_password(request.current_password, current_user.hashed_password):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Current password is incorrect"
-            )
+            return {
+                "success": False,
+                "error": "Current password is incorrect",
+                "message": "The current password you entered is incorrect."
+            }
         
         # Update password
         hashed_password = auth_service.get_password_hash(request.new_password)
@@ -309,14 +367,16 @@ async def change_password(
         
         return {
             "success": True,
-            "message": "Password changed successfully"
+            "message": "Password changed successfully",
+            "error": None
         }
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to change password: {str(e)}"
-        )
+        return {
+            "success": False,
+            "error": f"Failed to change password: {str(e)}",
+            "message": "An error occurred while changing your password. Please try again."
+        }
 

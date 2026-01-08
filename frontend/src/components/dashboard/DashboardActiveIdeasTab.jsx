@@ -7,6 +7,7 @@ import { memo, useMemo, useState } from "react";
 import Card from "../ui/Card.jsx";
 import UIHeading from "../ui/ui-heading.jsx";
 import UIButton from "../ui/ui-button.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../workspace/WorkspaceTheme.js";
 
 /*
  NOTES FOR DEV:
@@ -36,8 +37,19 @@ function DashboardActiveIdeasTab({
  // Extract idea IDs from actions + notes for indicators
  // ---------------------------------------------------------------------------
 
+ // Filter actions for display (exclude completed for UI purposes)
  const ideaActions = actions.filter(a => {
  if (a.status === "completed") return false;
+ if (!a.idea_id) return false;
+ return (
+ a.idea_id.match(/run_([^_]+)_idea_(\d+)/) ||
+ a.idea_id.match(/idea_(\d+)/) ||
+ (a.idea_id.match(/run_([^_]+)/) && !a.idea_id.match(/val_/))
+ );
+ });
+
+ // Include ALL actions (any status) for determining active status
+ const allActionsForActiveCheck = actions.filter(a => {
  if (!a.idea_id) return false;
  return (
  a.idea_id.match(/run_([^_]+)_idea_(\d+)/) ||
@@ -79,6 +91,28 @@ function DashboardActiveIdeasTab({
  }
  });
 
+ // Create map for ALL actions (any status) to determine active status
+ const allActionsByIdeaId = new Map();
+ allActionsForActiveCheck.forEach(action => {
+ allActionsByIdeaId.set(action.idea_id, action);
+ 
+ // Handle canonical format: run_id::idea_index
+ const canonicalMatch = action.idea_id.match(/^([^:]+)::idea_(\d+)$/);
+ if (canonicalMatch) {
+  const [, runId, idx] = canonicalMatch;
+  // Map to frontend formats
+  allActionsByIdeaId.set(`${runId}-${idx}`, action);
+  allActionsByIdeaId.set(`run_${runId}_idea_${idx}`, action);
+ }
+ 
+ // Handle legacy format: run_xxx_idea_y
+ const legacyMatch = action.idea_id.match(/run_([^_]+)_idea_(\d+)/);
+ if (legacyMatch) {
+  const [, runId, idx] = legacyMatch;
+  allActionsByIdeaId.set(`${runId}-${idx}`, action);
+ }
+ });
+
  const notesByIdeaId = new Map();
  ideaNotes.forEach(note => {
  notesByIdeaId.set(note.idea_id, note);
@@ -105,26 +139,39 @@ function DashboardActiveIdeasTab({
  const allIdeasList = allIdeas.map(idea => {
  // Idea ID can be in format "runId-ideaIndex" or we construct it
  const ideaId = idea.id || `${idea.runId}-${idea.ideaIndex}`;
- // Also create the "run_xxx_idea_y" format for matching
- const runIdNormalized = String(idea.runId || "").replace(/^run_/, "");
+ // Normalize runId - remove "run_" prefix if present, but keep original for matching
+ const runIdRaw = String(idea.runId || "");
+ const runIdNormalized = runIdRaw.replace(/^run_/, "");
  const ideaIdFormatted = `run_${runIdNormalized}_idea_${idea.ideaIndex}`;
  // Also create canonical format: run_id::idea_index
  const canonicalId = `${runIdNormalized}::idea_${idea.ideaIndex}`;
  
  // Try all formats when looking up actions/notes (canonical, formatted, and original)
+ // Also try with the raw runId in case it has "run_" prefix
+ // For display: use actionsByIdeaId (excludes completed)
  const action = actionsByIdeaId.get(canonicalId) || 
                 actionsByIdeaId.get(ideaIdFormatted) || 
-                actionsByIdeaId.get(ideaId);
+                actionsByIdeaId.get(ideaId) ||
+                (runIdRaw !== runIdNormalized ? actionsByIdeaId.get(`run_${runIdRaw}_idea_${idea.ideaIndex}`) : null);
  const note = notesByIdeaId.get(canonicalId) || 
               notesByIdeaId.get(ideaIdFormatted) || 
-              notesByIdeaId.get(ideaId);
+              notesByIdeaId.get(ideaId) ||
+              (runIdRaw !== runIdNormalized ? notesByIdeaId.get(`run_${runIdRaw}_idea_${idea.ideaIndex}`) : null);
+ 
+ // For active status check: use allActionsByIdeaId (includes all statuses)
+ const hasActionForActive = !!(allActionsByIdeaId.get(canonicalId) || 
+                                allActionsByIdeaId.get(ideaIdFormatted) || 
+                                allActionsByIdeaId.get(ideaId) ||
+                                (runIdRaw !== runIdNormalized ? allActionsByIdeaId.get(`run_${runIdRaw}_idea_${idea.ideaIndex}`) : null));
  
  return {
  idea_id: ideaIdFormatted, // Use standard format for compatibility
- hasAction: !!action,
+ hasAction: !!action, // For display purposes (excludes completed)
  hasNote: !!note,
  action: action || null,
  note: note || null,
+ // Active status: has ANY action (any status) OR note
+ isActive: hasActionForActive || !!note,
  // Store original idea data for reference
  _ideaData: idea,
  };
@@ -147,7 +194,7 @@ function DashboardActiveIdeasTab({
   const withNotes = allActiveIdeas.filter(item => item.hasNote).length;
   const withActions = allActiveIdeas.filter(item => item.hasAction).length;
   const withBoth = allActiveIdeas.filter(item => item.hasNote && item.hasAction).length;
-  const activeCount = allActiveIdeas.filter(item => item.hasNote || item.hasAction).length;
+  const activeCount = allActiveIdeas.filter(item => item.isActive).length;
   
   return { total, withNotes, withActions, withBoth, activeCount };
  }, [allActiveIdeas]);
@@ -160,11 +207,12 @@ function DashboardActiveIdeasTab({
   let filtered = allActiveIdeas;
 
   // Apply active filter first (if enabled)
+  // An idea is active if it has an action OR a note (in any status)
   if (showActiveOnly) {
-   filtered = filtered.filter(item => item.hasNote || item.hasAction);
+   filtered = filtered.filter(item => item.isActive);
   }
 
-  // Apply search filter (searches within the already filtered list)
+  // Apply search filter
   if (searchQuery.trim()) {
    const query = searchQuery.toLowerCase().trim();
    const normalize = v => (v ? String(v).trim().toLowerCase() : "");
@@ -211,8 +259,8 @@ function DashboardActiveIdeasTab({
 
   // Sort: active ideas (with notes/actions) first, then by recency
   filtered.sort((a, b) => {
-   const aIsActive = a.hasNote || a.hasAction;
-   const bIsActive = b.hasNote || b.hasAction;
+   const aIsActive = a.isActive;
+   const bIsActive = b.isActive;
    
    // Active ideas come first
    if (aIsActive && !bIsActive) return -1;
@@ -234,7 +282,7 @@ function DashboardActiveIdeasTab({
  const IdeaCard = ({ item, ideaLink, projectName, run, ideaData }) => {
  const isSelected = selectedIdeas?.has(item.idea_id);
  const navigate = useNavigate();
- const isActive = item.hasNote || item.hasAction;
+ const isActive = item.isActive;
 
  const handleClick = (e) => {
   e.preventDefault();
@@ -299,14 +347,14 @@ title="Has action item"
 <div className="h-2 w-2 rounded-full" style={{ background: "var(--badge-info-bg)" }} title="Has note" />
 )}
 
- <h4 className="text-sm font-semibold text-primary">
+ <h4 className={WORKSPACE_TYPOGRAPHY.h4}>
  {projectName}
  </h4>
 
  {isActive && (
  <div className="flex items-center gap-1 ml-auto">
   {item.hasNote && (
-   <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium" style={{ background: "var(--badge-info-bg)", color: "var(--badge-info-text)" }}>
+   <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded ${WORKSPACE_TYPOGRAPHY.caption} font-medium`} style={{ background: "var(--badge-info-bg)", color: "var(--badge-info-text)" }}>
     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
     </svg>
@@ -314,7 +362,7 @@ title="Has action item"
    </span>
   )}
   {item.hasAction && (
-   <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium bg-surface border border-default text-secondary">
+   <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded ${WORKSPACE_TYPOGRAPHY.caption} font-medium bg-surface border border-default text-secondary`}>
     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
     </svg>
@@ -327,7 +375,7 @@ title="Has action item"
 
  {/* run metadata */}
  {run?.inputs && (
- <p className="text-xs text-secondary mb-1 leading-tight">
+ <p className={`${WORKSPACE_TYPOGRAPHY.caption} mb-1 leading-tight`}>
  Time: {run.inputs.time_commitment || "Not set"} • Budget:{" "}
  {run.inputs.budget_range || "Not set"} • Focus:{" "}
  {run.inputs.sub_interest_area ||
@@ -335,13 +383,13 @@ title="Has action item"
  "Unknown"}
  </p>
  )}
-
+ 
  {item.hasAction && (
- <p className="text-xs text-primary leading-tight">{item.action.action_text}</p>
+ <p className={`${WORKSPACE_TYPOGRAPHY.caption} leading-tight`}>{item.action.action_text}</p>
  )}
-
+ 
  {item.hasNote && (
- <p className="text-xs text-primary italic leading-tight">
+ <p className={`${WORKSPACE_TYPOGRAPHY.caption} italic leading-tight`}>
  {item.note.content.length > 100
  ? item.note.content.slice(0, 100) + "..."
  : item.note.content}
@@ -367,7 +415,7 @@ if (!hasExploredIdeas || allIdeas.length === 0) {
  No ideas yet
  </UIHeading>
 
- <p className="text-base text-secondary max-w-sm mx-auto mb-6">
+ <p className={`${WORKSPACE_TYPOGRAPHY.body} text-secondary max-w-sm mx-auto mb-6`}>
  Start by discovering 3 tailored ideas or validating your own.
  </p>
 
@@ -385,13 +433,13 @@ if (!hasExploredIdeas || allIdeas.length === 0) {
  {/* SECTION HEADER */}
  <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
  <div className="flex items-center gap-4 flex-wrap">
-  <h3 className="ui-heading ui-heading--h3 text-primary">
+  <h3 className={`${WORKSPACE_TYPOGRAPHY.h3} text-primary`}>
    {showActiveOnly ? `Active Ideas (${activeIdeas.length})` : `All Ideas (${activeIdeas.length})`}
   </h3>
   
   {/* Summary Statistics */}
   {!showActiveOnly && (
-   <div className="flex items-center gap-2 text-sm text-secondary">
+   <div className={`flex items-center gap-2 ${WORKSPACE_TYPOGRAPHY.subtitle}`}>
     <span>{stats.total} ideas</span>
     {stats.activeCount > 0 && (
      <>
@@ -416,7 +464,7 @@ if (!hasExploredIdeas || allIdeas.length === 0) {
  </div>
 
  <div className="flex items-center gap-2 flex-wrap">
-  {/* Filter Toggle */}
+  {/* Show Active Only Toggle Button */}
   <UIButton
    variant={showActiveOnly ? "primary" : "secondary"}
    size="sm"
@@ -440,7 +488,7 @@ if (!hasExploredIdeas || allIdeas.length === 0) {
  </div>
 
  {activeIdeas.length === 0 ? (
- <div className="text-center text-base text-secondary py-8">
+ <div className={`text-center ${WORKSPACE_TYPOGRAPHY.body} text-secondary py-8`}>
   {showActiveOnly 
    ? "No active ideas. Ideas with notes or actions will appear here."
    : "No ideas match your search."}

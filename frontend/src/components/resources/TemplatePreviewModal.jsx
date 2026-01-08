@@ -53,7 +53,7 @@ export default function TemplatePreviewModal({ template, content, onClose, onDow
  </UIButton>
  <button
  onClick={onClose}
- className="rounded-lg p-1 text-secondary text-secondary transition hover:bg-surface hover:bg-surface hover:text-primary hover:text-primary"
+ className="rounded-lg p-1 text-secondary transition hover:bg-surface hover:text-primary"
  aria-label="Close"
  >
  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,13 +71,13 @@ export default function TemplatePreviewModal({ template, content, onClose, onDow
  </div>
  ) : (
  <div className="flex items-center justify-center py-12">
- <div className="text-secondary text-secondary">No content available</div>
+ <div className="text-secondary">No content available</div>
  </div>
  )}
  </div>
 
  {/* Bottom Actions */}
- <div className="flex items-center justify-end gap-3 p-6 border-t border-default bg-app bg-surface rounded-b-xl">
+ <div className="flex items-center justify-end gap-3 p-6 border-t border-default bg-surface rounded-b-xl">
  <UIButton variant="secondary" onClick={onClose}>
  Close
  </UIButton>

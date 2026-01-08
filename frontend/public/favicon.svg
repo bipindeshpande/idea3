@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Simple "S" Letter - Correct Orientation -->
+  <!-- Top curve: starts top-left, curves right -->
+  <path d="M 150 100 
+           Q 200 100 256 100 
+           Q 312 100 362 100 
+           Q 362 150 256 150 
+           Q 150 150 150 200 
+           Q 150 250 256 250 
+           Q 362 250 362 300 
+           Q 362 350 256 350 
+           Q 150 350 150 400" 
+        stroke="#2563EB" 
+        stroke-width="60" 
+        fill="none" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+</svg>

@@ -29,10 +29,10 @@ export default function NextStepsTab({
           <div className="space-y-4">
             <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
               <h3 className="mb-2 text-lg font-semibold text-primary">🎉 Strong Potential Detected!</h3>
-              <p className="mb-3 text-primary text-primary text-secondary leading-relaxed">
+              <p className="mb-3 text-secondary leading-relaxed">
                 Your idea shows strong potential with a score of {overallScore.toFixed(1)}/10. Here's your recommended path forward:
               </p>
-              <ul className="ml-4 list-disc space-y-2 text-primary text-primary text-secondary leading-relaxed">
+              <ul className="ml-4 list-disc space-y-2 text-secondary leading-relaxed">
                 <li>Create an MVP roadmap - Break down your idea into minimum viable features</li>
                 <li>Validate with real customers - Conduct user interviews and gather feedback</li>
                 <li>Build a landing page - Test demand before full development</li>
@@ -45,10 +45,10 @@ export default function NextStepsTab({
           <div className="space-y-4">
             <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
               <h3 className="mb-2 text-lg font-semibold text-primary">⚡ Good Potential, Needs Work</h3>
-              <p className="mb-3 text-primary text-primary text-secondary leading-relaxed">
+              <p className="mb-3 text-secondary leading-relaxed">
                 Your idea has potential with a score of {overallScore.toFixed(1)}/10, but there are areas to strengthen:
               </p>
-              <ul className="ml-4 list-disc space-y-2 text-primary text-primary text-secondary leading-relaxed">
+              <ul className="ml-4 list-disc space-y-2 text-secondary leading-relaxed">
                 <li>Address weak areas - Focus on parameters scoring below 6</li>
                 <li>Refine your value proposition - Make it clearer and more compelling</li>
                 <li>Conduct market research - Validate assumptions with real data</li>
@@ -61,10 +61,10 @@ export default function NextStepsTab({
           <div className="space-y-4">
             <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
               <h3 className="mb-2 text-lg font-semibold text-primary">🔍 Consider Pivoting or Addressing Key Issues</h3>
-              <p className="mb-3 text-primary text-primary text-secondary leading-relaxed">
+              <p className="mb-3 text-secondary leading-relaxed">
                 Your idea scored {overallScore.toFixed(1)}/10. Consider these actions:
               </p>
-              <ul className="ml-4 list-disc space-y-2 text-primary text-primary text-secondary leading-relaxed">
+              <ul className="ml-4 list-disc space-y-2 text-secondary leading-relaxed">
                 <li>Identify critical gaps - Review parameters scoring below 5</li>
                 <li>Pivot or refine - Consider adjusting your idea based on feedback</li>
                 <li>Address fundamental issues - Market fit, problem clarity, or business model</li>
@@ -85,7 +85,7 @@ export default function NextStepsTab({
           </h2>
           {isFree && (
             <div className="space-y-3">
-              <p className="text-primary text-primary text-secondary leading-relaxed">
+              <p className="text-secondary leading-relaxed">
                 You've used <strong>{subscription?.validations_used || 0} of 2</strong> free validations.
               </p>
               <p className="text-sm text-secondary mb-4">
@@ -101,7 +101,7 @@ export default function NextStepsTab({
           )}
           {isStarter && (
             <div className="space-y-3">
-              <p className="text-primary text-primary text-secondary leading-relaxed">
+              <p className="text-secondary leading-relaxed">
                 You've used <strong>{subscription?.validations_used || 0} of 20</strong> validations this month.
               </p>
               <p className="text-sm text-secondary mb-4">
@@ -134,16 +134,16 @@ export default function NextStepsTab({
             <ReactMarkdown
               components={{
                 ol: ({ node, ...props }) => (
-                  <ol className="list-decimal list-outside space-y-4 text-primary text-secondary mb-4 ml-6" {...props} />
+                  <ol className="list-decimal list-outside space-y-4 text-secondary mb-4 ml-6" {...props} />
                 ),
                 li: ({ node, ...props }) => (
-                  <li className="leading-relaxed text-base text-primary text-secondary" {...props} />
+                  <li className="leading-relaxed text-base text-secondary" {...props} />
                 ),
                 strong: ({ node, ...props }) => (
-                  <strong className="font-semibold text-primary text-secondary" {...props} />
+                  <strong className="font-semibold text-primary" {...props} />
                 ),
                 p: ({ node, ...props }) => (
-                  <p className="text-primary text-secondary leading-relaxed mb-2" {...props} />
+                  <p className="text-secondary leading-relaxed mb-2" {...props} />
                 ),
                 a: ({ node, ...props }) => (
                   <a className="text-accent hover:text-accent-hover underline" target="_blank" rel="noopener noreferrer" {...props} />
@@ -211,31 +211,31 @@ export default function NextStepsTab({
         <div className="space-y-4">
           {overallScore >= 8 ? (
             <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
-              <p className="text-primary text-primary text-secondary leading-relaxed">
+              <p className="text-secondary leading-relaxed">
                 <strong>Top 15%</strong> - Your idea scores higher than 85% of validated ideas. This indicates exceptional potential.
               </p>
             </div>
           ) : overallScore >= 7 ? (
             <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
-              <p className="text-primary text-primary text-secondary leading-relaxed">
+              <p className="text-secondary leading-relaxed">
                 <strong>Top 30%</strong> - Your idea scores higher than 70% of validated ideas. Strong potential with room for improvement.
               </p>
             </div>
           ) : overallScore >= 6 ? (
             <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
-              <p className="text-primary text-primary text-secondary leading-relaxed">
+              <p className="text-secondary leading-relaxed">
                 <strong>Above Average</strong> - Your idea scores higher than 50% of validated ideas. Good foundation with clear improvement areas.
               </p>
             </div>
           ) : overallScore >= 5 ? (
             <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
-              <p className="text-primary text-primary text-secondary leading-relaxed">
+              <p className="text-secondary leading-relaxed">
                 <strong>Average</strong> - Your idea is in the middle range. Average score for validated ideas is 5.5/10. Focus on strengthening weak areas.
               </p>
             </div>
           ) : (
             <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
-              <p className="text-primary text-primary text-secondary leading-relaxed">
+              <p className="text-secondary leading-relaxed">
                 <strong>Below Average</strong> - Your idea scores below 50% of validated ideas. Consider significant refinements or pivoting.
               </p>
             </div>

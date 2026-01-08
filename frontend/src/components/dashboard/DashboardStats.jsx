@@ -1,4 +1,5 @@
 import React from "react";
+import { WORKSPACE_TYPOGRAPHY } from "../workspace/WorkspaceTheme.js";
 
 /**
  * Dashboard Stats Component
@@ -50,9 +51,9 @@ export default function DashboardStats({ ideas, validations, matchPercent, riskA
         <div key={index} className="ui-card2 ui-card2--muted" style={{ padding: "6px 8px" }}>
           <div className="flex items-center gap-1 mb-0.5">
             {stat.icon}
-            <p className="text-xs text-secondary leading-tight">{stat.label}</p>
+            <p className={`${WORKSPACE_TYPOGRAPHY.caption} leading-tight`}>{stat.label}</p>
           </div>
-          <p className="text-base font-mono font-bold text-primary leading-tight">{stat.value}</p>
+          <p className={`${WORKSPACE_TYPOGRAPHY.body} font-mono font-bold leading-tight`}>{stat.value}</p>
         </div>
       ))}
     </div>

@@ -49,10 +49,10 @@ export default function UserDetailModal({ userDetail, onClose, onUpdate }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface backdrop-blur-sm">
       <div className="mx-4 w-full max-w-2xl rounded-3xl border border-default bg-surface p-8 shadow-xl">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-primary text-secondary">User Details</h2>
+          <h2 className="text-2xl font-bold text-primary">User Details</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-secondary text-secondary transition hover:bg-surface hover:bg-surface hover:text-primary hover:text-primary"
+            className="rounded-lg p-1 text-secondary transition hover:bg-surface hover:text-primary"
           >
             ×
           </button>
@@ -60,24 +60,24 @@ export default function UserDetailModal({ userDetail, onClose, onUpdate }) {
 
         <div className="space-y-4">
           <div>
-            <h3 className="mb-2 font-semibold text-primary text-secondary">Email</h3>
-            <p className="text-secondary text-secondary">{userDetail.user.email}</p>
+            <h3 className="mb-2 font-semibold text-primary">Email</h3>
+            <p className="text-secondary">{userDetail.user.email}</p>
           </div>
 
           <div>
-            <h3 className="mb-2 font-semibold text-primary text-secondary">Current Subscription</h3>
-            <p className="text-secondary text-secondary">
+            <h3 className="mb-2 font-semibold text-primary">Current Subscription</h3>
+            <p className="text-secondary">
               {userDetail.user.subscription_type || "N/A"} - {userDetail.user.days_remaining || 0} days remaining
             </p>
           </div>
 
           <div>
-            <h3 className="mb-2 font-semibold text-primary text-secondary">Update Subscription</h3>
+            <h3 className="mb-2 font-semibold text-primary">Update Subscription</h3>
             <div className="space-y-3">
               <select
                 value={subscriptionType}
                 onChange={(e) => setSubscriptionType(e.target.value)}
-                className="w-full rounded-lg border border-default bg-surface p-2 text-sm text-primary text-secondary"
+                className="w-full rounded-lg border border-default bg-surface p-2 text-sm text-primary"
               >
                 <option value="free_trial">Free Trial</option>
                 <option value="weekly">Weekly ($5)</option>
@@ -89,7 +89,7 @@ export default function UserDetailModal({ userDetail, onClose, onUpdate }) {
                 value={durationDays}
                 onChange={(e) => setDurationDays(parseInt(e.target.value) || 0)}
                 placeholder="Duration in days"
-                className="w-full rounded-lg border border-default bg-surface p-2 text-sm text-primary text-secondary"
+                className="w-full rounded-lg border border-default bg-surface p-2 text-sm text-primary"
               />
               <button
                 onClick={handleUpdateSubscription}
@@ -102,10 +102,10 @@ export default function UserDetailModal({ userDetail, onClose, onUpdate }) {
           </div>
 
           <div>
-            <h3 className="mb-2 font-semibold text-primary text-secondary">Runs ({userDetail.runs?.length || 0})</h3>
+            <h3 className="mb-2 font-semibold text-primary">Runs ({userDetail.runs?.length || 0})</h3>
             <div className="max-h-40 space-y-1 overflow-y-auto">
               {userDetail.runs?.map((run) => (
-                <div key={run.id} className="rounded-lg border border-default bg-app bg-surface p-2 text-xs text-primary text-secondary">
+                <div key={run.id} className="rounded-lg border border-default bg-surface p-2 text-xs text-primary">
                   {run.run_id} - {run.created_at ? new Date(run.created_at).toLocaleString() : "N/A"}
                 </div>
               ))}
@@ -113,10 +113,10 @@ export default function UserDetailModal({ userDetail, onClose, onUpdate }) {
           </div>
 
           <div>
-            <h3 className="mb-2 font-semibold text-primary text-secondary">Validations ({userDetail.validations?.length || 0})</h3>
+            <h3 className="mb-2 font-semibold text-primary">Validations ({userDetail.validations?.length || 0})</h3>
             <div className="max-h-40 space-y-1 overflow-y-auto">
               {userDetail.validations?.map((validation) => (
-                <div key={validation.id} className="rounded-lg border border-default bg-app bg-surface p-2 text-xs text-primary text-secondary">
+                <div key={validation.id} className="rounded-lg border border-default bg-surface p-2 text-xs text-primary">
                   {validation.validation_id} - {validation.created_at ? new Date(validation.created_at).toLocaleString() : "N/A"}
                 </div>
               ))}
@@ -124,10 +124,10 @@ export default function UserDetailModal({ userDetail, onClose, onUpdate }) {
           </div>
 
           <div>
-            <h3 className="mb-2 font-semibold text-primary text-secondary">Payments ({userDetail.payments?.length || 0})</h3>
+            <h3 className="mb-2 font-semibold text-primary">Payments ({userDetail.payments?.length || 0})</h3>
             <div className="max-h-40 space-y-1 overflow-y-auto">
               {userDetail.payments?.map((payment) => (
-                <div key={payment.id} className="rounded-lg border border-default bg-app bg-surface p-2 text-xs text-primary text-secondary">
+                <div key={payment.id} className="rounded-lg border border-default bg-surface p-2 text-xs text-primary">
                   ${payment.amount} {payment.currency} - {payment.subscription_type} - {payment.status} -{" "}
                   {payment.created_at ? new Date(payment.created_at).toLocaleString() : "N/A"}
                 </div>

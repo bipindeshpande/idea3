@@ -52,19 +52,19 @@ export default function UsersManagement() {
   const getStatusBadge = (user) => {
     if (user.is_subscription_active) {
       return (
-        <span className="inline-block rounded-full bg-surface bg-surface px-2 py-1 text-xs font-semibold text-accent text-accent">
+        <span className="inline-block rounded-full bg-surface px-2 py-1 text-xs font-semibold text-accent">
           Active
         </span>
       );
     } else if (user.subscription_type === "free_trial") {
       return (
-        <span className="inline-block rounded-full bg-surface bg-surface px-2 py-1 text-xs font-semibold text-accent text-accent">
+        <span className="inline-block rounded-full bg-surface px-2 py-1 text-xs font-semibold text-accent">
           Free Trial
         </span>
       );
     } else {
       return (
-        <span className="inline-block rounded-full bg-app bg-surface px-2 py-1 text-xs font-semibold text-primary text-secondary">
+        <span className="inline-block rounded-full bg-surface px-2 py-1 text-xs font-semibold text-primary">
           Expired
         </span>
       );
@@ -74,7 +74,7 @@ export default function UsersManagement() {
   if (loading) {
     return (
       <div className="rounded-3xl border border-default bg-surface p-8 shadow-soft">
-        <p className="text-secondary text-secondary">Loading users...</p>
+        <p className="text-secondary">Loading users...</p>
       </div>
     );
   }
@@ -83,29 +83,29 @@ export default function UsersManagement() {
     <div className="space-y-6">
       <div className="rounded-3xl border border-default bg-surface p-8 shadow-soft">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-primary text-secondary">Users ({users.length})</h2>
+          <h2 className="text-2xl font-semibold text-primary">Users ({users.length})</h2>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-default">
-                <th className="px-4 py-3 text-left font-semibold text-primary text-secondary">Email</th>
-                <th className="px-4 py-3 text-left font-semibold text-primary text-secondary">Subscription</th>
-                <th className="px-4 py-3 text-left font-semibold text-primary text-secondary">Status</th>
-                <th className="px-4 py-3 text-left font-semibold text-primary text-secondary">Days Remaining</th>
-                <th className="px-4 py-3 text-left font-semibold text-primary text-secondary">Created</th>
-                <th className="px-4 py-3 text-left font-semibold text-primary text-secondary">Actions</th>
+                <th className="px-4 py-3 text-left font-semibold text-primary">Email</th>
+                <th className="px-4 py-3 text-left font-semibold text-primary">Subscription</th>
+                <th className="px-4 py-3 text-left font-semibold text-primary">Status</th>
+                <th className="px-4 py-3 text-left font-semibold text-primary">Days Remaining</th>
+                <th className="px-4 py-3 text-left font-semibold text-primary">Created</th>
+                <th className="px-4 py-3 text-left font-semibold text-primary">Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.id} className="border-b border-default hover:bg-surface hover:bg-surface">
-                  <td className="px-4 py-3 text-primary text-secondary">{user.email}</td>
-                  <td className="px-4 py-3 text-secondary text-secondary">{user.subscription_type || "N/A"}</td>
+                <tr key={user.id} className="border-b border-default hover:bg-surface">
+                  <td className="px-4 py-3 text-primary">{user.email}</td>
+                  <td className="px-4 py-3 text-secondary">{user.subscription_type || "N/A"}</td>
                   <td className="px-4 py-3">{getStatusBadge(user)}</td>
-                  <td className="px-4 py-3 text-secondary text-secondary">{user.days_remaining || 0}</td>
-                  <td className="px-4 py-3 text-secondary text-secondary">
+                  <td className="px-4 py-3 text-secondary">{user.days_remaining || 0}</td>
+                  <td className="px-4 py-3 text-secondary">
                     {user.subscription_started_at ? new Date(user.subscription_started_at).toLocaleDateString() : "N/A"}
                   </td>
                   <td className="px-4 py-3">

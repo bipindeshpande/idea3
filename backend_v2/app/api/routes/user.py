@@ -29,6 +29,11 @@ class CreateNoteRequest(BaseModel):
     tags: List[str] = []
 
 
+class UpdateNoteRequest(BaseModel):
+    content: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
 class CompareSessionsRequest(BaseModel):
     run_ids: List[str]
     validation_ids: List[str] = []
@@ -316,6 +321,115 @@ async def create_note(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create note: {str(e)}"
+        )
+
+
+@router.delete("/actions/{action_id}", status_code=status.HTTP_200_OK)
+async def delete_action(
+    action_id: str = Path(..., description="Action ID"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Delete an action
+    
+    Path Parameters:
+        - action_id: Action ID
+    
+    Returns:
+        Success confirmation
+    """
+    try:
+        user_service = UserService(db)
+        result = user_service.delete_action(
+            user_id=current_user.user_id,
+            action_id=action_id
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete action: {str(e)}"
+        )
+
+
+@router.delete("/notes/{note_id}", status_code=status.HTTP_200_OK)
+async def delete_note(
+    note_id: str = Path(..., description="Note ID"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Delete a note
+    
+    Path Parameters:
+        - note_id: Note ID
+    
+    Returns:
+        Success confirmation
+    """
+    try:
+        user_service = UserService(db)
+        result = user_service.delete_note(
+            user_id=current_user.user_id,
+            note_id=note_id
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete note: {str(e)}"
+        )
+
+
+@router.put("/notes/{note_id}", response_model=Dict[str, Any], status_code=status.HTTP_200_OK)
+async def update_note(
+    note_id: str = Path(..., description="Note ID"),
+    request: UpdateNoteRequest = Body(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update a note
+    
+    Path Parameters:
+        - note_id: Note ID
+    
+    Request Body:
+        - content: Updated note content (optional)
+        - tags: Updated tags list (optional)
+    
+    Returns:
+        Updated note
+    """
+    try:
+        user_service = UserService(db)
+        result = user_service.update_note(
+            user_id=current_user.user_id,
+            note_id=note_id,
+            content=request.content,
+            tags=request.tags
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update note: {str(e)}"
         )
 
 

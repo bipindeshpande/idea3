@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 import UIButton from "../ui/ui-button.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../workspace/WorkspaceTheme.js";
 
 function SessionCard({ 
  session, 
@@ -43,10 +44,10 @@ function SessionCard({
  <div className="flex items-start justify-between gap-4">
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 mb-1">
- <p className="text-xs text-secondary">
+ <p className={WORKSPACE_TYPOGRAPHY.caption}>
  {new Date(timestamp).toLocaleString()}
  {session.from_api && (
- <span className="ml-2 text-xs text-accent font-medium">
+ <span className={`ml-2 ${WORKSPACE_TYPOGRAPHY.caption} text-accent font-medium`}>
  (Synced)
  </span>
  )}
@@ -55,7 +56,7 @@ function SessionCard({
  <div className="flex items-center gap-1">
  {hasOpenActions && (
  <span 
- className="inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-xs font-semibold text-accent"
+ className={`inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 ${WORKSPACE_TYPOGRAPHY.caption} font-semibold text-accent`}
  title="Has open action items"
  >
  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +67,7 @@ function SessionCard({
  )}
  {hasNotes && (
  <span 
- className="badge-info inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+ className={`badge-info inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${WORKSPACE_TYPOGRAPHY.caption} font-semibold`}
  title="Has notes"
  >
  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,7 +82,7 @@ function SessionCard({
  
  {isValidation ? (
  <>
- <h4 className="text-sm font-semibold text-primary mt-1 mb-3">
+ <h4 className={`${WORKSPACE_TYPOGRAPHY.h4} mt-1 mb-3`}>
   {(() => {
    // Priority 1: Use solution text from category_answers (this is what's displayed in the card body)
    // This should be the full descriptive text, not a dropdown value
@@ -172,61 +173,61 @@ function SessionCard({
  <div className="space-y-3 mt-3">
  {session.category_answers.problem && (
  <div>
- <p className="text-xs font-semibold text-secondary mb-1">1. Problem:</p>
- <p className="text-sm text-primary leading-relaxed">{session.category_answers.problem}</p>
+ <p className={`${WORKSPACE_TYPOGRAPHY.caption} font-semibold mb-1`}>1. Problem:</p>
+ <p className={WORKSPACE_TYPOGRAPHY.bodySmall}>{session.category_answers.problem}</p>
  </div>
  )}
  {session.category_answers.solution && (
  <div>
- <p className="text-xs font-semibold text-secondary mb-1">2. Solution:</p>
- <p className="text-sm text-primary leading-relaxed">{session.category_answers.solution}</p>
+ <p className={`${WORKSPACE_TYPOGRAPHY.caption} font-semibold mb-1`}>2. Solution:</p>
+ <p className={WORKSPACE_TYPOGRAPHY.bodySmall}>{session.category_answers.solution}</p>
  </div>
  )}
  {session.category_answers.target_user && (
  <div>
- <p className="text-xs font-semibold text-secondary mb-1">3. User:</p>
- <p className="text-sm text-primary leading-relaxed">{session.category_answers.target_user}</p>
+ <p className={`${WORKSPACE_TYPOGRAPHY.caption} font-semibold mb-1`}>3. User:</p>
+ <p className={WORKSPACE_TYPOGRAPHY.bodySmall}>{session.category_answers.target_user}</p>
  </div>
  )}
  {session.category_answers.differentiation && (
  <div>
- <p className="text-xs font-semibold text-secondary mb-1">4. Differentiation:</p>
- <p className="text-sm text-primary leading-relaxed">{session.category_answers.differentiation}</p>
+ <p className={`${WORKSPACE_TYPOGRAPHY.caption} font-semibold mb-1`}>4. Differentiation:</p>
+ <p className={WORKSPACE_TYPOGRAPHY.bodySmall}>{session.category_answers.differentiation}</p>
  </div>
  )}
  {session.category_answers.monetization && (
  <div>
- <p className="text-xs font-semibold text-secondary mb-1">5. Monetization:</p>
- <p className="text-sm text-primary leading-relaxed">{session.category_answers.monetization}</p>
+ <p className={`${WORKSPACE_TYPOGRAPHY.caption} font-semibold mb-1`}>5. Monetization:</p>
+ <p className={WORKSPACE_TYPOGRAPHY.bodySmall}>{session.category_answers.monetization}</p>
  </div>
  )}
  {session.category_answers.scope && (
  <div>
- <p className="text-xs font-semibold text-secondary mb-1">6. Scope/Region:</p>
- <p className="text-sm text-primary leading-relaxed">{session.category_answers.scope}</p>
+ <p className={`${WORKSPACE_TYPOGRAPHY.caption} font-semibold mb-1`}>6. Scope/Region:</p>
+ <p className={WORKSPACE_TYPOGRAPHY.bodySmall}>{session.category_answers.scope}</p>
  </div>
  )}
  </div>
  )}
  {(!session.category_answers || Object.keys(session.category_answers).length === 0) && session.idea_explanation && (
  <div className="mt-2">
- <p className="text-sm text-primary leading-relaxed">{session.idea_explanation}</p>
+ <p className={WORKSPACE_TYPOGRAPHY.bodySmall}>{session.idea_explanation}</p>
  </div>
  )}
  </>
  ) : (
  <>
- <h3 className="text-lg font-semibold text-primary mt-1">
+ <h3 className={`${WORKSPACE_TYPOGRAPHY.h3} mt-1`}>
  {idea_title || (session.inputs?.goal_type 
  ? `${session.inputs.goal_type}${session.inputs.interest_area || session.inputs.sub_interest_area ? ` - ${session.inputs.interest_area || session.inputs.sub_interest_area}` : ""}`
  : "Idea Discovery Session")}
  </h3>
  {summary && (
- <p className="text-sm text-secondary mt-2 line-clamp-3">{summary}</p>
+ <p className={`${WORKSPACE_TYPOGRAPHY.subtitle} mt-2 line-clamp-3`}>{summary}</p>
  )}
  {session.inputs && Object.keys(session.inputs).length > 0 && !hasNormalizedFormat ? (
  <div className="mt-2">
- <p className="text-sm text-secondary leading-relaxed">
+ <p className={WORKSPACE_TYPOGRAPHY.subtitle}>
  <span className="font-medium">Time:</span> {session.inputs.time_commitment || "Not set"} • 
  <span className="font-medium"> Budget:</span> {session.inputs.budget_range || "Not set"} • 
  <span className="font-medium"> Focus:</span>{" "}
@@ -237,13 +238,13 @@ function SessionCard({
  </div>
  ) : hasNormalizedFormat ? (
  <div className="mt-2">
- <p className="text-xs text-secondary">
+ <p className={WORKSPACE_TYPOGRAPHY.caption}>
  Type: {run_type} • {session.run_id ? `Run ID: ${session.run_id}` : ""}
  </p>
  </div>
  ) : session.run_id ? (
  <div className="mt-2">
- <p className="text-xs text-secondary italic">
+ <p className={`${WORKSPACE_TYPOGRAPHY.caption} italic`}>
  Run ID: {session.run_id}
  </p>
  </div>
@@ -276,14 +277,14 @@ function SessionCard({
  className="h-4 w-4 rounded border-default text-accent cursor-pointer"
  title="Select for comparison"
  />
- <span className="absolute -top-10 right-0 bg-surface border border-default rounded px-2 py-1 text-xs text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg" style={{ zIndex: 100 }}>
+ <span className={`absolute -top-10 right-0 bg-surface border border-default rounded px-2 py-1 ${WORKSPACE_TYPOGRAPHY.caption} whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg`} style={{ zIndex: 100 }}>
  Select for comparison
  </span>
  </div>
  )}
  {isValidation && session.overall_score !== undefined && (
  <div className="px-2 py-1 rounded border border-default bg-surface">
- <p className="text-sm font-semibold text-primary whitespace-nowrap">
+ <p className={`${WORKSPACE_TYPOGRAPHY.bodySmall} font-semibold whitespace-nowrap`}>
  Score: {session.overall_score.toFixed(1)}/10
  </p>
  </div>

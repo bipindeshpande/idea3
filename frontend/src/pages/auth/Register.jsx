@@ -65,46 +65,49 @@ export default function Register() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
- <FormInput
- type="email"
- id="email"
- label="Email"
- value={email}
- onChange={(e) => setEmail(e.target.value)}
- required
- autoComplete="username"
- placeholder="your@email.com"
- />
+<FormInput
+type="email"
+id="email"
+label="Email"
+value={email}
+onChange={(e) => setEmail(e.target.value)}
+required
+autoComplete="username"
+placeholder="your@email.com"
+data-testid="register-email-input"
+/>
 
- <FormInput
- type="password"
- id="password"
- label="Password"
- value={password}
- onChange={(e) => setPassword(e.target.value)}
- required
- minLength={8}
- autoComplete="new-password"
- placeholder="At least 8 characters"
- />
+<FormInput
+type="password"
+id="password"
+label="Password"
+value={password}
+onChange={(e) => setPassword(e.target.value)}
+required
+minLength={8}
+autoComplete="new-password"
+placeholder="At least 8 characters"
+data-testid="register-password-input"
+/>
 
- <FormInput
- type="password"
- id="confirmPassword"
- label="Confirm Password"
- value={confirmPassword}
- onChange={(e) => setConfirmPassword(e.target.value)}
- required
- minLength={8}
- autoComplete="new-password"
- placeholder="Confirm your password"
- />
+<FormInput
+type="password"
+id="confirmPassword"
+label="Confirm Password"
+value={confirmPassword}
+onChange={(e) => setConfirmPassword(e.target.value)}
+required
+minLength={8}
+autoComplete="new-password"
+placeholder="Confirm your password"
+data-testid="register-confirm-password-input"
+/>
 
- {error && (
- <Card className="border-default bg-surface">
- <p className="text-primary text-accent leading-relaxed font-semibold">{error}</p>
- </Card>
- )}
+{error && (
+<Card className="border-default bg-surface" data-testid="register-error" role="alert">
+<p className="text-primary text-accent leading-relaxed font-semibold">{error}</p>
+</Card>
+)}
 
  <UIButton
  type="submit"

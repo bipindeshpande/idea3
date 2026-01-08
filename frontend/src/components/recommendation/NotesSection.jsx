@@ -31,8 +31,8 @@ export default function NotesSection({
       <div className="space-y-4">
         {/* Add new note */}
         {!isValidIdeaId ? (
-          <div className="rounded-xl border border-default bg-surface bg-surface p-3">
-            <p className="text-sm text-accent text-accent">Idea reference not ready</p>
+          <div className="rounded-xl border border-default bg-surface p-3">
+            <p className="text-sm text-accent">Idea reference not ready</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -55,10 +55,10 @@ export default function NotesSection({
 
         {/* Notes list */}
         {loadingNotes ? (
-          <p className="text-sm text-primary text-primary">Loading notes...</p>
+          <p className="text-sm text-primary">Loading notes...</p>
         ) : notes.length === 0 ? (
           <div>
-            <p className="text-sm text-primary text-primary">
+            <p className="text-sm text-primary">
               No notes yet. Add one above to start tracking your insights!
             </p>
             {process.env.NODE_ENV === 'development' && (
@@ -80,7 +80,7 @@ export default function NotesSection({
                 className="ui-card2 ui-pad-md rounded-xl shadow-card"
               >
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-xs text-primary text-primary">
+                  <span className="text-xs text-primary">
                     {note.created_at
                       ? (() => {
                           try {
@@ -95,10 +95,10 @@ export default function NotesSection({
                   {note.updated_at &&
                     note.created_at &&
                     note.updated_at !== note.created_at && (
-                      <span className="text-xs text-primary text-primary">(edited)</span>
+                      <span className="text-xs text-primary">(edited)</span>
                     )}
                 </div>
-                <p className="whitespace-pre-wrap text-sm text-primary text-primary">
+                <p className="whitespace-pre-wrap text-sm text-primary">
                   {note.content}
                 </p>
                 {note.tags && note.tags.length > 0 && (
@@ -106,7 +106,7 @@ export default function NotesSection({
                     {note.tags.map((tag, idx) => (
                       <span
                         key={idx}
-                        className="rounded-2xl bg-surface bg-surface border border-default px-[10px] py-1 text-primary font-medium text-primary text-primary"
+                        className="rounded-2xl bg-surface border border-default px-[10px] py-1 text-primary font-medium"
                       >
                         {tag}
                       </span>

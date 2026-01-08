@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useReports } from "../../context/ReportsContext.jsx";
-import { extractProfileJSON } from "../../utils/streamingParser.js";
+import { extractProfileJSON } from "../../utils/parsers/index.js";
 import Seo from "../../components/common/Seo.jsx";
 import UIHeading from "../../components/ui/ui-heading.jsx";
 import FocusLayout from "../../layouts/FocusLayout.jsx";
@@ -162,7 +162,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
  border: isDark ? "#6366f1" : "#C7D2FE",
  headerBg: isDark ? "#312e81" : "rgba(238, 242, 255, 0.2)", // indigo-50 opacity-20
  headerBgHover: isDark ? "#4338ca" : "rgba(238, 242, 255, 0.3)", // opacity-30 on hover
- text: "text-primary text-secondary",
+ text: "text-secondary",
  };
  }
  
@@ -175,7 +175,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
  border: isDark ? "#3b82f6" : "#BFDBFE",
  headerBg: isDark ? "#1e40af" : "rgba(239, 246, 255, 0.2)", // blue-50 opacity-20
  headerBgHover: isDark ? "#2563eb" : "rgba(239, 246, 255, 0.3)", // opacity-30 on hover
- text: "text-primary text-secondary",
+ text: "text-secondary",
  };
  }
  
@@ -188,7 +188,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
  border: isDark ? "#9333ea" : "#F3E8FF",
  headerBg: isDark ? "#6b21a8" : "rgba(250, 245, 255, 0.2)", // purple-50 opacity-20
  headerBgHover: isDark ? "#7c3aed" : "rgba(250, 245, 255, 0.3)", // opacity-30 on hover
- text: "text-primary text-secondary",
+ text: "text-secondary",
  };
  }
  
@@ -201,7 +201,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
  border: isDark ? "#0284c7" : "#BAE6FD",
  headerBg: isDark ? "#075985" : "rgba(240, 249, 255, 0.2)", // sky-50 opacity-20
  headerBgHover: isDark ? "#0369a1" : "rgba(240, 249, 255, 0.3)", // opacity-30 on hover
- text: "text-primary text-secondary",
+ text: "text-secondary",
  };
  }
  
@@ -214,7 +214,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
  border: isDark ? "#f59e0b" : "#FDE68A",
  headerBg: isDark ? "#78350f" : "rgba(255, 251, 235, 0.2)", // amber-50 opacity-20
  headerBgHover: isDark ? "#92400e" : "rgba(255, 251, 235, 0.3)", // opacity-30 on hover
- text: "text-primary text-secondary",
+ text: "text-secondary",
  };
  }
  
@@ -227,7 +227,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
  border: isDark ? "#10b981" : "#D1FAE5",
  headerBg: isDark ? "#065f46" : "rgba(240, 253, 244, 0.2)", // green-50 opacity-20
  headerBgHover: isDark ? "#047857" : "rgba(240, 253, 244, 0.3)", // opacity-30 on hover
- text: "text-primary text-secondary",
+ text: "text-secondary",
  };
  }
  
@@ -239,7 +239,7 @@ function getSectionTheme(title = "", index = 0, isDark = false) {
  border: isDark ? "#3b82f6" : "#BFDBFE",
  headerBg: isDark ? "#1e40af" : "rgba(239, 246, 255, 0.2)",
  headerBgHover: isDark ? "#2563eb" : "rgba(239, 246, 255, 0.3)",
- text: "text-primary text-secondary",
+ text: "text-secondary",
  };
 }
 

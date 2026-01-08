@@ -25,7 +25,7 @@ export default function RadarChart({ axes }) {
 
  return (
  <div className="h-full flex flex-col">
- <h3 className="mb-1 text-sm font-semibold text-primary text-secondary">Idea Shape Across 10 Validation Pillars</h3>
+ <h3 className="mb-1 text-sm font-semibold text-primary">Idea Shape Across 10 Validation Pillars</h3>
  <div className="flex-1 flex items-center justify-center" style={{ minHeight: 0, maxHeight: '270px' }}>
  <div className="w-full h-full flex items-center justify-center" style={{ maxHeight: '270px', padding: '0 6px' }}>
  <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full" style={{ overflow: 'visible', maxHeight: '270px', maxWidth: '100%' }}>

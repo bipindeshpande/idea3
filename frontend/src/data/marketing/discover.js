@@ -1,10 +1,10 @@
 // ProductDiscover page data
 export const seo = {
-  title: "Startup Idea Advisor — Discover Ideas",
+  title: "Idea Bunch — Discover Startup Ideas",
   description: "Let AI discover personalized startup opportunities tailored to your profile, goals, and constraints. Get ranked recommendations with detailed fit analysis.",
   keywords: "discover startup ideas, ai idea generator, personalized startup recommendations, business idea discovery, startup idea discovery",
   canonical: "/product/discover",
-  ogTitle: "Startup Idea Advisor — Discover Ideas",
+  ogTitle: "Idea Bunch — Discover Startup Ideas",
   ogDescription: "Let AI discover personalized startup opportunities tailored to your profile, goals, and constraints. Get ranked recommendations with detailed fit analysis.",
   structuredData: {
     "@context": "https://schema.org",

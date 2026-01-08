@@ -3,14 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Startup Idea Advisor</title>
+    <title>Idea Bunch — Startup Idea Advisor</title>
+    
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=5" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64x64.png?v=3" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png?v=3" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=3" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=3" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+    <link rel="manifest" href="/site.webmanifest" />
+    
     <!-- Google Fonts: Inter + JetBrains Mono (IDEA theme typography) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+    
     <!-- Preconnect to external domains for faster loading -->
     <link rel="preconnect" href="https://js.stripe.com" />
     <link rel="dns-prefetch" href="https://js.stripe.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/src/main.jsx" as="script" />
     <!-- Apply theme before React renders to prevent flash -->
     <script>
       (function() {

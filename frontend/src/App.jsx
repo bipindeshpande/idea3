@@ -35,6 +35,7 @@ import ValidationResult from "./pages/validation/ValidationResult.jsx";
 // Resources pages
 import ResourcesPage from "./pages/resources/Resources.jsx";
 import AdvisorResourcesPage from "./pages/resources/AdvisorResources.jsx";
+import HowAdvisorThinksPage from "./pages/resources/HowAdvisorThinks.jsx";
 import BlogPage from "./pages/resources/Blog.jsx";
 
 // Dashboard pages
@@ -105,14 +106,6 @@ export default function App() {
  </ProtectedRoute>
  }
  />
- <Route
- path="/validate-result"
- element={
- <ProtectedRoute>
- <ValidationResult />
- </ProtectedRoute>
- }
- />
  <Route path="/product" element={<ProductPage />} />
  <Route path="/product/discover" element={<ProductDiscoverPage />} />
  <Route path="/product/validate" element={<ProductValidatePage />} />
@@ -147,6 +140,14 @@ export default function App() {
  </Suspense>
  }
  />
+        <Route
+          path="/validate-result"
+          element={
+            <ProtectedRoute>
+              <ValidationResult />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/founder-connect" element={<FounderConnectPage />} />
         <Route path="/founder-psychology" element={<FounderPsychologyPage />} />
         <Route
@@ -173,8 +174,16 @@ export default function App() {
             </Suspense>
           }
         />
- </Route>
- </Route>
+        <Route
+          path="/how-advisor-thinks"
+          element={
+            <ProtectedRoute>
+              <HowAdvisorThinksPage />
+            </ProtectedRoute>
+          }
+        />
+</Route>
+</Route>
  <Route
  path="/psyche/complete"
  element={
@@ -288,7 +297,7 @@ function AdminRouteWrapper({ children }) {
  // Admin routes are completely isolated - no navigation, no header/footer
  // This wrapper ensures admin pages are separate from the main app
  return (
- <div className="min-h-screen bg-app bg-surface">
+ <div className="min-h-screen bg-surface">
  {children}
  </div>
  );

@@ -66,7 +66,7 @@ export default function Screen2({
           type="button"
           onClick={onBack}
           disabled={loading}
-          className={`rounded-xl border border-default bg-surface px-6 py-3 text-base font-semibold text-primary text-secondary shadow-sm transition-all duration-200 hover:bg-surface hover:bg-surface hover:-translate-y-0.5 whitespace-nowrap ${loading ? "cursor-not-allowed opacity-50" : ""}`}
+          className={`rounded-xl border border-default bg-surface px-6 py-3 text-base font-semibold text-primary shadow-sm transition-all duration-200 hover:bg-surface hover:-translate-y-0.5 whitespace-nowrap ${loading ? "cursor-not-allowed opacity-50" : ""}`}
         >
           ← Back
         </button>

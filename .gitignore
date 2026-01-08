@@ -1,0 +1,34 @@
+# Python Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Build/Tool Caches
+.vite/
+.vitest/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment Files (NEVER commit these!)
+.env
+.env.*
+*.env
+!*.env.example
+backend_v2/.env
+backend_v2/dev.env
+backend_v2/qa.env
+backend_v2/uat.env
+backend_v2/production.env
+frontend/.env
+frontend/.env.*
+

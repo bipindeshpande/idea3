@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
  * Market Opportunity Section Component
  */
 export default function MarketOpportunitySection({ marketInsights, content, isEnriching }) {
-  if (marketInsights.length > 0) {
+  if (marketInsights && marketInsights.length > 0) {
     return (
       <ul className="space-y-3 text-sm text-primary text-primary">
         {marketInsights.map((insight, index) => (

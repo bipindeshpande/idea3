@@ -7,6 +7,7 @@ import SectionHeader from "../../components/marketing/SectionHeader.jsx";
 import CTASection from "../../components/marketing/CTASection.jsx";
 import PageContainer from "../../components/layout/PageContainer.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
+import { generateBreadcrumbs, breadcrumbPatterns } from "../../utils/seo/breadcrumbs.js";
 import {
   heroData,
   tiers,
@@ -46,13 +47,16 @@ export default function PricingPage() {
     setPaymentSuccess(true);
   };
 
+  const breadcrumbs = generateBreadcrumbs(breadcrumbPatterns.pricing);
+
   return (
     <MarketingLayout>
       <PageContainer>
         <Seo
           title="Pricing | Startup Idea Advisor"
-          description="Start with 3 days free, then choose $5/week or $15/month for unlimited access to startup idea recommendations and validation."
+          description="Start with 3 days free, then choose $5/week or $15/month for unlimited access to startup idea recommendations and validation. No credit card required for trial."
           path="/pricing"
+          breadcrumbs={breadcrumbs}
         />
 
         <HeroSection title={heroData.title} subtitle={heroData.subtitle} primaryCTA={heroData.primaryCTA} secondaryCTA={heroData.secondaryCTA} className="mb-20" />

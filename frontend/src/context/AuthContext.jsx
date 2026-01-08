@@ -46,14 +46,21 @@ export function AuthProvider({ children }) {
  };
  }, [sessionToken]);
 
- // Load user on mount
- useEffect(() => {
- if (sessionToken) {
- checkAuth();
- } else {
- setLoading(false);
+ const checkSubscription = useCallback(async () => {
+ // Check localStorage instead of state to handle cases where state hasn't updated yet
+ const token = localStorage.getItem(SESSION_TOKEN_KEY);
+ if (!token) return;
+
+ try {
+ const data = await apiClient.get("/subscription/status");
+ setSubscription(data.subscription);
+ } catch (error) {
+ // Silently fail subscription check - don't disrupt user experience
+ if (process.env.NODE_ENV === 'development') {
+ console.error("Subscription check failed:", error);
  }
- }, [sessionToken]);
+ }
+ }, []);
 
  const checkAuth = useCallback(async () => {
  if (!sessionToken) {
@@ -87,21 +94,16 @@ export function AuthProvider({ children }) {
  } finally {
  setLoading(false);
  }
- }, [sessionToken]);
+ }, [sessionToken, checkSubscription]);
 
- const checkSubscription = useCallback(async () => {
- if (!sessionToken) return;
-
- try {
- const data = await apiClient.get("/subscription/status");
- setSubscription(data.subscription);
- } catch (error) {
- // Silently fail subscription check - don't disrupt user experience
- if (process.env.NODE_ENV === 'development') {
- console.error("Subscription check failed:", error);
+ // Load user on mount
+ useEffect(() => {
+ if (sessionToken) {
+ checkAuth();
+ } else {
+ setLoading(false);
  }
- }
- }, [sessionToken]);
+ }, [sessionToken, checkAuth]);
 
  const register = useCallback(async (email, password) => {
  try {

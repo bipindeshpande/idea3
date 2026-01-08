@@ -2,6 +2,7 @@ import { useState, memo } from "react";
 import { Link } from "react-router-dom";
 import SessionCard from "./SessionCard.jsx";
 import TabButton from "../ui/ui-tab-button.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../workspace/WorkspaceTheme.js";
 
 function DashboardSessionsTab({
  activeTab,
@@ -18,7 +19,7 @@ function DashboardSessionsTab({
  return (
  <>
  <div className="mb-6">
- <p className="text-sm text-secondary leading-relaxed">
+ <p className={WORKSPACE_TYPOGRAPHY.subtitle}>
  Manage your idea discovery runs and validations - revisit previous recommendations or generate new ones.
  </p>
  </div>
@@ -43,7 +44,7 @@ function DashboardSessionsTab({
  
  {loadingRuns ? (
  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <p className="text-sm text-secondary leading-relaxed">Loading sessions...</p>
+ <p className={WORKSPACE_TYPOGRAPHY.subtitle}>Loading sessions...</p>
  </div>
  ) : (
  <>
@@ -52,10 +53,10 @@ function DashboardSessionsTab({
  <>
  {!filteredRuns ? null : filteredRuns.length === 0 ? (
  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <h3 className="text-lg font-semibold text-primary mb-1">
+ <h3 className={`${WORKSPACE_TYPOGRAPHY.h3} mb-1`}>
  No past sessions yet
  </h3>
- <p className="text-primary text-secondary leading-relaxed max-w-md mx-auto">
+ <p className={`${WORKSPACE_TYPOGRAPHY.body} max-w-md mx-auto`}>
  Ideas you explored earlier will appear here.
  </p>
  </div>
@@ -87,10 +88,10 @@ function DashboardSessionsTab({
  <>
  {filteredValidations.length === 0 ? (
  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <h3 className="text-lg font-semibold text-primary mb-1">
+ <h3 className={`${WORKSPACE_TYPOGRAPHY.h3} mb-1`}>
  No validations yet
  </h3>
- <p className="text-primary text-secondary leading-relaxed max-w-md mx-auto">
+ <p className={`${WORKSPACE_TYPOGRAPHY.body} max-w-md mx-auto`}>
  Results from checking ideas will appear here.
  </p>
  </div>

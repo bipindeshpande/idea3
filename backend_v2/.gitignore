@@ -41,6 +41,15 @@ wheels/
 # Logs
 *.log
 
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+
+# Testing
+.pytest_cache/
+
 # OS
 .DS_Store
 Thumbs.db

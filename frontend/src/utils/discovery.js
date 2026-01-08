@@ -1,7 +1,7 @@
 /**
  * Discovery API helper with streaming support using Server-Sent Events (SSE)
  */
-import { cleanStreamedText } from './streamingParser.js';
+import { cleanStreamedText } from './parsers/index.js';
 import apiClient from './apiClient.js';
 
 /**

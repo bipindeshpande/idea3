@@ -5,33 +5,7 @@ import { getScoreMeta } from "../utils.js";
 export default function AnalysisTab({ parameterLookup, recommendations }) {
   return (
     <div className="space-y-6">
-      {/* Parameter-by-Parameter Detailed Analysis */}
-      <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
-        <h2 className="text-lg font-semibold text-primary flex items-center gap-2 mb-6">Parameter-by-Parameter Analysis</h2>
-        <div className="space-y-6">
-          {VALIDATION_PARAMETERS.map((parameter) => {
-            const data = parameterLookup[parameter] || { score: 0, details: null };
-            const details = data.details;
-            if (!details || details === FALLBACK_DETAIL) return null;
-
-            return (
-              <div key={parameter} className="rounded-lg border border-default bg-surface-muted p-5">
-                <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-base font-semibold text-primary">{parameter}</h3>
-                  <div className={`rounded-full px-3 py-1 text-xs font-medium ${getScoreMeta(data.score).badge}`}>
-                    {data.score.toFixed(1)} / 10
-                  </div>
-                </div>
-                <p className="text-primary text-primary text-secondary leading-relaxed whitespace-pre-wrap">
-                  {details}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Summary Recommendations */}
+      {/* Summary Recommendations - Primary Content */}
       {recommendations && (
         <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
           <h2 className="text-lg font-semibold text-primary flex items-center gap-2 mb-4">Summary Recommendations</h2>
@@ -41,15 +15,15 @@ export default function AnalysisTab({ parameterLookup, recommendations }) {
                 p: ({ node, ...props }) => {
                   const text = node.children?.[0]?.value || "";
                   if (text && text.length > 50 && !text.includes("\n")) {
-                    return <p className="text-primary text-primary text-secondary leading-relaxed mb-4" {...props} />;
+                    return <p className="text-secondary leading-relaxed mb-4" {...props} />;
                   }
-                  return <p className="text-primary text-primary text-secondary leading-relaxed mb-4" {...props} />;
+                  return <p className="text-secondary leading-relaxed mb-4" {...props} />;
                 },
                 ul: ({ node, ...props }) => (
-                  <ul className="list-disc list-outside space-y-2 text-primary text-primary text-secondary leading-relaxed mb-4 ml-6" style={{ listStyleType: 'disc', paddingLeft: '1.5rem' }} {...props} />
+                  <ul className="list-disc list-outside space-y-2 text-secondary leading-relaxed mb-4 ml-6" style={{ listStyleType: 'disc', paddingLeft: '1.5rem' }} {...props} />
                 ),
                 ol: ({ node, ...props }) => (
-                  <ol className="list-decimal list-outside space-y-2 text-primary text-primary text-secondary leading-relaxed mb-4 ml-6" style={{ listStyleType: 'decimal', paddingLeft: '1.5rem' }} {...props} />
+                  <ol className="list-decimal list-outside space-y-2 text-secondary leading-relaxed mb-4 ml-6" style={{ listStyleType: 'decimal', paddingLeft: '1.5rem' }} {...props} />
                 ),
                 li: ({ node, ...props }) => {
                   const hasNestedList = node.children?.some(child =>
@@ -57,14 +31,14 @@ export default function AnalysisTab({ parameterLookup, recommendations }) {
                   );
                   return (
                     <li
-                      className={`leading-relaxed text-primary text-primary text-secondary ${hasNestedList ? 'mb-2' : 'mb-3'}`}
+                      className={`leading-relaxed text-secondary ${hasNestedList ? 'mb-2' : 'mb-3'}`}
                       style={{ display: 'list-item', listStylePosition: 'outside' }}
                       {...props}
                     />
                   );
                 },
                 strong: ({ node, ...props }) => (
-                  <strong className="font-semibold text-primary text-secondary" {...props} />
+                  <strong className="font-semibold text-primary" {...props} />
                 ),
                 h2: ({ node, ...props }) => (
                   <h2 className="text-lg font-semibold text-primary flex items-center gap-2 mt-6 mb-4" {...props} />
@@ -79,6 +53,33 @@ export default function AnalysisTab({ parameterLookup, recommendations }) {
           </div>
         </div>
       )}
+
+      {/* Parameter-by-Parameter Detailed Analysis - Secondary Content */}
+      <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
+        <h2 className="text-lg font-semibold text-primary flex items-center gap-2 mb-6">Parameter-by-Parameter Detailed Analysis</h2>
+        <p className="text-sm text-secondary mb-6">Deep dive into each validation parameter with specific insights and analysis.</p>
+        <div className="space-y-6">
+          {VALIDATION_PARAMETERS.map((parameter) => {
+            const data = parameterLookup[parameter] || { score: 0, details: null };
+            const details = data.details;
+            if (!details || details === FALLBACK_DETAIL) return null;
+
+            return (
+              <div key={parameter} className="rounded-lg border border-default bg-surface-muted p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-base font-semibold text-primary">{parameter}</h3>
+                  <div className={`rounded-full px-3 py-1 text-xs font-medium ${getScoreMeta(data.score).badge}`}>
+                    {data.score.toFixed(1)} / 10
+                  </div>
+                </div>
+                <p className="text-secondary leading-relaxed whitespace-pre-wrap">
+                  {details}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

@@ -51,7 +51,7 @@ export default function AdminStats() {
   if (loading) {
     return (
       <div className="rounded-3xl border border-default bg-surface p-8 shadow-soft">
-        <p className="text-secondary text-secondary">Loading statistics...</p>
+        <p className="text-secondary">Loading statistics...</p>
       </div>
     );
   }
@@ -68,14 +68,14 @@ export default function AdminStats() {
   if (!stats) {
     return (
       <div className="rounded-3xl border border-default bg-surface p-8 shadow-soft">
-        <p className="text-secondary text-secondary">No statistics available</p>
+        <p className="text-secondary">No statistics available</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-3xl border border-default bg-surface p-8 shadow-soft">
-      <h2 className="mb-6 text-2xl font-semibold text-primary text-secondary">Statistics</h2>
+      <h2 className="mb-6 text-2xl font-semibold text-primary">Statistics</h2>
       
       <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
         <div className="rounded-2xl border border-default bg-surface p-6">
@@ -104,31 +104,31 @@ export default function AdminStats() {
       </div>
 
       <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-default bg-app bg-surface p-4">
-          <h3 className="mb-2 text-sm font-semibold text-primary text-secondary">Active Subscriptions</h3>
-          <p className="text-2xl font-bold text-primary text-secondary">{stats.active_subscriptions || 0}</p>
+        <div className="rounded-2xl border border-default bg-surface p-4">
+          <h3 className="mb-2 text-sm font-semibold text-primary">Active Subscriptions</h3>
+          <p className="text-2xl font-bold text-primary">{stats.active_subscriptions || 0}</p>
         </div>
 
-        <div className="rounded-2xl border border-default bg-app bg-surface p-4">
-          <h3 className="mb-2 text-sm font-semibold text-primary text-secondary">Free Trial Users</h3>
-          <p className="text-2xl font-bold text-primary text-secondary">{stats.free_trial_users || 0}</p>
+        <div className="rounded-2xl border border-default bg-surface p-4">
+          <h3 className="mb-2 text-sm font-semibold text-primary">Free Trial Users</h3>
+          <p className="text-2xl font-bold text-primary">{stats.free_trial_users || 0}</p>
         </div>
 
-        <div className="rounded-2xl border border-default bg-app bg-surface p-4">
-          <h3 className="mb-2 text-sm font-semibold text-primary text-secondary">Weekly Subscribers</h3>
-          <p className="text-2xl font-bold text-primary text-secondary">{stats.weekly_subscribers || 0}</p>
+        <div className="rounded-2xl border border-default bg-surface p-4">
+          <h3 className="mb-2 text-sm font-semibold text-primary">Weekly Subscribers</h3>
+          <p className="text-2xl font-bold text-primary">{stats.weekly_subscribers || 0}</p>
         </div>
 
-        <div className="rounded-2xl border border-default bg-app bg-surface p-4">
-          <h3 className="mb-2 text-sm font-semibold text-primary text-secondary">Monthly Subscribers</h3>
-          <p className="text-2xl font-bold text-primary text-secondary">{stats.monthly_subscribers || 0}</p>
+        <div className="rounded-2xl border border-default bg-surface p-4">
+          <h3 className="mb-2 text-sm font-semibold text-primary">Monthly Subscribers</h3>
+          <p className="text-2xl font-bold text-primary">{stats.monthly_subscribers || 0}</p>
         </div>
       </div>
 
       <div className="mt-8">
-        <div className="rounded-2xl border border-default bg-app bg-surface p-4">
-          <h3 className="mb-2 text-sm font-semibold text-primary text-secondary">Completed Payments</h3>
-          <p className="text-2xl font-bold text-primary text-secondary">{stats.total_payments || 0}</p>
+        <div className="rounded-2xl border border-default bg-surface p-4">
+          <h3 className="mb-2 text-sm font-semibold text-primary">Completed Payments</h3>
+          <p className="text-2xl font-bold text-primary">{stats.total_payments || 0}</p>
         </div>
       </div>
     </div>

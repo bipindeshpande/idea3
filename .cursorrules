@@ -1,0 +1,68 @@
+# AI Code Change Guidelines
+# This file ensures AI assistants make minimal, targeted changes only
+
+## 🎯 Core Principle: MINIMAL CHANGES ONLY
+
+When the user requests a change:
+- **ONLY modify what is explicitly requested**
+- **DO NOT fix unrelated errors**
+- **DO NOT refactor working code**
+- **DO NOT improve code quality unless asked**
+- **DO NOT update dependencies unless asked**
+- **DO NOT touch files not mentioned in the request**
+
+## ✅ What TO Do
+
+1. **Targeted Changes**: Only modify the specific files/functions mentioned
+2. **Requested Fixes**: Fix errors ONLY if explicitly asked or if they're in the files being changed
+3. **Ask First**: If unsure about scope, ask before making changes
+4. **Document Changes**: Clearly explain what was changed and why
+
+## ❌ What NOT To Do
+
+1. **No Proactive Fixes**: Don't fix linter errors in unrelated files
+2. **No Refactoring**: Don't improve code structure unless asked
+3. **No Optimization**: Don't optimize performance unless requested
+4. **No Style Changes**: Don't reformat code unless explicitly requested
+5. **No Dependency Updates**: Don't update packages unless asked
+6. **No "While We're At It"**: Don't make additional improvements "while you're changing this"
+
+## 🔒 Production Safety
+
+- **Working code is sacred**: If it works, don't touch it
+- **Isolated changes**: Changes should be contained to requested areas
+- **Explicit scope**: Confirm scope before proceeding with multi-file changes
+- **Review-friendly**: Changes should be easy to review in git diff
+
+## 📋 Change Process
+
+1. **Understand Request**: Clarify exactly what needs to change
+2. **Identify Scope**: List only the files/functions that need modification
+3. **Make Changes**: Modify ONLY the identified scope
+4. **Report Changes**: List exactly what was changed
+
+## 🚨 Exception Cases
+
+Only fix errors automatically if:
+- The error is in the file being modified
+- The error would prevent the requested change from working
+- The user explicitly asks to fix errors
+
+## 💬 Communication
+
+Always:
+- Summarize what will be changed BEFORE making changes (for large changes)
+- List all files that will be modified
+- Ask for confirmation if scope seems unclear
+
+## 📝 Example Requests
+
+**Good Request**: "Add validation to the email field in UserForm.jsx"
+**Response**: Modify ONLY UserForm.jsx, add ONLY email validation
+
+**Bad Response**: Modify UserForm.jsx, fix lint errors in 5 other files, refactor validation utilities, update dependencies
+
+---
+
+**Remember**: Production stability > Code perfection. Working code should remain untouched unless explicitly requested.
+

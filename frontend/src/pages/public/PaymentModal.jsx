@@ -6,6 +6,7 @@ import {
  useElements,
 } from "@stripe/react-stripe-js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { CONTACT_EMAIL } from "../../constants/contact.js";
 
 function DevActivationForm({ subscriptionType, onSuccess, onCancel }) {
  const { sessionToken } = useAuth();
@@ -215,8 +216,8 @@ function CheckoutForm({ subscriptionType, onSuccess, onCancel }) {
  <p className="mt-1 text-sm">{error}</p>
  <p className="mt-2 text-xs">
  Need help? Contact us at{" "}
- <a href="mailto:hello@startupideaadvisor.com" className="underline">
- hello@startupideaadvisor.com
+ <a href={`mailto:${CONTACT_EMAIL}`} className="underline">
+ {CONTACT_EMAIL}
  </a>
  </p>
  </div>

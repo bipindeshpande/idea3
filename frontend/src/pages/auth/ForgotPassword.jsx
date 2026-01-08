@@ -58,16 +58,16 @@ export default function ForgotPassword() {
  description="Enter your email and we'll send you a reset link."
  />
 
- {success ? (
- <div className="space-y-4">
- <Card className="border-default bg-surface">
- <p className="text-primary text-accent leading-relaxed font-semibold">Reset link sent!</p>
+{success ? (
+<div className="space-y-4" data-testid="forgot-password-success">
+<Card className="border-default bg-surface">
+<p className="text-primary text-accent leading-relaxed font-semibold">Reset link sent!</p>
  <p className="mt-2 text-primary text-accent leading-relaxed">
  If an account exists with that email, we've sent a password reset link. Check your inbox.
  </p>
- {resetLink && (
- <div className="mt-4 rounded-lg border border-default bg-surface p-3">
- <p className="mb-2 text-xs font-semibold">Development Mode - Reset Link:</p>
+{resetLink && (
+<div className="mt-4 rounded-lg border border-default bg-surface p-3" data-testid="forgot-password-dev-link">
+<p className="mb-2 text-xs font-semibold">Development Mode - Reset Link:</p>
  <a
  href={resetLink}
  className="break-all text-xs text-accent underline"
@@ -95,11 +95,11 @@ export default function ForgotPassword() {
  placeholder="your@email.com"
  />
 
- {error && (
- <Card className="border-default bg-surface">
- <p className="text-primary text-accent leading-relaxed font-semibold">{error}</p>
- </Card>
- )}
+{error && (
+<Card className="border-default bg-surface" data-testid="forgot-password-error" role="alert">
+<p className="text-primary text-accent leading-relaxed font-semibold">{error}</p>
+</Card>
+)}
 
  <UIButton
  type="submit"

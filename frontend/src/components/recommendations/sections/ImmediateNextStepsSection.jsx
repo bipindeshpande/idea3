@@ -23,7 +23,7 @@ export default function ImmediateNextStepsSection({ discoveryNextSteps, immediat
     );
   }
 
-  if (immediateNextSteps.length > 0) {
+  if (immediateNextSteps && immediateNextSteps.length > 0) {
     return (
       <ul className="space-y-2 text-sm text-primary text-primary">
         {immediateNextSteps.map((item, index) => (

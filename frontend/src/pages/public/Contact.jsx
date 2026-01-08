@@ -9,6 +9,8 @@ import UIHeading from "../../components/ui/ui-heading.jsx";
 import FormInput from "../../components/ui/FormInput.jsx";
 import FormTextarea from "../../components/ui/FormTextarea.jsx";
 import MarketingLayout from "../../layouts/MarketingLayout.jsx";
+import { generateBreadcrumbs, breadcrumbPatterns } from "../../utils/seo/breadcrumbs.js";
+import { CONTACT_EMAIL } from "../../constants/contact.js";
 
 export default function ContactPage() {
  const [formData, setFormData] = useState({
@@ -70,9 +72,10 @@ export default function ContactPage() {
  <MarketingLayout>
  <PageContainer maxWidth="4xl">
  <Seo
- title="Contact | Idea Bunch"
- description="Reach the Startup Idea Advisor team for pilots, partnerships, or support."
+ title="Contact | Startup Idea Advisor"
+ description="Get in touch with the Startup Idea Advisor team for partnerships, support, or questions about our AI-powered startup validation platform."
  path="/contact"
+ breadcrumbs={generateBreadcrumbs(breadcrumbPatterns.contact)}
  />
  
  {/* Hero Section */}
@@ -89,34 +92,34 @@ export default function ContactPage() {
  <Blob size="small" position="top-right" />
  <div className="relative z-10">
  
- {success && (
- <Card className="mb-6 border-default border-default bg-surface bg-surface">
- <div className="flex items-start gap-3">
- <div className="icon-circle bg-surface bg-surface text-accent text-accent text-xl shrink-0">
- ✓
- </div>
- <div>
- <p className="text-primary text-accent text-accent leading-relaxed font-semibold mb-1">
- Message sent successfully!
- </p>
- <p className="text-base text-accent">
- Thank you for reaching out. We'll get back to you within one business day.
- </p>
- </div>
- </div>
- </Card>
- )}
+{success && (
+<Card className="mb-6 border-default bg-surface">
+<div className="flex items-start gap-3">
+<div className="icon-circle bg-surface text-accent text-xl shrink-0">
+✓
+</div>
+<div>
+<p className="text-accent leading-relaxed font-semibold mb-1">
+Message sent successfully!
+</p>
+<p className="text-base text-accent">
+Thank you for reaching out. We'll get back to you within one business day.
+</p>
+</div>
+</div>
+</Card>
+)}
 
- {error && (
- <Card className="mb-6 border-default border-default bg-surface bg-surface">
- <div className="flex items-start gap-3">
- <div className="icon-circle bg-surface bg-surface text-accent text-accent text-xl shrink-0">
- ⚠
- </div>
- <div>
- <p className="text-primary text-accent text-accent leading-relaxed font-semibold">
- {error}
- </p>
+{error && (
+<Card className="mb-6 border-default bg-surface">
+<div className="flex items-start gap-3">
+<div className="icon-circle bg-surface text-accent text-xl shrink-0">
+⚠
+</div>
+<div>
+<p className="text-accent leading-relaxed font-semibold">
+{error}
+</p>
  </div>
  </div>
  </Card>
@@ -180,10 +183,10 @@ export default function ContactPage() {
  Prefer to email directly? We're here to help.
  </p>
  <a
- href="mailto:hello@ideabunch.com"
+ href={`mailto:${CONTACT_EMAIL}`}
  className="text-base text-accent hover:text-accent-hover font-semibold break-all text-center block"
  >
- hello@ideabunch.com
+ {CONTACT_EMAIL}
  </a>
  </Card>
 

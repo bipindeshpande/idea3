@@ -101,11 +101,11 @@ export default function Login() {
  </Link>
  </div>
 
- {error && (
- <Card className="border-default bg-surface">
- <p className="text-primary text-accent leading-relaxed font-semibold">{error}</p>
- </Card>
- )}
+{error && (
+<Card className="border-default bg-surface" data-testid="login-error" role="alert">
+<p className="text-primary text-accent leading-relaxed font-semibold">{error}</p>
+</Card>
+)}
 
  <UIButton
  type="submit"

@@ -388,6 +388,113 @@ class UserService(BaseService):
             "note": note.to_dict()
         }
     
+    def delete_action(self, user_id: str, action_id: str) -> Dict[str, Any]:
+        """
+        Delete an action
+        
+        Args:
+            user_id: User ID (for authorization)
+            action_id: Action ID
+            
+        Returns:
+            Success confirmation
+        """
+        from app.models.action import Action
+        
+        action = self.db.query(Action).filter(
+            and_(
+                Action.id == action_id,
+                Action.user_id == user_id
+            )
+        ).first()
+        
+        if not action:
+            raise ValueError("Action not found")
+        
+        self.db.delete(action)
+        self.db.commit()
+        
+        return {
+            "success": True,
+            "message": "Action deleted successfully"
+        }
+    
+    def delete_note(self, user_id: str, note_id: str) -> Dict[str, Any]:
+        """
+        Delete a note
+        
+        Args:
+            user_id: User ID (for authorization)
+            note_id: Note ID
+            
+        Returns:
+            Success confirmation
+        """
+        from app.models.note import Note
+        
+        note = self.db.query(Note).filter(
+            and_(
+                Note.id == note_id,
+                Note.user_id == user_id
+            )
+        ).first()
+        
+        if not note:
+            raise ValueError("Note not found")
+        
+        self.db.delete(note)
+        self.db.commit()
+        
+        return {
+            "success": True,
+            "message": "Note deleted successfully"
+        }
+    
+    def update_note(
+        self,
+        user_id: str,
+        note_id: str,
+        content: Optional[str] = None,
+        tags: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """
+        Update a note
+        
+        Args:
+            user_id: User ID (for authorization)
+            note_id: Note ID
+            content: Updated note content (optional)
+            tags: Updated tags list (optional)
+            
+        Returns:
+            Updated note
+        """
+        from app.models.note import Note
+        
+        note = self.db.query(Note).filter(
+            and_(
+                Note.id == note_id,
+                Note.user_id == user_id
+            )
+        ).first()
+        
+        if not note:
+            raise ValueError("Note not found")
+        
+        # Update fields if provided
+        if content is not None:
+            note.content = content
+        if tags is not None:
+            note.tags = tags
+        
+        self.db.commit()
+        self.db.refresh(note)
+        
+        return {
+            "success": True,
+            "note": note.to_dict()
+        }
+    
     def compare_sessions(
         self, 
         user_id: str, 
@@ -586,20 +693,65 @@ class UserService(BaseService):
         """
         Get smart recommendations based on user's validation history
         
-        Returns similar high-scoring ideas from validation history
-        For now, returns mock data - will be refined later with actual validation data
+        Returns similar high-scoring ideas from validation history.
+        Queries user's validation results, finds high-scoring validations (score >= 7),
+        and returns the top similar ideas.
         """
-        # TODO: Implement actual logic to:
-        # 1. Query validation results for this user
-        # 2. Find high-scoring validations (score >= 7)
-        # 3. Group by similar ideas/patterns
-        # 4. Return top similar ideas
+        from app.models.validation import Validation
+        import json
         
-        # Mock data for now
-        return {
-            "success": True,
-            "insights": {
-                "similar_ideas": []  # Empty for now - will be populated when validation data is available
+        try:
+            # Query validation results for this user
+            validations = self.db.query(Validation).filter(
+                and_(
+                    Validation.user_id == user_id,
+                    Validation.deleted_at.is_(None),
+                    Validation.status == "completed"
+                )
+            ).order_by(desc(Validation.created_at)).limit(20).all()
+            
+            similar_ideas = []
+            for validation in validations:
+                try:
+                    validation_result = validation.validation_result
+                    # Handle both dict and JSON string formats
+                    if isinstance(validation_result, str):
+                        validation_result = json.loads(validation_result)
+                    
+                    # Get overall_score from validation_result
+                    overall_score = validation_result.get("overall_score", 0)
+                    
+                    # Only include high-scoring validations (score >= 7)
+                    if overall_score >= 7.0:
+                        similar_ideas.append({
+                            "validation_id": validation.validation_id,
+                            "idea_explanation": validation.idea_explanation[:200] + "..." if len(validation.idea_explanation) > 200 else validation.idea_explanation,
+                            "score": float(overall_score)
+                        })
+                        
+                        # Limit to top 5 high-scoring ideas
+                        if len(similar_ideas) >= 5:
+                            break
+                            
+                except (json.JSONDecodeError, KeyError, ValueError, AttributeError) as e:
+                    # Skip invalid validation records (malformed JSON, missing fields, etc.)
+                    self._log(f"Skipping invalid validation {validation.validation_id}: {str(e)}", "WARNING")
+                    continue
+            
+            return {
+                "success": True,
+                "insights": {
+                    "similar_ideas": similar_ideas
+                }
             }
-        }
+            
+        except Exception as e:
+            self._log(f"Error fetching smart recommendations for user {user_id}: {str(e)}", "ERROR")
+            # Return empty list on error rather than failing completely
+            return {
+                "success": True,
+                "insights": {
+                    "similar_ideas": []
+                }
+            }
 

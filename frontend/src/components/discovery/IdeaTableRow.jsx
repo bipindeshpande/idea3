@@ -69,9 +69,9 @@ export default function IdeaTableRow({
             </div>
           )}
         </div>
-        {runQuery && (
+        {idea.id && (
           <p className="mt-1 text-xs text-secondary">
-            ID: {runQuery.slice(-8)}
+            ID: {idea.id.slice(-8)}
           </p>
         )}
       </td>

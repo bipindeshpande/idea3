@@ -17,7 +17,23 @@ function loadSavedValidations() {
 
 function saveValidation(validation) {
  const validations = loadSavedValidations();
- validations.unshift(validation);
+ const validationId = validation.id || validation.validation_id;
+ 
+ // Check if validation with same ID already exists
+ const existingIndex = validations.findIndex(v => {
+  const vId = v.id || v.validation_id;
+  return vId && validationId && vId === validationId;
+ });
+ 
+ if (existingIndex >= 0) {
+  // Replace existing validation (keep its position or move to front)
+  validations[existingIndex] = validation;
+ } else {
+  // Add new validation to front
+  validations.unshift(validation);
+ }
+ 
+ // Keep only the 20 most recent
  localStorage.setItem(STORAGE_KEY, JSON.stringify(validations.slice(0, 20)));
 }
 

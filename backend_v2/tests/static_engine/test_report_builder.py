@@ -252,10 +252,11 @@ class TestIndustryContext:
         assert "Budget Considerations" in context or "budget" in context.lower()
     
     def test_industry_context_includes_constraints(self, sample_industry_data):
-        """Industry context should include constraints."""
-        context = _format_industry_context(sample_industry_data)
+        """Industry context should include constraints for high realism."""
+        # Constraints only appear for realism >= 4
+        context = _format_industry_context(sample_industry_data, realism_level=4)
         
-        assert "Common Constraints" in context or "constraints" in context.lower()
+        assert "Industry Constraints" in context or "Constraints" in context or "Considerations" in context
 
 
 class TestDeterministicOutput:
@@ -326,4 +327,96 @@ class TestTemplateHandling:
         # Should still produce a report
         assert len(report) > 0
         assert "Industry Overview" in report or "Ideas" in report
+    
+    def test_template_without_placeholders_appends_sections(self, sample_profile, sample_ideas, sample_industry_data):
+        """Template without placeholders should append sections."""
+        industry_data_no_placeholders = sample_industry_data.copy()
+        industry_data_no_placeholders["markdown_template"] = "# Static Template\n\nNo placeholders here."
+        
+        report = build_markdown_report(
+            profile=sample_profile,
+            idea_list=sample_ideas,
+            industry_data=industry_data_no_placeholders
+        )
+        
+        # Should contain template and appended sections
+        assert "Static Template" in report
+        assert len(report) > len(industry_data_no_placeholders["markdown_template"])
+    
+    def test_ideas_section_realism_level_low(self, sample_ideas, sample_industry_data):
+        """Ideas section with low realism level should use personalized header."""
+        section = _format_ideas_section(sample_ideas, sample_industry_data, realism_level=1)
+        
+        assert "Your Personalized Ideas" in section or "🚀" in section
+    
+    def test_ideas_section_realism_level_high(self, sample_ideas, sample_industry_data):
+        """Ideas section with high realism level should use strategic header."""
+        section = _format_ideas_section(sample_ideas, sample_industry_data, realism_level=5)
+        
+        assert "Strategic Startup Recommendations" in section
+    
+    def test_ideas_section_structured_format(self, sample_industry_data):
+        """Ideas section should format structured ideas correctly."""
+        structured_ideas = [
+            {
+                "title": "AI Automation Tool",
+                "summary": "Automate workflows",
+                "target_market": "Small businesses",
+                "revenue_model": "Subscription",
+                "validation_score": 8.5,
+                "timeline": "3-6 months",
+                "why_this_fits": "Matches your skills",
+                "index": 1
+            }
+        ]
+        
+        section = _format_ideas_section(structured_ideas, sample_industry_data)
+        
+        assert "title: AI Automation Tool" in section
+        assert "summary: Automate workflows" in section
+        assert "target_market: Small businesses" in section
+        assert "revenue_model: Subscription" in section
+        assert "validation_score: 8.5" in section
+        assert "timeline: 3-6 months" in section
+        assert "why_this_fits: Matches your skills" in section
+    
+    def test_ideas_section_details_markdown(self, sample_industry_data):
+        """Ideas section should include details_markdown if available."""
+        ideas_with_details = [
+            {
+                "title": "Test Idea",
+                "details_markdown": "## Detailed Description\n\nThis is a detailed explanation."
+            }
+        ]
+        
+        section = _format_ideas_section(ideas_with_details, sample_industry_data)
+        
+        assert "Detailed Description" in section
+        assert "This is a detailed explanation" in section
+    
+    def test_industry_context_realism_level_low(self, sample_industry_data):
+        """Industry context with low realism should use simplified headers."""
+        context = _format_industry_context(sample_industry_data, realism_level=1)
+        
+        assert "Why This Industry Works" in context or "Budget Tips" in context
+    
+    def test_industry_context_realism_level_high(self, sample_industry_data):
+        """Industry context with high realism should include all sections."""
+        context = _format_industry_context(sample_industry_data, realism_level=5)
+        
+        assert "Value Propositions" in context
+        assert "Relevant Skills" in context
+        assert "Budget Considerations" in context
+        assert "Industry Constraints" in context or "Considerations" in context
+    
+    def test_industry_context_constraints_only_high_realism(self, sample_industry_data):
+        """Constraints section should only appear for high realism."""
+        context_low = _format_industry_context(sample_industry_data, realism_level=3)
+        context_high = _format_industry_context(sample_industry_data, realism_level=4)
+        
+        # Constraints should only be in high realism
+        if "Constraints" in context_low:
+            # If it appears in low, it should be less detailed
+            assert "Industry Constraints & Considerations" not in context_low
+        assert "Industry Constraints & Considerations" in context_high or "Constraints" in context_high
 

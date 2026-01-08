@@ -281,9 +281,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  <div className="grid gap-4 sm:gap-5">
  {/* Startup Category - FIRST FIELD */}
  <div className="grid gap-1.5">
- <label htmlFor="startup_category" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- What type of business are you interested in? <span className="text-accent">*</span>
- </label>
+<label htmlFor="startup_category" className="text-xs sm:text-sm font-semibold text-primary">
+What type of business are you interested in? <span className="text-accent">*</span>
+</label>
  <select
  id="startup_category"
  className={fieldClasses}
@@ -298,17 +298,17 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  {errors.startup_category && (
  <p className="text-xs text-accent">{errors.startup_category}</p>
  )}
- <p className="text-xs text-secondary text-secondary">
- This filters out ideas that won't match your preferred business type. Select "Both" if you're open to any type.
- </p>
+<p className="text-xs text-secondary">
+This filters out ideas that won't match your preferred business type. Select "Both" if you're open to any type.
+</p>
  </div>
 
  {/* First row: Time Commitment, Budget Range, Risk Tolerance */}
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
  <div className="grid gap-1.5">
- <label htmlFor="time_commitment" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Time Commitment <span className="text-accent">*</span>
- </label>
+<label htmlFor="time_commitment" className="text-xs sm:text-sm font-semibold text-primary">
+Time Commitment <span className="text-accent">*</span>
+</label>
  <select
  id="time_commitment"
  className={fieldClasses}
@@ -327,9 +327,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  </div>
 
  <div className="grid gap-1.5">
- <label htmlFor="budget_range" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Budget Range <span className="text-accent">*</span>
- </label>
+<label htmlFor="budget_range" className="text-xs sm:text-sm font-semibold text-primary">
+Budget Range <span className="text-accent">*</span>
+</label>
  <select
  id="budget_range"
  className={fieldClasses}
@@ -349,9 +349,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  </div>
 
  <div className="grid gap-1.5 sm:col-span-2 lg:col-span-1">
- <label htmlFor="risk_tolerance" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Risk Tolerance <span className="text-accent">*</span>
- </label>
+<label htmlFor="risk_tolerance" className="text-xs sm:text-sm font-semibold text-primary">
+Risk Tolerance <span className="text-accent">*</span>
+</label>
  <select
  id="risk_tolerance"
  className={fieldClasses}
@@ -372,12 +372,12 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  {/* Skills Section */}
  <div className="grid gap-4">
  <div>
- <label className="text-sm font-semibold text-primary text-secondary">
- Entrepreneurial Capabilities <span className="text-accent">*</span>
- </label>
- <p className="text-xs text-secondary text-secondary mt-0.5">
- This ensures I only suggest ideas you can actually execute. Select all that apply.
- </p>
+<label className="text-sm font-semibold text-primary">
+Entrepreneurial Capabilities <span className="text-accent">*</span>
+</label>
+<p className="text-xs text-secondary mt-0.5">
+This ensures I only suggest ideas you can actually execute. Select all that apply.
+</p>
  </div>
  
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -386,9 +386,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  key={category} 
  className="rounded-xl border border-default bg-surface p-4 space-y-3 shadow-sm"
  >
- <h4 className="text-xs font-semibold text-primary text-secondary uppercase tracking-wider">
- {skillCategoryLabels[category]}
- </h4>
+<h4 className="text-xs font-semibold text-primary uppercase tracking-wider">
+{skillCategoryLabels[category]}
+</h4>
  <div className="flex flex-wrap gap-1.5">
  {skills.map((skill) => {
  const isSelected = (localInputs.skills?.[category] || []).includes(skill);
@@ -413,9 +413,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  </div>
  
  <div className="grid gap-1.5 pt-2 border-t border-default">
- <label htmlFor="skills_other" className="text-xs font-semibold text-primary text-secondary">
- Additional Skills
- </label>
+<label htmlFor="skills_other" className="text-xs font-semibold text-primary">
+Additional Skills
+</label>
  <input
  id="skills_other"
  type="text"
@@ -436,9 +436,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  {/* Preferred Work Style and Startup Style */}
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="grid gap-1.5">
- <label htmlFor="preferred_work_style" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Preferred Work Style <span className="text-accent">*</span>
- </label>
+<label htmlFor="preferred_work_style" className="text-xs sm:text-sm font-semibold text-primary">
+Preferred Work Style <span className="text-accent">*</span>
+</label>
  <select
  id="preferred_work_style"
  className={fieldClasses}
@@ -460,9 +460,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  </div>
 
  <div className="grid gap-1.5">
- <label htmlFor="startup_style" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Startup Style <span className="text-accent">*</span>
- </label>
+<label htmlFor="startup_style" className="text-xs sm:text-sm font-semibold text-primary">
+Startup Style <span className="text-accent">*</span>
+</label>
  <select
  id="startup_style"
  className={fieldClasses}
@@ -487,9 +487,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  {/* Customer Interaction and Location Context */}
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="grid gap-1.5">
- <label htmlFor="customer_interaction" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Customer Interaction <span className="text-accent">*</span>
- </label>
+<label htmlFor="customer_interaction" className="text-xs sm:text-sm font-semibold text-primary">
+Customer Interaction <span className="text-accent">*</span>
+</label>
  <select
  id="customer_interaction"
  className={fieldClasses}
@@ -508,9 +508,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  </div>
 
  <div className="grid gap-1.5">
- <label htmlFor="location_context" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Location Context <span className="text-accent">*</span>
- </label>
+<label htmlFor="location_context" className="text-xs sm:text-sm font-semibold text-primary">
+Location Context <span className="text-accent">*</span>
+</label>
  <select
  id="location_context"
  className={fieldClasses}
@@ -531,9 +531,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
 
  {/* Business Region */}
  <div className="grid gap-1.5">
- <label htmlFor="business_region" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Business Region <span className="text-accent">*</span>
- </label>
+<label htmlFor="business_region" className="text-xs sm:text-sm font-semibold text-primary">
+Business Region <span className="text-accent">*</span>
+</label>
  <select
  id="business_region"
  className={fieldClasses}
@@ -557,9 +557,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
 
  {/* Industry Interest - Full width */}
  <div className="grid gap-1.5">
- <label htmlFor="industry_interest" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Industry Interest <span className="text-accent">*</span>
- </label>
+<label htmlFor="industry_interest" className="text-xs sm:text-sm font-semibold text-primary">
+Industry Interest <span className="text-accent">*</span>
+</label>
  <select
  id="industry_interest"
  className={fieldClasses}
@@ -581,9 +581,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  {/* Sub-Interest Area - Full width */}
  {industryInterest && (
  <div className="grid gap-1.5">
- <label htmlFor="sub_interest_area" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Sub-Interest Area {!isCustomSubInterest && <span className="text-accent">*</span>}
- </label>
+<label htmlFor="sub_interest_area" className="text-xs sm:text-sm font-semibold text-primary">
+Sub-Interest Area {!isCustomSubInterest && <span className="text-accent">*</span>}
+</label>
  {isCustomSubInterest ? (
  <input
  id="sub_interest_area"
@@ -617,9 +617,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  {/* Business Type and Earnings Timeline */}
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div className="grid gap-1.5">
- <label htmlFor="business_type" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Business Type <span className="text-accent">*</span>
- </label>
+<label htmlFor="business_type" className="text-xs sm:text-sm font-semibold text-primary">
+Business Type <span className="text-accent">*</span>
+</label>
  <select
  id="business_type"
  className={fieldClasses}
@@ -641,9 +641,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
  </div>
 
  <div className="grid gap-1.5">
- <label htmlFor="earnings_timeline" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Earnings Timeline <span className="text-accent">*</span>
- </label>
+<label htmlFor="earnings_timeline" className="text-xs sm:text-sm font-semibold text-primary">
+Earnings Timeline <span className="text-accent">*</span>
+</label>
  <select
  id="earnings_timeline"
  className={fieldClasses}
@@ -664,9 +664,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
 
  {/* Founder Ambition - Full width */}
  <div className="grid gap-1.5">
- <label htmlFor="founder_ambition" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Founder Ambition <span className="text-accent">*</span>
- </label>
+<label htmlFor="founder_ambition" className="text-xs sm:text-sm font-semibold text-primary">
+Founder Ambition <span className="text-accent">*</span>
+</label>
  <select
  id="founder_ambition"
  className={fieldClasses}
@@ -687,9 +687,9 @@ export default function IntakeScreen({ inputs, onChange, errors = {} }) {
 
  {/* Experience Summary - Full width */}
  <div className="grid gap-1.5">
- <label htmlFor="experience_summary" className="text-xs sm:text-sm font-semibold text-primary text-secondary">
- Experience Summary
- </label>
+<label htmlFor="experience_summary" className="text-xs sm:text-sm font-semibold text-primary">
+Experience Summary
+</label>
  <textarea
  id="experience_summary"
  className={fieldClasses}

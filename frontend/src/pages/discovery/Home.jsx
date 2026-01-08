@@ -10,6 +10,7 @@ import { DISCOVERY_SPACING, DISCOVERY_TYPOGRAPHY } from "../../components/discov
 import IntakeScreen from "./IntakeScreen.jsx";
 import ReviewScreen from "../../components/discovery/ReviewScreen.jsx";
 import FocusLayout from "../../layouts/FocusLayout.jsx";
+import { CONTACT_EMAIL } from "../../constants/contact.js";
 
 export default function HomePage() {
  const navigate = useNavigate();
@@ -289,7 +290,7 @@ export default function HomePage() {
  ],
  contactPoint: {
  "@type": "ContactPoint",
- email: "hello@startupideaadvisor.com",
+ email: CONTACT_EMAIL,
  contactType: "customer support",
  },
  })}

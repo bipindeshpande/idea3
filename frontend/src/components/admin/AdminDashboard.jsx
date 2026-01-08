@@ -55,7 +55,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="rounded-3xl border border-default bg-surface p-8 shadow-soft">
-        <p className="text-secondary text-secondary">Loading dashboard...</p>
+        <p className="text-secondary">Loading dashboard...</p>
       </div>
     );
   }
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
   if (!stats) {
     return (
       <div className="rounded-3xl border border-default bg-surface p-8 shadow-soft">
-        <p className="text-secondary text-secondary">No dashboard data available</p>
+        <p className="text-secondary">No dashboard data available</p>
       </div>
     );
   }
@@ -87,11 +87,11 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div className="rounded-3xl border border-default bg-surface p-6 shadow-soft">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-primary text-secondary">Dashboard Overview</h2>
+          <h2 className="text-2xl font-semibold text-primary">Dashboard Overview</h2>
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="rounded-lg border border-default bg-surface px-4 py-2 text-sm font-semibold text-primary text-secondary"
+            className="rounded-lg border border-default bg-surface px-4 py-2 text-sm font-semibold text-primary"
           >
             <option value="all">All Time</option>
             <option value="7d">Last 7 Days</option>
@@ -127,63 +127,63 @@ export default function AdminDashboard() {
         </div>
 
         <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-default bg-app bg-surface p-4">
-            <h3 className="mb-2 text-sm font-semibold text-primary text-secondary">Free Users</h3>
-            <p className="text-2xl font-bold text-primary text-secondary">{stats.free_trial_users || 0}</p>
+          <div className="rounded-xl border border-default bg-surface p-4">
+            <h3 className="mb-2 text-sm font-semibold text-primary">Free Users</h3>
+            <p className="text-2xl font-bold text-primary">{stats.free_trial_users || 0}</p>
           </div>
-          <div className="rounded-xl border border-default bg-app bg-surface p-4">
-            <h3 className="mb-2 text-sm font-semibold text-primary text-secondary">Weekly Subscribers</h3>
-            <p className="text-2xl font-bold text-primary text-secondary">{stats.weekly_subscribers || 0}</p>
+          <div className="rounded-xl border border-default bg-surface p-4">
+            <h3 className="mb-2 text-sm font-semibold text-primary">Weekly Subscribers</h3>
+            <p className="text-2xl font-bold text-primary">{stats.weekly_subscribers || 0}</p>
           </div>
-          <div className="rounded-xl border border-default bg-app bg-surface p-4">
-            <h3 className="mb-2 text-sm font-semibold text-primary text-secondary">Starter Subscribers</h3>
-            <p className="text-2xl font-bold text-primary text-secondary">{stats.starter_subscribers || 0}</p>
+          <div className="rounded-xl border border-default bg-surface p-4">
+            <h3 className="mb-2 text-sm font-semibold text-primary">Starter Subscribers</h3>
+            <p className="text-2xl font-bold text-primary">{stats.starter_subscribers || 0}</p>
           </div>
-          <div className="rounded-xl border border-default bg-app bg-surface p-4">
-            <h3 className="mb-2 text-sm font-semibold text-primary text-secondary">Pro Subscribers</h3>
-            <p className="text-2xl font-bold text-primary text-secondary">{stats.pro_subscribers || 0}</p>
+          <div className="rounded-xl border border-default bg-surface p-4">
+            <h3 className="mb-2 text-sm font-semibold text-primary">Pro Subscribers</h3>
+            <p className="text-2xl font-bold text-primary">{stats.pro_subscribers || 0}</p>
           </div>
         </div>
 
         <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <div className="rounded-xl border border-default bg-app bg-surface p-6">
-            <h3 className="mb-4 text-lg font-semibold text-primary text-secondary">Activity Summary</h3>
+          <div className="rounded-xl border border-default bg-surface p-6">
+            <h3 className="mb-4 text-lg font-semibold text-primary">Activity Summary</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-secondary text-secondary">Total Validations</span>
-                <span className="text-lg font-bold text-primary text-secondary">{stats.total_validations || 0}</span>
+                <span className="text-sm text-secondary">Total Validations</span>
+                <span className="text-lg font-bold text-primary">{stats.total_validations || 0}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-secondary text-secondary">Completed Payments</span>
-                <span className="text-lg font-bold text-primary text-secondary">{stats.total_payments || 0}</span>
+                <span className="text-sm text-secondary">Completed Payments</span>
+                <span className="text-lg font-bold text-primary">{stats.total_payments || 0}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-secondary text-secondary">Conversion Rate</span>
-                <span className="text-lg font-bold text-primary text-secondary">
+                <span className="text-sm text-secondary">Conversion Rate</span>
+                <span className="text-lg font-bold text-primary">
                   {stats.total_users > 0 ? ((stats.active_subscriptions / stats.total_users) * 100).toFixed(1) : 0}%
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-default bg-app bg-surface p-6">
-            <h3 className="mb-4 text-lg font-semibold text-primary text-secondary">Revenue Metrics</h3>
+          <div className="rounded-xl border border-default bg-surface p-6">
+            <h3 className="mb-4 text-lg font-semibold text-primary">Revenue Metrics</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-secondary text-secondary">Average Revenue per User</span>
-                <span className="text-lg font-bold text-primary text-secondary">
+                <span className="text-sm text-secondary">Average Revenue per User</span>
+                <span className="text-lg font-bold text-primary">
                   ${stats.total_users > 0 ? (stats.total_revenue / stats.total_users).toFixed(2) : 0}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-secondary text-secondary">Monthly Recurring Revenue</span>
-                <span className="text-lg font-bold text-primary text-secondary">
+                <span className="text-sm text-secondary">Monthly Recurring Revenue</span>
+                <span className="text-lg font-bold text-primary">
                   ${((stats.pro_subscribers || 0) * 15 + (stats.starter_subscribers || 0) * 7).toFixed(2)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-secondary text-secondary">Weekly Recurring Revenue</span>
-                <span className="text-lg font-bold text-primary text-secondary">
+                <span className="text-sm text-secondary">Weekly Recurring Revenue</span>
+                <span className="text-lg font-bold text-primary">
                   ${((stats.weekly_subscribers || 0) * 5).toFixed(2)}
                 </span>
               </div>
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* System Settings */}
-      <div className="mt-6 rounded-xl border border-default bg-app bg-surface p-6">
+      <div className="mt-6 rounded-xl border border-default bg-surface p-6">
         <SystemSettingsPanel />
       </div>
     </div>

@@ -361,7 +361,7 @@ export default function ProfileTab({ profile, onUpdate, getAuthHeaders, addToast
  setEditing(false);
  setErrors({});
  }}
- className="px-4 py-2 border rounded-lg hover:bg-surface hover:bg-surface"
+ className="px-4 py-2 border rounded-lg hover:bg-surface"
  >
  Cancel
  </button>
@@ -373,7 +373,7 @@ export default function ProfileTab({ profile, onUpdate, getAuthHeaders, addToast
  <h2 className="text-xl font-bold">My Profile</h2>
  <button
  onClick={() => setEditing(true)}
- className="px-4 py-2 border rounded-lg hover:bg-surface hover:bg-surface"
+ className="px-4 py-2 border rounded-lg hover:bg-surface"
  >
  Edit
  </button>

@@ -8,13 +8,13 @@ Write-Host "Stopping containers..." -ForegroundColor Cyan
 docker-compose down
 
 Write-Host "Removing PostgreSQL volume..." -ForegroundColor Cyan
-docker volume rm idea2_postgres_data 2>$null
+docker volume rm idea3_postgres_data 2>$null
 if ($LASTEXITCODE -ne 0) {
     docker volume rm backend_v2_postgres_data 2>$null
 }
 
 Write-Host "Removing Redis volume (optional)..." -ForegroundColor Cyan
-docker volume rm idea2_redis_data 2>$null
+docker volume rm idea3_redis_data 2>$null
 if ($LASTEXITCODE -ne 0) {
     docker volume rm backend_v2_redis_data 2>$null
 }

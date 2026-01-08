@@ -9,10 +9,10 @@ echo "Stopping containers..."
 docker-compose down
 
 echo "Removing PostgreSQL volume..."
-docker volume rm idea2_postgres_data 2>/dev/null || docker volume rm backend_v2_postgres_data 2>/dev/null || echo "Volume not found (may already be deleted)"
+docker volume rm idea3_postgres_data 2>/dev/null || docker volume rm backend_v2_postgres_data 2>/dev/null || echo "Volume not found (may already be deleted)"
 
 echo "Removing Redis volume (optional)..."
-docker volume rm idea2_redis_data 2>/dev/null || docker volume rm backend_v2_redis_data 2>/dev/null || echo "Redis volume not found"
+docker volume rm idea3_redis_data 2>/dev/null || docker volume rm backend_v2_redis_data 2>/dev/null || echo "Redis volume not found"
 
 echo "Starting containers..."
 docker-compose up -d postgres redis

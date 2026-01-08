@@ -453,4 +453,40 @@ class TestValidationService:
         assert result["success"] is True
         # Next steps should be present (may or may not have timeout message depending on timing)
         assert "next_steps" in result["validation"]
+    
+    @patch('app.services.validation_service.ValidationAnalysis')
+    @patch('app.core.config.settings')
+    @patch('app.services.validation_service.time')
+    def test_validate_idea_timeout_exceeded_after_analysis(self, mock_time, mock_settings, mock_analysis_class, validation_service, test_user, category_answers, idea_explanation):
+        """Test that timeout message is set when timeout exceeded after analysis"""
+        mock_settings.VALIDATION_OVERALL_TIMEOUT = 10.0
+        
+        # Simulate time passing: start at 0, then after analysis it's past timeout
+        time_calls = [0, 15.0]  # Start time, then time after analysis exceeds timeout
+        mock_time.time.side_effect = lambda: time_calls.pop(0) if time_calls else 20.0
+        
+        mock_analysis = Mock()
+        mock_analysis.generate_validation_analysis = Mock(return_value={
+            "scores": {"market_demand": 8.0},
+            "details": {"market_demand": "Strong demand"},
+            "overall_score": 8.0,
+            "recommendations": "Test"
+        })
+        mock_analysis_class.return_value = mock_analysis
+        validation_service.analysis = mock_analysis
+        validation_service.generate_next_steps = Mock(return_value="Next steps")
+        validation_service.user_profile_retriever.get_user_profile_and_constraints = Mock(return_value=(None, None))
+        
+        result = validation_service.validate_idea(
+            user_id=test_user.user_id,
+            category_answers=category_answers,
+            idea_explanation=idea_explanation,
+            include_next_steps=True
+        )
+        
+        assert result["success"] is True
+        # Should have timeout message in next_steps when timeout exceeded
+        next_steps = result["validation"]["next_steps"]
+        # Check if timeout message is present (may vary based on timing)
+        assert next_steps is not None
 

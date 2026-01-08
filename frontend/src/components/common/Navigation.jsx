@@ -150,12 +150,22 @@ export default function Navigation() {
         <NavLink
           to={isAuthenticated ? "/dashboard" : "/"}
           onClick={closeAll}
-          className="text-xl font-bold"
+          className="flex items-center gap-2 text-xl font-bold"
           style={{
             fontFamily: "var(--font-family)",
             color: "var(--mkt-heading)",
           }}
         >
+          <img 
+            src="/favicon.svg" 
+            alt="Idea Bunch" 
+            className="w-6 h-6 flex-shrink-0" 
+            style={{ display: 'inline-block', width: '24px', height: '24px', verticalAlign: 'middle' }}
+            onError={(e) => {
+              // Fallback to PNG if SVG fails
+              e.target.src = '/favicon-32x32.png';
+            }}
+          />
           Idea Bunch
         </NavLink>
 

@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
  * Immediate Experiments Section Component
  */
 export default function ImmediateExperimentsSection({ immediateExperimentsList, content, isEnriching }) {
-  if (immediateExperimentsList.length > 0) {
+  if (immediateExperimentsList && immediateExperimentsList.length > 0) {
     return (
       <ul className="space-y-2 text-sm text-primary text-primary">
         {immediateExperimentsList.map((item, index) => (

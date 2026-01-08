@@ -22,6 +22,7 @@ export default function FormInput({
  label,
  required = false,
  className = "",
+ helperText,
  ...rest
 }) {
  const inputId = rest.id || `input-${Math.random().toString(36).substr(2, 9)}`;
@@ -37,20 +38,25 @@ export default function FormInput({
  {required && <span className="text-accent ml-1">*</span>}
  </label>
  )}
- <UIInput
- id={inputId}
- type={type}
- value={value}
- onChange={onChange}
- placeholder={placeholder}
- required={required}
- className={className}
- aria-invalid={Boolean(error) || undefined}
- style={error ? { borderColor: "var(--danger)" } : undefined}
- {...rest}
- />
+<UIInput
+id={inputId}
+type={type}
+value={value}
+onChange={onChange}
+placeholder={placeholder}
+required={required}
+className={className}
+aria-invalid={Boolean(error) || undefined}
+aria-describedby={helperText ? `${inputId}-helper` : undefined}
+style={error ? { borderColor: "var(--danger)" } : undefined}
+data-testid={rest['data-testid']}
+{...rest}
+/>
  {error && (
  <p className="text-xs text-danger mt-1">{error}</p>
+ )}
+ {helperText && !error && (
+ <p id={`${inputId}-helper`} className="text-xs text-secondary mt-1">{helperText}</p>
  )}
  </div>
  );

@@ -1,10 +1,10 @@
 // ProductValidate page data
 export const seo = {
-  title: "Startup Idea Advisor — Validate Ideas",
+  title: "Idea Bunch — Validate Startup Ideas",
   description: "Validate your startup idea across 10 critical parameters. Get comprehensive analysis including market opportunity, financial viability, risk assessment, and more.",
   keywords: "idea validation, startup validation, validate business idea, startup idea analysis, idea feasibility, business idea validation",
   canonical: "/product/validate",
-  ogTitle: "Startup Idea Advisor — Validate Ideas",
+  ogTitle: "Idea Bunch — Validate Startup Ideas",
   ogDescription: "Validate your startup idea across 10 critical parameters. Get comprehensive analysis including market opportunity, financial viability, risk assessment, and more.",
   structuredData: {
     "@context": "https://schema.org",

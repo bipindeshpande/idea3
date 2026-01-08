@@ -82,6 +82,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALLOW_UNAUTHENTICATED: bool = False  # Allow unauthenticated access if True
+    ADMIN_PASSWORD: Optional[str] = None  # Admin password for admin panel access
     
     class Config:
         env_file = ".env"

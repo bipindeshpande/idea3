@@ -84,11 +84,11 @@ switch ($Command) {
         }
         
         # Stop existing container if running
-        $existingContainer = docker ps -a --format '{{.Names}}' | Select-String -Pattern "^idea2_backend$"
+        $existingContainer = docker ps -a --format '{{.Names}}' | Select-String -Pattern "^idea3_backend$"
         if ($existingContainer) {
             Write-Info "Stopping existing container..."
-            docker stop idea2_backend 2>$null
-            docker rm idea2_backend 2>$null
+            docker stop idea3_backend 2>$null
+            docker rm idea3_backend 2>$null
         }
         
         # Start new container
@@ -99,7 +99,7 @@ switch ($Command) {
         $NetworkName = if ($env:NETWORK_NAME) { $env:NETWORK_NAME } else { "app_network" }
         docker network create $NetworkName 2>$null
         docker run -d `
-            --name idea2_backend `
+            --name idea3_backend `
             --network $NetworkName `
             --env-file .env `
             -p 8000:8000 `
@@ -108,7 +108,7 @@ switch ($Command) {
         
         if ($LASTEXITCODE -eq 0) {
             Write-Info "Deployment completed successfully!"
-            Write-Info "Container is running. Check logs with: docker logs -f idea2_backend"
+            Write-Info "Container is running. Check logs with: docker logs -f idea3_backend"
         } else {
             Write-Error "Deployment failed!"
             exit 1

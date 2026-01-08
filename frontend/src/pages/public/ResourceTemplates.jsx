@@ -11,6 +11,7 @@ import TemplatePreviewModal from "../../components/resources/TemplatePreviewModa
 import { markdownToDocx } from "../../utils/markdownToDocx.js";
 import { frameworks } from "../../templates/frameworksConfig.js";
 import { templates as traditionalTemplates } from "../../templates/templatesConfig.js";
+import { generateBreadcrumbs, breadcrumbPatterns } from "../../utils/seo/breadcrumbs.js";
 import {
   seo,
   heroData,
@@ -67,9 +68,12 @@ export default function ResourceTemplatesPage() {
   const filteredTemplates = selectedCategory === "All" 
     ? allTemplates 
     : allTemplates.filter(template => template.category === selectedCategory);
+  
+  const breadcrumbs = generateBreadcrumbs(breadcrumbPatterns.resourcesTemplates);
+  
   return (
     <MarketingLayout>
-      <Seo {...seo} />
+      <Seo {...seo} breadcrumbs={breadcrumbs} />
 
       <HeroSection data={heroData} />
 

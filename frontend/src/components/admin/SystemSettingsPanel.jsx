@@ -76,20 +76,20 @@ export default function SystemSettingsPanel() {
   if (loading) {
     return (
       <div>
-        <h3 className="mb-4 text-lg font-semibold text-primary text-secondary">System Settings</h3>
-        <p className="text-sm text-secondary text-secondary">Loading settings...</p>
+        <h3 className="mb-4 text-lg font-semibold text-primary">System Settings</h3>
+        <p className="text-sm text-secondary">Loading settings...</p>
       </div>
     );
   }
 
   return (
     <div>
-      <h3 className="mb-4 text-lg font-semibold text-primary text-secondary">System Settings</h3>
+      <h3 className="mb-4 text-lg font-semibold text-primary">System Settings</h3>
       <div className="space-y-4">
         <div className="flex items-center justify-between rounded-lg border border-default bg-surface p-4">
           <div>
-            <h4 className="font-semibold text-primary text-secondary">Debug Mode</h4>
-            <p className="mt-1 text-xs text-secondary text-secondary">
+            <h4 className="font-semibold text-primary">Debug Mode</h4>
+            <p className="mt-1 text-xs text-secondary">
               Enable Flask debug mode. Shows detailed error tracebacks. <strong>Warning:</strong> Disable in production for security.
             </p>
           </div>
@@ -107,7 +107,7 @@ export default function SystemSettingsPanel() {
         {message && (
           <div className={`rounded-lg border p-3 text-sm ${
             message.includes("enabled") || message.includes("disabled")
-              ? "border-default bg-surface text-accent border-default bg-surface text-accent"
+              ? "border-default bg-surface text-accent"
               : "badge-danger"
           }`}>
             {message}

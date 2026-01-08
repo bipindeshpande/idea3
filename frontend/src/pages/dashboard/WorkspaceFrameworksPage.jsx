@@ -9,6 +9,7 @@ import UIHeading from "../../components/ui/ui-heading.jsx";
 import Card from "../../components/ui/Card.jsx";
 import LoadingIndicator from "../../components/common/LoadingIndicator.jsx";
 import FrameworkEditor from "../../components/frameworks/FrameworkEditor.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../../components/workspace/WorkspaceTheme.js";
 
 export default function WorkspaceFrameworksPage() {
  const { frameworks: userFrameworks, loadFrameworks, loading, deleteFramework } = useFramework();
@@ -78,10 +79,10 @@ export default function WorkspaceFrameworksPage() {
     {/* Header */}
     <div className="mb-6 flex items-start justify-between border-b border-default pb-3">
      <div>
-      <UIHeading level="h2" className="text-primary mb-2">
+      <UIHeading level="h2" className={`${WORKSPACE_TYPOGRAPHY.h2} mb-2`}>
        My Validation Frameworks
       </UIHeading>
-      <p className="text-sm text-secondary">
+      <p className={WORKSPACE_TYPOGRAPHY.subtitle}>
        Manage your customized validation frameworks. Browse templates in <Link to="/resources/templates" className="text-accent hover:text-accent-hover underline">Resources</Link>.
       </p>
      </div>
@@ -96,7 +97,7 @@ export default function WorkspaceFrameworksPage() {
     <div>
      {/* Filters */}
      <div className="mb-6 flex items-center gap-4">
-      <label className="text-sm text-secondary">Filter by status:</label>
+      <label className={WORKSPACE_TYPOGRAPHY.subtitle}>Filter by status:</label>
       <select
        value={statusFilter}
        onChange={(e) => setStatusFilter(e.target.value)}
@@ -121,14 +122,14 @@ export default function WorkspaceFrameworksPage() {
           <div className="flex items-start justify-between">
            <div className="flex-1">
             <div className="flex items-center gap-3 mb-1.5">
-             <h3 className="text-lg font-semibold text-primary">
+             <h3 className={WORKSPACE_TYPOGRAPHY.h3}>
               {framework.title}
              </h3>
-             <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusBadge(framework.status)}`}>
+             <span className={`px-2 py-0.5 rounded ${WORKSPACE_TYPOGRAPHY.caption} font-medium ${getStatusBadge(framework.status)}`}>
               {framework.status.replace("_", " ")}
              </span>
              {framework.progress_percentage > 0 && (
-              <span className="text-xs text-secondary">
+              <span className={WORKSPACE_TYPOGRAPHY.caption}>
                {framework.progress_percentage}% complete
               </span>
              )}
@@ -139,7 +140,7 @@ export default function WorkspaceFrameworksPage() {
              </p>
             )}
             {framework.linked_validation_id && (
-             <p className="text-sm text-secondary">
+             <p className={WORKSPACE_TYPOGRAPHY.subtitle}>
               Linked to validation: {framework.linked_validation_id.substring(0, 8)}...
              </p>
             )}

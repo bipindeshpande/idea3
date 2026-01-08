@@ -1,4 +1,5 @@
 """Main FastAPI application"""
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
@@ -6,6 +7,40 @@ from app.core.database import engine, Base
 from app.api.routes import discovery
 from app.api.routes import router as api_router
 from app.middleware.request_id import RequestIDMiddleware
+
+# Initialize Sentry for error tracking (if DSN is provided)
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+    
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            FastApiIntegration(transaction_style='endpoint'),
+            SqlalchemyIntegration(),
+        ],
+        traces_sample_rate=0.1,  # 10% of transactions for performance monitoring
+        environment=os.getenv("ENVIRONMENT", "production"),
+        # Filter out expected errors
+        before_send=lambda event, hint: None if _should_filter_error(event, hint) else event,
+    )
+
+
+def _should_filter_error(event, hint):
+    """Filter out expected/non-critical errors"""
+    if 'exc_info' in hint:
+        exc_type, exc_value, tb = hint['exc_info']
+        # Skip validation errors (these are expected)
+        from pydantic import ValidationError
+        if isinstance(exc_value, ValidationError):
+            return True
+        # Skip 404s (expected)
+        from fastapi import HTTPException
+        if isinstance(exc_value, HTTPException) and exc_value.status_code == 404:
+            return True
+    return False
 
 # Note: Tables are created via Alembic migrations, not here
 # Run: alembic upgrade head

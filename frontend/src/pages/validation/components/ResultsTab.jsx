@@ -86,14 +86,23 @@ export default function ResultsTab({
         <div className="flex flex-col lg:flex-row lg:justify-between gap-4 mb-1.5">
           {/* Small Score Card - Left Side */}
           <div className="lg:w-48 flex-shrink-0">
-            <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
-              <p className="text-xs text-secondary mb-2">Overall Score</p>
-              <div className="text-center">
+            <div className="rounded-xl border border-default shadow-lg bg-gradient-to-br from-surface to-surface-muted p-6 md:p-7 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 opacity-10" style={{
+                background: overallScore >= 7 ? 'radial-gradient(circle, var(--accent) 0%, transparent 70%)' :
+                           overallScore >= 4 ? 'radial-gradient(circle, var(--warning) 0%, transparent 70%)' :
+                           'radial-gradient(circle, var(--coral-500) 0%, transparent 70%)'
+              }}></div>
+              <p className="text-xs text-secondary mb-2 relative z-10">Overall Score</p>
+              <div className="text-center relative z-10">
                 <div className="flex items-baseline justify-center gap-1">
-                  <p className="text-4xl font-bold text-primary">{overallScore.toFixed(1)}</p>
+                  <p className="text-4xl font-bold" style={{
+                    color: overallScore >= 7 ? 'var(--accent)' :
+                           overallScore >= 4 ? 'var(--warning)' :
+                           'var(--coral-500)'
+                  }}>{overallScore.toFixed(1)}</p>
                   <p className="text-lg text-secondary">/10</p>
                 </div>
-                <div className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-medium ${overallStatus.badge}`}>
+                <div className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-medium shadow-sm ${overallStatus.badge}`}>
                   {overallStatus.label}
                 </div>
               </div>
@@ -101,14 +110,14 @@ export default function ResultsTab({
           </div>
 
           {/* Score Legend - Right Side */}
-          <div className="lg:w-48 flex-shrink-0">
+          <div className="lg:w-56 flex-shrink-0">
             <ScoreLegend />
           </div>
         </div>
 
         {/* Diagnostic Overview - Unified Analytics Block */}
-        <UIHeading level="h3" className="text-primary mb-2">Diagnostic Overview Across 10 Validation Pillars</UIHeading>
-        <div className="mb-3 rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7">
+        <UIHeading level="h3" className="text-primary mb-3">Diagnostic Overview Across 10 Validation Pillars</UIHeading>
+        <div className="mb-3 rounded-xl border border-default shadow-lg bg-gradient-to-br from-surface to-surface-muted p-6 md:p-7">
           <div className="flex flex-col lg:flex-row gap-6 items-stretch lg:items-stretch min-h-[340px]">
             {/* Column 1: Radar Chart (50%) */}
             <div className="lg:w-[50%] flex flex-col lg:justify-center lg:pr-4">
@@ -193,7 +202,7 @@ export default function ResultsTab({
           ) : (
             <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
               <p className="text-lg font-semibold text-primary mb-1">No parameters match the selected filter.</p>
-              <p className="text-primary text-secondary leading-relaxed max-w-md mx-auto">Try adjusting your filter to see more results.</p>
+              <p className="text-secondary leading-relaxed max-w-md mx-auto">Try adjusting your filter to see more results.</p>
             </div>
           )}
         </div>

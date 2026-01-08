@@ -33,6 +33,64 @@ export default function BlogArticle({ post }) {
   const relatedPosts = getRelatedPosts(post, posts, 3);
   const resourceLink = resourceLinks[post.slug];
 
+  // Article structured data for SEO
+  const articleStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    image: `https://ideabunch.com/og-image.jpg`, // Update with actual article images if available
+    datePublished: post.date,
+    dateModified: post.date, // Update if you track modification dates
+    author: {
+      "@type": "Organization",
+      name: "Startup Idea Advisor",
+      url: "https://ideabunch.com"
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Startup Idea Advisor",
+      url: "https://ideabunch.com",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://ideabunch.com/logo.png"
+      }
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://ideabunch.com/blog/${post.slug}`
+    },
+    articleSection: post.tags?.[0] || "Startup",
+    keywords: post.tags?.join(", ") || "",
+    timeRequired: `PT${readingTime}M`
+  };
+
+  // Breadcrumb structured data
+  const breadcrumbStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://ideabunch.com"
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: "https://ideabunch.com/blog"
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: `https://ideabunch.com/blog/${post.slug}`
+      }
+    ]
+  };
+
   return (
     <Card>
       <Seo
@@ -40,6 +98,9 @@ export default function BlogArticle({ post }) {
         description={post.description}
         path={`/blog/${post.slug}`}
         keywords={`startup ideas, ${post.tags.join(", ")}`}
+        type="article"
+        structuredData={articleStructuredData}
+        breadcrumbs={breadcrumbStructuredData}
       />
       <div className="mb-6">
         <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-secondary">

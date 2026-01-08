@@ -28,6 +28,13 @@ export default function ValidationResult() {
   const [viewFilter, setViewFilter] = useState("all");
   const [sortOption, setSortOption] = useState("category");
   const downloadButtonRef = useRef(null);
+  
+  // Scroll to top when navigating to results tab
+  useEffect(() => {
+    if (activeTab === "results") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [activeTab]);
 
   // Load validation data from URL parameters
   const { previousScore } = useValidationDataLoader();
@@ -110,6 +117,7 @@ export default function ValidationResult() {
       overallScore,
       scores,
       parameterGroups,
+      parameterLookup,
       recommendations,
       nextSteps,
       categoryAnswers: effectiveCategoryAnswers || categoryAnswers,
@@ -128,7 +136,7 @@ export default function ValidationResult() {
         keywords="startup validation results, idea validation score, startup idea analysis, business validation report, startup feasibility report, idea evaluation results, startup assessment, business idea score, validation feedback, startup recommendations"
         path="/validate-result"
       />
-      <section className="mx-auto max-w-6xl px-6 py-12">
+      <div className="mx-auto max-w-6xl py-6">
         <ValidationHeader
           isAuthenticated={isAuthenticated}
           currentValidation={currentValidation}
@@ -198,7 +206,7 @@ export default function ValidationResult() {
             setInputs={setInputs}
           />
         )}
-      </section>
+      </div>
     </React.Fragment>
   );
 }

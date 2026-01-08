@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { trimFromHeading, parseStructuredIdeas } from "../../utils/streamingParser.js";
+import { trimFromHeading, parseStructuredIdeas } from "../../utils/parsers/index.js";
 import { buildFinalConclusion, parseRecommendationMatrix, splitFullReportSections } from "../../utils/formatters/recommendationFormatters.js";
 
 /**

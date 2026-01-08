@@ -15,6 +15,7 @@ from app.models.founder_profile import FounderProfile
 from app.models.founder_idea_listing import FounderIdeaListing
 from app.models.founder_connection import FounderConnection
 from app.models.saved_framework import SavedFramework
+from app.models.contact_submission import ContactSubmission
 
-__all__ = ["Run", "User", "CacheEntry", "DiscoveryResult", "ErrorLog", "RateLimitLog", "Validation", "Action", "Note", "PsycheProfile", "FounderPsychology", "FounderProfile", "FounderIdeaListing", "FounderConnection", "SavedFramework"]
+__all__ = ["Run", "User", "CacheEntry", "DiscoveryResult", "ErrorLog", "RateLimitLog", "Validation", "Action", "Note", "PsycheProfile", "FounderPsychology", "FounderProfile", "FounderIdeaListing", "FounderConnection", "SavedFramework", "ContactSubmission"]
 

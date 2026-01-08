@@ -343,4 +343,196 @@ class TestCacheService:
         hash2 = CacheEntry.generate_key_hash(key2)
         
         assert hash1 != hash2
+    
+    def test_clear_expired_entries(self, cache_service_no_redis, db_session):
+        """Test clearing expired cache entries"""
+        key_hash1 = CacheEntry.generate_key_hash("expired1")
+        key_hash2 = CacheEntry.generate_key_hash("expired2")
+        key_hash3 = CacheEntry.generate_key_hash("valid")
+        
+        # Create expired entries
+        expired1 = CacheEntry(
+            cache_key_hash=key_hash1,
+            cache_key="expired1",
+            cache_value={"data": "old1"},
+            cache_type="test",
+            ttl_seconds=3600,
+            expires_at=datetime.now(timezone.utc) - timedelta(seconds=100)
+        )
+        expired2 = CacheEntry(
+            cache_key_hash=key_hash2,
+            cache_key="expired2",
+            cache_value={"data": "old2"},
+            cache_type="test",
+            ttl_seconds=3600,
+            expires_at=datetime.now(timezone.utc) - timedelta(seconds=50)
+        )
+        # Create valid entry
+        valid = CacheEntry(
+            cache_key_hash=key_hash3,
+            cache_key="valid",
+            cache_value={"data": "new"},
+            cache_type="test",
+            ttl_seconds=3600,
+            expires_at=datetime.now(timezone.utc) + timedelta(seconds=3600)
+        )
+        db_session.add_all([expired1, expired2, valid])
+        db_session.commit()
+        
+        count = cache_service_no_redis.clear_expired()
+        
+        assert count == 2  # Should delete 2 expired entries
+        # Verify expired entries are gone
+        assert db_session.query(CacheEntry).filter(CacheEntry.cache_key_hash == key_hash1).first() is None
+        assert db_session.query(CacheEntry).filter(CacheEntry.cache_key_hash == key_hash2).first() is None
+        # Verify valid entry still exists
+        assert db_session.query(CacheEntry).filter(CacheEntry.cache_key_hash == key_hash3).first() is not None
+    
+    def test_clear_expired_no_expired_entries(self, cache_service_no_redis, db_session):
+        """Test clearing expired when no expired entries exist"""
+        count = cache_service_no_redis.clear_expired()
+        assert count == 0
+    
+    def test_clear_expired_db_error(self, cache_service_no_redis, db_session):
+        """Test clearing expired when database error occurs"""
+        with patch.object(db_session, 'query', side_effect=Exception("DB error")):
+            count = cache_service_no_redis.clear_expired()
+            assert count == 0
+    
+    def test_delete_user_cache_redis_and_db(self, cache_service, mock_redis, db_session):
+        """Test deleting user cache from both Redis and database"""
+        user_id = "user123"
+        cache_type = "discovery"
+        
+        # Create cache entries for user
+        key1 = f"discovery_user:{user_id}:key1"
+        key2 = f"discovery_user:{user_id}:key2"
+        key_hash1 = CacheEntry.generate_key_hash(key1)
+        key_hash2 = CacheEntry.generate_key_hash(key2)
+        
+        entry1 = CacheEntry(
+            cache_key_hash=key_hash1,
+            cache_key=key1,
+            cache_value={"data": "test1"},
+            cache_type=cache_type,
+            ttl_seconds=3600,
+            expires_at=datetime.now(timezone.utc) + timedelta(seconds=3600)
+        )
+        entry2 = CacheEntry(
+            cache_key_hash=key_hash2,
+            cache_key=key2,
+            cache_value={"data": "test2"},
+            cache_type=cache_type,
+            ttl_seconds=3600,
+            expires_at=datetime.now(timezone.utc) + timedelta(seconds=3600)
+        )
+        db_session.add_all([entry1, entry2])
+        db_session.commit()
+        
+        # Mock Redis keys pattern matching
+        mock_redis.keys.return_value = [
+            f"{cache_type}:{key1}",
+            f"{cache_type}:{key2}"
+        ]
+        mock_redis.delete.return_value = 2
+        
+        count = cache_service.delete_user_cache(user_id, cache_type)
+        
+        assert count >= 2  # At least 2 from DB, possibly more from Redis
+        mock_redis.keys.assert_called_once_with(f"{cache_type}:discovery_user:{user_id}:*")
+        mock_redis.delete.assert_called_once()
+    
+    def test_delete_user_cache_no_redis(self, cache_service_no_redis, db_session):
+        """Test deleting user cache without Redis"""
+        user_id = "user123"
+        cache_type = "discovery"
+        
+        key = f"discovery_user:{user_id}:key1"
+        key_hash = CacheEntry.generate_key_hash(key)
+        
+        entry = CacheEntry(
+            cache_key_hash=key_hash,
+            cache_key=key,
+            cache_value={"data": "test"},
+            cache_type=cache_type,
+            ttl_seconds=3600,
+            expires_at=datetime.now(timezone.utc) + timedelta(seconds=3600)
+        )
+        db_session.add(entry)
+        db_session.commit()
+        
+        count = cache_service_no_redis.delete_user_cache(user_id, cache_type)
+        
+        assert count == 1
+        # Verify entry is deleted
+        assert db_session.query(CacheEntry).filter(CacheEntry.cache_key_hash == key_hash).first() is None
+    
+    def test_delete_user_cache_no_entries(self, cache_service, mock_redis):
+        """Test deleting user cache when no entries exist"""
+        mock_redis.keys.return_value = []
+        count = cache_service.delete_user_cache("nonexistent", "discovery")
+        assert count == 0
+    
+    def test_set_json_redis_enabled(self, cache_service, mock_redis, db_session):
+        """Test set_json when Redis is enabled"""
+        from app.core.config import settings
+        original_redis_enabled = getattr(settings, 'REDIS_ENABLED', False)
+        
+        try:
+            # Temporarily enable Redis
+            settings.REDIS_ENABLED = True
+            
+            result = cache_service.set_json("test_key", {"data": "test"}, cache_type="test", ttl_seconds=3600)
+            
+            assert result is True
+            mock_redis.setex.assert_called_once()
+        finally:
+            # Restore original setting
+            settings.REDIS_ENABLED = original_redis_enabled
+    
+    def test_set_json_redis_disabled(self, cache_service):
+        """Test set_json when Redis is disabled"""
+        with patch('app.services.cache_service.settings') as mock_settings:
+            mock_settings.REDIS_ENABLED = False
+            
+            result = cache_service.set_json("test_key", {"data": "test"})
+            
+            assert result is False
+    
+    def test_get_db_exception_handling(self, cache_service_no_redis, db_session):
+        """Test that DB exceptions in get() are handled gracefully"""
+        with patch.object(db_session, 'query', side_effect=Exception("DB error")):
+            result = cache_service_no_redis.get("test_key", cache_type="test")
+            assert result is None
+    
+    def test_set_db_exception_handling(self, cache_service_no_redis, db_session):
+        """Test that DB exceptions in set() are handled gracefully"""
+        with patch.object(db_session, 'commit', side_effect=Exception("DB commit error")):
+            result = cache_service_no_redis.set("test_key", {"data": "test"}, cache_type="test")
+            assert result is False
+    
+    def test_delete_db_exception_handling(self, cache_service_no_redis, db_session):
+        """Test that DB exceptions in delete() are handled gracefully"""
+        with patch.object(db_session, 'query', side_effect=Exception("DB error")):
+            result = cache_service_no_redis.delete("test_key", cache_type="test")
+            assert result is False  # Returns False on DB error
+    
+    def test_clear_expired_db_exception_handling(self, cache_service_no_redis, db_session):
+        """Test that DB exceptions in clear_expired() are handled gracefully"""
+        with patch.object(db_session, 'query', side_effect=Exception("DB error")):
+            count = cache_service_no_redis.clear_expired()
+            assert count == 0
+    
+    def test_delete_user_cache_db_exception_handling(self, cache_service_no_redis, db_session):
+        """Test that DB exceptions in delete_user_cache() are handled gracefully"""
+        with patch.object(db_session, 'query', side_effect=Exception("DB error")):
+            count = cache_service_no_redis.delete_user_cache("user123", "discovery")
+            assert count == 0
+    
+    def test_delete_user_cache_redis_exception_handling(self, cache_service, mock_redis, db_session):
+        """Test that Redis exceptions in delete_user_cache() are handled gracefully"""
+        mock_redis.keys.side_effect = Exception("Redis error")
+        # Should still work with DB
+        count = cache_service.delete_user_cache("user123", "discovery")
+        assert count >= 0  # May be 0 if no DB entries
 

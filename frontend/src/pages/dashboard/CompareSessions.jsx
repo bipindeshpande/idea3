@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import LoadingIndicator from "../../components/common/LoadingIndicator.jsx";
-import { parseStructuredIdeas } from "../../utils/streamingParser.js";
+import { parseStructuredIdeas } from "../../utils/parsers/index.js";
 import UIButton from "../../components/ui/ui-button.jsx";
 import UIHeading from "../../components/ui/ui-heading.jsx";
 

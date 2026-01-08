@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: idea2_postgres
+    container_name: idea3_postgres
     environment:
       POSTGRES_USER: startup_discovery
       POSTGRES_PASSWORD: startup_discovery_dev
@@ -26,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: idea2_backend
+    container_name: idea3_backend
     environment:
       - DATABASE_URL=postgresql://startup_discovery:startup_discovery_dev@postgres:5432/startup_discovery
       - REDIS_URL=redis://redis:6379/0
@@ -51,7 +49,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: idea2_redis
+    container_name: idea3_redis
     ports:
       - "6379:6379"
     volumes:

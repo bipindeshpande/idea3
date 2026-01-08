@@ -1,6 +1,6 @@
 // ResourceTemplates page data
 export const seo = {
-  title: "Startup Idea Advisor — Templates",
+  title: "Idea Bunch — Startup Templates",
   description: "Download free templates for startup idea validation, customer discovery, business planning, and more. Professional templates designed for entrepreneurs.",
   keywords: ["startup templates", "business plan template", "validation template", "customer discovery template", "startup resources"],
   canonical: "/resources/templates",

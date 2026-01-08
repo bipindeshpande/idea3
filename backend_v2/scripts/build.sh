@@ -72,10 +72,10 @@ case "$COMMAND" in
         docker pull "${FULL_IMAGE_NAME}" || log_warn "Failed to pull image, using local build"
         
         # Stop existing container if running
-        if docker ps -a --format '{{.Names}}' | grep -q "^idea2_backend$"; then
+        if docker ps -a --format '{{.Names}}' | grep -q "^idea3_backend$"; then
             log_info "Stopping existing container..."
-            docker stop idea2_backend || true
-            docker rm idea2_backend || true
+            docker stop idea3_backend || true
+            docker rm idea3_backend || true
         fi
         
         # Start new container
@@ -86,7 +86,7 @@ case "$COMMAND" in
         NETWORK_NAME="${NETWORK_NAME:-app_network}"
         docker network create "$NETWORK_NAME" 2>/dev/null || true
         docker run -d \
-            --name idea2_backend \
+            --name idea3_backend \
             --network "$NETWORK_NAME" \
             --env-file .env \
             -p 8000:8000 \
@@ -94,7 +94,7 @@ case "$COMMAND" in
             "${FULL_IMAGE_NAME}"
         
         log_info "Deployment completed successfully!"
-        log_info "Container is running. Check logs with: docker logs -f idea2_backend"
+        log_info "Container is running. Check logs with: docker logs -f idea3_backend"
         ;;
     
     build-push)

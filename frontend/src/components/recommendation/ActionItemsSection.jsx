@@ -32,8 +32,8 @@ export default function ActionItemsSection({
       <div className="space-y-4">
         {/* Add new action */}
         {!isValidIdeaId ? (
-          <div className="rounded-lg border border-default bg-surface bg-surface p-3">
-            <p className="text-sm text-accent text-accent">Idea reference not ready</p>
+          <div className="rounded-lg border border-default bg-surface p-3">
+            <p className="text-sm text-accent">Idea reference not ready</p>
           </div>
         ) : (
           <div className="flex gap-2">

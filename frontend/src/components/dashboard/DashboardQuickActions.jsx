@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import UIButton from "../ui/ui-button.jsx";
 import UIHeading from "../ui/ui-heading.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../workspace/WorkspaceTheme.js";
 
 /**
  * Dashboard Quick Actions Component
@@ -14,10 +15,10 @@ export default function DashboardQuickActions() {
     <div className="ui-card2 ui-card2--muted" style={{ padding: "8px 12px" }}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex-1">
-          <UIHeading level="h4" className="text-primary text-sm font-semibold">
+          <UIHeading level="h4" className={WORKSPACE_TYPOGRAPHY.h4}>
             Quick Actions
           </UIHeading>
-          <p className="mt-0.5 text-xs text-secondary leading-tight">
+          <p className={`mt-0.5 ${WORKSPACE_TYPOGRAPHY.caption} leading-tight`}>
             Start a new discovery or validation.
           </p>
         </div>

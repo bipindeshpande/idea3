@@ -1,0 +1,263 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.75rem;
+  /* Glassmorphism Blue & Orange Theme */
+  /* Primary palette */
+  --primary: #0b72ff; /* custom blue (not Tailwind blue-600) */
+  --primary-foreground: #ffffff;
+  --accent: #ff7a18; /* orange-600 */
+  --accent-foreground: #ffffff;
+
+  /* Base surface + text */
+  --background: #0b1028; /* deep navy fallback color for page bg */
+  --foreground: rgba(255,255,255,0.95);
+
+  /* Glass surfaces */
+  --card: rgba(255,255,255,0.08);
+  --card-foreground: rgba(255,255,255,0.95);
+  --popover: rgba(20,22,35,0.6);
+  --popover-foreground: rgba(255,255,255,0.95);
+
+  /* Supportive colors */
+  --secondary: rgba(255,255,255,0.12);
+  --secondary-foreground: #ffffff;
+  --muted: rgba(255,255,255,0.08);
+  --muted-foreground: rgba(255,255,255,0.8);
+  --destructive: #e11d48; /* rose-600 */
+  --border: rgba(255,255,255,0.18);
+  --input: rgba(255,255,255,0.08);
+  --ring: #0b72ff;
+
+  /* Charts (kept on brand) */
+  --chart-1: #0b72ff;
+  --chart-2: #ff7a18;
+  --chart-3: #4aa3ff;
+  --chart-4: #ffb36b;
+  --chart-5: #6ee7b7;
+
+  /* Sidebar tokens aligned with glass */
+  --sidebar: rgba(255,255,255,0.08);
+  --sidebar-foreground: rgba(255,255,255,0.95);
+  --sidebar-primary: #0b72ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255,255,255,0.06);
+  --sidebar-accent-foreground: rgba(255,255,255,0.95);
+  --sidebar-border: rgba(255,255,255,0.18);
+  --sidebar-ring: #0b72ff;
+
+  /* Page gradient background as an image var */
+  --app-bg:
+    radial-gradient(600px 400px at 10% 20%, rgba(11,114,255,0.18), transparent 12%),
+    radial-gradient(500px 350px at 90% 85%, rgba(255,122,24,0.14), transparent 12%),
+    linear-gradient(135deg, rgba(4,9,30,1) 0%, rgba(11,16,40,1) 40%, rgba(8,10,30,1) 100%);
+
+  /* Glass utility vars */
+  --glass-bg: rgba(255,255,255,0.12);
+  --glass-border: rgba(255,255,255,0.24);
+  --glass-blur: 22px;
+  --glass-radius: 14px;
+  --glass-shadow: 0 8px 30px rgba(10,10,20,0.25);
+  --text-on-glass: rgba(255,255,255,0.95);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Page background gradient (keeps bg color as fallback) */
+    background-image: var(--app-bg);
+    background-attachment: fixed;
+    background-size: cover;
+    /* Subtle vignette for glass depth */
+    box-shadow: inset 0 0 200px rgba(0,0,0,0.25);
+  }
+}
+
+/* Glass utility class - reusable across the app */
+.glass{
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  color: var(--text-on-glass);
+}
+
+/* Softer glass for navbars/secondary surfaces */
+.glass-soft{
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+  background-color: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: var(--glass-radius);
+  box-shadow: 0 6px 24px rgba(10,10,20,0.18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text-on-glass);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .glass{
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    filter: saturate(1.08);
+  }
+
+  .glass-soft{
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+    filter: saturate(1.04);
+  }
+}
+
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Date Picker Calendar Styles - Match Dropdown Theme */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 1;
+  filter: invert(1) brightness(0.7);
+  transition: filter 0.2s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  filter: invert(1) brightness(0.9);
+}
+
+/* Calendar popup styling (WebKit browsers) */
+input[type="date"]::-webkit-datetime-edit {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus {
+  background: rgba(11, 114, 255, 0.2);
+  color: rgba(255, 255, 255, 1);
+  border-radius: 2px;
+  outline: none;
+}
+
+/* Apply cursor pointer to all interactive elements */
+button,
+a,
+[role="button"],
+[role="link"],
+[type="button"],
+[type="submit"],
+[type="reset"],
+label[for],
+select,
+[onclick],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+

@@ -1,7 +1,11 @@
 """API route handlers"""
-from fastapi import APIRouter, HTTPException, status, Body
+import logging
+from fastapi import APIRouter, HTTPException, status, Body, Depends
 from pydantic import BaseModel, EmailStr
 from typing import Dict, Any
+from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.models.contact_submission import ContactSubmission
 from .history import router as history_router
 from .runs import router as runs_router
 from .auth import router as auth_router
@@ -16,6 +20,7 @@ from .payment import router as payment_router
 from .frameworks import router as frameworks_router
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 class ContactRequest(BaseModel):
@@ -44,28 +49,47 @@ router.include_router(frameworks_router, prefix="", tags=["frameworks"])
 
 # Contact endpoint (expected at /api/contact, not /api/public/contact)
 @router.post("/contact", status_code=status.HTTP_200_OK)
-async def submit_contact(request: ContactRequest = Body(...)) -> Dict[str, Any]:
+async def submit_contact(
+    request: ContactRequest = Body(...),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
     """
     Submit contact form
     
-    In production, this would send an email or save to database.
-    For now, returns success message.
+    Saves the contact form submission to the database for later review.
+    In production, this could also trigger email notifications.
     """
     try:
-        # TODO: In production, send email or save to database
-        # For now, just log and return success
-        print(f"Contact form submission: {request.name} ({request.email}) - {request.topic or 'No topic'}")
-        if request.company:
-            print(f"Company: {request.company}")
-        print(f"Message: {request.message}")
+        # Create contact submission record
+        submission = ContactSubmission(
+            name=request.name,
+            email=request.email,
+            company=request.company if request.company else None,
+            topic=request.topic if request.topic else None,
+            message=request.message,
+            status="new"
+        )
+        
+        db.add(submission)
+        db.commit()
+        db.refresh(submission)
+        
+        logger.info(
+            f"Contact form submission received: {request.name} ({request.email}) - Submission ID: {submission.id}"
+        )
         
         return {
             "success": True,
             "message": "Thank you for your message! We'll get back to you soon."
         }
     except Exception as e:
+        db.rollback()
+        logger.error(
+            f"Failed to submit contact form from {request.email}: {str(e)}",
+            exc_info=True
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to submit contact form: {str(e)}"
-        )  # Already has /api/psyche prefix
+            detail="Failed to submit contact form. Please try again later."
+        )
 

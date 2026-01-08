@@ -15,17 +15,17 @@ if ($portInUse) {
 }
 
 Write-Host "Starting PostgreSQL container on port $env:POSTGRES_PORT..."
-docker-compose up -d idea2_postgres
+docker-compose up -d postgres
 
 Write-Host "Waiting for database to be ready..."
 Start-Sleep -Seconds 5
 
 # Check if container is running
-$containerStatus = docker ps --filter "name=idea2_postgres" --format "{{.Status}}"
+$containerStatus = docker ps --filter "name=idea3_postgres" --format "{{.Status}}"
 if ($containerStatus) {
     Write-Host "✓ PostgreSQL container is running: $containerStatus"
     Write-Host "✓ Database URL: postgresql://startup_discovery:startup_discovery_dev@localhost:$env:POSTGRES_PORT/startup_discovery"
 } else {
-    Write-Host "✗ Container failed to start. Check logs with: docker-compose logs idea2_postgres"
+    Write-Host "✗ Container failed to start. Check logs with: docker-compose logs idea3_postgres"
 }
 

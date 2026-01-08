@@ -27,7 +27,7 @@ export default function OnboardingTooltip({
  className={`absolute z-50 ${positionClasses[position]} w-64 rounded-lg border border-default bg-surface p-3 shadow-xl`}
  style={{ pointerEvents: 'auto' }}
  >
- <div className="text-sm text-primary text-secondary">
+ <div className="text-sm text-secondary">
  {message}
  </div>
  <button

@@ -6,8 +6,8 @@
 // Only structure, visual hierarchy, and styling have been redesigned.
 // ---------------------------------------------------------------------------
 
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Seo from "../../components/common/Seo.jsx";
 import { useReports } from "../../context/ReportsContext.jsx";
@@ -21,27 +21,24 @@ import DashboardCompareTab from "../../components/dashboard/DashboardCompareTab.
 import DashboardStats from "../../components/dashboard/DashboardStats.jsx";
 import DashboardQuickActions from "../../components/dashboard/DashboardQuickActions.jsx";
 import TabButton from "../../components/ui/ui-tab-button.jsx";
+import UIButton from "../../components/ui/ui-button.jsx";
 
-import { parseStructuredIdeas } from "../../utils/streamingParser.js";
-import {
- buildFinancialSnapshots,
- parseRiskRows,
- splitFullReportSections
-} from "../../utils/formatters/recommendationFormatters.js";
-import { normalizeRunId } from "../../utils/runs.js";
 import { useDashboardData } from "../../hooks/dashboard/useDashboardData.js";
 import { useIdeasExtraction } from "../../hooks/dashboard/useIdeasExtraction.js";
 import { useRunDeletion } from "../../hooks/dashboard/useRunDeletion.js";
 import { useValidationDeletion } from "../../hooks/dashboard/useValidationDeletion.js";
 import { useTabNavigation } from "../../hooks/dashboard/useTabNavigation.js";
+import { useComparison } from "../../hooks/dashboard/useComparison.js";
+import { useFiltering } from "../../hooks/dashboard/useFiltering.js";
+import { useDataMerging } from "../../hooks/dashboard/useDataMerging.js";
+import ValidationComparisonView from "../../components/dashboard/ValidationComparisonView.jsx";
 
 const STORAGE_KEY = "sia_saved_runs";
 
 export default function DashboardPage() {
- const location = useLocation();
  const navigate = useNavigate();
 
- const { deleteRun: deleteRunFromContext, setInputs } = useReports();
+ const { deleteRun: deleteRunFromContext } = useReports();
  const { isAuthenticated, getAuthHeaders } = useAuth();
  const { getSavedValidations, deleteValidation: deleteValidationFromContext } = useValidation();
 
@@ -64,8 +61,20 @@ export default function DashboardPage() {
  const [allIdeas, setAllIdeas] = useState([]);
  const [selectedIdeas, setSelectedIdeas] = useState(new Set());
  const [comparisonData, setComparisonData] = useState(null);
- const [comparing, setComparing] = useState(false);
- const [autoCompareTrigger, setAutoCompareTrigger] = useState(false);
+
+ // Clear comparison data when switching tabs
+ useEffect(() => {
+  // Only clear if switching away from ideas tab and comparisonData is for ideas
+  if (activeTab !== "ideas" && comparisonData?.ideas) {
+   setComparisonData(null);
+   setSelectedIdeas(new Set());
+  }
+  // Only clear if switching away from validations tab and comparisonData is for validations
+  if (activeTab !== "validations" && comparisonData?.validations) {
+   setComparisonData(null);
+   setSelectedIdeas(new Set());
+  }
+ }, [activeTab, comparisonData]);
 
  const [insights, setInsights] = useState(null);
 
@@ -85,7 +94,6 @@ export default function DashboardPage() {
  });
 
  const [searchTabQuery, setSearchTabQuery] = useState("");
- const [searchTabResults, setSearchTabResults] = useState([]);
  const [searchCategory, setSearchCategory] = useState("all");
 
  // ---------------------------------------------------------------------------
@@ -136,53 +144,17 @@ export default function DashboardPage() {
  }, [isAuthenticated, loadDashboardData]);
 
  // ---------------------------------------------------------------------------
- // MERGE RUNS (UNCHANGED)
+ // MERGE DATA (MODULARIZED)
  // ---------------------------------------------------------------------------
 
- const allRunsMerged = useMemo(() => {
- if (isAuthenticated && !loadingRuns) {
- const apiMapped = apiRuns.map(r => {
- let reports = {};
- if (r.reports) {
- try {
- reports = typeof r.reports === "string" ? JSON.parse(r.reports) : r.reports;
- } catch {}
- }
- return {
- id: `run_${r.run_id}`,
- timestamp: r.created_at ? new Date(r.created_at).getTime() : Date.now(),
- inputs: r.inputs || {},
- outputs: reports,
- reports,
- run_id: r.run_id,
- from_api: true,
- is_validation: false
- };
+ const { allRunsMerged, allValidations } = useDataMerging({
+  apiRuns,
+  runs,
+  apiValidations,
+  getSavedValidations,
+  isAuthenticated,
+  loadingRuns
  });
-
- const localMapped = runs.map(r => ({
- ...r,
- from_api: false,
- is_validation: false
- }));
-
- const combined = [...apiMapped];
- const apiIds = new Set(apiMapped.map(r => r.run_id));
-
- localMapped.forEach(local => {
- const id = local.run_id || local.id;
- if (!apiIds.has(id)) combined.push(local);
- });
-
- return combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
- }
-
- return runs.map(r => ({
- ...r,
- from_api: false,
- is_validation: false
- }));
- }, [apiRuns, runs, isAuthenticated, loadingRuns]);
 
  // ---------------------------------------------------------------------------
  // EXTRACT IDEAS FROM RUNS
@@ -197,288 +169,45 @@ export default function DashboardPage() {
  });
 
  // ---------------------------------------------------------------------------
- // COMPARISON LOGIC (UNCHANGED)
+ // COMPARISON LOGIC (MODULARIZED)
  // ---------------------------------------------------------------------------
 
- const extractComparisonMetrics = (run, ideaIndex) => {
- // unchanged — omitted for length
- // (your original logic stays EXACTLY as it is)
- return {
- startupCost: "N/A",
- monthlyRevenue: "N/A",
- marketSize: "N/A",
- competitionLevel: "N/A",
- riskLevel: "N/A",
- timeToMarket: "N/A",
- customerSegment: "N/A",
- keyStrengths: "N/A",
- validationScore: "N/A",
- scalability: "N/A"
- };
- };
-
- const performComparison = useCallback(async ideasToCompare => {
- // unchanged — omitted for length
- // logic stays the same
- }, [allIdeas, getAuthHeaders]);
-
- // ---------------------------------------------------------------------------
- // VALIDATIONS
- // ---------------------------------------------------------------------------
-
- const allValidations = useMemo(() => {
- if (loadingRuns) return [];
-
- // Transform API validations to expected format
- // Use standardized 'validation' key (removed validation_result fallback)
- const apiMapped = (apiValidations || []).map(v => {
- const validationResult = v.validation || {};
- const overallScore = validationResult.overall_score;
- 
- return {
-  id: v.validation_id || v.id,
-  validation_id: v.validation_id || v.id,
-  timestamp: v.created_at ? new Date(v.created_at).getTime() : Date.now(),
-  idea_explanation: v.idea_explanation || "",
-  category_answers: v.category_answers || {},
-  overall_score: overallScore !== undefined ? overallScore : validationResult.scores ? 
-   Object.values(validationResult.scores || {}).reduce((sum, score) => sum + (parseFloat(score) || 0), 0) / 
-   (Object.keys(validationResult.scores || {}).length || 1) : undefined,
-  validation_result: validationResult,
-  created_at: v.created_at,
-  from_api: true,
-  is_validation: true
- };
+ const { comparing, performComparison, performValidationComparison } = useComparison({
+  allIdeas,
+  allRunsMerged,
+  allValidations,
+  getAuthHeaders,
+  setComparisonData,
+  setSelectedIdeas
  });
 
- // Get localStorage validations if authenticated and merge
- let localValidations = [];
- if (isAuthenticated) {
-  try {
-   const saved = getSavedValidations();
-   localValidations = (saved || []).map(v => {
-    const validationResult = v.validation || v.validation_result || {};
-    const overallScore = validationResult.overall_score;
-    
-    return {
-     id: v.id || v.validation_id,
-     validation_id: v.validation_id || v.id,
-     timestamp: v.timestamp || Date.now(),
-     idea_explanation: v.ideaExplanation || v.idea_explanation || "",
-     category_answers: v.categoryAnswers || v.category_answers || {},
-     overall_score: overallScore !== undefined ? overallScore : 
-      (validationResult.scores ? 
-       Object.values(validationResult.scores || {}).reduce((sum, score) => sum + (parseFloat(score) || 0), 0) / 
-       (Object.keys(validationResult.scores || {}).length || 1) : undefined),
-     validation_result: validationResult,
-     created_at: v.created_at || (v.timestamp ? new Date(v.timestamp).toISOString() : null),
-     from_api: false,
-     is_validation: true
-    };
-   });
-  } catch (err) {
-   console.error("Failed to load saved validations:", err);
-  }
- }
-
- // Merge: prefer API validations, add local ones that aren't in API
- const combined = [...apiMapped];
- const apiIds = new Set(apiMapped.map(v => v.validation_id || v.id));
- 
- localValidations.forEach(local => {
-  const id = local.validation_id || local.id;
-  if (!apiIds.has(id)) {
-   combined.push(local);
-  }
- });
-
- // Sort by timestamp (newest first)
- return combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
- }, [apiValidations, getSavedValidations, isAuthenticated, loadingRuns]);
-
  // ---------------------------------------------------------------------------
- // FILTER & SORT (UNCHANGED)
+ // VALIDATIONS (handled by useDataMerging)
  // ---------------------------------------------------------------------------
 
- const filteredRuns = useMemo(() => {
- if (!allRunsMerged || allRunsMerged.length === 0) return [];
- 
- // Filter out validations (only show discovery runs in history)
- // The API returns runs and validations separately, so apiRuns should only contain discovery runs
- // Filter out any that have validation characteristics
- const discoveryRuns = allRunsMerged.filter(run => {
-  // Exclude if explicitly marked as validation
-  if (run.is_validation === true) return false;
-  // Exclude if it has a validation_id (linked to a validation)
-  if (run.validation_id) return false;
-  // Exclude if it has overall_score (validation characteristic)
-  if (run.overall_score !== undefined && run.overall_score !== null) return false;
-  // Include all other runs
-  return true;
- });
- 
- // Sort by selected criteria
- let sorted = [...discoveryRuns];
- 
- if (sortBy === "date") {
-  sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
- } else if (sortBy === "date_oldest") {
-  sorted.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
- }
- 
- return sorted;
-}, [allRunsMerged, sortBy]);
+ // ---------------------------------------------------------------------------
+ // FILTER & SORT (MODULARIZED)
+ // ---------------------------------------------------------------------------
 
- const filteredValidations = useMemo(() => {
- if (!allValidations || allValidations.length === 0) return [];
-
- let filtered = [...allValidations];
-
- // Date filter
- if (dateFilter !== "all") {
-  const now = Date.now();
-  const oneDay = 24 * 60 * 60 * 1000;
-  const oneWeek = 7 * oneDay;
-  const oneMonth = 30 * oneDay;
-
-  filtered = filtered.filter(v => {
-   const timestamp = v.timestamp || 0;
-   const age = now - timestamp;
-
-   switch (dateFilter) {
-    case "today":
-     return age < oneDay;
-    case "week":
-     return age < oneWeek;
-    case "month":
-     return age < oneMonth;
-    default:
-     return true;
-   }
-  });
- }
-
- // Score filter
- if (scoreFilter !== "all") {
-  filtered = filtered.filter(v => {
-   const score = v.overall_score;
-   if (score === undefined || score === null) return false;
-
-   switch (scoreFilter) {
-    case "high":
-     return score >= 7;
-    case "medium":
-     return score >= 4 && score < 7;
-    case "low":
-     return score < 4;
-    default:
-     return true;
-   }
-  });
- }
-
- // Advanced search filter (for validations)
- if (advancedSearch && advancedSearch.searchType === "validations") {
-  const query = (advancedSearch.ideaDescription || "").toLowerCase().trim();
-  if (query) {
-   filtered = filtered.filter(v => {
-    const explanation = (v.idea_explanation || "").toLowerCase();
-    return explanation.includes(query);
-   });
-  }
- }
-
- // Sort
- let sorted = [...filtered];
- if (sortBy === "date") {
-  sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
- } else if (sortBy === "date_oldest") {
-  sorted.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
- } else if (sortBy === "score_high") {
-  sorted.sort((a, b) => {
-   const scoreA = a.overall_score ?? -1;
-   const scoreB = b.overall_score ?? -1;
-   return scoreB - scoreA;
-  });
- } else if (sortBy === "score_low") {
-  sorted.sort((a, b) => {
-   const scoreA = a.overall_score ?? 999;
-   const scoreB = b.overall_score ?? 999;
-   return scoreA - scoreB;
-  });
- }
-
- return sorted;
- }, [
+ const { filteredRuns, filteredValidations, filteredSearchIdeas } = useFiltering({
+  allRunsMerged,
  allValidations,
+  allIdeas,
+  sortBy,
  dateFilter,
  scoreFilter,
- sortBy,
- advancedSearch
- ]);
-
- // ---------------------------------------------------------------------------
- // SEARCH FILTERING LOGIC
- // ---------------------------------------------------------------------------
-
- const filteredSearchIdeas = useMemo(() => {
- if (!searchTabQuery.trim()) return [];
-
- const query = searchTabQuery.toLowerCase().trim();
- const results = [];
-
- allIdeas.forEach(idea => {
- let matches = false;
-
- // Extract full idea details from runReports if available
- let fullIdeaData = { ...idea };
- if (idea.runReports?.personalized_recommendations) {
- const recs = idea.runReports.personalized_recommendations;
- const parsed = parseStructuredIdeas(typeof recs === 'string' ? recs : '', 10);
- const matchedIdea = parsed.find(p => String(p.index) === String(idea.ideaIndex));
- if (matchedIdea) {
- // Try to extract additional fields from body if available
- const body = matchedIdea.body || matchedIdea.fullText || '';
- const timelineMatch = body.match(/(?:timeline|timeline_effort)[:\-]?\s*(.+?)(?:\n|$)/i);
- const whyFitsMatch = body.match(/(?:why_this_fits|why.*fits)[:\-]?\s*(.+?)(?:\n|$)/i);
- 
- fullIdeaData = {
- ...fullIdeaData,
- target_market: matchedIdea.target_market || '',
- revenue_model: matchedIdea.revenue_model || '',
- timeline: timelineMatch ? timelineMatch[1].trim() : '',
- why_this_fits: whyFitsMatch ? whyFitsMatch[1].trim() : (matchedIdea.summary || '')
- };
- }
- }
-
- // Search based on category
- if (searchCategory === "all" || searchCategory === "title") {
- if (fullIdeaData.title?.toLowerCase().includes(query)) matches = true;
- }
- if (searchCategory === "all" || searchCategory === "summary") {
- if (fullIdeaData.summary?.toLowerCase().includes(query)) matches = true;
- }
- if (searchCategory === "all" || searchCategory === "market") {
- if (fullIdeaData.target_market?.toLowerCase().includes(query)) matches = true;
- }
- if (searchCategory === "all" || searchCategory === "revenue") {
- if (fullIdeaData.revenue_model?.toLowerCase().includes(query)) matches = true;
- }
- if (searchCategory === "all" || searchCategory === "timeline") {
- if (fullIdeaData.timeline?.toLowerCase().includes(query)) matches = true;
- }
- if (searchCategory === "all" || searchCategory === "why_fits") {
- if (fullIdeaData.why_this_fits?.toLowerCase().includes(query)) matches = true;
- }
-
- if (matches) {
- results.push(fullIdeaData);
- }
+  advancedSearch,
+  searchTabQuery,
+  searchCategory
  });
 
- return results;
- }, [allIdeas, searchTabQuery, searchCategory]);
+ // ---------------------------------------------------------------------------
+ // VALIDATION COMPARISON (handled by useComparison)
+ // ---------------------------------------------------------------------------
+
+ // ---------------------------------------------------------------------------
+ // SEARCH FILTERING (handled by useFiltering)
+ // ---------------------------------------------------------------------------
 
  // ---------------------------------------------------------------------------
  // DELETE HANDLER WITH WARNING
@@ -624,20 +353,30 @@ export default function DashboardPage() {
  All idea validations you’ve run—compare, revisit, or refine your assumptions.
  </p>
 
- <DashboardValidationsTab
- filteredValidations={filteredValidations}
- loadingRuns={loadingRuns}
- sessionHasOpenActions={sessionHasOpenActions}
- sessionHasNotes={sessionHasNotes}
- selectedIdeas={selectedIdeas}
- setSelectedIdeas={setSelectedIdeas}
- comparisonData={comparisonData}
- setComparisonData={setComparisonData}
- comparing={comparing}
- performComparison={performComparison}
- handleDelete={handleDeleteValidation}
- handleEditValidation={handleEditValidation}
- />
+ {comparisonData?.validations ? (
+  <ValidationComparisonView
+   comparisonData={comparisonData}
+   onResetComparison={() => {
+      setComparisonData(null);
+      setSelectedIdeas(new Set());
+     }}
+  />
+ ) : (
+  <DashboardValidationsTab
+   filteredValidations={filteredValidations}
+   loadingRuns={loadingRuns}
+   sessionHasOpenActions={sessionHasOpenActions}
+   sessionHasNotes={sessionHasNotes}
+   selectedIdeas={selectedIdeas}
+   setSelectedIdeas={setSelectedIdeas}
+   comparisonData={comparisonData}
+   setComparisonData={setComparisonData}
+   comparing={comparing}
+   performComparison={performValidationComparison}
+   handleDelete={handleDeleteValidation}
+   handleEditValidation={handleEditValidation}
+  />
+ )}
  </div>
  )}
 
