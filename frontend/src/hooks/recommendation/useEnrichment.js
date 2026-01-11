@@ -3,9 +3,20 @@ import { useState, useEffect, useRef } from "react";
 /**
  * Custom hook for managing idea enrichment
  */
-export function useEnrichment(currentActiveIdea, industry, reports, ideaId, getEnrichment, setEnrichment, cachedIdea, cachedRun) {
+export function useEnrichment(currentActiveIdea, industry, reports, ideaId, getEnrichment, setEnrichment, cachedIdea, cachedRun, getAuthHeaders) {
+  console.log("🟢 useEnrichment HOOK CALLED with:", {
+    hasCurrentActiveIdea: !!currentActiveIdea,
+    currentActiveIdeaTitle: currentActiveIdea?.title,
+    industry,
+    ideaId,
+    hasCachedIdea: !!cachedIdea,
+    hasCachedRun: !!cachedRun,
+    hasGetAuthHeaders: !!getAuthHeaders
+  });
+  
   const [enrichedBody, setEnrichedBody] = useState(null);
   const [isEnriching, setIsEnriching] = useState(false);
+  const [enrichmentError, setEnrichmentError] = useState(null);
   const enrichmentCalledRef = useRef(false);
   const lastEnrichmentIdeaRef = useRef(null);
 
@@ -22,20 +33,45 @@ export function useEnrichment(currentActiveIdea, industry, reports, ideaId, getE
 
   // Fetch enrichment when user clicks "View details"
   useEffect(() => {
+    console.log("🔵 useEffect TRIGGERED - Starting loadEnrichment check", {
+      hasCachedIdea: !!cachedIdea,
+      hasCachedRun: !!cachedRun,
+      hasCurrentActiveIdea: !!currentActiveIdea,
+      currentActiveIdeaTitle: currentActiveIdea?.title
+    });
+    
     async function loadEnrichment() {
-      // CRITICAL: Disable enrichment if viewing cached idea or cached run
+      console.log("🟣 loadEnrichment function CALLED");
+      // CRITICAL: Only skip enrichment if cached data has ENRICHED body (with markdown sections)
       if (cachedIdea || cachedRun) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log("[useEnrichment] Enrichment disabled - viewing cached data", {
-            hasCachedIdea: !!cachedIdea,
-            hasCachedRun: !!cachedRun
-          });
+        const bodyToCheck = cachedIdea?.body || currentActiveIdea?.body;
+        const isEnrichedBody = bodyToCheck && bodyToCheck.includes('## '); // Check for markdown headings
+        
+        console.log("🔍 ENRICHMENT DEBUG - Cached data check:", {
+          hasCachedIdea: !!cachedIdea,
+          hasCachedRun: !!cachedRun,
+          cachedIdeaHasBody: !!cachedIdea?.body,
+          cachedIdeaBodyLength: cachedIdea?.body?.length || 0,
+          cachedIdeaBodyPreview: cachedIdea?.body?.substring(0, 100),
+          isEnrichedBody: isEnrichedBody,
+          cachedIdeaTitle: cachedIdea?.title,
+          currentActiveIdeaHasBody: !!currentActiveIdea?.body,
+          currentActiveIdeaBodyLength: currentActiveIdea?.body?.length || 0
+        });
+        
+        if (isEnrichedBody) {
+          // Body contains enriched markdown - use it
+          console.log("✅ Cached idea has ENRICHED body - skipping API call");
+          if (process.env.NODE_ENV === 'development') {
+            console.log("[useEnrichment] Enrichment disabled - viewing cached enriched data");
+          }
+          setEnrichedBody(bodyToCheck);
+          enrichmentCalledRef.current = true;
+          return;
+        } else {
+          // Body exists but not enriched - continue to API call
+          console.log("⚠️ Cached idea has body but NOT enriched - will call API");
         }
-        if (cachedIdea?.body) {
-          setEnrichedBody(cachedIdea.body);
-        }
-        enrichmentCalledRef.current = true;
-        return;
       }
 
       // Reset ref if idea changed
@@ -78,9 +114,15 @@ export function useEnrichment(currentActiveIdea, industry, reports, ideaId, getE
         return;
       }
       if (currentActiveIdea.body && currentActiveIdea.body.trim().length > 0) {
-        console.log("✅ SKIP: Already enriched, body length:", currentActiveIdea.body.length);
-        enrichmentCalledRef.current = true;
-        return;
+        // Check if body is actually enriched (contains markdown sections)
+        const isEnrichedBody = currentActiveIdea.body.includes('## ');
+        if (isEnrichedBody) {
+          console.log("✅ SKIP: Already enriched, body length:", currentActiveIdea.body.length);
+          enrichmentCalledRef.current = true;
+          return;
+        } else {
+          console.log("⚠️ Body exists but not enriched (no markdown sections) - will call API");
+        }
       }
       if (!reports?.profile_analysis) {
         console.log("❌ BLOCKED: No profile_analysis");
@@ -88,15 +130,20 @@ export function useEnrichment(currentActiveIdea, industry, reports, ideaId, getE
       }
 
       console.log("❌ CACHE MISS: No cached enrichment for", ideaId, "- will fetch from API");
+      console.log("🚀 ENRICHMENT API CALL STARTING - All checks passed!");
 
       enrichmentCalledRef.current = true;
       setIsEnriching(true);
 
       try {
         console.log("=== Making enrichment API call ===");
+        const authHeaders = getAuthHeaders ? getAuthHeaders() : {};
         const response = await fetch("/api/discovery/enrich_idea?format=json", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            ...authHeaders
+          },
           body: JSON.stringify({
             idea: {
               title: currentActiveIdea.title,
@@ -124,9 +171,11 @@ export function useEnrichment(currentActiveIdea, industry, reports, ideaId, getE
           console.log("✅ ENRICHMENT COMPLETE");
         } else {
           console.error("❌ Enrichment API returned success=false:", result);
+          setEnrichmentError(result?.error || "Enrichment failed");
         }
       } catch (err) {
         console.error("❌ Enrichment failed", err);
+        setEnrichmentError(err.message || "Failed to load enrichment data");
       } finally {
         setIsEnriching(false);
       }
@@ -142,12 +191,14 @@ export function useEnrichment(currentActiveIdea, industry, reports, ideaId, getE
     cachedRun,
     ideaId,
     getEnrichment,
-    setEnrichment
+    setEnrichment,
+    getAuthHeaders
   ]);
 
   return {
     enrichedBody,
     isEnriching,
+    enrichmentError,
     setEnrichedBody
   };
 }

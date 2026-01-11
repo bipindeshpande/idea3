@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import Seo from "../../components/common/Seo.jsx";
-import FocusLayout from "../../layouts/FocusLayout.jsx";
 import DiscoveryEmptyState from "../../components/discovery/DiscoveryEmptyState.jsx";
 import DiscoveryLoadingState from "../../components/discovery/DiscoveryLoadingState.jsx";
 import { useReports } from "../../context/ReportsContext.jsx";
@@ -14,8 +13,7 @@ import { useSectionToggle } from "../../components/recommendations/hooks/useSect
 import { useRecommendationData } from "../../hooks/recommendation/useRecommendationData.js";
 import { useEnrichment } from "../../hooks/recommendation/useEnrichment.js";
 import { useActionsAndNotes } from "../../hooks/recommendation/useActionsAndNotes.js";
-// Import utility functions
-import { processRecommendationData } from "../../utils/recommendationDataProcessing.js";
+import { useRecommendationDetailState } from "../../hooks/recommendation/useRecommendationDetailState.js";
 // Import UI components
 import RecommendationLoadingState from "../../components/recommendation/RecommendationLoadingState.jsx";
 import RecommendationHeader from "../../components/recommendation/RecommendationHeader.jsx";
@@ -34,8 +32,12 @@ export default function RecommendationDetail() {
   const { getAuthHeaders, isAuthenticated } = useAuth();
   const { validateRecommendationIdea, loading: validating } = useValidation();
   
+  console.log("🔵 RECOMMENDATION DETAIL PAGE LOADED - ideaIndex:", ideaIndex);
+  console.log("🔵 Location state:", location.state);
+  
   // Initialize file logger on mount
   useEffect(() => {
+    console.log("🔵 RecommendationDetail useEffect - component mounted");
     logToFile("RecommendationDetail component mounted", "INFO", "RecommendationDetail");
   }, []);
 
@@ -61,8 +63,29 @@ export default function RecommendationDetail() {
     runQuery
   } = useRecommendationData(contextReports, contextInputs, loading, loadRunById, currentRunId);
 
+  console.log("🟡 useRecommendationData returned:", {
+    hasActiveIdea: !!activeIdea,
+    activeIdeaTitle: activeIdea?.title,
+    hasCurrentActiveIdea: !!currentActiveIdea,
+    ideaId,
+    isValidIdeaId,
+    industry,
+    hasCachedIdea: !!cachedIdea,
+    hasCachedRun: !!cachedRun,
+    ideasCount: ideas?.length
+  });
+
   // Use enrichment hook
-  const { enrichedBody, isEnriching, setEnrichedBody } = useEnrichment(
+  console.log("🟠 CALLING useEnrichment with:", {
+    currentActiveIdea,
+    industry,
+    hasReports: !!reports,
+    ideaId,
+    cachedIdea,
+    cachedRun,
+    hasGetAuthHeaders: !!getAuthHeaders
+  });
+  const { enrichedBody, isEnriching, enrichmentError, setEnrichedBody } = useEnrichment(
     currentActiveIdea,
     industry,
     reports,
@@ -70,18 +93,27 @@ export default function RecommendationDetail() {
     getEnrichment,
     setEnrichment,
     cachedIdea,
-    cachedRun
+    cachedRun,
+    getAuthHeaders
   );
+  console.log("🟠 useEnrichment returned:", { hasEnrichedBody: !!enrichedBody, isEnriching, enrichmentError });
 
-  // Update activeIdeaState with enriched body
+  // Update activeIdeaState with enriched body (only when enrichedBody changes and differs from current body)
   useEffect(() => {
-    if (enrichedBody && activeIdeaState && !activeIdeaState.body) {
-      setActiveIdeaState(prev => ({
-        ...(prev || currentActiveIdea),
-        body: enrichedBody
-      }));
+    if (enrichedBody && enrichedBody.trim().length > 0) {
+      setActiveIdeaState(prev => {
+        // Only update if the enriched body is different from current body
+        const currentBody = prev?.body || currentActiveIdea?.body || "";
+        if (currentBody !== enrichedBody) {
+          return {
+            ...(prev || currentActiveIdea),
+            body: enrichedBody
+          };
+        }
+        return prev; // No change needed
+      });
     }
-  }, [enrichedBody, activeIdeaState, currentActiveIdea, setActiveIdeaState]);
+  }, [enrichedBody, currentActiveIdea]);
 
   // Use actions and notes hook
   const {
@@ -100,17 +132,32 @@ export default function RecommendationDetail() {
 
   const { openSections, toggleSection } = useSectionToggle();
 
-  // Process recommendation data
-  const processedData = useMemo(() => {
-    const bodyToParse = enrichedBody || activeIdeaState?.body || currentActiveIdea?.body || "";
-    if (!currentActiveIdea || !bodyToParse || bodyToParse.trim().length === 0) {
-      return null;
-    }
-    return processRecommendationData(parsedSections, currentActiveIdea, inputs);
-  }, [enrichedBody, activeIdeaState, currentActiveIdea, parsedSections, inputs]);
-
-  // Extract processed data
+  // Use centralized hook for all detail page state and logic
+  const detailState = useRecommendationDetailState({
+    enrichedBody,
+    isEnriching,
+    enrichmentError,
+    activeIdeaState,
+    currentActiveIdea,
+    parsedSections,
+    activeIdea,
+    cachedIdea,
+    cachedRun,
+    loading,
+    inputs
+  });
+  
+  // Destructure all state and data from the hook
   const {
+    hasEnrichedBody,
+    hasBasicBody,
+    hasBody,
+    needsEnrichment,
+    isLoadingPage,
+    shouldShowContent,
+    enrichedParsedSections,
+    enrichedOrderedSections,
+    processedData,
     heroStatement,
     heroChips,
     executionPhaseCards,
@@ -124,33 +171,26 @@ export default function RecommendationDetail() {
     immediateNextSteps,
     decisionChecklist,
     roadmapMarkdown,
-  } = processedData || {};
+    discoveryNextSteps,
+    finalImmediateNextSteps
+  } = detailState;
 
-  // Use lightweight next_steps from enrichment if available
-  const discoveryNextSteps = currentActiveIdea?.enrichment?.next_steps;
-  const finalImmediateNextSteps = discoveryNextSteps
-    ? discoveryNextSteps
-        .split("\n")
-        .filter((line) => line.trim().startsWith("-"))
-        .map((line) => line.trim().replace(/^-\s*/, ""))
-    : immediateNextSteps || [];
-
-
- // Redirect if we have stage2Markdown but the idea index doesn't match
- if (stage2Markdown && !activeIdea && ideas.length > 0) {
- return <Navigate to={backPath} replace state={backState} />;
- }
-
-  // Loading state: Show spinner when enriching and no body yet
-  const hasBody = !!(enrichedBody?.length > 0 || activeIdeaState?.body?.length > 0 || currentActiveIdea?.body?.length > 0);
-  const isLoadingPage = (loading && !cachedIdea && !cachedRun) || (!hasBody && isEnriching && activeIdea) || (activeIdea && !hasBody && loading);
+  // Redirect if we have stage2Markdown but the idea index doesn't match
+  if (stage2Markdown && !activeIdea && ideas.length > 0) {
+    return <Navigate to={backPath} replace state={backState} />;
+  }
 
   if (isLoadingPage) {
-    return <RecommendationLoadingState isEnriching={isEnriching} />;
+    return <RecommendationLoadingState isEnriching={isEnriching || needsEnrichment} />;
+  }
+  
+  // If enrichment failed, show a warning but still show the page with basic details
+  if (enrichmentError && !hasEnrichedBody && activeIdea) {
+    console.warn("Enrichment failed, showing page with basic details:", enrichmentError);
   }
 
  return (
- <FocusLayout>
+ <>
  <Seo
  title={
  activeIdea
@@ -158,7 +198,7 @@ export default function RecommendationDetail() {
  : "Recommendation Detail | Startup Idea Advisor"
  }
  description="Dive deeper into the selected startup recommendation, including financial outlook, risk radar, and validation plan."
- path={`/results/recommendations/${ideaIndex}`}
+ path={`/dashboard/recommendations/${ideaIndex}`}
  />
 
  <RecommendationNavigation
@@ -187,20 +227,20 @@ export default function RecommendationDetail() {
  />
  )}
 
- {/* Show idea information if we have an activeIdea, even if body is still loading */}
- {activeIdea && (
+ {/* Show idea information only if we have enriched body OR cached data (which already has enrichment) */}
+ {shouldShowContent && (
  <>
  <RecommendationHeader
- activeIdea={activeIdea}
- heroStatement={heroStatement}
- heroChips={heroChips}
- actions={actions}
- notes={notes}
+   activeIdea={activeIdea}
+   heroStatement={heroStatement}
+   heroChips={heroChips}
+   actions={actions}
+   notes={notes}
  />
-
+ 
  <RecommendationSectionsList
- orderedSections={orderedSections}
- openSections={openSections}
+   orderedSections={enrichedOrderedSections}
+   openSections={openSections}
  toggleSection={toggleSection}
  fitNarrativeMarkdown={fitNarrativeMarkdown}
  discoveryNextSteps={discoveryNextSteps}
@@ -255,7 +295,7 @@ export default function RecommendationDetail() {
  {/* Explore other ideas section removed based on feedback */}
  </>
  )}
- </FocusLayout>
+ </>
  );
 }
 
