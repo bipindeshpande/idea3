@@ -24,29 +24,13 @@ class ProfileFormatter(BaseService):
         if not profile_text:
             return profile_text
         
-        # Extract JSON from delimited block
-        start_marker = "---PROFILE_ANALYSIS_START---"
-        end_marker = "---PROFILE_ANALYSIS_END---"
-        
-        start_idx = profile_text.find(start_marker)
-        end_idx = profile_text.find(end_marker)
+        # Extract JSON from delimited block using shared parser library
+        from app.services.parsers.profile_parser import ProfileParser
         
         formatted = []
+        profile_data = ProfileParser.extract_json(profile_text)
         
-        if start_idx >= 0 and end_idx > start_idx:
-            # Extract JSON block
-            json_start = start_idx + len(start_marker)
-            json_text = profile_text[json_start:end_idx].strip()
-            
-            # Find the JSON object (first { to last })
-            first_brace = json_text.find('{')
-            last_brace = json_text.rfind('}')
-            
-            if first_brace >= 0 and last_brace > first_brace:
-                json_text = json_text[first_brace:last_brace + 1]
-                
-                try:
-                    profile_data = json.loads(json_text)
+        if profile_data:
                     
                     # Format as readable text for recommendations prompt
                     formatted.append("## Profile Analysis Summary")
@@ -81,9 +65,6 @@ class ProfileFormatter(BaseService):
                         formatted.append("### Pathway Recommendation")
                         formatted.append(profile_data["pathway_recommendation"])
                         formatted.append("")
-                except json.JSONDecodeError:
-                    # If JSON parsing fails, return original text (fallback)
-                    return profile_text
         
         # AI GUARDRAIL: Always include Psyche Profile if available (NON-NEGOTIABLE)
         # Never let AI infer psyche traits from free text - only use deterministic scores

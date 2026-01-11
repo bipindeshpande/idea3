@@ -5,8 +5,6 @@ import PageHeader from "../layout/PageHeader.jsx";
 import Card from "../ui/Card.jsx";
 import UIHeading from "../ui/ui-heading.jsx";
 import FeatureCard from "../marketing/FeatureCard.jsx";
-import UIButton from "../ui/ui-button.jsx";
-import ShareLinks from "./ShareLinks.jsx";
 import { calculateReadingTime, getRelatedPosts } from "../../utils/blog/blogUtils.js";
 import { posts } from "../../data/blog/posts.js";
 
@@ -114,12 +112,10 @@ export default function BlogArticle({ post }) {
         </div>
         <PageHeader title={post.title} className="mt-2" />
       </div>
-      <ShareLinks title={post.title} slug={post.slug} />
       
       {/* Resource Links */}
       {resourceLink && (
-        <div className="mt-6 p-4 bg-surface-muted border border-default rounded-lg">
-          <p className="text-base font-medium text-secondary mb-2">Use this guide with:</p>
+        <div className="mt-6">
           <Link
             to={resourceLink.path}
             className="text-base text-accent hover:text-accent-hover font-semibold"
@@ -167,7 +163,7 @@ export default function BlogArticle({ post }) {
                 : tintColors[index % tintColors.length];
 
               return (
-                <div key={relatedPost.slug} className="w-full flex">
+                <Link key={relatedPost.slug} to={`/blog/${relatedPost.slug}`} className="w-full flex">
                   <FeatureCard
                     icon="📝"
                     title={relatedPost.title}
@@ -175,28 +171,13 @@ export default function BlogArticle({ post }) {
                     tint={tint}
                     eyebrow={relatedPost.tags?.[0] || "Article"}
                     accentBorder
-                    className="flex flex-col flex-1"
+                    className="flex flex-col flex-1 hover:opacity-90 transition-opacity cursor-pointer"
                   >
                     <div className="text-xs text-secondary mb-4">
                       {new Date(relatedPost.date).toLocaleDateString()}
                     </div>
-                    <div className="mt-auto">
-                      <UIButton
-                        as={Link}
-                        to={`/blog/${relatedPost.slug}`}
-                        variant="secondary"
-                        className="w-full"
-                        style={{
-                          background: "var(--mkt-surface)",
-                          color: "var(--mkt-heading)",
-                          border: "1px solid var(--mkt-outline)"
-                        }}
-                      >
-                        Read article
-                      </UIButton>
-                    </div>
                   </FeatureCard>
-                </div>
+                </Link>
               );
             })}
           </div>

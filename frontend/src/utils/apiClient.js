@@ -4,7 +4,6 @@
  * Provides consistent API request handling with:
  * - Automatic auth header injection
  * - Standardized error handling
- * - Request/response interceptors
  * - Timeout management
  * - Global 401 handling
  */
@@ -34,11 +33,6 @@ class ApiClient {
       "Content-Type": "application/json",
       Accept: "application/json",
     };
-    
-    // Request interceptors (array of functions)
-    this.requestInterceptors = [];
-    // Response interceptors (array of functions)
-    this.responseInterceptors = [];
   }
 
   /**
@@ -47,20 +41,6 @@ class ApiClient {
   getAuthHeaders() {
     const token = localStorage.getItem(SESSION_TOKEN_KEY);
     return token ? { Authorization: `Bearer ${token}` } : {};
-  }
-
-  /**
-   * Add request interceptor
-   */
-  addRequestInterceptor(interceptor) {
-    this.requestInterceptors.push(interceptor);
-  }
-
-  /**
-   * Add response interceptor
-   */
-  addResponseInterceptor(interceptor) {
-    this.responseInterceptors.push(interceptor);
   }
 
   /**
@@ -134,28 +114,6 @@ class ApiClient {
   }
 
   /**
-   * Apply request interceptors
-   */
-  async applyRequestInterceptors(config) {
-    let processedConfig = config;
-    for (const interceptor of this.requestInterceptors) {
-      processedConfig = await interceptor(processedConfig);
-    }
-    return processedConfig;
-  }
-
-  /**
-   * Apply response interceptors
-   */
-  async applyResponseInterceptors(response) {
-    let processedResponse = response;
-    for (const interceptor of this.responseInterceptors) {
-      processedResponse = await interceptor(processedResponse);
-    }
-    return processedResponse;
-  }
-
-  /**
    * Handle 401 Unauthorized globally
    */
   handleUnauthorized() {
@@ -187,7 +145,7 @@ class ApiClient {
     };
 
     // Prepare config
-    let config = {
+    const config = {
       ...restOptions,
       headers: requestHeaders,
     };
@@ -204,9 +162,6 @@ class ApiClient {
         config.body = JSON.stringify(body);
       }
     }
-
-    // Apply request interceptors
-    config = await this.applyRequestInterceptors(config);
 
     // Setup timeout with AbortController
     const controller = new AbortController();
@@ -225,27 +180,24 @@ class ApiClient {
         signal: abortSignal,
       });
 
-      // Apply response interceptors
-      const processedResponse = await this.applyResponseInterceptors(response);
-
       // Handle 401 globally (unless skipAuthRedirect is true)
-      if (processedResponse.status === 401) {
+      if (response.status === 401) {
         if (!skipAuthRedirect) {
           this.handleUnauthorized();
         }
-        const error = await this.parseError(processedResponse);
+        const error = await this.parseError(response);
         // Use the actual error message from the backend instead of hardcoding "Unauthorized"
         throw new ApiError(error.message || "Unauthorized", 401, error.data);
       }
 
       // Handle other error statuses
-      if (!processedResponse.ok) {
-        const error = await this.parseError(processedResponse);
-        throw new ApiError(error.message, processedResponse.status, error.data);
+      if (!response.ok) {
+        const error = await this.parseError(response);
+        throw new ApiError(error.message, response.status, error.data);
       }
 
       // Parse successful response
-      return await this.parseResponse(processedResponse);
+      return await this.parseResponse(response);
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
@@ -339,7 +291,7 @@ class ApiClient {
       ...headers,
     };
 
-    let config = {
+    const config = {
       ...restOptions,
       headers: requestHeaders,
     };
@@ -347,8 +299,6 @@ class ApiClient {
     if (body !== undefined) {
       config.body = typeof body === "string" ? body : JSON.stringify(body);
     }
-
-    config = await this.applyRequestInterceptors(config);
 
     const controller = new AbortController();
     const abortSignal = signal || controller.signal;
@@ -361,30 +311,45 @@ class ApiClient {
     }
 
     try {
+      // 🔍 DEBUG: Log final request details before sending
+      console.group('🚀 API Stream Request Details');
+      console.log('Full URL:', `${this.baseURL}${url}`);
+      console.log('Method:', config.method || 'GET');
+      console.log('Headers:', config.headers);
+      console.log('Body (raw string):', config.body);
+      if (config.body) {
+        try {
+          console.log('Body (parsed JSON):', JSON.parse(config.body));
+        } catch (e) {
+          console.log('Body (not JSON):', config.body);
+        }
+      }
+      console.log('Signal:', abortSignal ? 'AbortSignal present' : 'No signal');
+      console.log('Timeout:', timeout + 'ms');
+      console.groupEnd();
+
       const response = await fetch(`${this.baseURL}${url}`, {
         ...config,
         signal: abortSignal,
       });
 
-      const processedResponse = await this.applyResponseInterceptors(response);
-
-      if (processedResponse.status === 401) {
+      if (response.status === 401) {
         const { skipAuthRedirect = false } = options;
         if (!skipAuthRedirect) {
           this.handleUnauthorized();
         }
-        const error = await this.parseError(processedResponse);
+        const error = await this.parseError(response);
         // Use the actual error message from the backend instead of hardcoding "Unauthorized"
         throw new ApiError(error.message || "Unauthorized", 401, error.data);
       }
 
-      if (!processedResponse.ok) {
-        const error = await this.parseError(processedResponse);
-        throw new ApiError(error.message, processedResponse.status, error.data);
+      if (!response.ok) {
+        const error = await this.parseError(response);
+        throw new ApiError(error.message, response.status, error.data);
       }
 
       // Return Response object for streaming
-      return processedResponse;
+      return response;
     } catch (error) {
       if (timeoutId) {
         clearTimeout(timeoutId);

@@ -39,7 +39,7 @@ export default function WorkspaceLayout() {
  <Sidebar isCollapsed={isCollapsed} onToggleCollapse={handleToggleCollapse} />
  </UICard>
 
- {/* Right Pane - Content Area */}
+      {/* Right Pane - Content Area */}
       <div className="min-w-0 flex-1">
        <UICard variant="muted" className="ui-radius-page ui-pad-md shadow-soft">
         {title && <WorkspaceTopBar title={title} subtitle={subtitle} />}

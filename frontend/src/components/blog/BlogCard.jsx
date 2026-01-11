@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
 import FeatureCard from "../marketing/FeatureCard.jsx";
-import UIButton from "../ui/ui-button.jsx";
-import ShareLinks from "./ShareLinks.jsx";
 
 const tagTintMap = {
   "Validation": "blue",
@@ -60,7 +58,7 @@ export default function BlogCard({ post, index = 0 }) {
   const resourceLink = resourceLinks[post.slug];
 
   return (
-    <div className="w-full flex">
+    <Link to={`/blog/${post.slug}`} className="w-full flex">
       <FeatureCard
         icon="📝"
         title={post.title}
@@ -68,7 +66,7 @@ export default function BlogCard({ post, index = 0 }) {
         tint={tint}
         eyebrow={post.tags?.[0] || "Article"}
         accentBorder
-        className="flex flex-col flex-1"
+        className="flex flex-col flex-1 hover:opacity-90 transition-opacity cursor-pointer"
       >
         <div className="flex items-center justify-between text-xs text-secondary mb-4">
           <span>{new Date(post.date).toLocaleDateString()}</span>
@@ -79,28 +77,12 @@ export default function BlogCard({ post, index = 0 }) {
               style={{ color: "var(--mkt-primary)" }}
               onClick={(e) => e.stopPropagation()}
             >
-              Use with: {resourceLink.text} →
+              {resourceLink.text} →
             </Link>
           )}
         </div>
-        <div className="flex items-center justify-between gap-4 mt-auto">
-          <UIButton 
-            as={Link} 
-            to={`/blog/${post.slug}`} 
-            variant="secondary" 
-            className="flex-1"
-            style={{
-              background: "var(--mkt-surface)",
-              color: "var(--mkt-heading)",
-              border: "1px solid var(--mkt-outline)"
-            }}
-          >
-            Read article
-          </UIButton>
-          <ShareLinks title={post.title} slug={post.slug} />
-        </div>
       </FeatureCard>
-    </div>
+    </Link>
   );
 }
 

@@ -54,23 +54,14 @@ class Stage2Service(BaseService):
                 
                 if industry_data:
                     self._log(f"Successfully loaded industry data for '{industry_interest}'", "INFO")
-                    # Parse profile analysis JSON
+                    # Parse profile analysis JSON using shared parser library
                     profile_data = {}
                     if profile_analysis:
                         try:
-                            # Try to extract JSON from delimiters
-                            start_marker = "---PROFILE_ANALYSIS_START---"
-                            end_marker = "---PROFILE_ANALYSIS_END---"
-                            start_idx = profile_analysis.find(start_marker)
-                            end_idx = profile_analysis.find(end_marker)
-                            
-                            if start_idx != -1 and end_idx != -1:
-                                json_text = profile_analysis[start_idx + len(start_marker):end_idx].strip()
-                                profile_data = json.loads(json_text)
-                            else:
-                                # Try parsing entire profile_analysis as JSON
-                                profile_data = json.loads(profile_analysis)
-                        except (json.JSONDecodeError, ValueError):
+                            from app.services.parsers.profile_parser import ProfileParser
+                            parsed = ProfileParser.extract_json(profile_analysis)
+                            profile_data = parsed if parsed else {"raw": profile_analysis}
+                        except Exception:
                             # If parsing fails, use as string
                             profile_data = {"raw": profile_analysis}
                     
@@ -95,6 +86,12 @@ class Stage2Service(BaseService):
                         ranked_ideas, profile_data, inputs
                     )
                     
+                    # Log next_steps addition for static engine
+                    for idx, idea in enumerate(ideas_with_next_steps, 1):
+                        has_next_steps = bool(idea.get("enrichment", {}).get("next_steps"))
+                        next_steps_preview = (idea.get("enrichment", {}).get("next_steps", "") or "")[:100]
+                        self._log(f"[Static Engine] After add_discovery_next_steps - Idea {idx}: has_next_steps={has_next_steps}, preview={next_steps_preview}", "INFO")
+                    
                     # Build report (uses details_markdown from structured ideas)
                     report = build_markdown_report(
                         profile=profile_data,
@@ -108,6 +105,11 @@ class Stage2Service(BaseService):
                     
                     # Clean structured ideas to ensure only seed-level fields (but keep enrichment.next_steps)
                     cleaned_ideas = self.clean_seed_ideas(ideas_with_next_steps)
+                    
+                    # Log cleaned ideas with next_steps check for static engine
+                    for idx, idea in enumerate(cleaned_ideas, 1):
+                        has_next_steps = bool(idea.get("enrichment", {}).get("next_steps"))
+                        self._log(f"[Static Engine] Cleaned Idea {idx}: has_next_steps={has_next_steps}", "INFO")
                     
                     # Attach structured ideas to report for result_assembler to extract
                     structured_json = json.dumps(cleaned_ideas)
@@ -130,34 +132,7 @@ class Stage2Service(BaseService):
             user_inputs=inputs
         )
 
-        system_prompt = """You are a startup advisor. You MUST output recommendations using the EXACT format specified in the prompt.
-
-CRITICAL RULES:
-- Output ONLY the IDEA blocks (### IDEA_1, ### IDEA_2, etc.)
-- Do NOT include any intro text, explanations, or disclaimers
-- Do NOT output markdown sections like ## SECTION or ### RECOMMENDATION
-- Each IDEA block must have exactly these fields: title, summary, target_market, revenue_model, validation_score, timeline, why_this_fits
-- Follow the format EXACTLY as specified.
-
-IDEA TITLE REQUIREMENTS (CRITICAL):
-- Each idea title MUST be a CONCRETE STARTUP IDEA, NOT a framework component or abstract concept
-- DO NOT return: "Business Models", "Target Segments", "Value Propositions", "Revenue Models", "Market Opportunities", "Customer Personas", "Go-to-Market Strategy", "Pricing Strategies", "Validation Frameworks", "Execution Plans", or any other framework terms
-- Each title MUST follow pattern: [Who] + [Problem] + [Solution]
-- Examples of VALID titles: "Non-technical food founders launch cloud kitchens using shared commercial kitchens", "Local fitness coaches create personalized meal prep services for busy professionals"
-- Examples of INVALID titles: "Business Models", "Target Segments", "Value Propositions" (these are framework terms, not ideas)
-- ONLY return fully-formed, concrete startup ideas with specific customers, problems, and solutions
-
-REALISM ENFORCEMENT:
-- Ideas MUST match user's actual skills (if user only has cooking skills, NO tech/AI/software ideas)
-- Ideas MUST fit user's time commitment, budget, preferred work style, and startup style
-- Preferred work style influences operational complexity and founder-fit (solo vs team, hands-on vs remote, etc.)
-- Startup style influences business model, delivery method, cost structure, and scalability (home-based vs local vs online, etc.)
-- Business region influences pricing assumptions, feasibility, cultural fit, delivery models, legal complexity, and startup costs
-- Ideas MUST be executable within user's earnings timeline
-- Ideas MUST be from user's selected industry and sub-interest ONLY
-- Ideas MUST be operationally simple and feasible for the user's skill level
-- NO hallucinations, NO irrelevant tech, NO ideas from different industries
-- NO framework terms, NO abstract concepts, NO strategy categories - ONLY concrete startup ideas"""
+        system_prompt = self.prompt_builder.build_idea_research_system_prompt()
 
         llm_response = self.llm_service.generate(
             prompt=prompt,
@@ -168,7 +143,8 @@ REALISM ENFORCEMENT:
         )
 
         # Parse ideas from LLM response with uniqueness filtering
-        from app.services.recommendation_parser import RecommendationParser
+        # Use shared parser library (single source of truth)
+        from app.services.parsers.recommendation_parser import RecommendationParser
         parsed_ideas = RecommendationParser.parse_recommendations(llm_response["content"])
         
         # Regenerate if we have fewer than 3 unique ideas
@@ -198,21 +174,14 @@ REALISM ENFORCEMENT:
         if len(parsed_ideas) < 3:
             self._log(f"Only {len(parsed_ideas)} unique ideas after {max_regeneration_attempts} attempts. Proceeding with available ideas.", "WARNING")
         
-        # Parse profile analysis for ranking
+        # Parse profile analysis for ranking using shared parser library
         profile_data = {}
         if profile_analysis:
             try:
-                start_marker = "---PROFILE_ANALYSIS_START---"
-                end_marker = "---PROFILE_ANALYSIS_END---"
-                start_idx = profile_analysis.find(start_marker)
-                end_idx = profile_analysis.find(end_marker)
-                
-                if start_idx != -1 and end_idx != -1:
-                    json_text = profile_analysis[start_idx + len(start_marker):end_idx].strip()
-                    profile_data = json.loads(json_text)
-                else:
-                    profile_data = json.loads(profile_analysis)
-            except (json.JSONDecodeError, ValueError):
+                from app.services.parsers.profile_parser import ProfileParser
+                parsed = ProfileParser.extract_json(profile_analysis)
+                profile_data = parsed if parsed else {"raw": profile_analysis}
+            except Exception:
                 profile_data = {"raw": profile_analysis}
         
         # Log parsed ideas before processing
@@ -236,14 +205,22 @@ REALISM ENFORCEMENT:
             [copy.deepcopy(idea) for idea in ranked_ideas], profile_data, inputs
         )
         
+        # Log next_steps addition
+        for idx, idea in enumerate(ideas_with_next_steps, 1):
+            has_next_steps = bool(idea.get("enrichment", {}).get("next_steps"))
+            next_steps_preview = (idea.get("enrichment", {}).get("next_steps", "") or "")[:100]
+            self._log(f"[run_stage2] After add_discovery_next_steps - Idea {idx}: has_next_steps={has_next_steps}, preview={next_steps_preview}", "INFO")
+        
         # Clean ideas to ensure only seed-level fields (but keep enrichment.next_steps)
         # Deep clone again to prevent reference reuse
         cleaned_ideas = self.clean_seed_ideas([copy.deepcopy(idea) for idea in ideas_with_next_steps])
         
-        # Log final cleaned ideas
+        # Log final cleaned ideas with next_steps check
         self._log(f"[run_stage2] Final {len(cleaned_ideas)} cleaned ideas", "INFO")
         for idx, idea in enumerate(cleaned_ideas, 1):
-            self._log(f"[run_stage2] Final Idea {idx}: id={idea.get('id')}, index={idea.get('index')}, title={(idea.get('title') or '')[:50]}, summary={(idea.get('summary') or '')[:50]}", "INFO")
+            has_next_steps = bool(idea.get("enrichment", {}).get("next_steps"))
+            next_steps_preview = (idea.get("enrichment", {}).get("next_steps", "") or "")[:100]
+            self._log(f"[run_stage2] Final Idea {idx}: id={idea.get('id')}, index={idea.get('index')}, title={(idea.get('title') or '')[:50]}, has_next_steps={has_next_steps}, next_steps_preview={next_steps_preview}", "INFO")
         
         # Filter ideas by startup_category (tech vs non-tech)
         startup_category = inputs.get('startup_category', 'both')
@@ -310,14 +287,21 @@ REALISM ENFORCEMENT:
                 if key in ALLOWED_SEED_FIELDS:
                     # Special handling for enrichment - only keep next_steps
                     if key == "enrichment" and isinstance(value, dict):
-                        cleaned_idea[key] = {
-                            "next_steps": value.get("next_steps", "")
-                        }
+                        next_steps_value = value.get("next_steps", "")
+                        if next_steps_value:
+                            cleaned_idea[key] = {
+                                "next_steps": next_steps_value
+                            }
+                            self._log(f"Preserved enrichment.next_steps for idea {idea.get('index', 'unknown')}: length={len(next_steps_value)}", "DEBUG")
+                        else:
+                            self._log(f"WARNING: enrichment.next_steps is empty for idea {idea.get('index', 'unknown')}, skipping enrichment", "WARNING")
                     else:
                         cleaned_idea[key] = value
                 elif key in FORBIDDEN_FIELDS:
-                    # Explicitly skip tool/enrichment fields (but enrichment.next_steps is allowed)
-                    self._log(f"Removed tool field '{key}' from seed idea {idea.get('index', 'unknown')}", "DEBUG")
+                    # Explicitly skip tool/enrichment fields (but enrichment.next_steps is allowed via ALLOWED_SEED_FIELDS)
+                    # Note: "enrichment" is in FORBIDDEN_FIELDS but handled above via ALLOWED_SEED_FIELDS
+                    if key != "enrichment":  # Don't log for enrichment since it's handled above
+                        self._log(f"Removed tool field '{key}' from seed idea {idea.get('index', 'unknown')}", "DEBUG")
                 # Ignore any other unexpected fields
         
             cleaned.append(cleaned_idea)

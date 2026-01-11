@@ -69,11 +69,14 @@ export function parseTopIdeas(markdown = "", limit = 5) {
  const index = parseInt(match[1], 10);
  const blockContent = match[2].trim();
  
- // Extract title and summary from key: value format
+ // Extract all fields from key: value format
  const titleMatch = blockContent.match(/title:\s*(.+?)(?:\n|$)/i);
  const summaryMatch = blockContent.match(/summary:\s*(.+?)(?:\n|$)/i);
  const targetMarketMatch = blockContent.match(/target_market:\s*(.+?)(?:\n|$)/i);
  const revenueModelMatch = blockContent.match(/revenue_model:\s*(.+?)(?:\n|$)/i);
+ const validationScoreMatch = blockContent.match(/validation_score:\s*(.+?)(?:\n|$)/i);
+ const timelineMatch = blockContent.match(/timeline:\s*(.+?)(?:\n|$)/i);
+ const whyThisFitsMatch = blockContent.match(/why_this_fits:\s*(.+?)(?:\n|$)/i);
  
  const title = titleMatch ? titleMatch[1].trim() : '';
  const summary = summaryMatch ? summaryMatch[1].trim() : '';
@@ -87,6 +90,9 @@ export function parseTopIdeas(markdown = "", limit = 5) {
  fullText: match[0],
  target_market: targetMarketMatch ? targetMarketMatch[1].trim() : '',
  revenue_model: revenueModelMatch ? revenueModelMatch[1].trim() : '',
+ validation_score: validationScoreMatch ? validationScoreMatch[1].trim() : '',
+ timeline: timelineMatch ? timelineMatch[1].trim() : '',
+ why_this_fits: whyThisFitsMatch ? whyThisFitsMatch[1].trim() : '',
  });
  }
  }
@@ -143,7 +149,9 @@ export function parseTopIdeas(markdown = "", limit = 5) {
  const excludePatterns = [
  'recommendation matrix', 'financial outlook', 'risk radar', 'customer persona',
  'validation questions', '30/60/90', 'roadmap', 'decision checklist',
- 'comprehensive recommendation report', 'profile analysis', 'research'
+ 'comprehensive recommendation report', 'profile analysis', 'research',
+ 'core motivations', 'strengths and capabilities', 'strategic considerations',
+ 'operating constraints', 'viability red flags', 'pathway recommendation'
  ];
  return !excludePatterns.some(pattern => title.includes(pattern));
  });
@@ -171,7 +179,9 @@ export function parseTopIdeas(markdown = "", limit = 5) {
  'recommendation matrix', 'financial outlook', 'risk radar', 'customer persona',
  'validation questions', '30/60/90', 'roadmap', 'decision checklist',
  'startup costs', 'monthly operating', 'revenue potential', 'breakeven',
- 'primary', 'secondary', 'days', 'mitigation'
+ 'primary', 'secondary', 'days', 'mitigation',
+ 'core motivations', 'strengths and capabilities', 'strategic considerations',
+ 'operating constraints', 'viability red flags', 'pathway recommendation'
  ];
  return title.length < 100 && 
  title.length > 3 && 
@@ -193,19 +203,26 @@ export function parseTopIdeas(markdown = "", limit = 5) {
  if (matches.length === 0) {
  const lines = markdown.split(/\n/);
  const potentialTitles = [];
+ const profileSectionExclusions = [
+ 'core motivations', 'strengths and capabilities', 'strategic considerations',
+ 'operating constraints', 'viability red flags', 'pathway recommendation'
+ ];
  for (let i = 0; i < lines.length; i++) {
  const line = lines[i].trim();
+ const lineLower = line.toLowerCase();
  // Look for lines that:
  // - Start with capital letter
  // - Are between 10 and 80 characters
  // - Don't start with common markdown or list markers
  // - Are followed by content (not just standalone)
+ // - Are not profile analysis section headers
  if (
  line.length >= 10 &&
  line.length <= 80 &&
  /^[A-Z]/.test(line) &&
  !line.match(/^(#{1,6}|[-*+]|\d+\.)\s/) &&
  !line.match(/^(The|This|That|These|Those|And|Or|But)\s/i) &&
+ !profileSectionExclusions.some(pattern => lineLower.includes(pattern)) &&
  lines[i + 1] && lines[i + 1].trim().length > 20 // Has content after
  ) {
  potentialTitles.push({
@@ -238,7 +255,9 @@ export function parseTopIdeas(markdown = "", limit = 5) {
  const lower = trimmed.toLowerCase();
  const excludePatterns = [
  'recommendation matrix', 'financial outlook', 'risk radar', 'customer persona',
- 'validation questions', '30/60/90', 'roadmap', 'decision checklist'
+ 'validation questions', '30/60/90', 'roadmap', 'decision checklist',
+ 'core motivations', 'strengths and capabilities', 'strategic considerations',
+ 'operating constraints', 'viability red flags', 'pathway recommendation'
  ];
  return !excludePatterns.some(pattern => lower.includes(pattern));
  });
@@ -313,6 +332,8 @@ export function parseTopIdeas(markdown = "", limit = 5) {
  
  // Remove common section headers and prefixes from summary
  summary = summary
+ .replace(/^\*\*summary\*\*[:\s]*/i, "")
+ .replace(/^summary[:\s]*/i, "")
  .replace(/^why\s+it\s+fits\s+now[:\s]*/i, "")
  .replace(/^execution\s+path[:\s]*/i, "")
  .replace(/^[-*]\s*\*\*execution\s+path\*\*[:\s]*/i, "")
@@ -348,9 +369,15 @@ export function parseTopIdeas(markdown = "", limit = 5) {
  const num = parseInt(match[1], 10);
  const text = match[2].trim();
  // Skip if it's clearly not an idea (too short, or looks like a section header)
+ const textLower = text.toLowerCase();
+ const profileSectionPatterns = [
+ 'core motivations', 'strengths and capabilities', 'strategic considerations',
+ 'operating constraints', 'viability red flags', 'pathway recommendation'
+ ];
  if (text.length < 10 || 
  text.length > 200 ||
- text.toLowerCase().match(/^(recommendation|financial|risk|customer|validation|roadmap|decision|profile|matrix)/i)) {
+ textLower.match(/^(recommendation|financial|risk|customer|validation|roadmap|decision|profile|matrix)/i) ||
+ profileSectionPatterns.some(pattern => textLower.includes(pattern))) {
  continue;
  }
  // Extract title (remove bold markers, take first part)
@@ -377,6 +404,8 @@ export function parseTopIdeas(markdown = "", limit = 5) {
  // Clean summary - remove section headers and roadmap markers
  let cleanSummary = body.split(/[.!?]/)[0] || item.title;
  cleanSummary = cleanSummary
+ .replace(/^\*\*summary\*\*[:\s]*/i, "")
+ .replace(/^summary[:\s]*/i, "")
  .replace(/^execution\s+path[:\s]*/i, "")
  .replace(/^[-*]\s*\*\*execution\s+path\*\*[:\s]*/i, "")
  .replace(/^[-*]\s*execution\s+path[:\s]*/i, "")

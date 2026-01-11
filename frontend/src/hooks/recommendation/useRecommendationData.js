@@ -70,12 +70,19 @@ export function useRecommendationData(reports, inputs, loading, loadRunById, cur
       return cachedAllIdeas;
     }
 
-    // Priority 3: Try structured parser from reports
+    // Priority 3: Use recommendations_structured from backend (already parsed, most reliable)
+    const structuredFromBackend = stableReports?.recommendations_structured;
+    if (Array.isArray(structuredFromBackend) && structuredFromBackend.length > 0) {
+      return structuredFromBackend;
+    }
+
+    // Priority 4: Try structured parser from personalized_recommendations
     const raw = stableReports?.personalized_recommendations || "";
     const structuredParsed = parseStructuredIdeas(raw);
     if (structuredParsed && structuredParsed.length > 0) {
       return structuredParsed;
     }
+    
     // Fallback: markdown parser
     return parseStructuredIdeas(stage2Markdown, 10);
   }, [stage2Markdown, stableReports, cachedAllIdeas, cachedIdea]);
@@ -127,9 +134,10 @@ export function useRecommendationData(reports, inputs, loading, loadRunById, cur
 
   const currentActiveIdea = activeIdeaState || activeIdea;
 
-  // Parse sections
+  // Parse sections from body (prioritize activeIdeaState.body which includes enrichment)
   const sections = useMemo(() => {
-    const bodyToParse = currentActiveIdea?.body || "";
+    // Use activeIdeaState.body if available (includes enrichment), otherwise currentActiveIdea.body
+    const bodyToParse = activeIdeaState?.body || currentActiveIdea?.body || "";
 
     if (!currentActiveIdea || !bodyToParse || bodyToParse.trim().length === 0) {
       return {
@@ -152,14 +160,14 @@ export function useRecommendationData(reports, inputs, loading, loadRunById, cur
     }));
 
     return { merged, orderedSections };
-  }, [currentActiveIdea]);
+  }, [activeIdeaState, currentActiveIdea]);
 
   const parsedSections = useMemo(() => sections.merged || DEFAULT_SECTIONS, [sections]);
   const orderedSections = sections.orderedSections;
 
   // Back navigation state
   const runQuery = runId || currentRunId;
-  const backPath = runQuery ? `/results/recommendations?id=${runQuery}` : "/results/recommendations";
+  const backPath = runQuery ? `/dashboard/recommendations?id=${runQuery}` : "/dashboard/recommendations";
   const backState = stateData ? {
     recommendations: stateData.recommendations || contextReports,
     allIdeas: stateData.allIdeas || ideas,

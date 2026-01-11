@@ -13,15 +13,17 @@ export function useActionsAndNotes(ideaId, isValidIdeaId, isAuthenticated, getAu
 
   // Load actions and notes for this idea
   useEffect(() => {
+    // Always ensure actions and notes are arrays (never null/undefined)
     if (!isAuthenticated || !ideaId) {
-      if (!ideaId) {
-        setActions([]);
-        setNotes([]);
-      }
+      setActions([]);
+      setNotes([]);
       return;
     }
 
-    console.log("[useActionsAndNotes] Loading actions and notes for ideaId:", ideaId);
+    // Clear previous data immediately when ideaId changes
+    console.log("[useActionsAndNotes] Clearing and loading actions/notes for ideaId:", ideaId);
+    setActions([]);
+    setNotes([]);
 
     const loadActions = async () => {
       setLoadingActions(true);
@@ -215,9 +217,26 @@ export function useActionsAndNotes(ideaId, isValidIdeaId, isAuthenticated, getAu
     }
   }, [newNoteContent, ideaId, isValidIdeaId, getAuthHeaders]);
 
+  // Ensure actions and notes are always arrays (never null/undefined)
+  // AND filter to only show items for the current ideaId (safety check)
+  const safeActions = Array.isArray(actions) 
+    ? actions.filter(action => action.idea_id === ideaId)
+    : [];
+  const safeNotes = Array.isArray(notes) 
+    ? notes.filter(note => note.idea_id === ideaId)
+    : [];
+  
+  console.log("[useActionsAndNotes] Returning filtered data:", {
+    ideaId,
+    actionsCount: safeActions.length,
+    notesCount: safeNotes.length,
+    allActionsCount: actions.length,
+    allNotesCount: notes.length
+  });
+  
   return {
-    actions,
-    notes,
+    actions: safeActions,
+    notes: safeNotes,
     loadingActions,
     loadingNotes,
     newActionText,

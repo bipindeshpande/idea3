@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import UIHeading from "../../components/ui/ui-heading.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../../components/workspace/WorkspaceTheme.js";
 
 const TIME_FILTERS = [
  { id: "all", label: "All time", days: null },
@@ -160,8 +161,8 @@ export default function RunHistoryPage() {
  <div className="space-y-6">
 
  <div className="grid gap-3 md:grid-cols-3">
- <div>
- <label className="text-xs font-semibold text-secondary">Interest Area</label>
+  <div>
+   <label className={WORKSPACE_TYPOGRAPHY.labelSmall}>Interest Area</label>
  <select
   className="ui-select mt-1 focus-visible:outline-accent"
  value={interestFilter}
@@ -172,9 +173,9 @@ export default function RunHistoryPage() {
  <option key={opt} value={opt}>{opt}</option>
  ))}
  </select>
- </div>
- <div>
- <label className="text-xs font-semibold text-secondary">Time</label>
+  </div>
+  <div>
+   <label className={WORKSPACE_TYPOGRAPHY.labelSmall}>Time</label>
  <select
   className="ui-select mt-1 focus-visible:outline-accent"
  value={timeFilter}
@@ -184,9 +185,9 @@ export default function RunHistoryPage() {
  <option key={f.id} value={f.id}>{f.label}</option>
  ))}
  </select>
- </div>
- <div>
- <label className="text-xs font-semibold text-secondary">Sort</label>
+  </div>
+  <div>
+   <label className={WORKSPACE_TYPOGRAPHY.labelSmall}>Sort</label>
  <select
   className="ui-select mt-1 focus-visible:outline-accent"
  value={sortOption}
@@ -200,13 +201,13 @@ export default function RunHistoryPage() {
  </div>
 
  {loading ? (
- <p className="text-sm text-secondary">Loading runs...</p>
+  <p className={WORKSPACE_TYPOGRAPHY.subtitle}>Loading runs...</p>
  ) : error ? (
- <p className="text-sm text-accent">{error}</p>
+  <p className={WORKSPACE_TYPOGRAPHY.subtitle + " text-accent"}>{error}</p>
  ) : (
   <div className="ui-card overflow-hidden rounded-[16px] shadow-card">
- <table className="min-w-full text-sm">
-  <thead className="bg-surface-muted text-xs uppercase text-secondary">
+   <table className={"min-w-full " + WORKSPACE_TYPOGRAPHY.bodySmall.replace("text-primary", "")}>
+    <thead className={"bg-surface-muted " + WORKSPACE_TYPOGRAPHY.statLabel}>
  <tr>
  <th className="px-3 py-2 text-left">Run ID</th>
  <th className="px-3 py-2 text-left">Created</th>
@@ -216,89 +217,89 @@ export default function RunHistoryPage() {
  <th className="px-3 py-2 text-left"></th>
  </tr>
  </thead>
- <tbody>
- {(filteredRuns || []).map((run) => (
-  <tr key={run.run_id} className="border-t border-default hover:bg-surface-hover">
- <td className="px-3 py-2 font-mono text-xs">{run.run_id}</td>
- <td className="px-3 py-2">{run.created_at ? new Date(run.created_at).toLocaleString() : "n/a"}</td>
- <td className="px-3 py-2">{formatDurationMs(durationMs(run))}</td>
- <td className="px-3 py-2 capitalize">{run.status || "unknown"}</td>
- <td className="px-3 py-2">{run.inputs?.interest_area || "—"}</td>
- <td className="px-3 py-2 flex gap-2">
- <button
- className="text-accent hover:underline text-xs"
- onClick={() => handleSelectRun(run.run_id)}
- >
- View
- </button>
- <button
- className="text-accent hover:underline text-xs"
- onClick={() => handleRerun(run)}
- >
- Re-run
- </button>
- </td>
- </tr>
- ))}
- {filteredRuns.length === 0 && (
- <tr>
- <td className="px-3 py-4 text-center text-secondary" colSpan={6}>No runs found.</td>
- </tr>
- )}
- </tbody>
+     <tbody>
+      {(filteredRuns || []).map((run) => (
+       <tr key={run.run_id} className="border-t border-default hover:bg-surface-hover">
+        <td className={"px-3 py-2 font-mono " + WORKSPACE_TYPOGRAPHY.caption}>{run.run_id}</td>
+        <td className={"px-3 py-2 " + WORKSPACE_TYPOGRAPHY.bodySmall}>{run.created_at ? new Date(run.created_at).toLocaleString() : "n/a"}</td>
+        <td className={"px-3 py-2 " + WORKSPACE_TYPOGRAPHY.bodySmall}>{formatDurationMs(durationMs(run))}</td>
+        <td className={"px-3 py-2 capitalize " + WORKSPACE_TYPOGRAPHY.bodySmall}>{run.status || "unknown"}</td>
+        <td className={"px-3 py-2 " + WORKSPACE_TYPOGRAPHY.bodySmall}>{run.inputs?.interest_area || "—"}</td>
+        <td className="px-3 py-2 flex gap-2">
+         <button
+          className={"text-accent hover:underline " + WORKSPACE_TYPOGRAPHY.caption}
+          onClick={() => handleSelectRun(run.run_id)}
+         >
+          View
+         </button>
+         <button
+          className={"text-accent hover:underline " + WORKSPACE_TYPOGRAPHY.caption}
+          onClick={() => handleRerun(run)}
+         >
+          Re-run
+         </button>
+        </td>
+       </tr>
+      ))}
+      {filteredRuns.length === 0 && (
+       <tr>
+        <td className={"px-3 py-4 text-center " + WORKSPACE_TYPOGRAPHY.subtitle} colSpan={6}>No runs found.</td>
+       </tr>
+      )}
+     </tbody>
  </table>
  </div>
  )}
 
  {selectedRun && (
- <div className="rounded-xl border border-default bg-surface p-4 shadow space-y-3">
- <div className="flex items-center justify-between">
- <UIHeading level="h2" className="text-primary">Run Details</UIHeading>
- {detailLoading && <span className="text-xs text-secondary">Loading...</span>}
- </div>
- <div className="grid gap-2 text-sm">
- <div><strong>Run ID:</strong> {selectedRun.run_id}</div>
- <div><strong>Status:</strong> {selectedRun.status || "unknown"}{selectedRun.cached ? " (cached)" : ""}</div>
- <div><strong>Created:</strong> {selectedRun.created_at ? new Date(selectedRun.created_at).toLocaleString() : "n/a"}</div>
- <div><strong>Completed:</strong> {selectedRun.completed_at ? new Date(selectedRun.completed_at).toLocaleString() : "n/a"}</div>
- <div><strong>Duration:</strong> {formatDurationMs(durationMs(selectedRun))}</div>
- <div><strong>Interest:</strong> {selectedRun.inputs?.interest_area || "—"}</div>
- </div>
- <div className="grid gap-2 text-sm">
- <div>
- <strong>Profile Analysis</strong>
- <div className="mt-1 whitespace-pre-wrap rounded border border-default bg-app p-2 text-xs">
- {selectedRun.reports?.profile_analysis || selectedRun.profile_analysis || "No data"}
- </div>
- </div>
- <div>
- <strong>Recommendations</strong>
- <div className="mt-1 whitespace-pre-wrap rounded border border-default bg-app p-2 text-xs">
- {selectedRun.reports?.personalized_recommendations || selectedRun.personalized_recommendations || "No data"}
- </div>
- </div>
- <div>
- <strong>Static Blocks Used</strong>
- <div className="mt-1 whitespace-pre-wrap rounded border border-default bg-app p-2 text-xs">
- {selectedRun.reports?.startup_ideas_research || "No data"}
- </div>
- </div>
- <div>
- <strong>Token Usage</strong>
- <div className="mt-1 text-xs text-primary">
- {selectedRun.reports?.usage ? (
- <ul className="list-disc pl-4">
- <li>Prompt tokens: {selectedRun.reports.usage.prompt_tokens ?? "n/a"}</li>
- <li>Completion tokens: {selectedRun.reports.usage.completion_tokens ?? "n/a"}</li>
- <li>Total tokens: {selectedRun.reports.usage.total_tokens ?? "n/a"}</li>
- </ul>
- ) : (
- "No usage data"
- )}
- </div>
- </div>
- </div>
- </div>
+  <div className="rounded-xl border border-default bg-surface p-4 shadow space-y-3">
+   <div className="flex items-center justify-between">
+    <UIHeading level="h2" className="text-primary">Run Details</UIHeading>
+    {detailLoading && <span className={WORKSPACE_TYPOGRAPHY.caption}>Loading...</span>}
+   </div>
+   <div className={"grid gap-2 " + WORKSPACE_TYPOGRAPHY.bodySmall}>
+    <div><strong>Run ID:</strong> {selectedRun.run_id}</div>
+    <div><strong>Status:</strong> {selectedRun.status || "unknown"}{selectedRun.cached ? " (cached)" : ""}</div>
+    <div><strong>Created:</strong> {selectedRun.created_at ? new Date(selectedRun.created_at).toLocaleString() : "n/a"}</div>
+    <div><strong>Completed:</strong> {selectedRun.completed_at ? new Date(selectedRun.completed_at).toLocaleString() : "n/a"}</div>
+    <div><strong>Duration:</strong> {formatDurationMs(durationMs(selectedRun))}</div>
+    <div><strong>Interest:</strong> {selectedRun.inputs?.interest_area || "—"}</div>
+   </div>
+   <div className={"grid gap-2 " + WORKSPACE_TYPOGRAPHY.bodySmall}>
+    <div>
+     <strong>Profile Analysis</strong>
+     <div className={"mt-1 whitespace-pre-wrap rounded border border-default bg-app p-2 " + WORKSPACE_TYPOGRAPHY.caption}>
+      {selectedRun.reports?.profile_analysis || selectedRun.profile_analysis || "No data"}
+     </div>
+    </div>
+    <div>
+     <strong>Recommendations</strong>
+     <div className={"mt-1 whitespace-pre-wrap rounded border border-default bg-app p-2 " + WORKSPACE_TYPOGRAPHY.caption}>
+      {selectedRun.reports?.personalized_recommendations || selectedRun.personalized_recommendations || "No data"}
+     </div>
+    </div>
+    <div>
+     <strong>Static Blocks Used</strong>
+     <div className={"mt-1 whitespace-pre-wrap rounded border border-default bg-app p-2 " + WORKSPACE_TYPOGRAPHY.caption}>
+      {selectedRun.reports?.startup_ideas_research || "No data"}
+     </div>
+    </div>
+    <div>
+     <strong>Token Usage</strong>
+     <div className={"mt-1 " + WORKSPACE_TYPOGRAPHY.caption.replace("text-secondary", "text-primary")}>
+      {selectedRun.reports?.usage ? (
+       <ul className="list-disc pl-4">
+        <li>Prompt tokens: {selectedRun.reports.usage.prompt_tokens ?? "n/a"}</li>
+        <li>Completion tokens: {selectedRun.reports.usage.completion_tokens ?? "n/a"}</li>
+        <li>Total tokens: {selectedRun.reports.usage.total_tokens ?? "n/a"}</li>
+       </ul>
+      ) : (
+       "No usage data"
+      )}
+     </div>
+    </div>
+   </div>
+  </div>
  )}
  </div>
  );

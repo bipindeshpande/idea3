@@ -24,7 +24,6 @@ const productLinks = [
 
 const resourceLinks = [
   { label: "Templates", to: "/resources/templates" },
-  { label: "Validation Frameworks", to: "/resources/templates" },
   { label: "Blog", to: "/blog" },
 ];
 

@@ -107,13 +107,20 @@ class ValidationPromptBuilder:
             prompt_parts.append("")
         
         # Add user profile
+        # Filter out constraint-related fields to avoid duplication with User Constraints section
+        # Only show profile analysis fields: core_motivations, operating_constraints, strengths_and_capabilities, etc.
         if user_profile:
             prompt_parts.append("**User Profile:**")
             if isinstance(user_profile, dict):
-                for key, value in user_profile.items():
-                    if value:
+                # Only include known profile analysis fields, excluding constraint fields
+                profile_fields = [
+                    "core_motivations", "operating_constraints", "strengths_and_capabilities",
+                    "strategic_considerations", "viability_red_flags", "pathway_recommendation"
+                ]
+                for key in profile_fields:
+                    if key in user_profile and user_profile[key]:
                         key_name = key.replace("_", " ").title()
-                        prompt_parts.append(f"- {key_name}: {value}")
+                        prompt_parts.append(f"- {key_name}: {user_profile[key]}")
             elif isinstance(user_profile, str):
                 prompt_parts.append(user_profile[:1000])
             prompt_parts.append("")

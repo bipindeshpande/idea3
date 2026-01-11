@@ -51,6 +51,25 @@ export function splitIdeaSections(body = "") {
   console.log("splitIdeaSections: First 500 chars:", body.substring(0, 500));
   logToFile(parseInfo, "INFO", "splitIdeaSections");
   
+  // Check if body contains section headers (enriched content) vs basic details (no headers)
+  // Basic details format: **Summary:**, **Target Market:**, **Revenue Model:**, etc.
+  // Enriched content format: ### Market Opportunity, ### Key Risks & Mitigations, etc.
+  const hasSectionHeaders = /^###\s+(Market Opportunity|Key Risks|Immediate Experiments|Timeline & Effort|Decision Checklist|Additional Insights|Financial Snapshot|Execution Path|Customer Persona|Validation Questions)/im.test(body);
+  const hasBasicDetailsFormat = /^\*\*Summary:\*\*|\*\*Target Market:\*\*|\*\*Revenue Model:\*\*/m.test(body);
+  
+  // If body contains basic details format but no section headers, don't try to parse sections
+  // This is from details_markdown (basic idea info), not enriched content
+  if (hasBasicDetailsFormat && !hasSectionHeaders) {
+    const msg = "splitIdeaSections: Body contains basic details format (Summary, Target Market, etc.) but no section headers. This is not enriched content - skipping section parsing.";
+    console.log(msg);
+    logToFile(msg, "INFO", "splitIdeaSections");
+    
+    const emptyResult = {};
+    const parseResult = `Body is basic details (not enriched), no sections to parse. Returning empty result.`;
+    logSectionToFile("splitIdeaSections - PARSED RESULT", parseResult, "INFO", "splitIdeaSections");
+    return emptyResult; // Return empty object - no sections to parse from basic details
+  }
+  
   const sections = {};
   let current = null;
   const lines = body.split(/\r?\n/);

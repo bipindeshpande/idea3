@@ -1,7 +1,8 @@
-import { createContext, useCallback, useContext, useMemo, useState, useEffect } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { runDiscovery } from "../utils/discovery.js";
 import { splitProfileAndRecommendations } from "../utils/parsers/index.js";
+import { parseJSONLinesStream } from "../utils/parsers/streamParsers/parseJSONLines.js";
 import { normalizeRunId } from "../utils/runs.js";
 import apiClient, { ApiError } from "../utils/apiClient.js";
 
@@ -116,6 +117,8 @@ export function ReportsProvider({ children }) {
  const [requestDuration, setRequestDuration] = useState(null);
  // Enrichment cache: Map<ideaId, enrichmentBody>
  const [enrichmentCache, setEnrichmentCache] = useState(new Map());
+ // Abort controller ref for cancelling requests
+ const abortControllerRef = useRef(null);
 
  const setInputs = useCallback((nextInputs) => {
  setInputsState(normalizeInputs(nextInputs));
@@ -142,6 +145,10 @@ export function ReportsProvider({ children }) {
  const startTime = performance.now();
  setRequestStartTime(startTime);
 
+ // Create abort controller for request cancellation
+ const controller = new AbortController();
+ abortControllerRef.current = controller;
+
  let isCached = false;
  let actualRunId = null;
 
@@ -154,7 +161,7 @@ export function ReportsProvider({ children }) {
  setStreamingOutput((prev) => prev + chunk);
  },
  // onComplete - called when streaming finishes with metadata
- (result) => {
+ async (result) => {
  // Calculate duration when request completes
  const endTime = performance.now();
  const duration = endTime - startTime;
@@ -166,15 +173,193 @@ export function ReportsProvider({ children }) {
  setIsCached(isCached); // Update cache state
  
  // Parse the streamed text into structured outputs
- // Follows SSE contract: profile analysis, then separator (---PROFILE_END---), then recommendations
+ // Try structured JSON lines format first, fallback to old delimiter format
  let fullData = result.fullData || "";
+ let profileAnalysis = "";
+ let recommendations = "";
  
- // Guard: Only parse when both profile markers are present
- const PROFILE_START = "---PROFILE_ANALYSIS_START---";
- const PROFILE_END = "---PROFILE_ANALYSIS_END---";
+        // Parse the streamed text into structured outputs
+        // Priority order: 1) Accumulator from discovery, 2) Parse JSON lines from fullData, 3) Fallback to old format
+        
+        // Ensure result exists before accessing properties
+        let accumulator = result && result.accumulator ? result.accumulator : null;
+        
+        // Priority 1: Use accumulator from discovery if available (already parsed during streaming)
+        if (accumulator && typeof accumulator.getProfile === 'function' && typeof accumulator.getRecommendations === 'function') {
+          profileAnalysis = accumulator.getProfile() || "";
+          recommendations = accumulator.getRecommendations() || "";
+          
+          if (typeof accumulator.hasErrors === 'function' && accumulator.hasErrors()) {
+            console.warn("WARNING: JSON lines parsing had errors:", accumulator.errors);
+          }
+          
+          // If we have parsed data, use it directly
+          if (profileAnalysis || recommendations) {
+            const run = {
+              id: actualRunId,
+              timestamp: Date.now(),
+              inputs: payload,
+              outputs: {
+                profile_analysis: profileAnalysis,
+                personalized_recommendations: recommendations,
+                streaming_output: fullData,
+              },
+              cached: isCached,
+            };
+            
+            saveRun(run);
+            setCurrentRunId(run.id);
+            setReports(run.outputs);
+            setLoading(false);
+            resolve({ 
+              success: true, 
+              runId: run.id,
+              cached: isCached
+            });
+            return;
+          }
+        }
+        
+        // Priority 2: Try parsing as structured JSON lines format from fullData
+        if (fullData) {
+          const jsonLinesResult = parseJSONLinesStream(fullData);
+          if (jsonLinesResult.profileAnalysis || jsonLinesResult.recommendations) {
+            // Successfully parsed as JSON lines format
+            profileAnalysis = jsonLinesResult.profileAnalysis || "";
+            recommendations = jsonLinesResult.recommendations || "";
+            
+            // Check if parsing is complete
+            if (jsonLinesResult.hasErrors) {
+              console.warn("WARNING: JSON lines parsing had errors:", jsonLinesResult.errors);
+            }
+            
+            // If we have parsed data, use it directly
+            if (profileAnalysis || recommendations) {
+              const run = {
+                id: actualRunId,
+                timestamp: Date.now(),
+                inputs: payload,
+                outputs: {
+                  profile_analysis: profileAnalysis,
+                  personalized_recommendations: recommendations,
+                  streaming_output: fullData,
+                },
+                cached: isCached,
+              };
+              
+              saveRun(run);
+              setCurrentRunId(run.id);
+              setReports(run.outputs);
+              setLoading(false);
+              resolve({ 
+                success: true, 
+                runId: run.id,
+                cached: isCached
+              });
+              return;
+            }
+          }
+        }
  
- if (!fullData.includes(PROFILE_START) || !fullData.includes(PROFILE_END)) {
- // Profile markers not complete yet - don't parse, don't update UI state
+ // Fallback to old delimiter format parsing
+ // Check if we have the separator token (---PROFILE_END---) which indicates profile section
+ const PROFILE_SEPARATOR = "---PROFILE_END---";
+ 
+ // If we don't have the separator and JSON lines parsing failed, try loading from API
+ if (!fullData.includes(PROFILE_SEPARATOR)) {
+ // No separator found - try loading from API
+ if (actualRunId) {
+ try {
+ // Remove 'run_' prefix if present
+ const apiRunId = actualRunId.startsWith('run_') ? actualRunId.substring(4) : actualRunId;
+ const response = await apiClient.get(`/user/run/${encodeURIComponent(apiRunId)}`);
+ 
+ if (response.success && response.run) {
+ // Parse reports if it's a string
+ const reports = typeof response.run.reports === 'string' 
+ ? JSON.parse(response.run.reports) 
+ : (response.run.reports || {});
+ 
+ // Use profile from API
+ const profileFromApi = response.run.profile_analysis || reports.profile_analysis || "";
+ const recommendationsFromApi = response.run.personalized_recommendations || reports.personalized_recommendations || "";
+ 
+ const run = {
+ id: actualRunId,
+ timestamp: Date.now(),
+ inputs: payload,
+ outputs: {
+ profile_analysis: profileFromApi,
+ personalized_recommendations: recommendationsFromApi,
+ streaming_output: fullData,
+ },
+ cached: isCached,
+ };
+ 
+ saveRun(run);
+ setCurrentRunId(run.id);
+ setReports(run.outputs);
+ setLoading(false);
+ resolve({ 
+ success: true, 
+ runId: run.id,
+ cached: isCached
+ });
+ return;
+ }
+ } catch (apiError) {
+ console.error("Failed to load run from API:", apiError);
+ // Continue to fallback behavior below
+ }
+ }
+ 
+ // No separator found in streamed data - try loading from API one more time
+ if (actualRunId) {
+ try {
+ // Remove 'run_' prefix if present
+ const apiRunId = actualRunId.startsWith('run_') ? actualRunId.substring(4) : actualRunId;
+ const response = await apiClient.get(`/user/run/${encodeURIComponent(apiRunId)}`);
+ 
+ if (response.success && response.run) {
+ // Parse reports if it's a string
+ const reports = typeof response.run.reports === 'string' 
+ ? JSON.parse(response.run.reports) 
+ : (response.run.reports || {});
+ 
+ const profileFromApi = response.run.profile_analysis || reports.profile_analysis || "";
+ const recommendationsFromApi = response.run.personalized_recommendations || reports.personalized_recommendations || "";
+ 
+ if (profileFromApi || recommendationsFromApi) {
+ const run = {
+ id: actualRunId,
+ timestamp: Date.now(),
+ inputs: payload,
+ outputs: {
+ profile_analysis: profileFromApi,
+ personalized_recommendations: recommendationsFromApi,
+ streaming_output: fullData,
+ },
+ cached: isCached,
+ };
+ 
+ saveRun(run);
+ setCurrentRunId(run.id);
+ setReports(run.outputs);
+ setLoading(false);
+ resolve({ 
+ success: true, 
+ runId: run.id,
+ cached: isCached
+ });
+ return;
+ }
+ }
+ } catch (apiError) {
+ console.error("Failed to load run from API (final attempt):", apiError);
+ }
+ }
+ 
+ // No separator found and API load failed - can't parse, don't update UI state
  setLoading(false);
  resolve({ 
  success: true, 
@@ -184,9 +369,11 @@ export function ReportsProvider({ children }) {
  return;
  }
  
- // Use contract-compliant parser to split profile and recommendations
- const { profileAnalysis, recommendations } = splitProfileAndRecommendations(fullData);
- 
+ // Use contract-compliant parser to split profile and recommendations (fallback for old format)
+ const splitResult = splitProfileAndRecommendations(fullData);
+ profileAnalysis = splitResult.profileAnalysis || profileAnalysis;
+ recommendations = splitResult.recommendations || recommendations;
+
  // Debug logging in development
  if (process.env.NODE_ENV === 'development') {
  const SPLIT_TOKEN = "\n\n---PROFILE_END---\n\n";
@@ -201,19 +388,57 @@ export function ReportsProvider({ children }) {
  recommendationsPreview: recommendations.substring(0, 200),
  });
  }
+
+ // If profile analysis is empty or too short, try loading from API as fallback
+ let finalProfileAnalysis = profileAnalysis;
+ let finalRecommendations = recommendations;
+
+ if ((!finalProfileAnalysis || finalProfileAnalysis.trim().length < 50) && actualRunId) {
+ try {
+ // Remove 'run_' prefix if present
+ const apiRunId = actualRunId.startsWith('run_') ? actualRunId.substring(4) : actualRunId;
+ const response = await apiClient.get(`/user/run/${encodeURIComponent(apiRunId)}`);
  
+ if (response.success && response.run) {
+ // Parse reports if it's a string
+ const reports = typeof response.run.reports === 'string' 
+ ? JSON.parse(response.run.reports) 
+ : (response.run.reports || {});
+ 
+ // Use API data if streamed data is incomplete
+ if (response.run.profile_analysis && response.run.profile_analysis.trim().length > finalProfileAnalysis.length) {
+ finalProfileAnalysis = response.run.profile_analysis;
+ }
+ if (response.run.personalized_recommendations && response.run.personalized_recommendations.trim().length > finalRecommendations.length) {
+ finalRecommendations = response.run.personalized_recommendations;
+ }
+ 
+ // Also try reports object
+ if (reports.profile_analysis && reports.profile_analysis.trim().length > finalProfileAnalysis.length) {
+ finalProfileAnalysis = reports.profile_analysis;
+ }
+ if (reports.personalized_recommendations && reports.personalized_recommendations.trim().length > finalRecommendations.length) {
+ finalRecommendations = reports.personalized_recommendations;
+ }
+ }
+ } catch (apiError) {
+ console.error("Failed to load run from API as fallback:", apiError);
+ // Continue with streamed data
+ }
+ }
+
  const run = {
  id: actualRunId || Date.now().toString(),
  timestamp: Date.now(),
  inputs: payload,
  outputs: {
- profile_analysis: profileAnalysis,
- personalized_recommendations: recommendations,
+ profile_analysis: finalProfileAnalysis,
+ personalized_recommendations: finalRecommendations,
  streaming_output: fullData, // Keep full output for reference
  },
  cached: isCached,
  };
- 
+
  saveRun(run);
  setCurrentRunId(run.id);
  setReports(run.outputs);
@@ -260,7 +485,8 @@ export function ReportsProvider({ children }) {
  // options
  {
  timeout: 300000, // 5 minutes
- useSSE: true
+ useSSE: true,
+ signal: controller.signal
  }
  ).catch((err) => {
  setError(err.message || "Unexpected error");
@@ -276,23 +502,30 @@ export function ReportsProvider({ children }) {
  const loadRunById = useCallback(async (runId) => {
  if (!runId) return null;
  
- // First try localStorage
+ // First try localStorage - if data exists there, use it immediately (don't call API)
  const runs = loadSavedRuns();
  const match = runs.find((run) => run.id === runId);
- if (match) {
+ if (match && match.outputs && (match.outputs.profile_analysis || match.outputs.personalized_recommendations)) {
+ // Found complete data in localStorage - use it without API call
  setCurrentRunId(match.id);
  setInputsState(normalizeInputs(match.inputs || {}));
  setReports(match.outputs || {});
  return match;
  }
  
- // If not found in localStorage, try API
+ // If not found in localStorage or data is incomplete, try API
+ // But use skipAuthRedirect to prevent immediate logout on 401/403
  // The API endpoint handles both "run_123" and "123" formats
  try {
  setLoading(true);
  // Remove 'run_' prefix if present, API will handle normalization
  const apiRunId = runId.startsWith('run_') ? runId.substring(4) : runId;
- const data = await apiClient.get(`/user/run/${encodeURIComponent(apiRunId)}`);
+ 
+ // Use skipAuthRedirect=true to handle auth errors gracefully
+ // This prevents immediate redirect to login if token expired or run doesn't belong to user
+ const data = await apiClient.get(`/user/run/${encodeURIComponent(apiRunId)}`, {
+ skipAuthRedirect: true // Don't redirect to login immediately on 401/403
+ });
  
  if (data.success && data.run) {
  setCurrentRunId(data.run.run_id);
@@ -302,7 +535,29 @@ export function ReportsProvider({ children }) {
  const reports = typeof data.run.reports === 'string' 
  ? JSON.parse(data.run.reports) 
  : (data.run.reports || {});
-
+ 
+ // Log what we received from API
+ if (process.env.NODE_ENV === 'development') {
+ console.log("[loadRunById] API response data:", {
+ run_id: data.run.run_id,
+ hasReports: !!data.run.reports,
+ reportsKeys: Object.keys(reports),
+ hasRecommendationsStructured: !!reports.recommendations_structured,
+ recommendationsStructuredCount: Array.isArray(reports.recommendations_structured) ? reports.recommendations_structured.length : "not an array",
+ hasPersonalizedRecommendations: !!data.run.personalized_recommendations,
+ personalizedRecommendationsLength: data.run.personalized_recommendations ? data.run.personalized_recommendations.length : 0,
+ hasProfileAnalysis: !!data.run.profile_analysis,
+ profileAnalysisLength: data.run.profile_analysis ? data.run.profile_analysis.length : 0
+ });
+ if (data.run.personalized_recommendations) {
+ const preview = data.run.personalized_recommendations.substring(0, 300);
+ console.log("[loadRunById] personalized_recommendations preview:", preview);
+ }
+ if (reports.recommendations_structured && Array.isArray(reports.recommendations_structured) && reports.recommendations_structured.length > 0) {
+ console.log("[loadRunById] First structured recommendation:", reports.recommendations_structured[0]);
+ }
+ }
+ 
  // Ensure reports structure includes outputs format expected by frontend
  const formattedReports = {
  profile_analysis: data.run.profile_analysis || reports.profile_analysis || "",
@@ -310,28 +565,80 @@ export function ReportsProvider({ children }) {
  recommendations_structured: reports.recommendations_structured || null, // Include structured recommendations if available
  ...reports // Include any other report fields
  };
-
+ 
+ // Log formatted reports
+ if (process.env.NODE_ENV === 'development') {
+ console.log("[loadRunById] Formatted reports:", {
+ hasProfileAnalysis: !!formattedReports.profile_analysis,
+ profileAnalysisLength: formattedReports.profile_analysis ? formattedReports.profile_analysis.length : 0,
+ hasPersonalizedRecommendations: !!formattedReports.personalized_recommendations,
+ personalizedRecommendationsLength: formattedReports.personalized_recommendations ? formattedReports.personalized_recommendations.length : 0,
+ hasRecommendationsStructured: !!formattedReports.recommendations_structured,
+ recommendationsStructuredCount: Array.isArray(formattedReports.recommendations_structured) ? formattedReports.recommendations_structured.length : "not an array"
+ });
+ }
+ 
  setReports(formattedReports);
+ 
+ // Also save to localStorage for future use
+ const runToSave = {
+ id: data.run.run_id,
+ timestamp: Date.now(),
+ inputs: data.run.inputs || {},
+ outputs: formattedReports,
+ from_api: true,
+ };
+ saveRun(runToSave);
+ 
+ return {
+ id: data.run.run_id,
+ inputs: data.run.inputs || {},
+ outputs: formattedReports, // Use formattedReports instead of data.run.reports
+ reports: formattedReports, // Also include as reports for consistency
+ profile_analysis: data.run.profile_analysis || reports.profile_analysis || "",
+ personalized_recommendations: data.run.personalized_recommendations || reports.personalized_recommendations || "",
+ from_api: true,
+ };
  } catch (e) {
  console.error("Failed to parse reports:", e);
  setReports({});
  }
- return {
- id: data.run.run_id,
- inputs: data.run.inputs || {},
- outputs: data.run.reports || {},
- from_api: true,
- };
  }
  } catch (error) {
- // Re-throw 401 errors so ProtectedRoute can handle them
- if (error instanceof ApiError && error.status === 401) {
+ // Handle 401/403 errors gracefully - don't throw or redirect
+ // If API fails, try to use localStorage data as fallback (even if incomplete)
+ if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+ console.warn(`Cannot load run ${runId} from API (status ${error.status}). ${error.status === 401 ? 'Authentication may have expired.' : 'Run may not belong to current user.'} Trying localStorage fallback...`);
+ 
+ // Try localStorage again as fallback (maybe data was added since first check)
+ const runs = loadSavedRuns();
+ const fallbackMatch = runs.find((run) => run.id === runId);
+ if (fallbackMatch && fallbackMatch.outputs) {
+ console.log(`Using localStorage data as fallback for run ${runId}`);
+ setCurrentRunId(fallbackMatch.id);
+ setInputsState(normalizeInputs(fallbackMatch.inputs || {}));
+ setReports(fallbackMatch.outputs || {});
  setLoading(false);
- const authError = new Error("Authentication required");
- authError.status = 401;
- throw authError;
+ return fallbackMatch;
  }
+ 
+ // If no localStorage fallback and 401 (not 403), user should re-authenticate
+ // But don't throw - let the component handle the empty state gracefully
+ if (error.status === 401) {
+ console.warn("Authentication required. User should be redirected to login by ProtectedRoute.");
+ // Don't throw - let the ProtectedRoute component handle the redirect
+ // This prevents double-redirects
+ } else {
+ // For 403 (authorization), just log and return null
+ console.warn(`Access denied to run ${runId}. User may not have permission.`);
+ }
+ setLoading(false);
+ return null;
+ }
+ 
  console.error("Failed to load run from API:", error);
+ setLoading(false);
+ return null;
  } finally {
  setLoading(false);
  }
@@ -432,21 +739,70 @@ export function ReportsProvider({ children }) {
  return null;
  }, []);
 
- // Get enrichment from cache
+ // Get enrichment from cache (memory + localStorage)
  const getEnrichment = useCallback((ideaId) => {
  if (!ideaId) return null;
- return enrichmentCache.get(ideaId) || null;
+ 
+ // Check memory cache first
+ const memoryCache = enrichmentCache.get(ideaId);
+ if (memoryCache) {
+   console.log(`[EnrichmentCache] Found in memory for ${ideaId}`);
+   return memoryCache;
+ }
+ 
+ // Check localStorage as fallback
+ try {
+   const stored = localStorage.getItem(`enrichment_${ideaId}`);
+   if (stored) {
+     console.log(`[EnrichmentCache] Found in localStorage for ${ideaId}`);
+     const parsed = JSON.parse(stored);
+     // Also restore to memory cache
+     setEnrichmentCache(prev => {
+       const next = new Map(prev);
+       next.set(ideaId, parsed.body);
+       return next;
+     });
+     return parsed.body;
+   }
+ } catch (e) {
+   console.error('[EnrichmentCache] Error reading from localStorage:', e);
+ }
+ 
+ return null;
  }, [enrichmentCache]);
 
- // Set enrichment in cache
+ // Set enrichment in cache (memory + localStorage)
  const setEnrichment = useCallback((ideaId, enrichmentBody) => {
  if (!ideaId || !enrichmentBody) return;
+ 
+ // Store in memory
  setEnrichmentCache(prev => {
- const next = new Map(prev);
- next.set(ideaId, enrichmentBody);
- console.log(`[EnrichmentCache] Stored enrichment for ${ideaId}, cache size: ${next.size}`);
- return next;
+   const next = new Map(prev);
+   next.set(ideaId, enrichmentBody);
+   console.log(`[EnrichmentCache] Stored enrichment for ${ideaId}, cache size: ${next.size}`);
+   return next;
  });
+ 
+ // Also persist to localStorage
+ try {
+   localStorage.setItem(`enrichment_${ideaId}`, JSON.stringify({
+     body: enrichmentBody,
+     timestamp: Date.now()
+   }));
+   console.log(`[EnrichmentCache] Persisted to localStorage for ${ideaId}`);
+ } catch (e) {
+   console.error('[EnrichmentCache] Error writing to localStorage:', e);
+ }
+ }, []);
+
+ // Cancel the current discovery request
+ const cancelRequest = useCallback(() => {
+  if (abortControllerRef.current) {
+   abortControllerRef.current.abort();
+   abortControllerRef.current = null;
+   setLoading(false);
+   setError("Request cancelled by user");
+  }
  }, []);
 
  // Log runs count on mount and when runs change (for debugging)
@@ -482,9 +838,10 @@ export function ReportsProvider({ children }) {
  requestStartTime,
  requestDuration,
  getEnrichment,
- setEnrichment
+ setEnrichment,
+ cancelRequest
  }),
- [inputs, reports, loading, error, runCrew, loadRunById, currentRunId, deleteRun, clearAllSavedRuns, loadFromRecentDiscoveryCache, setInputs, streamingOutput, isCached, requestStartTime, requestDuration, getEnrichment, setEnrichment]
+ [inputs, reports, loading, error, runCrew, loadRunById, currentRunId, deleteRun, clearAllSavedRuns, loadFromRecentDiscoveryCache, setInputs, streamingOutput, isCached, requestStartTime, requestDuration, getEnrichment, setEnrichment, cancelRequest]
  );
 
  return (

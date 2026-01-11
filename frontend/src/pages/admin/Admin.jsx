@@ -9,7 +9,6 @@ import AdminStats from "../../components/admin/AdminStats.jsx";
 import UsersManagement from "../../components/admin/UsersManagement.jsx";
 import PaymentsManagement from "../../components/admin/PaymentsManagement.jsx";
 import ValidationQuestionsEditor from "../../components/admin/ValidationQuestionsEditor.jsx";
-import IntakeFieldsEditor from "../../components/admin/IntakeFieldsEditor.jsx";
 import { ADMIN_STORAGE_KEY, verifyAdminSession, clearAdminAuth } from "../../utils/admin.js";
 
 export default function Admin() {
@@ -85,7 +84,6 @@ export default function Admin() {
       {activeTab === "users" && <UsersManagement />}
       {activeTab === "payments" && <PaymentsManagement />}
       {activeTab === "validation" && <ValidationQuestionsEditor />}
-      {activeTab === "intake" && <IntakeFieldsEditor />}
     </section>
   );
 }

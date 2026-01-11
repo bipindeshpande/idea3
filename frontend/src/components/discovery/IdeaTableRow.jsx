@@ -20,8 +20,8 @@ export default function IdeaTableRow({
   const navigate = useNavigate();
   const runQuery = runId || currentRunId;
   const detailPath = runQuery
-    ? `/results/recommendations/${idea.index}?id=${runQuery}`
-    : `/results/recommendations/${idea.index}`;
+    ? `/dashboard/recommendations/${idea.index}?id=${runQuery}`
+    : `/dashboard/recommendations/${idea.index}`;
 
   const handleViewDetails = () => {
     navigate(detailPath, {
@@ -36,12 +36,15 @@ export default function IdeaTableRow({
     });
   };
 
+  // Use title directly from LLM - just clean quotes if present
+  const displayTitle = idea.title ? idea.title.replace(/^["']|["']$/g, '').trim() : '';
+
   return (
     <tr className="transition hover:bg-surface">
       <td className="px-4 py-3 font-semibold text-secondary">{idea.index}</td>
       <td className="px-4 py-3 font-medium text-primary">
         <div className="flex items-center gap-2">
-          <span>{idea.title}</span>
+          <span>{displayTitle || 'Untitled Idea'}</span>
           {(hasActions || hasNotes) && (
             <div className="flex items-center gap-1">
               {hasActions && (

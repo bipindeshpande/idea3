@@ -1,9 +1,6 @@
-import CollapsibleSection from "../ui/CollapsibleSection.jsx";
-import { getSectionTheme } from "../recommendations/utils/sectionThemes.js";
-import { useSectionToggle } from "../recommendations/hooks/useSectionToggle.js";
-
 /**
  * Notes Section Component
+ * Renders notes list without collapsible wrapper (used in dedicated Actions & Notes tab)
  */
 export default function NotesSection({
   notes,
@@ -14,21 +11,12 @@ export default function NotesSection({
   isValidIdeaId,
   isAuthenticated,
 }) {
-  const { openSections, toggleSection } = useSectionToggle();
-
   if (!isAuthenticated) {
     return null;
   }
 
   return (
-    <CollapsibleSection
-      title="Notes & Journal"
-      description="Capture your thoughts, insights, customer feedback, and research findings for this idea."
-      theme={getSectionTheme("Notes")}
-      isOpen={openSections.has("notes")}
-      onToggle={() => toggleSection("notes")}
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Add new note */}
         {!isValidIdeaId ? (
           <div className="rounded-xl border border-default bg-surface p-3">
@@ -77,7 +65,7 @@ export default function NotesSection({
             {notes.map((note) => (
               <div
                 key={note.id}
-                className="ui-card2 ui-pad-md rounded-xl shadow-card"
+                className="ui-card2 ui-pad-md rounded-xl shadow-card overflow-hidden"
               >
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-xs text-primary">
@@ -98,7 +86,7 @@ export default function NotesSection({
                       <span className="text-xs text-primary">(edited)</span>
                     )}
                 </div>
-                <p className="whitespace-pre-wrap text-sm text-primary">
+                <p className="whitespace-pre-wrap break-words text-sm text-primary">
                   {note.content}
                 </p>
                 {note.tags && note.tags.length > 0 && (
@@ -117,8 +105,7 @@ export default function NotesSection({
             ))}
           </div>
         )}
-      </div>
-    </CollapsibleSection>
+    </div>
   );
 }
 

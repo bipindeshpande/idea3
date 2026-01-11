@@ -9,6 +9,12 @@ export default function IdeaAttributes({
   heroChips = [],
   className = ""
 }) {
+  // Safety checks: ensure heroChips is always an array and idea exists
+  const safeHeroChips = Array.isArray(heroChips) ? heroChips : [];
+  if (!idea) {
+    return null; // Don't render if idea is missing
+  }
+  
   return (
     <div className={className}>
       {/* Timeline */}
@@ -22,7 +28,7 @@ export default function IdeaAttributes({
       )}
 
       {/* Validation Score */}
-      {idea.validation_score && idea.validation_score.trim() && !isNaN(parseFloat(idea.validation_score)) && (
+      {idea.validation_score && typeof idea.validation_score === 'string' && idea.validation_score.trim() && !isNaN(parseFloat(idea.validation_score)) && (
         <div className="mt-4">
           <div className="flex items-center justify-between mb-1">
             <span className={DISCOVERY_TYPOGRAPHY.label}>Validation Score</span>
@@ -40,13 +46,19 @@ export default function IdeaAttributes({
       )}
 
       {/* Hero Chips */}
-      {heroChips.length > 0 && (
+      {safeHeroChips.length > 0 && (
         <div className={`mt-6 flex flex-wrap ${DISCOVERY_SPACING.elementGapSmall}`}>
-          {heroChips.map(({ label, value }) => (
-            <DiscoveryBadge key={`${label}-${value}`} variant="default" size="md">
-              {label}: {value}
-            </DiscoveryBadge>
-          ))}
+          {safeHeroChips.map((chip, index) => {
+            // Handle both {label, value} objects and other formats
+            const label = chip?.label || chip?.[0] || "";
+            const value = chip?.value || chip?.[1] || "";
+            if (!label || !value) return null;
+            return (
+              <DiscoveryBadge key={`${label}-${value}-${index}`} variant="default" size="md">
+                {label}: {value}
+              </DiscoveryBadge>
+            );
+          })}
         </div>
       )}
 

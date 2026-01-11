@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import ProfileReminderCard from "./workspace/ProfileReminderBanner.jsx";
 
 const nav = [
  { to: "/dashboard", label: "View Workspace", icon: "📊" },
@@ -11,12 +12,19 @@ const nav = [
 
 export default function Sidebar({ isCollapsed, onToggleCollapse }) {
  return (
- <aside className="h-full w-full">
- <div className={`px-5 pt-7 pb-5 ${isCollapsed ? "px-3" : ""}`}>
- <div className="flex items-center justify-between">
- <div className={`text-base font-bold tracking-tight text-primary ${isCollapsed ? "hidden" : ""}`}>
-  Idea Bunch
- </div>
+  <aside className="h-full w-full">
+    <div className={`px-5 pt-7 pb-5 ${isCollapsed ? "px-3" : ""}`}>
+      <div className="flex items-center justify-between">
+        <div className={`flex items-center gap-2 ${isCollapsed ? "justify-center w-full" : ""}`}>
+          <img 
+            src="/favicon.svg" 
+            alt="Idea Bunch" 
+            className="w-6 h-6 flex-shrink-0" 
+          />
+          <span className={`text-base font-bold tracking-tight text-primary ${isCollapsed ? "hidden" : ""}`}>
+            Idea Bunch
+          </span>
+        </div>
  <button
   onClick={onToggleCollapse}
   className="ml-auto p-1.5 rounded-md hover:bg-surface-hover transition-colors text-secondary hover:text-primary focus-visible:outline-accent"
@@ -36,7 +44,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
  </div>
  <div className={`mt-1 text-xs text-secondary ${isCollapsed ? "hidden" : ""}`}>Startup advisor</div>
  </div>
- <nav className={`pb-6 ${isCollapsed ? "px-2" : "px-3"}`}>
+ <nav className={`pb-3 ${isCollapsed ? "px-2" : "px-3"}`}>
  {nav.map((item) => (
  <NavLink
  key={item.to}
@@ -57,6 +65,9 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
  </NavLink>
  ))}
  </nav>
+ 
+ {/* Profile Reminder Card - below navigation */}
+ <ProfileReminderCard isCollapsed={isCollapsed} />
  </aside>
  );
 }

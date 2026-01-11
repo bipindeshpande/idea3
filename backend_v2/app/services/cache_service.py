@@ -190,7 +190,7 @@ class CacheService(BaseService):
         Build a stable cache key for discovery queries using SHA256
         
         Creates a hash from the new universal intake schema fields:
-        (time_commitment, budget_range, risk_tolerance, preferred_work_style,
+        (discovery_mode, time_commitment, budget_range, risk_tolerance, preferred_work_style,
          startup_style, skills, customer_interaction, location_context,
          industry_interest, sub_interest_area, business_type, earnings_timeline,
          founder_ambition, experience_summary)
@@ -213,7 +213,9 @@ class CacheService(BaseService):
             skills_str = str(skills)
         
         # Extract fields in exact order (new universal schema)
+        # IMPORTANT: discovery_mode is included so AI-first and standard mode have separate caches
         key_tuple = (
+            payload.get("discovery_mode", "standard"),  # Include discovery mode in cache key
             payload.get("time_commitment", ""),
             payload.get("budget_range", ""),
             payload.get("risk_tolerance", ""),

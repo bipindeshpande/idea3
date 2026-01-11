@@ -314,21 +314,21 @@ function SessionCard({
  </UIButton>
  ) : (
  <>
- <UIButton
- as={Link}
- to={`/results/profile?id=${session.run_id || session.id}`}
- variant="action"
- size="sm"
- className="whitespace-nowrap"
- >
- View profile
+              <UIButton
+                as={Link}
+                to={`/dashboard/profile?id=${session.run_id || session.id}`}
+                variant="action"
+                size="sm"
+                className="whitespace-nowrap"
+              >
+                View profile
  </UIButton>
  <UIButton
  variant="action"
  size="sm"
  onClick={() => {
  // Pass full run data through navigation state to prevent re-computation
- navigate("/results/recommendations", { 
+                navigate("/dashboard/recommendations", {
  state: { 
  run: session,
  runId: session.run_id || session.id

@@ -131,11 +131,14 @@ function parsePriority2Alternative(text) {
       const index = parseInt(match[1], 10);
       const blockContent = match[2].trim();
 
-      // Extract title and summary from key: value format
+      // Extract all fields from key: value format
       const titleMatch = blockContent.match(/title:\s*(.+?)(?:\n|$)/i);
       const summaryMatch = blockContent.match(/summary:\s*(.+?)(?:\n|$)/i);
       const targetMarketMatch = blockContent.match(/target_market:\s*(.+?)(?:\n|$)/i);
       const revenueModelMatch = blockContent.match(/revenue_model:\s*(.+?)(?:\n|$)/i);
+      const validationScoreMatch = blockContent.match(/validation_score:\s*(.+?)(?:\n|$)/i);
+      const timelineMatch = blockContent.match(/timeline:\s*(.+?)(?:\n|$)/i);
+      const whyThisFitsMatch = blockContent.match(/why_this_fits:\s*(.+?)(?:\n|$)/i);
 
       const title = titleMatch ? titleMatch[1].trim() : '';
       const summary = summaryMatch ? summaryMatch[1].trim() : '';
@@ -150,6 +153,9 @@ function parsePriority2Alternative(text) {
           fullText: match[0],
           target_market: targetMarketMatch ? targetMarketMatch[1].trim() : '',
           revenue_model: revenueModelMatch ? revenueModelMatch[1].trim() : '',
+          validation_score: validationScoreMatch ? validationScoreMatch[1].trim() : '',
+          timeline: timelineMatch ? timelineMatch[1].trim() : '',
+          why_this_fits: whyThisFitsMatch ? whyThisFitsMatch[1].trim() : '',
         });
       }
     }
@@ -170,6 +176,20 @@ function parsePriority2Alternative(text) {
  */
 export function parseStructuredIdeas(text = "", limit = null, skipPreprocessing = false) {
   if (!text) return [];
+  
+  // Only skip if this is PURELY profile analysis text (has markers but NO IDEA blocks)
+  // This prevents rejecting valid recommendations that happen to mention profile keywords
+  const hasProfileMarkers = text.includes("---PROFILE_ANALYSIS_START---") || 
+                            text.includes("---PROFILE_ANALYSIS_END---");
+  const hasIdeaBlocks = text.includes("### IDEA_") || /###\s*IDEA_\d+/i.test(text);
+  
+  // Only skip if it has profile markers AND no idea blocks
+  // This means it's purely profile analysis, not recommendations
+  if (hasProfileMarkers && !hasIdeaBlocks) {
+    return [];
+  }
+  
+  // If it has idea blocks, parse it regardless of other content
 
   // Fix concatenated text before parsing (unless skipped for internal calls)
   if (!skipPreprocessing) {

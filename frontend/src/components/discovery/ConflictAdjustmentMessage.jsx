@@ -1,4 +1,3 @@
-import DiscoveryCard from "./DiscoveryCard.jsx";
 import { DISCOVERY_SPACING, DISCOVERY_TYPOGRAPHY } from "./DiscoveryTheme.js";
 
 /**
@@ -10,7 +9,7 @@ export default function ConflictAdjustmentMessage({ conflictAdjustment }) {
   }
 
   return (
-    <DiscoveryCard variant="info">
+    <div className="bg-surface border border-accent rounded-xl p-6">
       <div className={`flex items-start ${DISCOVERY_SPACING.elementGap}`}>
         <div className="text-xl shrink-0">💡</div>
         <div className="flex-1">
@@ -24,7 +23,7 @@ export default function ConflictAdjustmentMessage({ conflictAdjustment }) {
           )}
         </div>
       </div>
-    </DiscoveryCard>
+    </div>
   );
 }
 

@@ -37,6 +37,7 @@ import ResourcesPage from "./pages/resources/Resources.jsx";
 import AdvisorResourcesPage from "./pages/resources/AdvisorResources.jsx";
 import HowAdvisorThinksPage from "./pages/resources/HowAdvisorThinks.jsx";
 import BlogPage from "./pages/resources/Blog.jsx";
+import ValidationMethodology from "./pages/resources/ValidationMethodology.jsx";
 
 // Help pages
 import ValidateIdeaHelp from "./pages/help/ValidateIdeaHelp.jsx";
@@ -45,6 +46,7 @@ import FounderNetworkHelp from "./pages/help/FounderNetworkHelp.jsx";
 import WorkspaceHelp from "./pages/help/WorkspaceHelp.jsx";
 import FrameworksHelp from "./pages/help/FrameworksHelp.jsx";
 import AccountHelp from "./pages/help/AccountHelp.jsx";
+import RecommendationDetailHelp from "./pages/help/RecommendationDetailHelp.jsx";
 
 // Dashboard pages
 import DashboardPage from "./pages/dashboard/Dashboard.jsx";
@@ -106,6 +108,7 @@ export default function App() {
         <Route path="/resources" element={<Navigate to="/resources/templates" replace />} />
         <Route path="/resources/templates" element={<ResourceTemplatesPage />} />
         <Route path="/resources/frameworks" element={<Navigate to="/resources/templates" replace />} />
+        <Route path="/resources/validation-methodology" element={<ValidationMethodology />} />
         <Route path="/frameworks" element={<Navigate to="/resources/templates" replace />} />
         <Route path="/advisor-resources" element={<AdvisorResourcesPage />} />
         <Route path="/blog" element={<BlogPage />} />
@@ -124,15 +127,33 @@ export default function App() {
  {/* Back-compat routes */}
  <Route path="/dashboard/workspace" element={<Navigate to="/dashboard?tab=ideas" replace />} />
  <Route path="/dashboard/compare" element={<CompareSessionsPage />} />
- <Route
- path="/dashboard/runs"
- element={
- <Suspense fallback={<LoadingIndicator simple={true} message="Loading run history..." />}>
- <RunHistoryPage />
- </Suspense>
- }
- />
         <Route
+          path="/dashboard/runs"
+          element={
+            <Suspense fallback={<LoadingIndicator simple={true} message="Loading run history..." />}>
+              <RunHistoryPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/dashboard/profile"
+          element={
+            <ProfileReport />
+          }
+        />
+        <Route
+          path="/dashboard/recommendations"
+          element={
+            <RecommendationsReport />
+          }
+        />
+        <Route
+          path="/dashboard/recommendations/:ideaIndex"
+          element={
+            <RecommendationDetail />
+          }
+        />
+                <Route
           path="/validate-result"
           element={
             <ProtectedRoute>
@@ -235,6 +256,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <AccountHelp />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/help/recommendation-detail"
+          element={
+            <ProtectedRoute>
+              <RecommendationDetailHelp />
             </ProtectedRoute>
           }
         />

@@ -20,12 +20,36 @@ export function useDataMerging({
             reports = typeof r.reports === "string" ? JSON.parse(r.reports) : r.reports;
           } catch {}
         }
+        
+        // Ensure profile_analysis is included in outputs and reports
+        // Backend returns it both as a separate field and in reports
+        const profileAnalysis = r.profile_analysis || reports.profile_analysis || "";
+        const personalizedRecommendations = r.personalized_recommendations || reports.personalized_recommendations || "";
+        
+        // Merge profile_analysis into reports if not already there
+        if (profileAnalysis && !reports.profile_analysis) {
+          reports.profile_analysis = profileAnalysis;
+        }
+        if (personalizedRecommendations && !reports.personalized_recommendations) {
+          reports.personalized_recommendations = personalizedRecommendations;
+        }
+        
         return {
           id: `run_${r.run_id}`,
           timestamp: r.created_at ? new Date(r.created_at).getTime() : Date.now(),
           inputs: r.inputs || {},
-          outputs: reports,
-          reports,
+          outputs: {
+            ...reports,
+            profile_analysis: profileAnalysis,
+            personalized_recommendations: personalizedRecommendations,
+          },
+          reports: {
+            ...reports,
+            profile_analysis: profileAnalysis,
+            personalized_recommendations: personalizedRecommendations,
+          },
+          profile_analysis: profileAnalysis, // Also include at top level for backward compatibility
+          personalized_recommendations: personalizedRecommendations, // Also include at top level
           run_id: r.run_id,
           from_api: true,
           is_validation: false

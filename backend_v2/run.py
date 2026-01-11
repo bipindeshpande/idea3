@@ -12,5 +12,6 @@ if __name__ == "__main__":
         port=8000,
         reload=True,  # Always enable auto-reload for development
         log_level="info" if not settings.DEBUG else "debug",
+        access_log=False,  # Disable uvicorn access logging to reduce log noise
     )
 

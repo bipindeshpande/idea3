@@ -4,28 +4,63 @@ import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import Seo from "../../components/common/Seo.jsx";
 import DiscoveryLoadingIndicator from "../../components/discovery/DiscoveryLoadingIndicator.jsx";
-import DiscoveryCard from "../../components/discovery/DiscoveryCard.jsx";
 import DiscoveryHeader from "../../components/discovery/DiscoveryHeader.jsx";
 import { DISCOVERY_SPACING, DISCOVERY_TYPOGRAPHY } from "../../components/discovery/DiscoveryTheme.js";
 import IntakeScreen from "./IntakeScreen.jsx";
 import ReviewScreen from "../../components/discovery/ReviewScreen.jsx";
 import Stepper from "../../components/Stepper.jsx";
 import { CONTACT_EMAIL } from "../../constants/contact.js";
+import { ToastContainer } from "../../components/common/Toast.jsx";
+import { useToast } from "../../hooks/useToast.js";
+import CacheIndicator from "../../components/common/CacheIndicator.jsx";
+
+const DRAFT_STORAGE_KEY = "discovery_draft";
 
 export default function HomePage() {
  const navigate = useNavigate();
- const { inputs, setInputs, loading, error, runCrew, reports, streamingOutput, isCached, requestStartTime, requestDuration } = useReports();
+ const { inputs, setInputs, loading, error, runCrew, reports, streamingOutput, isCached, requestStartTime, requestDuration, cancelRequest } = useReports();
  const { isAuthenticated } = useAuth();
+ const { toasts, addToast, removeToast } = useToast();
  const [localInputs, setLocalInputs] = useState(inputs || {});
  const [screen, setScreen] = useState(0); // 0 = Form, 1 = Review
  const [errors, setErrors] = useState({});
  const [touched, setTouched] = useState(false);
+ const [hasDraft, setHasDraft] = useState(false);
 
  useEffect(() => {
  setLocalInputs(inputs || {});
  setScreen(0);
  setTouched(false);
  setErrors({});
+ }, [inputs]);
+
+ // Check for existing draft on mount
+ useEffect(() => {
+ const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+ if (savedDraft) {
+  try {
+   const draftData = JSON.parse(savedDraft);
+   // Remove metadata
+   const { _savedAt, ...cleanDraft } = draftData;
+   if (cleanDraft && Object.keys(cleanDraft).length > 0) {
+    setHasDraft(true);
+    // Only auto-load if no inputs are already set
+    if (!inputs || Object.keys(inputs).length === 0) {
+     setLocalInputs(cleanDraft);
+    }
+   } else {
+    // Draft is empty, remove it
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    setHasDraft(false);
+   }
+  } catch (e) {
+   console.error("Error loading draft:", e);
+   localStorage.removeItem(DRAFT_STORAGE_KEY);
+   setHasDraft(false);
+  }
+ } else {
+  setHasDraft(false);
+ }
  }, [inputs]);
 
  // Handle scroll to form when navigating from Dashboard (Edit button)
@@ -147,7 +182,6 @@ export default function HomePage() {
  };
 
  // Dev-only auto-fill handler
- const handleAutoFill = () => {
  const SUB_INTEREST_MAPPING = {
  "Food & Beverage": ["Restaurant/Cafe", "Food Delivery", "Meal Prep", "Beverage Brand", "Catering", "Food Tech"],
  "Retail & E-commerce": ["D2C Brand", "Dropshipping", "Print-on-Demand", "Marketplace", "Subscription Box", "B2B Wholesale"],
@@ -168,7 +202,11 @@ export default function HomePage() {
  "Other": ["Custom Sub-Area Text Field"]
  };
 
- const SAMPLE_INPUTS = {
+ // 5 different preset profiles for auto-fill
+ const PRESET_PROFILES = {
+ "tech": {
+ name: "Tech Entrepreneur",
+ inputs: {
  startup_category: "tech",
  time_commitment: "10–20 hrs/week",
  budget_range: "$1,000–5,000",
@@ -192,16 +230,159 @@ export default function HomePage() {
  earnings_timeline: "90 days",
  founder_ambition: "Full-time business",
  experience_summary: "10 years in software development, experience with AI/ML projects, strong background in building SaaS products and managing technical teams."
+ }
+ },
+ "food": {
+ name: "Food & Beverage Founder",
+ inputs: {
+ startup_category: "non_tech",
+ time_commitment: "Full-time",
+ budget_range: "$5,000–20,000",
+ risk_tolerance: "Moderate",
+ preferred_work_style: "People-facing / Service-oriented",
+ startup_style: "Local service business",
+ customer_interaction: "Very comfortable",
+ location_context: "Urban",
+ business_region: "United States / Canada",
+ skills: {
+ product_creation: ["Cooking / Food Prep"],
+ sales_marketing: ["Social Media", "Customer Interaction", "Community Building"],
+ operational: ["Inventory Management", "Time Management"],
+ digital: ["Web Building"],
+ personality: ["Empathy", "Problem Solving"],
+ other: ""
+ },
+ industry_interest: "Food & Beverage",
+ sub_interest_area: "Meal Prep",
+ business_type: "Service",
+ earnings_timeline: "6+ months",
+ founder_ambition: "Full-time business",
+ experience_summary: "5 years in food service industry, experience with meal planning and food preparation, passionate about healthy eating and nutrition."
+ }
+ },
+ "creative": {
+ name: "Creative/Handmade Business",
+ inputs: {
+ startup_category: "non_tech",
+ time_commitment: "10–20 hrs/week",
+ budget_range: "$1,000–5,000",
+ risk_tolerance: "Low",
+ preferred_work_style: "Creative / Maker work",
+ startup_style: "Home-based business",
+ customer_interaction: "Somewhat comfortable",
+ location_context: "Suburban",
+ business_region: "United States / Canada",
+ skills: {
+ product_creation: ["Crafting / Handmade", "Photography / Videography"],
+ sales_marketing: ["Social Media", "SEO / Blogging"],
+ operational: ["Budgeting", "Time Management"],
+ digital: ["Web Building"],
+ personality: ["Empathy", "Problem Solving"],
+ other: ""
+ },
+ industry_interest: "Manufacturing / Crafts",
+ sub_interest_area: "Handmade Goods",
+ business_type: "Product",
+ earnings_timeline: "90 days",
+ founder_ambition: "Side income",
+ experience_summary: "8 years of crafting experience, skilled in creating handmade products, strong social media presence with engaged community."
+ }
+ },
+ "service": {
+ name: "Service-Based Business",
+ inputs: {
+ startup_category: "non_tech",
+ time_commitment: "Full-time",
+ budget_range: "$0–100",
+ risk_tolerance: "Low",
+ preferred_work_style: "People-facing / Service-oriented",
+ startup_style: "Local service business",
+ customer_interaction: "Very comfortable",
+ location_context: "Urban",
+ business_region: "United States / Canada",
+ skills: {
+ product_creation: ["Beauty Services"],
+ sales_marketing: ["Customer Interaction", "Community Building", "Marketing / Advertising"],
+ operational: ["Time Management", "Project Management"],
+ digital: ["Web Building"],
+ personality: ["Empathy", "Leadership", "Persuasion"],
+ other: ""
+ },
+ industry_interest: "Home Services",
+ sub_interest_area: "Cleaning",
+ business_type: "Service",
+ earnings_timeline: "60 days",
+ founder_ambition: "Full-time business",
+ experience_summary: "12 years in customer service, experience managing teams, strong interpersonal skills and attention to detail."
+ }
+ },
+ "ecommerce": {
+ name: "E-commerce/D2C Brand",
+ inputs: {
+ startup_category: "non_tech",
+ time_commitment: "10–20 hrs/week",
+ budget_range: "$5,000–20,000",
+ risk_tolerance: "Moderate",
+ preferred_work_style: "Remote-friendly",
+ startup_style: "Online-only business",
+ customer_interaction: "Somewhat comfortable",
+ location_context: "Urban",
+ business_region: "United States / Canada",
+ skills: {
+ product_creation: ["Graphic Design", "Writing / Content"],
+ sales_marketing: ["Social Media", "Marketing / Advertising", "SEO / Blogging"],
+ operational: ["Inventory Management", "Budgeting", "Project Management"],
+ digital: ["Web Building", "Low-code / No-code"],
+ personality: ["Problem Solving", "Leadership"],
+ other: ""
+ },
+ industry_interest: "Retail & E-commerce",
+ sub_interest_area: "D2C Brand",
+ business_type: "Product",
+ earnings_timeline: "6+ months",
+ founder_ambition: "Full-time business",
+ experience_summary: "7 years in marketing and branding, experience with e-commerce platforms, strong understanding of digital marketing and customer acquisition."
+ }
+ }
  };
 
- const updated = { ...SAMPLE_INPUTS };
- // Handle sub_interest_area based on industry_interest
+ const handleAutoFill = (presetKey = "tech") => {
+ const preset = PRESET_PROFILES[presetKey];
+ if (!preset) return;
+
+ const updated = { ...preset.inputs };
+ 
+ // Ensure sub_interest_area is set correctly based on industry_interest
+ // If preset already has sub_interest_area, verify it's valid for the industry
+ // Otherwise, set it to the first available option
+ if (updated.industry_interest) {
  const subOptions = SUB_INTEREST_MAPPING[updated.industry_interest] || [];
  if (subOptions.length === 1 && subOptions[0] === "Custom Sub-Area Text Field") {
  updated.sub_interest_area = "";
  } else {
+ // Use preset's sub_interest_area if it's valid, otherwise use first option
+ const presetSub = updated.sub_interest_area;
+ if (presetSub && subOptions.includes(presetSub)) {
+ // Keep the preset value
+ } else {
  updated.sub_interest_area = subOptions[0] || "";
  }
+ }
+ }
+ 
+ // Ensure all required fields are present
+ // Double-check that skills object has at least one skill selected
+ const skills = updated.skills || {};
+ const hasSkills = Object.keys(skills).some(category => {
+ if (category === "other") return skills[category] && skills[category].trim();
+ return Array.isArray(skills[category]) && skills[category].length > 0;
+ });
+ 
+ if (!hasSkills) {
+ // This shouldn't happen with presets, but add a fallback
+ console.warn(`Preset ${presetKey} has no skills selected`);
+ }
+ 
  setLocalInputs(updated);
  handleInputChange(updated);
  
@@ -214,13 +395,103 @@ export default function HomePage() {
  }, 100);
  };
 
- const handleSubmit = async (event) => {
+ const handleSaveDraft = () => {
+ try {
+  // Check if there's any meaningful data to save
+  const hasData = Object.keys(localInputs).some(key => {
+   const value = localInputs[key];
+   if (!value) return false;
+   if (typeof value === "string" && value.trim() === "") return false;
+   if (typeof value === "object" && !Array.isArray(value)) {
+    // Check if skills object has any selected skills
+    if (key === "skills") {
+     return Object.values(value).some(v => {
+      if (Array.isArray(v)) return v.length > 0;
+      if (typeof v === "string") return v.trim() !== "";
+      return Boolean(v);
+     });
+    }
+    return Object.keys(value).length > 0;
+   }
+   return true;
+  });
+
+  if (!hasData) {
+   addToast("No data to save. Please fill in the form first.", "error");
+   return;
+  }
+
+  // Save draft with timestamp
+  const draftData = {
+   ...localInputs,
+   _savedAt: new Date().toISOString()
+  };
+  localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
+  setHasDraft(true);
+  addToast("Draft saved successfully!", "success");
+ } catch (e) {
+  console.error("Error saving draft:", e);
+  addToast("Failed to save draft. Please try again.", "error");
+ }
+ };
+
+ const handleLoadDraft = () => {
+ try {
+  const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+  if (!savedDraft) {
+   addToast("No saved draft found.", "error");
+   return;
+  }
+
+  const draftData = JSON.parse(savedDraft);
+  // Remove metadata
+  const { _savedAt, ...cleanDraft } = draftData;
+  setLocalInputs(cleanDraft);
+  setScreen(0); // Reset to first screen
+  setTouched(false);
+  setErrors({});
+  addToast("Draft loaded successfully!", "success");
+
+  // Scroll to form
+  setTimeout(() => {
+   const formElement = document.getElementById("intake-form");
+   if (formElement) {
+    formElement.scrollIntoView({ behavior: "smooth", block: "start" });
+   }
+  }, 100);
+ } catch (e) {
+  console.error("Error loading draft:", e);
+  addToast("Failed to load draft. Please try again.", "error");
+  localStorage.removeItem(DRAFT_STORAGE_KEY);
+  setHasDraft(false);
+ }
+ };
+
+ const handleClearDraft = () => {
+ if (window.confirm("Are you sure you want to delete the saved draft?")) {
+  localStorage.removeItem(DRAFT_STORAGE_KEY);
+  setHasDraft(false);
+  addToast("Draft deleted.", "success");
+ }
+ };
+
+ const handleSubmit = async (event, discoveryMode = 'standard') => {
  event.preventDefault();
  if (screen === 1) {
  setInputs(localInputs);
- const { success, runId } = await runCrew(localInputs);
+ // Clear draft after successful submission
+ localStorage.removeItem(DRAFT_STORAGE_KEY);
+ setHasDraft(false);
+ 
+ // Add discovery_mode to inputs
+ const enrichedInputs = {
+  ...localInputs,
+  discovery_mode: discoveryMode
+ };
+ 
+ const { success, runId } = await runCrew(enrichedInputs);
  if (success) {
- navigate(runId ? `/results/profile?id=${runId}` : "/results/profile");
+ navigate(runId ? `/dashboard/profile?id=${runId}` : "/dashboard/profile");
  }
  }
  };
@@ -303,10 +574,10 @@ export default function HomePage() {
  isCached={isCached}
  startTime={requestStartTime}
  duration={requestDuration}
+ onCancel={cancelRequest}
  />}
 
  <form id="intake-form" onSubmit={handleSubmit}>
- <DiscoveryCard>
  <div className="flex items-start justify-between gap-4 mb-6">
  <DiscoveryHeader
  step={screen + 1}
@@ -314,11 +585,29 @@ export default function HomePage() {
  title={screenTitles[screen]}
  description={screenDescriptions[screen]}
  />
- {process.env.NODE_ENV === "development" ? (
- <button type="button" onClick={handleAutoFill} className="ui-btn ui-btn-secondary focus-visible:outline-accent">
- Auto-Fill (Dev)
- </button>
- ) : null}
+ <div className="flex items-center gap-2">
+ <label htmlFor="preset-select" className="text-sm text-secondary whitespace-nowrap">
+ Quick Fill:
+ </label>
+ <select
+ id="preset-select"
+ onChange={(e) => {
+ if (e.target.value) {
+ handleAutoFill(e.target.value);
+ e.target.value = ""; // Reset dropdown after selection
+ }
+ }}
+ className="ui-field text-sm focus-visible:outline-accent min-w-[200px]"
+ defaultValue=""
+ >
+ <option value="">Select a profile...</option>
+ <option value="tech">Tech Entrepreneur</option>
+ <option value="food">Food & Beverage Founder</option>
+ <option value="creative">Creative/Handmade Business</option>
+ <option value="service">Service-Based Business</option>
+ <option value="ecommerce">E-commerce/D2C Brand</option>
+ </select>
+ </div>
  </div>
 
  {renderScreenContent()}
@@ -333,9 +622,39 @@ export default function HomePage() {
  )}
 
  <footer className="mt-8 flex items-center justify-between border-t border-default pt-6">
- <button type="button" className="ui-btn ui-btn-secondary focus-visible:outline-accent" disabled>
- Save Draft
- </button>
+ <div className="flex items-center gap-2">
+  <button 
+   type="button" 
+   onClick={handleSaveDraft}
+   className="ui-btn ui-btn-secondary focus-visible:outline-accent"
+   disabled={loading}
+  >
+   Save Draft
+  </button>
+  {hasDraft && (
+   <>
+    <button 
+     type="button" 
+     onClick={handleLoadDraft}
+     className="ui-btn ui-btn-secondary focus-visible:outline-accent text-sm"
+     disabled={loading}
+     title="Load saved draft"
+    >
+     Load Draft
+    </button>
+    <button 
+     type="button" 
+     onClick={handleClearDraft}
+     className="ui-btn ui-btn-secondary focus-visible:outline-accent text-sm opacity-60 hover:opacity-100"
+     disabled={loading}
+     title="Delete saved draft"
+     aria-label="Delete draft"
+    >
+     ×
+    </button>
+   </>
+  )}
+ </div>
  <div className="flex items-center gap-3">
  {screen > 0 ? (
  <button type="button" onClick={handleBack} className="ui-btn ui-btn-secondary focus-visible:outline-accent" disabled={loading}>
@@ -347,9 +666,26 @@ export default function HomePage() {
  Continue
  </button>
  ) : (
- <button type="submit" disabled={loading} className="ui-btn ui-btn-primary focus-visible:outline-accent disabled:opacity-50 disabled:cursor-not-allowed">
- {loading ? "Exploring ideas..." : "Explore ideas"}
+ <>
+ <button 
+  type="button"
+  onClick={(e) => handleSubmit(e, 'standard')}
+  disabled={loading} 
+  className="ui-btn ui-btn-secondary focus-visible:outline-accent disabled:opacity-50 disabled:cursor-not-allowed"
+  title="Fast recommendations using curated templates (~15-20s)"
+ >
+  {loading ? "Exploring..." : "⚡ Discover Fast"}
  </button>
+ <button 
+  type="button"
+  onClick={(e) => handleSubmit(e, 'ai_first')}
+  disabled={loading} 
+  className="ui-btn ui-btn-primary focus-visible:outline-accent disabled:opacity-50 disabled:cursor-not-allowed"
+  title="AI-powered personalized recommendations (~30-40s)"
+ >
+  {loading ? "Generating..." : "✨ Discover with AI"}
+ </button>
+ </>
  )}
  </div>
  </footer>
@@ -365,18 +701,20 @@ export default function HomePage() {
  </Link>
  </p>
  )}
- </DiscoveryCard>
  </form>
 
  {reports && (
- <DiscoveryCard>
+ <div>
  <h2 className={`${DISCOVERY_TYPOGRAPHY.h3} flex items-center gap-2`}>Latest report saved</h2>
  <p className={`mt-1 ${DISCOVERY_TYPOGRAPHY.bodySmall}`}>
  Visit the dashboard or the tabs above to review your profile summary and recommendations anytime.
  </p>
- </DiscoveryCard>
+ </div>
  )}
  </div>
+
+ <CacheIndicator isCached={isCached} />
+ <ToastContainer toasts={toasts} onRemove={removeToast} />
  </>
  );
 }

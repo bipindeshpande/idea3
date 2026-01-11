@@ -17,9 +17,8 @@ import { useRecommendationDetailState } from "../../hooks/recommendation/useReco
 // Import UI components
 import RecommendationLoadingState from "../../components/recommendation/RecommendationLoadingState.jsx";
 import RecommendationHeader from "../../components/recommendation/RecommendationHeader.jsx";
-import ActionItemsSection from "../../components/recommendation/ActionItemsSection.jsx";
-import NotesSection from "../../components/recommendation/NotesSection.jsx";
 import RecommendationSectionsList from "../../components/recommendation/RecommendationSectionsList.jsx";
+import RecommendationTabbedSections from "../../components/recommendation/RecommendationTabbedSections.jsx";
 import RecommendationActionButtons from "../../components/recommendation/RecommendationActionButtons.jsx";
 import RecommendationNavigation from "../../components/recommendation/RecommendationNavigation.jsx";
 
@@ -208,6 +207,7 @@ export default function RecommendationDetail() {
  activeIdea={activeIdea}
  runQuery={runQuery}
  inputs={inputs}
+ isEnriching={isEnriching}
  />
 
 
@@ -229,60 +229,64 @@ export default function RecommendationDetail() {
 
  {/* Show idea information only if we have enriched body OR cached data (which already has enrichment) */}
  {shouldShowContent && (
- <>
+ <div data-pdf-content="true">
  <RecommendationHeader
    activeIdea={activeIdea}
    heroStatement={heroStatement}
    heroChips={heroChips}
-   actions={actions}
-   notes={notes}
  />
  
- <RecommendationSectionsList
+ <RecommendationTabbedSections
    orderedSections={enrichedOrderedSections}
    openSections={openSections}
- toggleSection={toggleSection}
- fitNarrativeMarkdown={fitNarrativeMarkdown}
- discoveryNextSteps={discoveryNextSteps}
- financialSnapshot={financialSnapshot}
- executionPhaseCards={executionPhaseCards}
- riskRows={riskRows}
- validationQuestions={validationQuestions}
- roadmapMarkdown={roadmapMarkdown}
- personaMarkdown={personaMarkdown}
- marketInsights={marketInsights}
- immediateExperimentsList={immediateExperimentsList}
- immediateNextSteps={finalImmediateNextSteps}
- decisionChecklist={decisionChecklist}
- isEnriching={isEnriching}
- hasBody={hasBody}
- activeIdea={activeIdea}
+   toggleSection={toggleSection}
+   fitNarrativeMarkdown={fitNarrativeMarkdown}
+   discoveryNextSteps={discoveryNextSteps}
+   financialSnapshot={financialSnapshot}
+   executionPhaseCards={executionPhaseCards}
+   riskRows={riskRows}
+   validationQuestions={validationQuestions}
+   roadmapMarkdown={roadmapMarkdown}
+   personaMarkdown={personaMarkdown}
+   marketInsights={marketInsights}
+   immediateExperimentsList={immediateExperimentsList}
+   immediateNextSteps={finalImmediateNextSteps}
+   decisionChecklist={decisionChecklist}
+   isEnriching={isEnriching}
+   hasBody={hasBody}
+   activeIdea={activeIdea}
+   heroChips={heroChips}
+   onValidate={async () => {
+     const result = await validateRecommendationIdea(
+       activeIdea,
+       inputs,
+       reports?.profile_analysis
+     );
+     if (result.success && result.validation?.id) {
+       navigate(`/validate-result?id=${result.validation.id}`);
+     }
+   }}
+   onSave={() => {
+     // TODO: Implement save functionality
+     console.log("Save idea:", activeIdea);
+   }}
+   validating={validating}
+   isAuthenticated={isAuthenticated}
+   actions={actions}
+   notes={notes}
+   loadingActions={loadingActions}
+   loadingNotes={loadingNotes}
+   newActionText={newActionText}
+   setNewActionText={setNewActionText}
+   newNoteContent={newNoteContent}
+   setNewNoteContent={setNewNoteContent}
+   handleCreateAction={handleCreateAction}
+   handleUpdateAction={handleUpdateAction}
+   handleCreateNote={handleCreateNote}
+   isValidIdeaId={isValidIdeaId}
  />
 
-    {/* Action Items Section */}
-    <ActionItemsSection
-      actions={actions}
-      loadingActions={loadingActions}
-      newActionText={newActionText}
-      setNewActionText={setNewActionText}
-      handleCreateAction={handleCreateAction}
-      handleUpdateAction={handleUpdateAction}
-      isValidIdeaId={isValidIdeaId}
-      isAuthenticated={isAuthenticated}
-    />
-
-    {/* Notes Section */}
-    <NotesSection
-      notes={notes}
-      loadingNotes={loadingNotes}
-      newNoteContent={newNoteContent}
-      setNewNoteContent={setNewNoteContent}
-      handleCreateNote={handleCreateNote}
-      isValidIdeaId={isValidIdeaId}
-      isAuthenticated={isAuthenticated}
-    />
-
- <RecommendationActionButtons
+<RecommendationActionButtons
  activeIdea={activeIdea}
  inputs={inputs}
  reports={reports}
@@ -293,7 +297,7 @@ export default function RecommendationDetail() {
  />
 
  {/* Explore other ideas section removed based on feedback */}
- </>
+ </div>
  )}
  </>
  );

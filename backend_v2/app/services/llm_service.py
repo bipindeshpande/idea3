@@ -7,7 +7,7 @@ from anthropic import Anthropic, AsyncAnthropic
 from app.services.base_service import BaseService
 from app.core.config import settings
 from app.models.llm_usage import LLMUsage
-from app.utils.text_cleaner import extract_profile_json
+from app.services.parsers.profile_parser import ProfileParser
 
 
 class LLMService(BaseService):
@@ -15,30 +15,35 @@ class LLMService(BaseService):
     
     # Model-specific max_tokens limits (completion tokens)
     MODEL_LIMITS = {
+        # GPT-5 models (latest)
+        "gpt-5.2": 16384,  # 16k completion tokens
+        "gpt-5.1": 16384,  # 16k completion tokens
+        # GPT-4o models
+        "gpt-4o": 16384,  # 16k completion tokens
         "gpt-4o-mini": 16384,  # 16k completion tokens
-        "gpt-4-turbo-preview": 4096,
-        "gpt-4": 4096,
-        "gpt-4-32k": 32768,
-        "gpt-3.5-turbo": 4096,
-        "gpt-3.5-turbo-16k": 16384,
+        # Claude models
         "claude-3-opus": 4096,
         "claude-3-sonnet": 4096,
         "claude-3-haiku": 4096,
     }
     
-    # Pricing per 1M tokens (USD)
-    # NOTE: rough hard-coded pricing; adjust as needed
+    # Pricing per 1M tokens (USD) - Updated January 2026
+    # Source: https://platform.openai.com/docs/pricing
     OPENAI_INPUT_COST_PER_M = {
-        "gpt-4o-mini": 0.15,
+        # GPT-5 models
+        "gpt-5.2": 1.75,
+        "gpt-5.1": 1.25,
+        # GPT-4o models
         "gpt-4o": 5.00,
-        "gpt-3.5-turbo": 0.50,
-        "gpt-3.5-turbo-16k": 1.00,
+        "gpt-4o-mini": 0.15,
     }
     OPENAI_OUTPUT_COST_PER_M = {
-        "gpt-4o-mini": 0.60,
+        # GPT-5 models
+        "gpt-5.2": 14.00,
+        "gpt-5.1": 10.00,
+        # GPT-4o models
         "gpt-4o": 15.00,
-        "gpt-3.5-turbo": 1.50,
-        "gpt-3.5-turbo-16k": 2.00,
+        "gpt-4o-mini": 0.60,
     }
 
     def __init__(self, db, redis_client=None):
@@ -510,7 +515,7 @@ class LLMService(BaseService):
             Clean JSON string extracted from delimiters
         """
         raw = self.generate(prompt)
-        clean = extract_profile_json(raw["content"])
+        clean = ProfileParser.extract_json_string(raw["content"])
         return clean
 
     def _calculate_cost(self, model: str, prompt_tokens: int, completion_tokens: int) -> float:

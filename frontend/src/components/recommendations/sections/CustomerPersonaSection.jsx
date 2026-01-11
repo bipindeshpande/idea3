@@ -4,12 +4,31 @@ import { cleanNarrativeMarkdown } from "../../../utils/formatters/recommendation
 /**
  * Customer Persona Section Component
  */
-export default function CustomerPersonaSection({ personaMarkdown, validationQuestions, content, isEnriching }) {
+export default function CustomerPersonaSection({ personaMarkdown, validationQuestions, content, isEnriching, onViewFullPersona }) {
+  // Get preview (first 300 characters)
+  const getPersonaPreview = () => {
+    if (!personaMarkdown) return "";
+    const cleaned = cleanNarrativeMarkdown(personaMarkdown);
+    return cleaned.length > 300 ? cleaned.substring(0, 300) + "..." : cleaned;
+  };
+
+  const hasFullPersona = personaMarkdown && cleanNarrativeMarkdown(personaMarkdown).length > 300;
+
   return (
     <div className="space-y-6">
       {personaMarkdown && (
         <div className="mt-6 pb-6 border-b border-default">
-          <h3 className="text-lg font-semibold text-primary mb-2 border-l-4 border-default pl-3">Customer Persona</h3>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-semibold text-primary border-l-4 border-default pl-3">Customer Persona</h3>
+            {hasFullPersona && onViewFullPersona && (
+              <button
+                onClick={onViewFullPersona}
+                className="text-sm text-accent hover:underline font-medium"
+              >
+                View Full Details →
+              </button>
+            )}
+          </div>
           <p className="text-sm text-primary mb-3">
             A detailed profile of your ideal customer—their demographics, pain points, goals, and buying behavior.
           </p>
@@ -30,8 +49,16 @@ export default function CustomerPersonaSection({ personaMarkdown, validationQues
                 ),
               }}
             >
-              {cleanNarrativeMarkdown(personaMarkdown)}
+              {hasFullPersona ? getPersonaPreview() : cleanNarrativeMarkdown(personaMarkdown)}
             </ReactMarkdown>
+            {hasFullPersona && onViewFullPersona && (
+              <button
+                onClick={onViewFullPersona}
+                className="mt-2 text-sm text-accent hover:underline font-medium"
+              >
+                Read more →
+              </button>
+            )}
           </div>
         </div>
       )}

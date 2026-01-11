@@ -14,6 +14,8 @@ import Screen1 from "./components/Screen1.jsx";
 import Screen2 from "./components/Screen2.jsx";
 import Screen3 from "./components/Screen3.jsx";
 import { getAutoFillData } from "./utils/autoFillData.js";
+import { validateInputConflicts } from "../../utils/validation/conflictValidation.js";
+import ConflictWarning from "../../components/validation/ConflictWarning.jsx";
 
 const SCREEN1_QUESTIONS = validationQuestions.screen1_questions || validationQuestions.category_questions || [];
 const SCREEN2_QUESTIONS = validationQuestions.screen2_questions || validationQuestions.idea_explanation_questions || [];
@@ -34,6 +36,7 @@ export default function IdeaValidator() {
   // Strip "val_" prefix if present - backend and API return validation_id without prefix
   const editValidationId = editValidationIdRaw ? editValidationIdRaw.replace(/^val_/, "") : null;
   const [isEditMode, setIsEditMode] = useState(!!editValidationId);
+  const [conflicts, setConflicts] = useState([]);
 
   // Load user data and activity data
   const { userIntake, loadingIntake, isFirstValidation, activityData, setActivityData } = useValidationData({
@@ -90,6 +93,23 @@ export default function IdeaValidator() {
         setError("Please answer all questions before continuing.");
         return;
       }
+      
+      // Check for conflicts between Screen 1 and Screen 2
+      const conflictCheck = validateInputConflicts(
+        formState.screen1Answers,
+        formState.screen2Answers,
+        formState.optionalAnswers,
+        formState.structuredDescription
+      );
+      
+      setConflicts(conflictCheck.conflicts);
+      const errorConflicts = conflictCheck.conflicts.filter(c => c.severity === "error");
+      if (errorConflicts.length > 0) {
+        // Don't proceed if there are errors
+        setError("Please fix the conflicts below before continuing.");
+        return;
+      }
+      
       setError("");
       setStep(2);
     } else if (step === 2) {
@@ -98,6 +118,24 @@ export default function IdeaValidator() {
         setError("Please provide a structured description of your idea.");
         return;
       }
+      
+      // Final conflict check before submission (includes description)
+      const conflictCheck = validateInputConflicts(
+        formState.screen1Answers,
+        formState.screen2Answers,
+        formState.optionalAnswers,
+        formState.structuredDescription
+      );
+      
+      setConflicts(conflictCheck.conflicts);
+      const errorConflicts = conflictCheck.conflicts.filter(c => c.severity === "error");
+      if (errorConflicts.length > 0) {
+        // Block submission if there are errors
+        setError("Cannot submit: Please fix the conflicts below.");
+        return;
+      }
+      
+      // Clear error if only warnings (warnings don't block submission)
       setError("");
       formState.handleSubmit();
     }
@@ -167,6 +205,13 @@ export default function IdeaValidator() {
           </div>
         )}
 
+        {/* Show conflict warnings if any */}
+        {conflicts.length > 0 && !loading && (
+          <div className="mb-6">
+            <ConflictWarning conflicts={conflicts} />
+          </div>
+        )}
+
         {error && !loading && (
           <div className="badge-danger mb-6 rounded-[16px] p-4">
             <p className="text-base font-semibold">{error}</p>
@@ -192,6 +237,7 @@ export default function IdeaValidator() {
           <Screen2
             questions={SCREEN2_QUESTIONS}
             answers={formState.screen2Answers}
+            screen1Answers={formState.screen1Answers}
             onAnswerChange={formState.handleScreen2Answer}
             error={error}
             loading={loading}
@@ -210,6 +256,8 @@ export default function IdeaValidator() {
             optionalAnswers={formState.optionalAnswers}
             onOptionalAnswerChange={formState.handleOptionalAnswer}
             onConstraintToggle={formState.handleConstraintToggle}
+            screen1Answers={formState.screen1Answers}
+            screen2Answers={formState.screen2Answers}
             error={error}
             loading={loading}
             onBack={handleBack}

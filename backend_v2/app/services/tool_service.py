@@ -155,8 +155,20 @@ class ToolService(BaseService):
             
             # Log raw LLM response before parsing to file
             try:
-                raw_content_text = f"Content length: {len(content)}\n\nFull content:\n{content}"
-                write_section_to_log("RAW ENRICHMENT MARKDOWN (BEFORE PARSING)", raw_content_text, "DEBUG", "ToolService")
+                # Check if required sections are present in raw content
+                has_decision_checklist = "### Decision Checklist" in content or "### decision checklist" in content.lower()
+                has_additional_insights = "### Additional Insights" in content or "### additional insights" in content.lower()
+                section_check = f"""
+Section Presence Check (case-insensitive):
+- Decision Checklist: {'✅ FOUND' if has_decision_checklist else '❌ MISSING'}
+- Additional Insights: {'✅ FOUND' if has_additional_insights else '❌ MISSING'}
+
+Content length: {len(content)}
+Content preview (last 1000 chars): {content[-1000:] if len(content) > 1000 else content}
+
+Full content:
+{content}"""
+                write_section_to_log("RAW ENRICHMENT MARKDOWN (BEFORE PARSING)", section_check, "DEBUG", "ToolService")
             except Exception as log_err:
                 print(f"Warning: Failed to write raw content log: {log_err}")
                 import traceback
@@ -445,12 +457,19 @@ Create a week-by-week action plan for the first 30-60 days. Include specific tas
 Provide realistic timeline estimates for key milestones (MVP, launch, break-even, etc.) and the effort required at each phase. Consider the user's time commitment and skills.
 
 ### Decision Checklist
-Provide a checklist of key decision points and criteria to evaluate whether to proceed with this idea. Include go/no-go criteria.
+**REQUIRED SECTION - DO NOT SKIP**: Provide a checklist of 5-7 key decision points and criteria to evaluate whether to proceed with this idea. Include go/no-go criteria. This section MUST contain actionable items. Format as bullet points.
 
 ### Additional Insights
-Any additional insights, opportunities, partnerships, or considerations that don't fit in the above sections.
+**REQUIRED SECTION - DO NOT SKIP**: Any additional insights, opportunities, partnerships, or considerations that don't fit in the above sections. Provide at least 2-3 sentences of strategic insights. This section MUST contain meaningful content.
 
-CRITICAL: Use EXACTLY these headings with ### markdown format. Every section MUST appear, even if some content is brief."""
+CRITICAL REQUIREMENTS:
+- Use EXACTLY these headings with ### markdown format: "### Decision Checklist" and "### Additional Insights"
+- EVERY section MUST appear in your response, including Decision Checklist and Additional Insights
+- Decision Checklist and Additional Insights are MANDATORY - do not skip them even if content is brief
+- If you cannot think of content, use default formats:
+  * Decision Checklist: "- [Decision point 1]\n- [Decision point 2]..."
+  * Additional Insights: "[At least 2-3 sentences of strategic insights]"
+- Both sections MUST have content - empty sections are not acceptable"""
         
         return prompt
     
@@ -546,6 +565,12 @@ CRITICAL: Use EXACTLY these headings with ### markdown format. Every section MUS
                             elif "timeline" in normalized_heading and "timeline" in normalized_pattern:
                                 current_field = field_name
                                 break
+                            elif "decision" in normalized_heading and "checklist" in normalized_heading and "decision" in normalized_pattern and "checklist" in normalized_pattern:
+                                current_field = field_name
+                                break
+                            elif "additional" in normalized_heading and "insights" in normalized_heading and "additional" in normalized_pattern and "insights" in normalized_pattern:
+                                current_field = field_name
+                                break
                 
                 if current_field:
                     self._log(f"ToolService: Found section '{current_field}' for heading '{trimmed}'", "DEBUG")
@@ -562,9 +587,42 @@ CRITICAL: Use EXACTLY these headings with ### markdown format. Every section MUS
         if current_field and current_content:
             result[current_field] = "\n".join(current_content).strip()
         
-        # Log parsing results
+        # CRITICAL: Validate that required sections are present, especially Decision Checklist and Additional Insights
+        missing_sections = []
+        if not result.get("decision_checklist") or not result["decision_checklist"].strip():
+            missing_sections.append("decision_checklist")
+            self._log("ToolService: WARNING - Decision Checklist section is missing or empty", "WARNING")
+        if not result.get("additional_insights") or not result["additional_insights"].strip():
+            missing_sections.append("additional_insights")
+            self._log("ToolService: WARNING - Additional Insights section is missing or empty", "WARNING")
+        
+        # Generate fallback content for missing required sections
+        if missing_sections:
+            idea_title = ""  # We don't have access to idea here, but we can use generic content
+            self._log(f"ToolService: Generating fallback content for missing sections: {missing_sections}", "INFO")
+            
+            if "decision_checklist" in missing_sections:
+                result["decision_checklist"] = """- Evaluate market demand and customer willingness to pay
+- Assess alignment with your skills, time commitment, and budget constraints
+- Consider competitive landscape and differentiation opportunities
+- Review risk factors specific to your operating constraints
+- Determine go/no-go criteria based on early validation results
+- Assess scalability potential given your resources
+- Evaluate strategic fit with your long-term goals"""
+                self._log("ToolService: Generated fallback Decision Checklist content", "INFO")
+            
+            if "additional_insights" in missing_sections:
+                result["additional_insights"] = """Consider exploring partnerships or collaborations that could accelerate your path to market. Early customer validation through interviews or surveys will provide critical feedback to refine your approach. Keep an eye on market trends and regulatory changes that might impact this opportunity."""
+                self._log("ToolService: Generated fallback Additional Insights content", "INFO")
+        
+        # Log parsing results with detail about required sections
         sections_found = [k for k, v in result.items() if v]
+        required_sections_status = {
+            "decision_checklist": "✅" if result.get("decision_checklist") and result["decision_checklist"].strip() else "❌",
+            "additional_insights": "✅" if result.get("additional_insights") and result["additional_insights"].strip() else "❌"
+        }
         self._log(f"ToolService: Parsed {len(sections_found)} sections with content: {sections_found}", "INFO")
+        self._log(f"ToolService: Required sections status: {required_sections_status}", "INFO")
         
         return result
     

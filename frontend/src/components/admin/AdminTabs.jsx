@@ -6,7 +6,6 @@ export default function AdminTabs({ activeTab, onTabChange }) {
     { id: "users", label: "Users" },
     { id: "payments", label: "Payments" },
     { id: "validation", label: "Validation Questions" },
-    { id: "intake", label: "Intake Form Fields" },
   ];
 
   return (

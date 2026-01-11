@@ -21,15 +21,16 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         response.headers["X-Request-ID"] = request_id
         
         # Log request
-        logger.info(
-            json.dumps({
-                "event": "http_request",
-                "request_id": request_id,
-                "method": request.method,
-                "path": request.url.path,
-                "status_code": response.status_code,
-            })
-        )
+        # Commented out to reduce log noise
+        # logger.info(
+        #     json.dumps({
+        #         "event": "http_request",
+        #         "request_id": request_id,
+        #         "method": request.method,
+        #         "path": request.url.path,
+        #         "status_code": response.status_code,
+        #     })
+        # )
         
         return response
 

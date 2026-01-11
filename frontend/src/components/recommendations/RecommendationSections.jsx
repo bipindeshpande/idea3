@@ -32,6 +32,8 @@ export default function RecommendationSections({
   discoveryNextSteps,
   immediateNextSteps,
   decisionChecklist,
+  // Modal handlers
+  onOpenPersonaModal,
 }) {
   // Skip rendering if enrichment is loading and content is empty
   if (isEnriching && !content?.trim()) {
@@ -85,6 +87,7 @@ export default function RecommendationSections({
           validationQuestions={validationQuestions}
           content={content}
           isEnriching={isEnriching}
+          onViewFullPersona={onOpenPersonaModal}
         />
       );
 

@@ -1,12 +1,28 @@
 import { useState, memo } from "react";
 import { Link } from "react-router-dom";
-import { formFieldsConfig } from "../../config/formFieldsConfig.js";
 import UISelect from "../ui/ui-select.jsx";
 import UIButton from "../ui/ui-button.jsx";
 import UICard from "../ui/ui-card.jsx";
 import UIHeading from "../ui/ui-heading.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../workspace/WorkspaceTheme.js";
 
-const selectClass = "ui-select text-sm focus-visible:outline-accent";
+const selectClass = "ui-select focus-visible:outline-accent";
+
+// Hardcoded options from IntakeScreen.jsx (matches actual form fields)
+const BUDGET_OPTIONS = [
+  "$0–100",
+  "$100–1,000",
+  "$1,000–5,000",
+  "$5,000–20,000",
+  "$20,000+"
+];
+
+const TIME_COMMITMENT_OPTIONS = [
+  "< 5 hrs/week",
+  "5–10 hrs/week",
+  "10–20 hrs/week",
+  "Full-time"
+];
 
 function DashboardSearchTab({
  advancedSearch,
@@ -68,20 +84,20 @@ function DashboardSearchTab({
         <UIHeading level="h3" className="mb-3">
           Search
         </UIHeading>
-        <p className="mb-4 text-sm text-secondary leading-relaxed max-w-md mx-auto">
+        <p className={"mb-4 " + WORKSPACE_TYPOGRAPHY.subtitle + " leading-relaxed max-w-md mx-auto"}>
  No items yet. These appear as you explore or validate ideas.
  </p>
  <div className="flex gap-3 justify-center">
  <Link
  to="/advisor"
-            className="text-sm text-accent hover:text-accent-hover"
+            className={WORKSPACE_TYPOGRAPHY.bodySmall.replace("text-primary", "text-accent") + " hover:text-accent-hover"}
  >
  Explore ideas
  </Link>
  <span className="text-secondary">•</span>
  <Link
  to="/validate-idea"
-            className="text-sm text-accent hover:text-accent-hover"
+            className={WORKSPACE_TYPOGRAPHY.bodySmall.replace("text-primary", "text-accent") + " hover:text-accent-hover"}
  >
  Validate an idea
  </Link>
@@ -96,7 +112,7 @@ function DashboardSearchTab({
         <UIHeading level="h3" className="mb-2">
           Advanced Search
         </UIHeading>
-        <p className="text-sm text-secondary">
+        <p className={WORKSPACE_TYPOGRAPHY.subtitle}>
  Use multiple search criteria and filters to find exactly what you're looking for.
  </p>
  </div>
@@ -107,7 +123,7 @@ function DashboardSearchTab({
           <div className="space-y-4">
  {/* Search Type */}
  <div>
-              <label className="block text-sm font-semibold text-primary mb-2">
+              <label className={"block " + WORKSPACE_TYPOGRAPHY.label + " mb-2"}>
  Search Type
  </label>
               <UISelect
@@ -180,52 +196,42 @@ function DashboardSearchTab({
  </div>
 
  {/* Budget Range */}
- {(() => {
- const budgetField = formFieldsConfig.fields.find(f => f.id === "budget_range");
- return (
  <div>
-                      <label className="block text-sm font-semibold text-primary mb-2">
- Budget Range
- </label>
-                      <UISelect
- value={advancedSearch.budgetRange}
- onChange={(e) => setAdvancedSearch({...advancedSearch, budgetRange: e.target.value})}
-                        className={selectClass}
- >
- <option value="all">All Budgets</option>
- {budgetField?.options?.map((option) => (
- <option key={option} value={option}>
- {option}
- </option>
- ))}
-                      </UISelect>
+   <label className="block text-sm font-semibold text-primary mb-2">
+     Budget Range
+   </label>
+   <UISelect
+     value={advancedSearch.budgetRange}
+     onChange={(e) => setAdvancedSearch({...advancedSearch, budgetRange: e.target.value})}
+     className={selectClass}
+   >
+     <option value="all">All Budgets</option>
+     {BUDGET_OPTIONS.map((option) => (
+       <option key={option} value={option}>
+         {option}
+       </option>
+     ))}
+   </UISelect>
  </div>
- );
- })()}
 
  {/* Time Commitment */}
- {(() => {
- const timeField = formFieldsConfig.fields.find(f => f.id === "time_commitment");
- return (
  <div>
-                      <label className="block text-sm font-semibold text-primary mb-2">
- Time Commitment
- </label>
-                      <UISelect
- value={advancedSearch.timeCommitment}
- onChange={(e) => setAdvancedSearch({...advancedSearch, timeCommitment: e.target.value})}
-                        className={selectClass}
- >
- <option value="all">All Time</option>
- {timeField?.options?.map((option) => (
- <option key={option} value={option}>
- {option}
- </option>
- ))}
-                      </UISelect>
+   <label className="block text-sm font-semibold text-primary mb-2">
+     Time Commitment
+   </label>
+   <UISelect
+     value={advancedSearch.timeCommitment}
+     onChange={(e) => setAdvancedSearch({...advancedSearch, timeCommitment: e.target.value})}
+     className={selectClass}
+   >
+     <option value="all">All Time</option>
+     {TIME_COMMITMENT_OPTIONS.map((option) => (
+       <option key={option} value={option}>
+         {option}
+       </option>
+     ))}
+   </UISelect>
  </div>
- );
- })()}
  </div>
  ) : (
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -313,7 +319,7 @@ function DashboardSearchTab({
  {/* Results Count and Compare Button */}
  {searchPerformed && (
  <div className="flex items-center justify-between mb-4">
-        <div className="text-sm text-secondary">
+        <div className={WORKSPACE_TYPOGRAPHY.subtitle}>
  {advancedSearch.searchType === "ideas" && (
  <>Showing {filteredIdeas.length} of {allIdeas.length} ideas</>
  )}
@@ -397,13 +403,13 @@ function DashboardSearchTab({
  className="mt-1 rounded border-default text-accent "
  />
  <div className="flex-1">
-                    <h4 className="text-sm font-bold text-primary">
+                    <h4 className={WORKSPACE_TYPOGRAPHY.label + " font-bold"}>
  {idea.title}
  </h4>
-                    <p className="text-xs text-secondary mt-1">
+                    <p className={WORKSPACE_TYPOGRAPHY.caption + " mt-1"}>
  {idea.summary}
  </p>
-                    <p className="text-xs text-secondary mt-1">
+                    <p className={WORKSPACE_TYPOGRAPHY.caption + " mt-1"}>
  {idea.runCreatedAt ? new Date(idea.runCreatedAt).toLocaleDateString() : "Unknown date"}
  </p>
  </div>
@@ -422,16 +428,16 @@ function DashboardSearchTab({
  key={session.id}
                 className="ui-card2 ui-pad-md"
  >
-                  <h4 className="text-sm font-bold text-primary">
+                  <h4 className={WORKSPACE_TYPOGRAPHY.label + " font-bold"}>
  {session.idea_explanation || "Validation"}
  </h4>
  <div className="flex items-center gap-2 mt-2">
  {session.overall_score !== undefined && (
-                      <span className="text-xs font-bold text-accent">
+                      <span className={WORKSPACE_TYPOGRAPHY.caption + " font-bold text-accent"}>
  Score: {session.overall_score.toFixed(1)}/10
  </span>
  )}
-                  <span className="text-xs text-secondary">
+                  <span className={WORKSPACE_TYPOGRAPHY.caption}>
  ID: {session.validation_id || session.id || "N/A"} • {session.timestamp ? new Date(session.timestamp).toLocaleDateString() : "Unknown date"}
  </span>
  </div>
@@ -444,18 +450,18 @@ function DashboardSearchTab({
  {((advancedSearch.searchType === "ideas" && filteredIdeas.length === 0) ||
  (advancedSearch.searchType === "validations" && filteredValidations.length === 0)) && (
             <UICard className="ui-pad-md text-center">
-              <p className="text-sm font-semibold text-primary mb-2">
+              <p className={WORKSPACE_TYPOGRAPHY.label + " mb-2"}>
  {advancedSearch.searchType === "ideas" 
  ? `No ideas found. ${allIdeas.length === 0 ? "No ideas available yet." : "Adjust your filters."}`
  : `No validations found. ${allValidations.length === 0 ? "No validations available yet." : "Adjust your filters."}`}
  </p>
  {allIdeas.length > 0 && advancedSearch.searchType === "ideas" && (
-                <p className="text-xs text-secondary mb-4">
+                <p className={WORKSPACE_TYPOGRAPHY.caption + " mb-4"}>
  Showing 0 of {allIdeas.length} ideas. Try removing filters or changing your search query.
  </p>
  )}
  {allValidations.length > 0 && advancedSearch.searchType === "validations" && (
-                <p className="text-xs text-secondary mb-4">
+                <p className={WORKSPACE_TYPOGRAPHY.caption + " mb-4"}>
  Showing 0 of {allValidations.length} validations. Try removing filters or changing your search query.
  </p>
  )}

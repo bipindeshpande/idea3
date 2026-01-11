@@ -13,19 +13,20 @@
  */
 export function clearAllLocalStorage() {
  // Clear all known localStorage keys used by the app
- const keysToClear = [
- 'session_token',
- 'validations',
- 'reports',
- 'runs',
- 'analytics_data',
- 'theme',
- 'admin_auth',
- 'validation_tooltips_dismissed',
- 'revalidate_data',
- 'sia_validation_questions',
- 'sia_intake_fields',
- ];
+  const keysToClear = [
+    'session_token',
+    'validations',
+    'reports',
+    'runs',
+    'analytics_data',
+    'theme',
+    'admin_auth',
+    'validation_tooltips_dismissed',
+    'revalidate_data',
+    'sia_validation_questions',
+    'sia_intake_fields',
+    'discovery_draft',
+  ];
 
  // Clear specific keys
  keysToClear.forEach(key => {
@@ -36,16 +37,17 @@ export function clearAllLocalStorage() {
  // (This is a fallback - be careful in production)
  const keysToCheck = Object.keys(localStorage);
  keysToCheck.forEach(key => {
- // Clear any key that looks like it belongs to this app
- if (
- key.includes('validation') ||
- key.includes('report') ||
- key.includes('run_') ||
- key.includes('session') ||
- key.includes('sia_')
- ) {
- localStorage.removeItem(key);
- }
+    // Clear any key that looks like it belongs to this app
+    if (
+      key.includes('validation') ||
+      key.includes('report') ||
+      key.includes('run_') ||
+      key.includes('session') ||
+      key.includes('sia_') ||
+      key.includes('discovery_draft')
+    ) {
+      localStorage.removeItem(key);
+    }
  });
 
  console.log('✅ All localStorage data cleared');

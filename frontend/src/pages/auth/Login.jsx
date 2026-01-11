@@ -57,7 +57,14 @@ export default function Login() {
       <Card className="relative max-w-sm mx-auto w-full" padding="sm">
         <div className="absolute -top-10 -left-10 w-[260px] h-[260px] rounded-full bg-surface opacity-[0.09] blur-2xl pointer-events-none"></div>
         <div className="relative z-10">
-        <div className="mb-6">
+        <div className="mb-6 text-center">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <img 
+              src="/favicon.svg" 
+              alt="Idea Bunch" 
+              className="w-8 h-8 flex-shrink-0" 
+            />
+          </div>
           <h1 className="text-2xl font-semibold text-primary mb-2">Sign In</h1>
           <p className="text-sm text-secondary">Welcome back! Sign in to continue.</p>
         </div>

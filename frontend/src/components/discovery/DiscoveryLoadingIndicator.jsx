@@ -11,7 +11,8 @@ export default function DiscoveryLoadingIndicator({
  streamingOutput = "", 
  isCached = false,
  startTime = null,
- duration = null // Duration in milliseconds when request completes
+ duration = null, // Duration in milliseconds when request completes
+ onCancel = null // Cancel callback function
 }) {
  const [stepIndex, setStepIndex] = useState(0);
  const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -117,6 +118,17 @@ export default function DiscoveryLoadingIndicator({
  </p>
  )}
  </div>
+ 
+ {onCancel && !isComplete && (
+ <div className="mt-4">
+ <button
+ onClick={onCancel}
+ className="ui-btn ui-btn-secondary text-sm px-4 py-2 focus-visible:outline-accent"
+ >
+ Cancel Request
+ </button>
+ </div>
+ )}
  
  {streamingOutput && (
  <div 

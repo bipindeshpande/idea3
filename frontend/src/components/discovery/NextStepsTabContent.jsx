@@ -65,7 +65,7 @@ export default function NextStepsTabContent({
             variant="primary"
             size="sm"
             onClick={() => {
-              navigate(`/results/recommendations/${topIdeas[0].index}${runId || currentRunId ? `?id=${runId || currentRunId}` : ''}`, {
+              navigate(`/dashboard/recommendations/${topIdeas[0].index}${runId || currentRunId ? `?id=${runId || currentRunId}` : ''}`, {
                 state: {
                   idea: topIdeas[0],
                   allIdeas: allIdeas,

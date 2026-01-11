@@ -6,15 +6,15 @@ from app.services.base_service import BaseService
 from app.services.llm_service import LLMService
 from app.services.cache_service import CacheService
 from app.core.config import settings
-from app.services.profile_analysis.profile_analysis_utils import (
-    clean_profile_analysis,
-    parse_profile_response,
-    wrap_profile_analysis
-)
+from app.services.parsers.profile_parser import ProfileParser
 from app.services.profile_analysis.profile_variable_extractor import ProfileVariableExtractor
 from app.services.profile_analysis.profile_prompt_builder import ProfilePromptBuilder
 
-# Export clean_profile_analysis for backward compatibility
+# Export clean_profile_analysis for backward compatibility (wrapper function)
+def clean_profile_analysis(text: str) -> str:
+    """Backward compatibility wrapper for ProfileParser.clean_and_wrap()"""
+    return ProfileParser.clean_and_wrap(text)
+
 __all__ = ["ProfileAnalysisService", "clean_profile_analysis"]
 
 
@@ -41,8 +41,22 @@ class ProfileAnalysisService(BaseService):
         cache_key = self._generate_cache_key(inputs)
         cached = self.cache_service.get(cache_key, cache_type="profile")
         if cached:
-            self._log("Profile analysis cache hit")
-            return cached
+            # Validate cached data has required structure
+            if isinstance(cached, dict) and "profile_analysis" in cached:
+                profile_text = cached.get("profile_analysis", "")
+                # Validate that cached profile is properly formatted
+                try:
+                    ProfileParser.extract_json(profile_text)
+                    self._log("Profile analysis cache hit (validated)")
+                    return cached
+                except Exception as e:
+                    self._log(f"WARNING: Cached profile data is invalid or corrupted: {e}. Regenerating.", "WARNING")
+                    # Clear invalid cache
+                    self.cache_service.delete(cache_key, cache_type="profile")
+            else:
+                self._log("WARNING: Cached profile data has unexpected structure. Regenerating.", "WARNING")
+                # Clear invalid cache
+                self.cache_service.delete(cache_key, cache_type="profile")
         
         # Extract user variables
         variables = ProfileVariableExtractor.extract_user_variables(inputs)
@@ -72,10 +86,10 @@ class ProfileAnalysisService(BaseService):
             )
 
             # Parse and validate response
-            json_obj = parse_profile_response(response["content"])
+            json_obj = ProfileParser.parse_response(response["content"])
             
             # Wrap in delimiters
-            profile_analysis = wrap_profile_analysis(json_obj)
+            profile_analysis = ProfileParser.wrap(json_obj)
 
             result = {
                 "profile_analysis": profile_analysis,
@@ -168,10 +182,10 @@ class ProfileAnalysisService(BaseService):
             )
 
             # Parse and validate response
-            json_obj = parse_profile_response(response["content"])
+            json_obj = ProfileParser.parse_response(response["content"])
             
             # Wrap in delimiters
-            profile_analysis = wrap_profile_analysis(json_obj)
+            profile_analysis = ProfileParser.wrap(json_obj)
 
             result = {
                 "profile_analysis": profile_analysis,

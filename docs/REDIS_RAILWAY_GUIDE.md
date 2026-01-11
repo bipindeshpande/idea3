@@ -436,3 +436,5 @@ railway run python -c "from app.core.redis_client import get_redis; from rq impo
 **Bottom Line**: For production with background jobs, use Railway Redis Service. It's the easiest and most reliable option.
 
 
+
+

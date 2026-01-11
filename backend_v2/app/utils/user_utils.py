@@ -36,37 +36,38 @@ def verify_run_ownership(
     Verify that the requesting user has permission to access a resource.
     
     Security rules:
-    - If resource has a user_id, requesting user must be authenticated and match
-    - If resource has no user_id (NULL), require authentication (safer for production)
-      This prevents unauthorized access to anonymous resources
+    - ALL resources require authentication (no anonymous access)
+    - If resource has a user_id, requesting user must match
+    - If resource has no user_id (legacy/anonymous), still require authentication
+      and deny access (legacy runs should be migrated or are inaccessible)
     
     Args:
-        run_user_id: The user_id of the resource (can be None)
-        requesting_user_id: The user_id of the requesting user (can be None)
+        run_user_id: The user_id of the resource (can be None for legacy runs)
+        requesting_user_id: The user_id of the requesting user (can be None if not authenticated)
         resource_name: Name of resource for error messages (default: "run")
         
     Raises:
         AuthorizationError: If user doesn't have permission
     """
+    # ALL resources require authentication
+    if not requesting_user_id:
+        raise AuthorizationError(
+            f"Authentication required to access this {resource_name}"
+        )
+    
     # If resource has a user_id, requesting user must match
     if run_user_id:
-        if not requesting_user_id:
-            raise AuthorizationError(
-                f"Authentication required to access this {resource_name}"
-            )
         if run_user_id != requesting_user_id:
             raise AuthorizationError(
                 f"You do not have permission to access this {resource_name}"
             )
     else:
-        # Resource has no user_id - in production, we require authentication
-        # to prevent unauthorized access to anonymous resources
-        # (This is a security measure; if you want to allow anonymous access,
-        # you'll need session/IP-based verification which is harder to implement securely)
-        if not requesting_user_id:
-            raise AuthorizationError(
-                f"Authentication required to access this {resource_name}"
-            )
+        # Resource has no user_id (legacy/anonymous run) - deny access
+        # Legacy anonymous runs are no longer accessible for security reasons.
+        # Users should create new runs which will be properly associated with their account.
+        raise AuthorizationError(
+            f"Access denied: This {resource_name} is not associated with any user account. Please create a new {resource_name}."
+        )
 
 
 def validate_user_id(user_id: Optional[str], allow_none: bool = True) -> Optional[str]:

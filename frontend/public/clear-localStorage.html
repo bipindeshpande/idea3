@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear LocalStorage</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px 10px 0;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button.danger {
+            background: #dc3545;
+        }
+        .button.danger:hover {
+            background: #c82333;
+        }
+        .info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        .keys-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .key-count {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Clear LocalStorage</h1>
+        
+        <div class="info">
+            <strong>⚠️ Warning:</strong> This will clear all application data stored in your browser's localStorage. 
+            You will need to log in again after clearing.
+        </div>
+
+        <div class="key-count" id="keyCount"></div>
+        <div class="keys-list" id="keysList"></div>
+
+        <button class="button danger" onclick="clearAll()">Clear All LocalStorage</button>
+        <button class="button" onclick="clearAppOnly()">Clear App Data Only (Keep Settings)</button>
+        <button class="button" onclick="listKeys()">Refresh Key List</button>
+
+        <div class="success" id="success">
+            ✅ LocalStorage cleared successfully!
+        </div>
+    </div>
+
+    <script>
+        const APP_KEYS = [
+            'sia_session_token',
+            'sia_saved_runs',
+            'sia_validations',
+            'recentDiscovery',
+            'discovery_draft',
+            'revalidate_data',
+            'sia_validation_questions',
+            'sia_intake_fields',
+            'session_token',
+            'validations',
+            'reports',
+            'runs',
+            'analytics_data',
+            'admin_auth',
+            'validation_tooltips_dismissed'
+        ];
+
+        function listKeys() {
+            const keys = Object.keys(localStorage);
+            const keyCount = document.getElementById('keyCount');
+            const keysList = document.getElementById('keysList');
+            
+            keyCount.textContent = `Found ${keys.length} localStorage key(s):`;
+            keysList.innerHTML = keys.length > 0 
+                ? keys.map(k => `• ${k}`).join('<br>')
+                : '<em>No keys found</em>';
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear ALL localStorage? This includes app data AND settings like theme preferences.')) {
+                localStorage.clear();
+                showSuccess();
+                listKeys();
+            }
+        }
+
+        function clearAppOnly() {
+            if (confirm('Clear all app data (runs, validations, reports) but keep settings like theme?')) {
+                let clearedCount = 0;
+                
+                // Clear known app keys
+                APP_KEYS.forEach(key => {
+                    if (localStorage.getItem(key)) {
+                        localStorage.removeItem(key);
+                        clearedCount++;
+                    }
+                });
+
+                // Clear any keys that match app patterns
+                const keysToCheck = Object.keys(localStorage);
+                keysToCheck.forEach(key => {
+                    if (
+                        key.includes('validation') ||
+                        key.includes('report') ||
+                        key.includes('run_') ||
+                        key.includes('session') ||
+                        key.includes('sia_') ||
+                        key.includes('discovery')
+                    ) {
+                        localStorage.removeItem(key);
+                        clearedCount++;
+                    }
+                });
+
+                showSuccess(`Cleared ${clearedCount} key(s)`);
+                listKeys();
+            }
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success');
+            if (message) {
+                successDiv.innerHTML = `✅ ${message}`;
+            }
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // List keys on page load
+        listKeys();
+    </script>
+</body>
+</html>
+

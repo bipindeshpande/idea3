@@ -1,7 +1,6 @@
 /**
  * DiscoveryLoadingState - Standardized loading state component for discovery pages
  */
-import DiscoveryCard from "./DiscoveryCard.jsx";
 import { DISCOVERY_TYPOGRAPHY } from "./DiscoveryTheme.js";
 
 export default function DiscoveryLoadingState({
@@ -17,15 +16,13 @@ export default function DiscoveryLoadingState({
   };
 
   return (
-    <DiscoveryCard className={className}>
-      <div className="text-center">
-        <div className="mb-4 flex justify-center">
-          <div className={`${spinnerSizes[size]} animate-spin rounded-full border-default border-t-brand-600`}></div>
-        </div>
-        <h2 className={DISCOVERY_TYPOGRAPHY.h3}>{title}</h2>
-        <p className={`mt-2 ${DISCOVERY_TYPOGRAPHY.subtitle}`}>{message}</p>
+    <div className={`text-center ${className}`}>
+      <div className="mb-4 flex justify-center">
+        <div className={`${spinnerSizes[size]} animate-spin rounded-full border-default border-t-brand-600`}></div>
       </div>
-    </DiscoveryCard>
+      <h2 className={DISCOVERY_TYPOGRAPHY.h3}>{title}</h2>
+      <p className={`mt-2 ${DISCOVERY_TYPOGRAPHY.subtitle}`}>{message}</p>
+    </div>
   );
 }
 

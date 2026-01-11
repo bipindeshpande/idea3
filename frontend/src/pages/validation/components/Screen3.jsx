@@ -1,4 +1,6 @@
+import { useState, useMemo, useEffect } from "react";
 import UIHeading from "../../../components/ui/ui-heading.jsx";
+import { getFilteredOptions } from "../../../utils/validation/conflictValidation.js";
 
 /**
  * Screen 3: Tell Us More
@@ -11,12 +13,66 @@ export default function Screen3({
   optionalAnswers,
   onOptionalAnswerChange,
   onConstraintToggle,
+  screen1Answers,
+  screen2Answers,
   error,
   loading,
   onBack,
   onNext,
   onAutoFill,
 }) {
+  // Track overrides for disabled options
+  const [overrides, setOverrides] = useState(new Set());
+
+  // Reset overrides when dependencies change (e.g., business archetype changes)
+  // This prevents stale overrides when compatibility changes
+  useEffect(() => {
+    setOverrides(new Set());
+  }, [screen2Answers?.business_archetype]);
+
+  // Get filtered options for delivery_channel
+  const deliveryChannelField = optionalFields.find(f => f.id === "delivery_channel");
+  const filteredDeliveryChannels = useMemo(() => {
+    if (!deliveryChannelField) return null;
+    const currentAnswers = { ...screen1Answers, ...screen2Answers };
+    return getFilteredOptions(
+      "delivery_channel",
+      deliveryChannelField.options,
+      currentAnswers
+    );
+  }, [deliveryChannelField, screen1Answers, screen2Answers]);
+
+  const handleOverrideToggle = (fieldId, optionValue) => {
+    const key = `${fieldId}:${optionValue}`;
+    setOverrides((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
+
+  const isOptionEnabled = (fieldId, optionValue) => {
+    if (fieldId !== "delivery_channel" || !filteredDeliveryChannels) return true;
+
+    const optionData = filteredDeliveryChannels.find((opt) => opt.value === optionValue);
+    if (!optionData) return true;
+
+    const overrideKey = `${fieldId}:${optionValue}`;
+    if (overrides.has(overrideKey)) return true;
+
+    return optionData.enabled;
+  };
+
+  const getOptionReason = (fieldId, optionValue) => {
+    if (fieldId !== "delivery_channel" || !filteredDeliveryChannels) return null;
+
+    const optionData = filteredDeliveryChannels.find((opt) => opt.value === optionValue);
+    return optionData?.reason || null;
+  };
   return (
     <div className="rounded-2xl border border-default bg-surface p-8 shadow-lg">
       <div className="flex items-center justify-between gap-4 mb-3">
@@ -61,6 +117,9 @@ export default function Screen3({
         {/* Optional Fields */}
         {optionalFields.map((field) => {
           if (["initial_budget", "delivery_channel"].includes(field.id)) {
+            const needsFiltering = field.id === "delivery_channel";
+            const filteredOptions = needsFiltering ? filteredDeliveryChannels : null;
+
             return (
               <div key={field.id}>
                 <label htmlFor={field.id} className="mb-2 block text-base font-semibold text-primary">
@@ -69,16 +128,95 @@ export default function Screen3({
                 <select
                   id={field.id}
                   value={optionalAnswers[field.id] || ""}
-                  onChange={(e) => onOptionalAnswerChange(field.id, e.target.value)}
+                  onChange={(e) => {
+                    const selectedValue = e.target.value;
+                    onOptionalAnswerChange(field.id, selectedValue);
+                    
+                    // Auto-enable override if user selects a disabled option
+                    if (needsFiltering && filteredOptions) {
+                      const selectedOption = filteredOptions.find(opt => opt.value === selectedValue);
+                      if (selectedOption && !selectedOption.enabled) {
+                        const overrideKey = `${field.id}:${selectedValue}`;
+                        if (!overrides.has(overrideKey)) {
+                          handleOverrideToggle(field.id, selectedValue);
+                        }
+                      }
+                    }
+                  }}
                   className="ui-select focus-visible:outline-accent"
                 >
                   <option value="">Select an option...</option>
-                  {field.options.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
+                  {field.options.map((option) => {
+                    const enabled = isOptionEnabled(field.id, option);
+                    const isSelected = optionalAnswers[field.id] === option;
+
+                    return (
+                      <option
+                        key={option}
+                        value={option}
+                        style={!enabled && !isSelected ? { 
+                          color: '#999', 
+                          fontStyle: 'italic'
+                        } : {}}
+                      >
+                        {!enabled && !isSelected ? `${option} ⚠️ (not recommended)` : option}
+                      </option>
+                    );
+                  })}
                 </select>
+
+                {/* Show warning if user selected a disabled delivery channel */}
+                {needsFiltering && filteredOptions && optionalAnswers[field.id] && (
+                  (() => {
+                    const selectedOption = filteredOptions.find(opt => opt.value === optionalAnswers[field.id]);
+                    if (selectedOption && !selectedOption.enabled) {
+                      const overrideKey = `${field.id}:${optionalAnswers[field.id]}`;
+                      const isOverridden = overrides.has(overrideKey);
+                      
+                      return (
+                        <div className="mt-2 rounded-lg border border-warning/30 bg-warning/5 p-3 text-sm">
+                          <div className="flex items-start gap-2">
+                            <svg
+                              className="w-5 h-5 text-warning flex-shrink-0 mt-0.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                              />
+                            </svg>
+                            <div className="flex-1">
+                              <p className="font-medium text-primary mb-1">
+                                ⚠️ Unusual combination detected
+                              </p>
+                              {selectedOption.reason && (
+                                <p className="text-secondary text-xs mb-2">
+                                  {selectedOption.reason}
+                                </p>
+                              )}
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={isOverridden}
+                                  onChange={() => handleOverrideToggle(field.id, optionalAnswers[field.id])}
+                                  className="h-4 w-4 rounded border-default text-accent"
+                                />
+                                <span className="text-xs text-secondary">
+                                  I understand this is unusual. My description explains why this combination makes sense.
+                                </span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()
+                )}
               </div>
             );
           } else if (field.id === "constraints" && field.multiSelect) {

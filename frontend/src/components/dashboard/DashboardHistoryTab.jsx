@@ -1,5 +1,6 @@
 import { memo } from "react";
 import SessionCard from "./SessionCard.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../workspace/WorkspaceTheme.js";
 
 function DashboardHistoryTab({
  filteredRuns,
@@ -12,16 +13,16 @@ function DashboardHistoryTab({
  return (
  <>
  {loadingRuns ? (
- <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <p className="text-sm text-secondary leading-relaxed">Loading history...</p>
- </div>
+  <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
+   <p className={WORKSPACE_TYPOGRAPHY.subtitle + " leading-relaxed"}>Loading history...</p>
+  </div>
  ) : (
- <>
- {filteredRuns.length === 0 ? (
- <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
- <h3 className="text-lg font-semibold text-primary mb-1">
- No discovery runs yet
- </h3>
+  <>
+   {filteredRuns.length === 0 ? (
+    <div className="rounded-xl border border-default shadow-sm bg-surface p-6 md:p-7 text-center">
+     <h3 className={WORKSPACE_TYPOGRAPHY.h4 + " mb-1"}>
+      No discovery runs yet
+     </h3>
 
  </div>
  ) : (

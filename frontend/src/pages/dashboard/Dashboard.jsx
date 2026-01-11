@@ -18,7 +18,6 @@ import DashboardActiveIdeasTab from "../../components/dashboard/DashboardActiveI
 import DashboardHistoryTab from "../../components/dashboard/DashboardHistoryTab.jsx";
 import DashboardValidationsTab from "../../components/dashboard/DashboardValidationsTab.jsx";
 import DashboardCompareTab from "../../components/dashboard/DashboardCompareTab.jsx";
-import DashboardStats from "../../components/dashboard/DashboardStats.jsx";
 import TabButton from "../../components/ui/ui-tab-button.jsx";
 import UIButton from "../../components/ui/ui-button.jsx";
 
@@ -31,6 +30,7 @@ import { useComparison } from "../../hooks/dashboard/useComparison.js";
 import { useFiltering } from "../../hooks/dashboard/useFiltering.js";
 import { useDataMerging } from "../../hooks/dashboard/useDataMerging.js";
 import ValidationComparisonView from "../../components/dashboard/ValidationComparisonView.jsx";
+import { WORKSPACE_TYPOGRAPHY } from "../../components/workspace/WorkspaceTheme.js";
 
 const STORAGE_KEY = "sia_saved_runs";
 
@@ -276,16 +276,6 @@ export default function DashboardPage() {
  />
 
  <div className="pb-16">
- {/* Stats */}
- <div className="grid gap-4">
- <DashboardStats
-  ideas={allIdeas}
-  validations={apiValidations}
-  matchPercent={insights?.match_percent}
-  riskAlerts={insights?.risk_alerts}
- />
- </div>
-
  {/* ---------------------------------------------------------------------
  TAB BAR 
  --------------------------------------------------------------------- */}
@@ -346,10 +336,10 @@ export default function DashboardPage() {
 
  {/* VALIDATIONS TAB */}
  {activeTab === "validations" && (
- <div>
- <p className="section-description">
- All idea validations you’ve run—compare, revisit, or refine your assumptions.
- </p>
+  <div>
+   <p className={WORKSPACE_TYPOGRAPHY.subtitleLarge + " mb-6"}>
+    All idea validations you've run—compare, revisit, or refine your assumptions.
+   </p>
 
  {comparisonData?.validations ? (
   <ValidationComparisonView
@@ -380,10 +370,10 @@ export default function DashboardPage() {
 
  {/* HISTORY TAB */}
  {activeTab === "history" && (
- <div>
- <p className="section-description">
- Browse all previous discoveries and validations.
- </p>
+  <div>
+   <p className={WORKSPACE_TYPOGRAPHY.subtitleLarge + " mb-6"}>
+    Browse all previous discoveries and validations.
+   </p>
 
  <DashboardHistoryTab
  filteredRuns={filteredRuns}

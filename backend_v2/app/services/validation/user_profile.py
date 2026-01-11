@@ -38,15 +38,13 @@ class UserProfileRetriever:
             user_profile = None
             user_constraints = None
             
-            # Extract profile analysis from run
+            # Extract profile analysis from run using shared parser library
             if latest_run.profile_analysis:
                 try:
-                    # Try to parse as JSON first
-                    if latest_run.profile_analysis.startswith("{"):
-                        user_profile = json.loads(latest_run.profile_analysis)
-                    else:
-                        # Otherwise use as string
-                        user_profile = latest_run.profile_analysis
+                    from app.services.parsers.profile_parser import ProfileParser
+                    parsed = ProfileParser.extract_json(latest_run.profile_analysis)
+                    # If parsing fails, use raw text (could be old format or already a string)
+                    user_profile = parsed if parsed else latest_run.profile_analysis
                 except Exception:
                     user_profile = latest_run.profile_analysis
             

@@ -1,9 +1,6 @@
-import CollapsibleSection from "../ui/CollapsibleSection.jsx";
-import { getSectionTheme } from "../recommendations/utils/sectionThemes.js";
-import { useSectionToggle } from "../recommendations/hooks/useSectionToggle.js";
-
 /**
  * Action Items Section Component
+ * Renders action items list without collapsible wrapper (used in dedicated Actions & Notes tab)
  */
 export default function ActionItemsSection({
   actions,
@@ -15,21 +12,12 @@ export default function ActionItemsSection({
   isValidIdeaId,
   isAuthenticated,
 }) {
-  const { openSections, toggleSection } = useSectionToggle();
-
   if (!isAuthenticated) {
     return null;
   }
 
   return (
-    <CollapsibleSection
-      title="Action Items"
-      description="Track your progress on this idea. Mark items as completed as you work through them."
-      theme={getSectionTheme("Action Items")}
-      isOpen={openSections.has("actions")}
-      onToggle={() => toggleSection("actions")}
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Add new action */}
         {!isValidIdeaId ? (
           <div className="rounded-lg border border-default bg-surface p-3">
@@ -79,7 +67,7 @@ export default function ActionItemsSection({
             {actions.map((action) => (
               <div
                 key={action.id}
-                className="flex items-center gap-3 rounded-xl border border-default bg-surface p-3"
+                className="flex items-center gap-3 rounded-xl border border-default bg-surface p-3 overflow-hidden min-w-0"
               >
                 <select
                   value={action.status}
@@ -92,7 +80,7 @@ export default function ActionItemsSection({
                   <option value="blocked">Blocked</option>
                 </select>
                 <span
-                  className={`flex-1 text-sm ${
+                  className={`flex-1 text-sm break-words ${
                     action.status === "completed" ? "line-through text-secondary" : "text-primary"
                   }`}
                 >
@@ -116,8 +104,7 @@ export default function ActionItemsSection({
             ))}
           </div>
         )}
-      </div>
-    </CollapsibleSection>
+    </div>
   );
 }
 

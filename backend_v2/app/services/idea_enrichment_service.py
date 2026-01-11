@@ -39,12 +39,22 @@ class IdeaEnrichmentService(BaseService):
             enriched_idea = copy.deepcopy(idea)
             
             # Generate lightweight next_steps
-            next_steps = self._generate_lightweight_next_steps(idea, profile_data, inputs)
+            try:
+                next_steps = self._generate_lightweight_next_steps(idea, profile_data, inputs)
+                self._log(f"Generated next_steps for idea '{idea.get('title', 'unknown')}': length={len(next_steps) if next_steps else 0}", "INFO")
+            except Exception as e:
+                self._log(f"Failed to generate next_steps for idea '{idea.get('title', 'unknown')}': {e}", "ERROR")
+                # Use fallback
+                next_steps = "- Test basic demand with a simple landing page\n- Talk to 3-5 potential customers\n- Create a rough prototype\n- Validate pricing\n- Get feedback and iterate"
             
             # Store in enrichment.next_steps
             enriched_idea["enrichment"] = {
                 "next_steps": next_steps
             }
+            
+            # Verify it was stored
+            if not enriched_idea.get("enrichment", {}).get("next_steps"):
+                self._log(f"WARNING: next_steps not stored for idea '{idea.get('title', 'unknown')}'", "WARNING")
             
             enriched_ideas.append(enriched_idea)
         

@@ -21,6 +21,21 @@ class PromptBuilder:
     # STAGE 2 – IDEA RESEARCH + RECOMMENDATIONS PROMPT
     # ----------------------------------------------------------------------
     @staticmethod
+    def build_idea_research_system_prompt() -> str:
+        """
+        Build the system prompt for idea generation.
+        This sets the AI's role and format requirements.
+        Centralized here to avoid duplication.
+        """
+        return """You are a startup advisor (StartupIdeaGPT). You MUST output recommendations using the EXACT format specified in the user prompt.
+
+CRITICAL RULES:
+- Follow the format EXACTLY as specified in the user prompt
+- Output ONLY the IDEA blocks as specified
+- Each idea title MUST be exactly 3-4 words that meaningfully capture the core business concept
+- DO NOT use abstract nouns, framework categories, or strategy terms as titles"""
+
+    @staticmethod
     def build_idea_research_prompt(
         profile_analysis: str,
         realism_level: int = 3,
@@ -82,29 +97,23 @@ USER INPUT PROFILE (STRUCTURED):
 List of skills selected:
 {skills_text}
 
-CRITICAL: Only propose ideas that directly match these skills OR require capabilities adjacent to them. 
+CRITICAL - Skills Matching (MUST FOLLOW):
+Only propose ideas that directly match these skills OR require capabilities closely related to these skills (skills that are a natural extension or adjacent application of the user's existing capabilities). 
 - If user selected "Cooking / Food Prep" → ONLY suggest food/cooking/meal prep ideas
 - If user selected "Crafting / Handmade" → ONLY suggest handmade/product design/Etsy-style ideas
 - If user selected physical/home-based skills → AVOID AI-heavy, tech-intensive, or app development ideas
 - If user did NOT select "Coding" or "AI & Automation" → DO NOT suggest software/app/AI platform ideas
 - Match ideas to actual practical capabilities the user has demonstrated
+- Keep ideas operationally simple and executable for the user's skill level
 """
         
-        # Extract profile analysis fields
+        # Extract profile analysis fields using shared parser library
         profile_data = {}
         try:
-            import json
-            start_marker = "---PROFILE_ANALYSIS_START---"
-            end_marker = "---PROFILE_ANALYSIS_END---"
-            start_idx = profile_analysis.find(start_marker)
-            end_idx = profile_analysis.find(end_marker)
-            
-            if start_idx != -1 and end_idx != -1:
-                json_text = profile_analysis[start_idx + len(start_marker):end_idx].strip()
-                profile_data = json.loads(json_text)
-            else:
-                profile_data = json.loads(profile_analysis)
-        except (json.JSONDecodeError, ValueError):
+            from app.services.parsers.profile_parser import ProfileParser
+            parsed = ProfileParser.extract_json(profile_analysis)
+            profile_data = parsed if parsed else {}
+        except Exception:
             profile_data = {}
         
         # Format psychological profile section
@@ -151,7 +160,7 @@ Tone Guidelines:
 """
         
         return f"""
-You are StartupIdeaGPT. Generate personalized startup ideas that deeply understand the user's context, constraints, and goals.
+You are StartupIdeaGPT (a startup advisor). Generate personalized startup ideas that deeply understand the user's context, constraints, and goals.
 
 {user_inputs_section}
 
@@ -159,11 +168,7 @@ You are StartupIdeaGPT. Generate personalized startup ideas that deeply understa
 
 REALISM RULES YOU MUST FOLLOW:
 
-1. Ideas must match the user's actual skills.
-   If the user only has cooking skills, do NOT suggest apps, AI platforms, software startups, or businesses requiring technical staff.
-   ONLY suggest ideas that can be executed with the user's stated skills.
-
-2. Ideas must fit within:
+1. Ideas must fit within:
    - User's time commitment (e.g., if 10-20 hrs/week, ideas must be part-time feasible)
    - User's budget range (e.g., if $5k-20k, ideas must be executable within that budget)
    - User's preferred work style (influences operational complexity and founder-fit):
@@ -182,17 +187,11 @@ REALISM RULES YOU MUST FOLLOW:
      * Low-cost/bootstrapped: Ideas must be executable with minimal capital
      * Tech-assisted but not tech-intensive: Ideas use tech tools but don't require deep technical skills
      * Community-driven/local engagement: Ideas involve local community participation
-   - User's customer interaction comfort level
+   - User's customer interaction preference: Match the level of direct customer interaction (people-facing vs remote-friendly) to the user's stated preference
 
-3. Ideas must be realistically executable within the user's earnings timeline (e.g., 90 days means ideas must generate revenue quickly).
+2. Ideas must be realistically executable within the user's earnings timeline (e.g., 90 days means ideas must generate revenue quickly).
 
-4. Ideas must be grounded in the user's chosen industry.
-   Do not suggest ideas from different industries.
-
-5. Keep ideas operationally simple and executable for a non-technical founder.
-   Avoid complex technical requirements unless the user has technical skills.
-
-6. Avoid overly complex, high-risk, long-development, or venture-style ideas unless user profile clearly supports it.
+3. Avoid overly complex, high-risk, long-development, or venture-style ideas unless user profile clearly supports it.
 
 STARTUP CATEGORY RULE (CRITICAL):
 The user has selected startup_category: {startup_category}
@@ -202,14 +201,14 @@ If startup_category == "tech":
 - Ideas must be primarily digital products, software platforms, AI tools, or online services
 - NO physical products, NO offline services, NO brick-and-mortar businesses
 - Examples: SaaS platforms, AI chatbots, mobile apps, web applications, digital marketplaces, online courses
-- Filter out any non-tech ideas after generation
+- DO NOT generate any non-tech ideas
 
 If startup_category == "non_tech":
 - Generate ONLY non-tech, physical, operational, offline or service-based businesses
 - Ideas must involve physical products, in-person services, or offline operations
 - NO software development, NO AI platforms, NO pure digital products
 - Examples: restaurants, physical retail, home services, consulting services, manufacturing, local services
-- Filter out any tech ideas after generation
+- DO NOT generate any tech ideas
 
 If startup_category == "both":
 - You can propose any reasonable mix of tech and non-tech ideas
@@ -250,47 +249,38 @@ OUTPUT FORMAT:
 Always output structured startup ideas ONLY in the following format:
 
 ### IDEA_1
-title: <title>
+title: <title - 3-4 words, concrete business concept>
 summary: <2–3 sentence value proposition>
 target_market: <target customers>
 revenue_model: <how money is earned>
-validation_score: <1–10>
+validation_score: <1–10 based on ease of validation, market demand signals, and initial customer feedback potential>
 timeline: <time to launch>
 why_this_fits: <tie explicitly to user profile>
 
 ### IDEA_2
 ...
 
-CRITICAL: IDEA TITLE REQUIREMENTS
+TITLE FORMAT REQUIREMENT (CRITICAL):
+- Each title MUST be exactly 3-4 words that meaningfully capture the core business concept
+- The title should be a concise, memorable phrase that identifies the business type and key value
+- Focus on core business/service type, be specific and meaningful, include key differentiator if it fits within 3-4 words
 
-Each idea title MUST be a CONCRETE STARTUP IDEA, NOT a framework component or abstract concept.
-
-VALID IDEA TITLES (examples):
-- "Non-technical food founders launch cloud kitchens using shared commercial kitchens and Instagram-based ordering"
-- "Local fitness coaches create personalized meal prep services for busy professionals"
-- "Home-based crafters build Etsy stores selling custom pet accessories"
-- "Remote consultants offer AI-powered business automation for small businesses"
+VALID IDEA TITLES (examples - 3-4 words only):
+- "Cloud Kitchen Service"
+- "Personalized Meal Prep"
+- "Custom Pet Accessories"
+- "AI Business Automation"
+- "Home Meal Delivery"
+- "Fitness Meal Plans"
+- "Local Meal Prep"
+- "Etsy Craft Store"
 
 INVALID IDEA TITLES (DO NOT USE):
-- "Business Models" ❌
-- "Target Segments" ❌
-- "Value Propositions" ❌
-- "Revenue Models" ❌
-- "Market Opportunities" ❌
-- "Customer Personas" ❌
-- "Go-to-Market Strategy" ❌
-- "Pricing Strategies" ❌
-- "Validation Frameworks" ❌
-- "Execution Plans" ❌
-- Any abstract noun or framework term ❌
-
-TITLE FORMAT REQUIREMENT:
-Each title MUST follow this pattern: [Who] + [Problem] + [Solution]
-
-Examples:
-- "[Non-technical founders] + [struggling to start food businesses] + [launch cloud kitchens using shared kitchens]"
-- "[Local fitness coaches] + [need additional income] + [create personalized meal prep services]"
-- "[Home-based crafters] + [want to monetize skills] + [build Etsy stores selling custom accessories]"
+- "Business Models" ❌ (framework term)
+- "Target Segments" ❌ (framework term)
+- "Non-technical food founders launch cloud kitchens using shared commercial kitchens" ❌ (too long, full sentence)
+- "Local fitness coaches create personalized meal prep services for busy professionals" ❌ (too long, full sentence)
+- Any abstract noun, framework term, or full sentence ❌
 
 Each IDEA block MUST be:
 - A CONCRETE STARTUP IDEA (not a framework, concept, or strategy term)
@@ -301,17 +291,16 @@ Each IDEA block MUST be:
 - Aligned with the user's psychological profile
 - Include a specific customer (who), specific problem (what), and specific solution (how)
 
-Rules:
-- NO markdown formatting except the ### headers.
-- NO bold text, no italics, no lists.
-- NO code blocks.
-- NEVER break tokens across lines.
-- Never stream single words per line.
-- Each field appears on ONE line only.
-- Output must be plain text, not markdown.
-- Adjust all content (titles, summaries, descriptions) to match the tone guidelines above.
-- DO NOT return frameworks, categories, strategy terms, or abstract concepts as ideas.
-- ONLY return fully-formed, concrete startup ideas.
+Formatting Rules:
+- Use ONLY ### headers for IDEA block markers (### IDEA_1, ### IDEA_2, etc.)
+- Field content must be plain text: NO bold text, NO italics, NO markdown lists within field values
+- NO code blocks, NO markdown formatting within field content
+- NEVER break tokens across lines
+- Never stream single words per line
+- Each field appears on ONE line only
+- Field values should be plain text sentences, not formatted lists or bullet points
+- Adjust all content (titles, summaries, descriptions) to match the tone guidelines above
+- ONLY return fully-formed, concrete startup ideas
 """
 
 

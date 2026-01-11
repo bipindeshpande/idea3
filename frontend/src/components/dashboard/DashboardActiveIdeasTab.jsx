@@ -440,10 +440,8 @@ if (!hasExploredIdeas || allIdeas.length === 0) {
   {/* Summary Statistics */}
   {!showActiveOnly && (
    <div className={`flex items-center gap-2 ${WORKSPACE_TYPOGRAPHY.subtitle}`}>
-    <span>{stats.total} ideas</span>
     {stats.activeCount > 0 && (
      <>
-      <span>•</span>
       <span className="text-accent font-medium">{stats.activeCount} active</span>
       {stats.withNotes > 0 && (
        <>
@@ -512,7 +510,7 @@ if (!hasExploredIdeas || allIdeas.length === 0) {
   return rId === runIdNormalized;
  });
  projectName = ideaData.title || `Idea #${ideaIndex}`;
- ideaLink = `/results/recommendations/${ideaIndex}?id=${runIdNormalized}`;
+ ideaLink = `/dashboard/recommendations/${ideaIndex}?id=${runIdNormalized}`;
  } else {
  // Fallback: Resolve routing from idea_id format
  const m = ideaId.match(/run_([^_]+)_idea_(\d+)/);
@@ -525,7 +523,7 @@ if (!hasExploredIdeas || allIdeas.length === 0) {
    return rId === runIdNormalized;
   });
   projectName = `Idea #${idx}`;
-  ideaLink = `/results/recommendations/${idx}?id=${runIdNormalized}`;
+  ideaLink = `/dashboard/recommendations/${idx}?id=${runIdNormalized}`;
   
   // Try to find the idea in allIdeas
   ideaData = allIdeas.find(idea => {

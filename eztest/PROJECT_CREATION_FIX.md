@@ -79,3 +79,5 @@ docker exec eztest-postgres psql -U eztest -d eztest -c "\dt"
 **Solution**: Check application logs for detailed error: `docker logs eztest-app --tail=50`
 
 
+
+

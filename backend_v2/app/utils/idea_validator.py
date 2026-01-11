@@ -98,13 +98,11 @@ def is_framework_term(text: str) -> bool:
     
     text_lower = text.lower().strip()
     
-    # Check against known framework terms
+    # Check against known framework terms - ONLY reject exact matches
+    # e.g., "Service" is rejected, but "Local Meal Prep Service" is allowed
     for term in FRAMEWORK_TERMS:
-        if term in text_lower:
-            # Allow if it's part of a longer concrete phrase
-            # e.g., "AI business model optimization tool" is OK, but "Business Models" is not
-            if text_lower == term or text_lower.startswith(term + " ") or text_lower.endswith(" " + term):
-                return True
+        if text_lower == term:
+            return True
     
     # Check if title is just an abstract noun
     words = text_lower.split()

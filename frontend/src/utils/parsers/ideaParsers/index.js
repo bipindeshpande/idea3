@@ -18,6 +18,20 @@ import { fixConcatenatedText } from '../helpers/textHelpers.js';
 export function parseStructuredIdeasUnified(text = "", limit = null) {
   if (!text) return [];
 
+  // Skip if this is profile analysis text - don't parse it as ideas
+  // Check for both JSON field names (snake_case) and markdown headers (title case)
+  const textLower = text.toLowerCase();
+  if (text.includes("---PROFILE_ANALYSIS_START---") || 
+      text.includes("---PROFILE_ANALYSIS_END---") ||
+      textLower.includes("core_motivations") || textLower.includes("core motivations") ||
+      textLower.includes("operating_constraints") || textLower.includes("operating constraints") ||
+      textLower.includes("strengths_and_capabilities") || textLower.includes("strengths and capabilities") ||
+      textLower.includes("strategic_considerations") || textLower.includes("strategic considerations") ||
+      textLower.includes("viability_red_flags") || textLower.includes("viability red flags") ||
+      textLower.includes("pathway_recommendation") || textLower.includes("pathway recommendation")) {
+    return [];
+  }
+
   // Fix concatenated text before parsing (done once here)
   text = fixConcatenatedText(text);
 

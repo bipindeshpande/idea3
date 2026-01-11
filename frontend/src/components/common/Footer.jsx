@@ -29,9 +29,16 @@ export default function Footer() {
  <div className="absolute top-0 left-0 marketing-blob marketing-blob--small opacity-20" />
  <div className="relative z-10 mx-auto max-w-7xl px-6 pt-12 pb-8">
  <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6 lg:gap-12">
- {/* Company Info */}
- <div className="col-span-2 lg:col-span-2 space-y-4">
- <UIHeading level="h4" className="text-primary font-bold">Idea Bunch</UIHeading>
+        {/* Company Info */}
+        <div className="col-span-2 lg:col-span-2 space-y-4">
+          <div className="flex items-center gap-2">
+            <img 
+              src="/favicon.svg" 
+              alt="Idea Bunch" 
+              className="w-6 h-6 flex-shrink-0" 
+            />
+            <UIHeading level="h4" className="text-primary font-bold">Idea Bunch</UIHeading>
+          </div>
  <p className="text-base leading-relaxed text-secondary max-w-sm">
  An AI-powered companion that helps professionals surface, validate, and prioritize startup ideas matched to their strengths.
  </p>

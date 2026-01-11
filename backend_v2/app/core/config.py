@@ -2,7 +2,7 @@
 import os
 import json
 from typing import Optional, List, Union
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
 
 
@@ -60,7 +60,7 @@ class Settings(BaseSettings):
         return v
     
     # Cache
-    CACHE_TTL_PROFILE: int = 3600  # 1 hour
+    CACHE_TTL_PROFILE: int = 86400  # 24 hours (aggressive caching for performance)
     CACHE_TTL_RECOMMENDATIONS: int = 7200  # 2 hours
     CACHE_TTL_TOOLS: int = 86400  # 24 hours
     
@@ -84,10 +84,11 @@ class Settings(BaseSettings):
     ALLOW_UNAUTHENTICATED: bool = False  # Allow unauthenticated access if True
     ADMIN_PASSWORD: Optional[str] = None  # Admin password for admin panel access
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
-        extra = "ignore"  # Ignore extra fields in .env file
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        extra="ignore"  # Ignore extra fields in .env file
+    )
 
 
 settings = Settings()

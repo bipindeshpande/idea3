@@ -39,21 +39,14 @@ class FinalRecommendationService(BaseService):
             # Extract top 3 ideas
             top_ideas = ideas[:3]
             
-            # Parse profile analysis
+            # Parse profile analysis using shared parser library
             profile_data = {}
             if profile_analysis:
                 try:
-                    start_marker = "---PROFILE_ANALYSIS_START---"
-                    end_marker = "---PROFILE_ANALYSIS_END---"
-                    start_idx = profile_analysis.find(start_marker)
-                    end_idx = profile_analysis.find(end_marker)
-                    
-                    if start_idx != -1 and end_idx != -1:
-                        json_text = profile_analysis[start_idx + len(start_marker):end_idx].strip()
-                        profile_data = json.loads(json_text)
-                    else:
-                        profile_data = json.loads(profile_analysis)
-                except (json.JSONDecodeError, ValueError):
+                    from app.services.parsers.profile_parser import ProfileParser
+                    parsed = ProfileParser.extract_json(profile_analysis)
+                    profile_data = parsed if parsed else {"raw": profile_analysis}
+                except Exception:
                     profile_data = {"raw": profile_analysis}
             
             # Extract user constraints and signals

@@ -310,28 +310,28 @@ export default function WorkspaceFrameworksPage() {
                 <div className="font-medium text-primary">{framework.title}</div>
                </td>
                <td className="py-2.5 px-3">
-                <div className="text-sm text-secondary truncate max-w-xs">
+                <div className={WORKSPACE_TYPOGRAPHY.bodySmall.replace("text-primary", "text-secondary") + " truncate max-w-xs"}>
                  {templateInfo ? templateInfo.title : "—"}
                 </div>
                </td>
                <td className="py-2.5 px-3 text-center">
-                <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusBadge(framework.status)}`}>
+                <span className={`px-2 py-0.5 rounded ${WORKSPACE_TYPOGRAPHY.caption} font-medium ${getStatusBadge(framework.status)}`}>
                  {framework.status.replace("_", " ")}
                 </span>
                </td>
                <td className="py-2.5 px-3 text-center">
                 {framework.progress_percentage > 0 ? (
-                 <span className="text-xs text-secondary">{framework.progress_percentage}%</span>
+                 <span className={WORKSPACE_TYPOGRAPHY.caption}>{framework.progress_percentage}%</span>
                 ) : (
-                 <span className="text-xs text-secondary">—</span>
+                 <span className={WORKSPACE_TYPOGRAPHY.caption}>—</span>
                 )}
                </td>
                <td className="py-2.5 px-3">
                 <div className="flex items-center justify-end gap-1.5">
-                 <UIButton variant="secondary" onClick={() => handleEdit(framework)} className="text-xs px-2 py-1">
+                 <UIButton variant="secondary" onClick={() => handleEdit(framework)} className={WORKSPACE_TYPOGRAPHY.caption + " px-2 py-1"}>
                   Edit
                  </UIButton>
-                 <UIButton variant="danger" onClick={() => handleDelete(framework.id)} className="text-xs px-2 py-1">
+                 <UIButton variant="danger" onClick={() => handleDelete(framework.id)} className={WORKSPACE_TYPOGRAPHY.caption + " px-2 py-1"}>
                   Delete
                  </UIButton>
                 </div>
@@ -355,16 +355,16 @@ export default function WorkspaceFrameworksPage() {
                 <h4 className={`${WORKSPACE_TYPOGRAPHY.h4} truncate`}>
                  {framework.title}
                 </h4>
-                <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusBadge(framework.status)} flex-shrink-0`}>
+                <span className={`px-2 py-0.5 rounded ${WORKSPACE_TYPOGRAPHY.caption} font-medium ${getStatusBadge(framework.status)} flex-shrink-0`}>
                  {framework.status.replace("_", " ")}
                 </span>
                 {framework.progress_percentage > 0 && (
-                 <span className={`${WORKSPACE_TYPOGRAPHY.caption} text-xs flex-shrink-0`}>
+                 <span className={`${WORKSPACE_TYPOGRAPHY.caption} flex-shrink-0`}>
                   {framework.progress_percentage}%
                  </span>
                 )}
                </div>
-               <div className="flex items-center gap-2 text-xs text-secondary">
+               <div className={"flex items-center gap-2 " + WORKSPACE_TYPOGRAPHY.caption}>
                 {templateInfo && (
                  <span className="truncate">Based on: {templateInfo.title}</span>
                 )}

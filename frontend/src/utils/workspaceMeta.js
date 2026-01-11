@@ -40,6 +40,28 @@ export function getWorkspaceMeta(pathname, search = "") {
     };
   }
   
+  if (pathname.startsWith("/dashboard/profile")) {
+    return {
+      title: "Profile Analysis",
+      subtitle: "Comprehensive analysis of your entrepreneurial profile, strengths, and opportunities.",
+    };
+  }
+  
+  if (pathname.startsWith("/dashboard/recommendations")) {
+    // Check if it's a detail page (has ideaIndex)
+    const ideaIndexMatch = pathname.match(/\/dashboard\/recommendations\/(\d+)/);
+    if (ideaIndexMatch) {
+      return {
+        title: "Recommendation Detail",
+        subtitle: "Detailed analysis of your selected startup recommendation.",
+      };
+    }
+    return {
+      title: "Recommendations",
+      subtitle: "Review AI-generated startup ideas, financial outlook, and execution roadmap.",
+    };
+  }
+  
   if (pathname.startsWith("/dashboard")) {
     return {
       title: "Workspace",

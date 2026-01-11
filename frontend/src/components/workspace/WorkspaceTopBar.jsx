@@ -20,6 +20,9 @@ function getHelpPath(pathname) {
  if (pathname.startsWith("/dashboard/frameworks")) {
   return "/help/frameworks";
  }
+ if (pathname.startsWith("/dashboard/recommendations")) {
+  return "/help/recommendation-detail";
+ }
  if (pathname.startsWith("/dashboard")) {
   return "/help/workspace";
  }
@@ -42,6 +45,9 @@ function getReturnPath(pathname) {
  }
  if (pathname === "/help/frameworks") {
   return "/dashboard/frameworks";
+ }
+ if (pathname === "/help/recommendation-detail") {
+  return "/dashboard"; // Return to dashboard since we don't know which specific recommendation
  }
  if (pathname === "/help/workspace") {
   return "/dashboard";

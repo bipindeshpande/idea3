@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import DiscoveryCard from "./DiscoveryCard.jsx";
 import { DISCOVERY_SPACING, DISCOVERY_TYPOGRAPHY } from "./DiscoveryTheme.js";
 import UIHeading from "../ui/ui-heading.jsx";
 
@@ -10,27 +9,25 @@ import UIHeading from "../ui/ui-heading.jsx";
 export default function UnparseableRecommendations({ markdown }) {
   if (!markdown || markdown.length === 0) {
     return (
-      <DiscoveryCard>
-        <div className="text-center">
-          <h3 className={`${DISCOVERY_TYPOGRAPHY.h3} mb-1`}>No Recommendations Available</h3>
-          <p className={`${DISCOVERY_TYPOGRAPHY.bodySmall} max-w-md mx-auto`}>
-            The recommendation report is empty or could not be loaded.
-          </p>
-          <div className={`mt-4 flex ${DISCOVERY_SPACING.elementGap} justify-center`}>
-            <Link
-              to="/advisor"
-              className="ui-btn ui-btn-primary focus-visible:outline-accent"
-            >
-              Generate Recommendations
-            </Link>
-          </div>
+      <div className="text-center">
+        <h3 className={`${DISCOVERY_TYPOGRAPHY.h3} mb-1`}>No Recommendations Available</h3>
+        <p className={`${DISCOVERY_TYPOGRAPHY.bodySmall} max-w-md mx-auto`}>
+          The recommendation report is empty or could not be loaded.
+        </p>
+        <div className={`mt-4 flex ${DISCOVERY_SPACING.elementGap} justify-center`}>
+          <Link
+            to="/advisor"
+            className="ui-btn ui-btn-primary focus-visible:outline-accent"
+          >
+            Generate Recommendations
+          </Link>
         </div>
-      </DiscoveryCard>
+      </div>
     );
   }
 
   return (
-    <DiscoveryCard variant="elevated">
+    <div>
       <h2 className={DISCOVERY_TYPOGRAPHY.h3}>Unable to Parse Recommendations</h2>
       <p className={`mt-2 ${DISCOVERY_TYPOGRAPHY.bodySmall} mb-4`}>
         The recommendations couldn't be parsed into individual ideas. This might happen if the format is unexpected or the report is very brief.
@@ -79,7 +76,7 @@ export default function UnparseableRecommendations({ markdown }) {
           </div>
         </div>
       </div>
-    </DiscoveryCard>
+    </div>
   );
 }
 

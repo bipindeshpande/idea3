@@ -25,7 +25,7 @@ export const WORKSPACE_TYPOGRAPHY = {
   subtitleLarge: "text-base text-secondary",
   
   // Special cases
-  statValue: "text-xl font-bold text-primary",
+  statValue: "text-2xl font-bold text-primary",
   statLabel: "text-sm font-semibold text-secondary uppercase tracking-wide",
 };
 

@@ -127,6 +127,7 @@ export function useRecommendationTransformations(effectiveReports, cachedIdeas, 
 
   // Unified action plan text
   const unifiedNextSteps = useMemo(() => {
+    // Priority 1: Use enrichment.next_steps from ideas if available
     if (allNextSteps.length > 0) {
       return allNextSteps
         .map((idea, index) => {
@@ -134,8 +135,43 @@ export function useRecommendationTransformations(effectiveReports, cachedIdeas, 
         })
         .join("\n\n");
     }
+    
+    // Priority 2: Check if next_steps is in reports directly
+    if (effectiveReports?.next_steps) {
+      return effectiveReports.next_steps;
+    }
+    if (effectiveReports?.reports?.next_steps) {
+      return effectiveReports.reports.next_steps;
+    }
+    
+    // Priority 3: Try to extract from markdown sections
+    try {
+      const sections = splitFullReportSections(markdown);
+      if (sections["next steps"] || sections["Next Steps"] || sections["next_steps"]) {
+        return sections["next steps"] || sections["Next Steps"] || sections["next_steps"];
+      }
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error extracting next steps from markdown:", err);
+      }
+    }
+    
+    // Priority 4: Look for "Next Steps" or "Immediate Next Steps" in the markdown text
+    if (markdown) {
+      const nextStepsMatch = markdown.match(/##?\s*Next\s+Steps[:\s]*\n\n([\s\S]*?)(?=\n##|$)/i);
+      if (nextStepsMatch && nextStepsMatch[1]) {
+        return nextStepsMatch[1].trim();
+      }
+      
+      // Try "Immediate Next Steps"
+      const immediateMatch = markdown.match(/##?\s*Immediate\s+Next\s+Steps[:\s]*\n\n([\s\S]*?)(?=\n##|$)/i);
+      if (immediateMatch && immediateMatch[1]) {
+        return immediateMatch[1].trim();
+      }
+    }
+    
     return null;
-  }, [allNextSteps]);
+  }, [allNextSteps, effectiveReports, markdown]);
 
   // Extract matrix data for conclusion
   const sections = useMemo(() => {

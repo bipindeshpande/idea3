@@ -32,3 +32,11 @@ backend_v2/production.env
 frontend/.env
 frontend/.env.*
 
+# Generated Files (should not be committed)
+backend_v2/coverage.xml
+backend_v2/mylog.log
+backend_v2/test.db
+backend_v2/htmlcov/
+frontend/dist/
+backend_v2/.pytest_cache/
+

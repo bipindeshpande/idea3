@@ -1,7 +1,5 @@
 import { useRef, useState } from "react";
 import Seo from "../../components/common/Seo.jsx";
-import FocusLayout from "../../layouts/FocusLayout.jsx";
-import DiscoveryHeader from "../../components/discovery/DiscoveryHeader.jsx";
 import DiscoveryEmptyState from "../../components/discovery/DiscoveryEmptyState.jsx";
 import DiscoveryLoadingState from "../../components/discovery/DiscoveryLoadingState.jsx";
 import DiscoveryErrorState from "../../components/discovery/DiscoveryErrorState.jsx";
@@ -9,6 +7,7 @@ import DiscoveryTabs from "../../components/discovery/DiscoveryTabs.jsx";
 import { DISCOVERY_SPACING } from "../../components/discovery/DiscoveryTheme.js";
 import { useReports } from "../../context/ReportsContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import CacheIndicator from "../../components/common/CacheIndicator.jsx";
 import { useRecommendationReportData } from "../../hooks/recommendation/useRecommendationReportData.js";
 import { useRecommendationTransformations } from "../../hooks/recommendation/useRecommendationTransformations.js";
 import { useSmartRecommendations } from "../../hooks/recommendation/useSmartRecommendations.js";
@@ -21,7 +20,7 @@ import SimilarIdeasSection from "../../components/discovery/SimilarIdeasSection.
 import UnparseableRecommendations from "../../components/discovery/UnparseableRecommendations.jsx";
 
 export default function RecommendationsReport() {
- const { reports, loadRunById, currentRunId, inputs, loadFromRecentDiscoveryCache } = useReports();
+ const { reports, loadRunById, currentRunId, inputs, loadFromRecentDiscoveryCache, isCached } = useReports();
  const { getAuthHeaders, isAuthenticated } = useAuth();
  const reportRef = useRef(null);
  const [activeTab, setActiveTab] = useState("ideas");
@@ -62,34 +61,34 @@ export default function RecommendationsReport() {
 // Show error state
 if (error) {
  return (
- <FocusLayout>
+ <>
  <Seo
  title="Error | Startup Idea Advisor"
  description="Error loading recommendation report"
- path="/results/recommendations"
+ path="/dashboard/recommendations"
  />
  <DiscoveryErrorState
  error={error}
  primaryAction={{ to: "/advisor", label: "Generate New Report" }}
  />
- </FocusLayout>
+ </>
  );
  }
 
  // Show loading state
  if (isLoading) {
  return (
- <FocusLayout>
+ <>
  <Seo
  title="Loading Recommendations | Startup Idea Advisor"
  description="Loading recommendation report"
- path="/results/recommendations"
+ path="/dashboard/recommendations"
  />
  <DiscoveryLoadingState
  title="Loading Report..."
  message="Please wait while we load your recommendations."
  />
- </FocusLayout>
+ </>
  );
  }
 
@@ -106,11 +105,11 @@ if (error) {
  } : null;
 
  return (
- <FocusLayout>
+ <>
  <Seo
  title="No Recommendations | Startup Idea Advisor"
  description="No recommendation report available"
- path="/results/recommendations"
+ path="/dashboard/recommendations"
  />
  <DiscoveryEmptyState
  title="No Report Available"
@@ -118,20 +117,16 @@ if (error) {
  primaryAction={{ to: "/advisor", label: "Generate Recommendations" }}
  debugInfo={debugInfo}
  />
- </FocusLayout>
+ </>
  );
  }
 
  return (
- <FocusLayout>
+ <>
  <Seo
  title="Personalized Startup Recommendations | Startup Idea Advisor"
  description="Review AI-generated startup ideas, financial outlook, and execution roadmap tailored to your profile."
- path="/results/recommendations"
- />
- <DiscoveryHeader
- title="Recommendation Report"
- description="Review AI-generated startup ideas tailored to your profile"
+ path="/dashboard/recommendations"
  />
 
  <div ref={reportRef} className={DISCOVERY_SPACING.sectionGap.replace('gap-', 'space-y-')}>
@@ -198,6 +193,7 @@ if (error) {
  </>
  )}
  </div>
- </FocusLayout>
+ <CacheIndicator isCached={isCached} />
+ </>
  );
 }
