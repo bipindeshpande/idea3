@@ -1,0 +1,6 @@
+---
+description: AI-DLC core workflow
+alwaysApply: true
+---
+
+@.cursor/rules/aidlc-rules/aws-aidlc-rules/core-workflow.md
